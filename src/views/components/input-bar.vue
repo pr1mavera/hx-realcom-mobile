@@ -1,0 +1,151 @@
+<template>
+  <div class="input-bar border-1px-before border-1px-after">
+    <div class="input-bar-item left-item" v-if="status">
+      <svg class="icon extend-click" aria-hidden="true" @click="ok(0)">
+        <use xlink:href="#icon-wode"></use>
+      </svg>
+    </div>
+    <div class="input-bar-item input-box" :class="{'visible-padding-left': !status}">
+      <div class="input-content"
+        ref="inputContent"
+        contenteditable="true"
+        type="text"
+        @focus="chatFocus(true)"
+        @blur="chatFocus(false)"
+        @keyup="chatInput($event, false)"
+        @keyup.enter="chatInput($event, true)">
+        </br>
+      </div>
+    </div>
+    <div class="input-bar-item right-item">
+      <svg class="icon extend-click" aria-hidden="true" @click="ok(1)">
+        <use xlink:href="#icon-wode"></use>
+      </svg>
+      <svg class="icon extend-click" aria-hidden="true" @click="ok(2)">
+        <use xlink:href="#icon-wode"></use>
+      </svg>
+      <svg class="icon extend-click" aria-hidden="true" @click="ok(3)">
+        <use xlink:href="#icon-wode"></use>
+      </svg>
+    </div>
+  </div>
+</template>
+
+<script type="text/ecmascript-6">
+// import { XTextarea, Group } from 'vux'
+
+export default {
+  components: {
+    // XTextarea,
+    // Group
+  },
+  data() {
+    return {
+      status: true
+    }
+  },
+  methods: {
+    ok(d) {
+      alert(d)
+    },
+    chatFocus(val) {
+      this.$emit('isInputfocus', val)
+    },
+    chatInput(event, isEnter) {
+      const e = event || window.event
+      const text = e.currentTarget.innerText
+      this.$emit('chatInputChange', text, isEnter)
+    }
+  }
+}
+</script>
+
+<style lang="less">
+@import '~@/common/style/theme.less';
+@import '~@/common/style/mixin.less';
+
+.input-bar {
+  .border-1px-before(@label-line-normal);
+  // position: relative;
+  // left: 0;
+  // bottom: 0;
+  width: 100%;
+  height: auto;
+  min-height: 4.6rem;
+  // padding: 0 0.8rem;
+  // box-sizing: border-box;
+  background-color: @bg-light;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  &.visible-padding-left {
+    padding-left: 0;
+  }
+  .input-bar-item {
+    // box-sizing: border-box;
+    align-self: flex-end;
+    &.left-item {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 5.6rem;
+      height: 4.6rem;
+    }
+    &.input-box {
+      width: 100%;
+      height: 100%;
+      padding: 0.6rem 0;
+      box-sizing: border-box;
+      &.visible-padding-left {
+        padding-left: 0.8rem;
+      }
+      .input-content {
+        width: 100%;
+        line-height: 2.2rem;
+        min-height: 3.2rem;
+        max-height: 12rem;
+        _height: 3.2rem;
+        outline: 0;
+        word-wrap: break-word;
+        word-break: break-all;
+        overflow-x: hidden;
+        overflow-y: auto;
+        _overflow-y: visible;
+        border-radius: 5px;
+        padding: 0.5rem;
+        border: 0.05rem solid @label-line-normal;
+        font-size: 1.4rem;
+        box-sizing: border-box;
+        color: @text-normal;
+        background-color: @bg-normal;
+        transition: all .5s cubic-bezier(0.11, 0.62, 0.23, 1);
+        -webkit-overflow-scrolling: touch;
+        &:focus {
+          border-color: @label-line-light;
+          background-color: #fff;
+        }
+      }
+    }
+    &.right-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 8.4rem;
+      flex-basis: 8.4rem;
+      height: 4.6rem;
+      padding: 0 0.8rem;
+      flex-grow: 0;
+      flex-shrink: 0;
+    }
+    .icon {
+      display: block;
+      width: 2.2rem;
+      height: 2.2rem;
+      // padding: 0 1.2rem;
+      fill: @label-line-normal;
+      background-color: transparent;
+    }
+  }
+
+}
+</style>
