@@ -7,6 +7,7 @@
     </div>
     <div class="input-bar-item input-box" :class="{'visible-padding-left': !status}">
       <div class="input-content"
+        id="input-content-hook"
         ref="inputContent"
         contenteditable="true"
         type="text"

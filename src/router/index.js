@@ -7,7 +7,7 @@ import Router from 'vue-router'
   // 主聊天界面
   const main = r => require.ensure([], () => r(mainM), 'main')
 */
-const main = () => import('@/views/mainChat')
+const main = () => import('@/App')
 
 Vue.use(Router)
 

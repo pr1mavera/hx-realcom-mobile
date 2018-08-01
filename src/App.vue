@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <router-view/>
+    <chat-room></chat-room>
   </div>
 </template>
 
@@ -10,6 +10,9 @@ import wxConfig from './config/wechat'
 
 export default {
   name: 'App',
+  components: {
+    'ChatRoom': () => import('@/views/chatRoom')
+  },
   created() {
     deviceConfig()
     wxConfig()

@@ -28,7 +28,7 @@ export function formatDate(date, format) {
   return format
 }
 export function needToReloadDate(cache, next) {
-  const cacheT = new Date(cache.substr(0, 16).replace(/-/g, '/'))
-  const nextT = new Date(next.substr(0, 16).replace(/-/g, '/'))
+  const cacheT = new Date(cache.substr(0, 16))
+  const nextT = new Date(next.substr(0, 16))
   return cacheT < nextT
 }

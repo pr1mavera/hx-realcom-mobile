@@ -1,6 +1,6 @@
 <template>
-  <div class="mainChat">
-    <header-bar></header-bar>
+  <div class="chatRoom">
+    <chat-header-bar></chat-header-bar>
     <div class="chat-room" ref="chatRoom">
       <div class="chat-wrapper" ref="chatScroll">
         <div class="chat-content" ref="chatContent">
@@ -32,19 +32,19 @@
 
 <script type="text/ecmascript-6">
 import BScroll from 'better-scroll'
-// import HeaderBar from '@/views/components/header-bar'
+// import HeaderBar from '@/views/components/chat-header-bar'
 // import ChatContentItem from '@/views/components/chat-content-item'
-import InputBar from '@/views/components/input-bar'
+// import InputBar from '@/views/chatRoom/components/input-bar'
 
 import { formatDate, needToReloadDate } from '@/common/js/formatDate.js'
 
 export default {
   components: {
-    'HeaderBar': () => import('@/views/components/header-bar'),
-    'ChatContentItem': () => import('@/views/components/chat-content-item'),
-    // 'InputBar': () => import('@/views/components/input-bar')
-    InputBar,
-    'FloadButton': () => import('@/views/components/fload-button')
+    'ChatHeaderBar': () => import('@/views/chatRoom/components/chat-header-bar'),
+    'ChatContentItem': () => import('@/views/chatRoom/components/chat-content-item'),
+    'InputBar': () => import('@/views/chatRoom/components/input-bar'),
+    // InputBar,
+    'FloadButton': () => import('@/views/chatRoom/components/fload-button')
   },
   data() {
     return {
@@ -147,30 +147,40 @@ export default {
     }
   },
   mounted() {
-    this.inputEle = this.$refs.inputBar.$refs.inputContent
+    this.$nextTick(() => {
+      this.inputEle = document.getElementById('input-content-hook')
+    })
     // 初始化聊天信息
     // 真实项目中拿到对应数据之后再初始化
-    this._initChatMsg()
+    this._initChatMsgList()
     // 初始化滚动
     this._initScroll()
   },
   methods: {
-    _initChatMsg() {
+    _initChatMsgList() {
       let map = []
+      let timeCache = this.chat[0].time
       let temp = {
-        time: '',
+        time: timeCache,
         type: 'time_msg'
       }
-      let timeCache = ''
+      map.push(this._shallowCopy(temp))
       this.chat.forEach((item) => {
-        if (needToReloadDate(timeCache, item.time) || !timeCache) {
-          timeCache = item.time
-          temp.time = timeCache
-          map.push(temp)
+        if (needToReloadDate(timeCache, item.time)) {
+          temp.time = item.time
+          timeCache = temp.time
+          map.push(this._shallowCopy(temp))
         }
         map.push(item)
       })
       console.log(map)
+    },
+    _shallowCopy(obj) {
+      let newObj = {}
+      for (let key in obj) {
+        newObj[key] = obj[key]
+      }
+      return newObj
     },
     _initScroll() {
       this.chatScroll = new BScroll(this.$refs.chatScroll, {
@@ -274,7 +284,7 @@ export default {
 <style lang="less">
 @import '../common/style/mixin.less';
 
-.mainChat {
+.chatRoom {
   position: relative;
   width: 100%;
   height: 100%;
