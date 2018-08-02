@@ -1,5 +1,5 @@
 <template>
-  <div class="header-bar">
+  <div class="chat-header-bar">
     <div class="switch">
       <!-- <button class="item">
         <svg class="icon" aria-hidden="true">
@@ -34,7 +34,7 @@
 <style lang="less">
 @import '~@/common/style/theme.less';
 
-.header-bar {
+.chat-header-bar {
   // position: relative;
   width: 100%;
   height: 5rem;

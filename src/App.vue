@@ -1,6 +1,9 @@
 <template>
   <div id="app">
-    <chat-room></chat-room>
+    <keep-alive>
+      <main-room></main-room>
+      <share v-if="false"></share>
+    </keep-alive>
   </div>
 </template>
 
@@ -11,7 +14,8 @@ import wxConfig from './config/wechat'
 export default {
   name: 'App',
   components: {
-    'ChatRoom': () => import('@/views/chatRoom')
+    'MainRoom': () => import('@/views/mainRoom'),
+    'Share': () => import('@/views/share')
   },
   created() {
     deviceConfig()

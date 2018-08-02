@@ -1,5 +1,5 @@
 <template>
-  <div class="chatRoom">
+  <div class="chat">
     <chat-header-bar></chat-header-bar>
     <div class="chat-room" ref="chatRoom">
       <div class="chat-wrapper" ref="chatScroll">
@@ -32,19 +32,20 @@
 
 <script type="text/ecmascript-6">
 import BScroll from 'better-scroll'
-// import HeaderBar from '@/views/components/chat-header-bar'
-// import ChatContentItem from '@/views/components/chat-content-item'
-// import InputBar from '@/views/chatRoom/components/input-bar'
+import ChatHeaderBar from '@/views/mainRoom/components/chat/chat-header-bar'
+// import ChatContentItem from '@/views/components/chat/chat-content-item'
+import InputBar from '@/views/mainRoom/components/chat/input-bar'
 
-import { formatDate, needToReloadDate } from '@/common/js/formatDate.js'
+import { needToReloadDate } from '@/common/js/dateConfig.js'
 
 export default {
   components: {
-    'ChatHeaderBar': () => import('@/views/chatRoom/components/chat-header-bar'),
-    'ChatContentItem': () => import('@/views/chatRoom/components/chat-content-item'),
-    'InputBar': () => import('@/views/chatRoom/components/input-bar'),
-    // InputBar,
-    'FloadButton': () => import('@/views/chatRoom/components/fload-button')
+    // 'ChatHeaderBar': () => import('@/views/mainRoom/components/chat/chat-header-bar'),
+    ChatHeaderBar,
+    'ChatContentItem': () => import('@/views/mainRoom/components/chat/chat-content-item'),
+    // 'InputBar': () => import('@/views/mainRoom/components/chat/input-bar'),
+    InputBar,
+    'FloadButton': () => import('@/views/mainRoom/components/chat/fload-button')
   },
   data() {
     return {
@@ -147,14 +148,15 @@ export default {
     }
   },
   mounted() {
-    this.$nextTick(() => {
-      this.inputEle = document.getElementById('input-content-hook')
-    })
     // 初始化聊天信息
     // 真实项目中拿到对应数据之后再初始化
     this._initChatMsgList()
     // 初始化滚动
-    this._initScroll()
+    const self = this
+    this.$nextTick(() => {
+      this.inputEle = self.$refs.inputBar.$refs.inputContent
+      this._initScroll()
+    })
   },
   methods: {
     _initChatMsgList() {
@@ -206,11 +208,11 @@ export default {
 
         // 定义观察者实时监听输入框状态变化，更新聊天区域高度
         // this._reloadChatContentHeight()
-        const self = this
+        // const self = this
         // 监听聊天区域滑动，触发回调关闭软键盘，重置聊天区域高度
         this.chatScroll.once('touchEnd', () => {
-          self.inputEle.blur()
-        })
+          this.inputEle.blur()
+        }, this)
       } else {
         // 键盘收起
         // this.inputObserver.disconnect()
@@ -282,15 +284,15 @@ export default {
 </script>
 
 <style lang="less">
-@import '../common/style/mixin.less';
+@import '~@/common/style/mixin.less';
 
-.chatRoom {
+.chat {
   position: relative;
   width: 100%;
   height: 100%;
   overflow: hidden;
   // background-color: @bg-normal;
-  .header-bar {
+  .chat-header-bar {
     position: relative;
     z-index: 50;
   }
