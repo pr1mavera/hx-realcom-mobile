@@ -1,5 +1,5 @@
 <template>
-  <div class="chat-content-item" :class="[{'item-padding-left': isSelf, 'item-padding-right': !isSelf}]">
+  <div class="content-item" :class="[{'item-padding-left': isSelf, 'item-padding-right': !isSelf}]">
     <div class="avatar" v-if="!isSelf">
       <svg class="icon extend-click" aria-hidden="true">
         <use xlink:href="#icon-wode"></use>
@@ -51,7 +51,7 @@ export default {
 @import '~@/common/style/theme.less';
 @import '~@/common/style/mixin.less';
 
-.chat-content-item {
+.content-item {
   width: calc(~'100% - 9rem');
   // padding-top: 1.2rem;
   // padding-bottom: 1.2rem;
@@ -101,7 +101,7 @@ export default {
       width: auto;
       max-width: 100%;
       padding: 0.9rem 1.2rem;
-      margin-bottom: 2rem;
+      margin-bottom: 1.4rem;
       &.left-content-style {
         border-radius: 0.4rem 1.5rem 1.5rem 1.5rem;
         color: @text-normal;

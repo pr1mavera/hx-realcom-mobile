@@ -1,17 +1,24 @@
 <template>
   <div class="chat">
-    <chat-header-bar></chat-header-bar>
+    <header-bar></header-bar>
     <div class="chat-room" ref="chatRoom">
       <div class="chat-wrapper" ref="chatScroll">
         <div class="chat-content" ref="chatContent">
           <ul>
             <li class="chat-content-block chat-content-start" ref="chatContentStart"></li>
             <li class="chat-content-li" v-for="(item, index) in this.chat" :key="index">
-              <chat-content-item
+              <component
+                :is="_showItmeByType(item.type)"
                 :isSelf="item.textType === 0 ? false : true"
                 :name="item.nickName"
                 :text="item.msg"
-              ></chat-content-item>
+                :time="item.time"
+              ></component>
+              <!-- <content-item
+                :isSelf="item.textType === 0 ? false : true"
+                :name="item.nickName"
+                :text="item.msg"
+              ></content-item> -->
             </li>
             <li class="chat-content-block chat-content-end" ref="chatContentEnd"></li>
           </ul>
@@ -32,7 +39,7 @@
 
 <script type="text/ecmascript-6">
 import BScroll from 'better-scroll'
-import ChatHeaderBar from '@/views/mainRoom/components/chat/chat-header-bar'
+import HeaderBar from '@/views/mainRoom/components/chat/header-bar'
 // import ChatContentItem from '@/views/components/chat/chat-content-item'
 import InputBar from '@/views/mainRoom/components/chat/input-bar'
 
@@ -40,12 +47,25 @@ import { needToReloadDate } from '@/common/js/dateConfig.js'
 
 export default {
   components: {
-    // 'ChatHeaderBar': () => import('@/views/mainRoom/components/chat/chat-header-bar'),
-    ChatHeaderBar,
-    'ChatContentItem': () => import('@/views/mainRoom/components/chat/chat-content-item'),
+    /**
+     * 注册组件
+     */
+    // 'HeaderBar': () => import('@/views/mainRoom/components/chat/header-bar'),
+    HeaderBar,
+    'ContentItem': () => import('@/views/mainRoom/components/chat/content-item'),
+    'TimeItem': () => import('@/views/mainRoom/components/chat/time-item'),
     // 'InputBar': () => import('@/views/mainRoom/components/chat/input-bar'),
     InputBar,
-    'FloadButton': () => import('@/views/mainRoom/components/chat/fload-button')
+    'FloadButton': () => import('@/views/mainRoom/components/chat/fload-button'),
+    /**
+     * 格式化动态组件模板
+     */
+    contentItem: {
+      template: `<content-item></content-item>`
+    },
+    timeItem: {
+      template: `<time-item></time-item>`
+    }
   },
   data() {
     return {
@@ -175,6 +195,7 @@ export default {
         }
         map.push(item)
       })
+      this.chat = map
       console.log(map)
     },
     _shallowCopy(obj) {
@@ -183,6 +204,19 @@ export default {
         newObj[key] = obj[key]
       }
       return newObj
+    },
+    _showItmeByType(type) {
+      let item = ''
+      switch (type) {
+        case 'text_msg':
+          item = 'ContentItem'
+          break
+        case 'time_msg':
+          item = 'TimeItem'
+          break
+      }
+      return item
+      // return type === 'text_msg' ? 'ContentItem' : type === 'time_msg' ? 'TimeItem' : ''
     },
     _initScroll() {
       this.chatScroll = new BScroll(this.$refs.chatScroll, {

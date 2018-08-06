@@ -8,6 +8,8 @@ import Router from 'vue-router'
   const main = r => require.ensure([], () => r(mainM), 'main')
 */
 const main = () => import('@/App')
+const room = () => import('@/views/mainRoom')
+const share = () => import('@/views/share')
 
 Vue.use(Router)
 
@@ -17,8 +19,20 @@ export default new Router({
     {
       path: '/',
       name: 'main',
-      component: main
+      component: main,
+      children: [
+        {
+          path: '/room',
+          name: 'room',
+          component: room
+        },
+        {
+          path: '/share',
+          name: 'share',
+          component: share
+        }
+      ]
     }
   ],
-  base: '/web/'
+  base: '/mobile/'
 })
