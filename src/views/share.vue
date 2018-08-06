@@ -13,5 +13,6 @@ export default {
 <style scoped lang="less">
 .share {
   width: 100%;
+  height: 100%;
 }
 </style>
