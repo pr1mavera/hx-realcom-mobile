@@ -10,6 +10,8 @@ export default {
 }
 </script>
 
-<style lang="less">
-
+<style scoped lang="less">
+.share {
+  width: 100%;
+}
 </style>
