@@ -1,7 +1,7 @@
 <template>
   <div class="input-bar border-1px-before border-1px-after">
     <div class="input-bar-item left-item" v-if="status">
-      <svg class="icon extend-click" aria-hidden="true" @click="ok(0)">
+      <svg class="icon extend-click" aria-hidden="true" @click="changeRoomMode">
         <use xlink:href="#icon-wode"></use>
       </svg>
     </div>
@@ -19,13 +19,13 @@
       </div>
     </div>
     <div class="input-bar-item right-item">
-      <svg class="icon extend-click" aria-hidden="true" @click="ok(1)">
+      <svg class="icon extend-click" aria-hidden="true" @click="toggleExtend(1)">
         <use xlink:href="#icon-wode"></use>
       </svg>
-      <svg class="icon extend-click" aria-hidden="true" @click="ok(2)">
+      <svg class="icon extend-click" aria-hidden="true" @click="toggleExtend(2)">
         <use xlink:href="#icon-wode"></use>
       </svg>
-      <svg class="icon extend-click" aria-hidden="true" @click="ok(3)">
+      <svg class="icon extend-click" aria-hidden="true" @click="toggleExtend(3)">
         <use xlink:href="#icon-wode"></use>
       </svg>
     </div>
@@ -46,8 +46,11 @@ export default {
     }
   },
   methods: {
-    ok(d) {
-      alert(d)
+    changeRoomMode() {
+
+    },
+    toggleExtend(index) {
+      this.$emit('toggleExtend', index === 1 ? 'gift' : index === 2 ? 'express' : 'file')
     },
     chatFocus(val) {
       this.$emit('isInputfocus', val)

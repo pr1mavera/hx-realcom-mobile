@@ -101,7 +101,7 @@ export default {
       width: auto;
       max-width: 100%;
       padding: 0.9rem 1.2rem;
-      margin-bottom: 1.4rem;
+      margin-bottom: 1.8rem;
       &.left-content-style {
         border-radius: 0.4rem 1.5rem 1.5rem 1.5rem;
         color: @text-normal;

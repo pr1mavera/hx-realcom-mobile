@@ -1,6 +1,6 @@
 <template>
- <div class="time-item">
-   <span class="item-span">{{time | timeFilter}}</span>
+ <div class="tips-item">
+   <span class="item-span">{{text | timeFilter}}</span>
  </div>
 </template>
 
@@ -9,9 +9,15 @@ import { formatDate } from '@/common/js/dateConfig.js'
 
 export default {
   props: {
-    time: {
+    text: {
+      type: String
+    },
+    types: {
       type: String
     }
+  },
+  created() {
+    console.log('tips-item ===> 你个组件你被引用了哈哈哈')
   },
   filters: {
     timeFilter(val) {
@@ -25,19 +31,22 @@ export default {
 <style lang="less">
 @import '~@/common/style/theme.less';
 
-.time-item {
+.tips-item {
+  position: relative;
   width: 100%;
+  min-height: 2.2rem;
   text-align: center;
-  margin-bottom: 1.4rem;
+  margin-bottom: 1.8rem;
   .item-span {
-    display: inline-block;
-    vertical-align: top;
+    // display: inline-block;
+    // vertical-align: middle;
     background-color: rgba(0, 0, 0, .2);
     color: @text-lighter;
     padding: 0.4rem 0.6rem;
     font-size: 1.2rem;
-    line-height: 1.2rem;
+    line-height: 1.4rem;
     border-radius: 5px;
+    max-width: 50%;
   }
 }
 </style>

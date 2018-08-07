@@ -1,18 +1,18 @@
 <template>
   <div class="chat">
     <header-bar></header-bar>
-    <div class="chat-room" ref="chatRoom">
+    <div class="chat-room" ref="chatRoom" :class="{'extendBarOpen': curExtendBar.type}">
       <div class="chat-wrapper" ref="chatScroll">
         <div class="chat-content" ref="chatContent">
           <ul>
             <li class="chat-content-block chat-content-start" ref="chatContentStart"></li>
-            <li class="chat-content-li" v-for="(item, index) in this.chat" :key="index">
+            <li class="chat-content-li" v-for="item in this.chat" :key="item.MsgTimestamp">
               <component
-                :is="_showItmeByType(item.type)"
+                :is="_showItemByType(item.type)"
                 :isSelf="item.textType === 0 ? false : true"
                 :name="item.nickName"
                 :text="item.msg"
-                :time="item.time"
+                :types="item.type"
               ></component>
               <!-- <content-item
                 :isSelf="item.textType === 0 ? false : true"
@@ -32,7 +32,15 @@
         :class="{'inputFocus': inputStatus}"
         @isInputfocus="isInputfocus"
         @chatInputChange="chatInputChange"
+        @toggleExtend="toggleExtend"
       ></input-bar>
+    </div>
+    <div class="extend-bar" v-if="curExtendBar.type">
+      <keep-alive>
+        <component
+          :is="curExtendBar.component"
+        ></component>
+      </keep-alive>
     </div>
   </div>
 </template>
@@ -40,7 +48,6 @@
 <script type="text/ecmascript-6">
 import BScroll from 'better-scroll'
 import HeaderBar from '@/views/mainRoom/components/chat/header-bar'
-// import ChatContentItem from '@/views/components/chat/chat-content-item'
 import InputBar from '@/views/mainRoom/components/chat/input-bar'
 
 import { needToReloadDate } from '@/common/js/dateConfig.js'
@@ -50,29 +57,32 @@ export default {
     /**
      * 注册组件
      */
-    // 'HeaderBar': () => import('@/views/mainRoom/components/chat/header-bar'),
     HeaderBar,
-    'ContentItem': () => import('@/views/mainRoom/components/chat/content-item'),
-    'TimeItem': () => import('@/views/mainRoom/components/chat/time-item'),
-    // 'InputBar': () => import('@/views/mainRoom/components/chat/input-bar'),
     InputBar,
+    'ContentItem': () => import('@/views/mainRoom/components/chat/content-item'),
+    'TipsItem': () => import('@/views/mainRoom/components/chat/tips-item'),
     'FloadButton': () => import('@/views/mainRoom/components/chat/fload-button'),
-    /**
-     * 格式化动态组件模板
-     */
-    contentItem: {
-      template: `<content-item></content-item>`
-    },
-    timeItem: {
-      template: `<time-item></time-item>`
-    }
+    'SendFile': () => import('@/views/mainRoom/components/chat/send-file'),
+    'SendExpress': () => import('@/views/mainRoom/components/chat/send-express'),
+    'SendGift': () => import('@/views/mainRoom/components/chat/send-gift')
   },
   data() {
     return {
+      /**
+       * [inputStatus    输入框焦点状态]
+       * [scrollY        消息显示区域滑动距离]
+       * [inputEle       真实输入框元素]
+       * [curExtendBar   当前弹出的额外输入内容的模式]
+       * [chat           消息队列]
+       */
       inputStatus: false,
       scrollY: 0,
       inputEle: null,
-      inputObserver: null,
+      // inputObserver: null,
+      curExtendBar: {
+        type: false,
+        component: ''
+      },
       chat: [
         {
           groupId: '372331123',
@@ -81,7 +91,8 @@ export default {
           msg: '尊贵的客人，您好！',
           textType: 0,
           time: '2018-03-28 08:45:19',
-          type: 'text_msg'
+          type: 'text_msg',
+          MsgTimestamp: '372331123'
         },
         {
           groupId: '372331123',
@@ -90,7 +101,8 @@ export default {
           msg: 'hello！你好',
           textType: 1,
           time: '2018-03-28 08:45:19',
-          type: 'text_msg'
+          type: 'text_msg',
+          MsgTimestamp: '3723311223'
         },
         {
           groupId: '372331123',
@@ -99,7 +111,8 @@ export default {
           msg: '请问您又有什么问题了呢？',
           textType: 0,
           time: '2018-03-28 08:45:59',
-          type: 'text_msg'
+          type: 'text_msg',
+          MsgTimestamp: '37233112'
         },
         {
           groupId: '372331123',
@@ -108,7 +121,8 @@ export default {
           msg: '我想要测试一条数据，一条数据你懂么',
           textType: 1,
           time: '2018-03-28 08:45:59',
-          type: 'text_msg'
+          type: 'text_msg',
+          MsgTimestamp: '3723'
         },
         {
           groupId: '372331123',
@@ -117,7 +131,8 @@ export default {
           msg: '小华智力有限，好像听不太懂您的问题呢，转人工服务？',
           textType: 0,
           time: '2018-03-28 08:45:59',
-          type: 'text_msg'
+          type: 'text_msg',
+          MsgTimestamp: '37233112335'
         },
         {
           groupId: '372331123',
@@ -126,7 +141,8 @@ export default {
           msg: '尊贵的客人，您好！',
           textType: 0,
           time: '2018-03-28 08:52:59',
-          type: 'text_msg'
+          type: 'text_msg',
+          MsgTimestamp: '37233112300'
         },
         {
           groupId: '372331123',
@@ -135,7 +151,8 @@ export default {
           msg: 'hello！你好',
           textType: 1,
           time: '2018-03-28 09:46:59',
-          type: 'text_msg'
+          type: 'text_msg',
+          MsgTimestamp: '3723311234567'
         },
         {
           groupId: '372331123',
@@ -144,7 +161,8 @@ export default {
           msg: '请问您又有什么问题了呢？',
           textType: 0,
           time: '2018-03-28 08:46:59',
-          type: 'text_msg'
+          type: 'text_msg',
+          MsgTimestamp: '37233112309'
         },
         {
           groupId: '372331123',
@@ -153,7 +171,8 @@ export default {
           msg: '我想要测试一条数据，一条数据你懂么',
           textType: 1,
           time: '2018-03-28 15:23:01',
-          type: 'text_msg'
+          type: 'text_msg',
+          MsgTimestamp: '37'
         },
         {
           groupId: '372331123',
@@ -162,7 +181,8 @@ export default {
           msg: '小华智力有限，好像听不太懂您的问题呢，转人工服务？',
           textType: 0,
           time: '2018-03-28 15:23:45',
-          type: 'text_msg'
+          type: 'text_msg',
+          MsgTimestamp: '372331'
         }
       ]
     }
@@ -183,14 +203,15 @@ export default {
       let map = []
       let timeCache = this.chat[0].time
       let temp = {
-        time: timeCache,
-        type: 'time_msg'
+        msg: timeCache,
+        type: 'time_msg',
+        MsgTimestamp: this.msg
       }
       map.push(this._shallowCopy(temp))
       this.chat.forEach((item) => {
         if (needToReloadDate(timeCache, item.time)) {
-          temp.time = item.time
-          timeCache = temp.time
+          temp.msg = item.time
+          timeCache = temp.msg
           map.push(this._shallowCopy(temp))
         }
         map.push(item)
@@ -198,6 +219,7 @@ export default {
       this.chat = map
       console.log(map)
     },
+    // 浅拷贝
     _shallowCopy(obj) {
       let newObj = {}
       for (let key in obj) {
@@ -205,14 +227,14 @@ export default {
       }
       return newObj
     },
-    _showItmeByType(type) {
+    _showItemByType(type) {
       let item = ''
       switch (type) {
         case 'text_msg':
           item = 'ContentItem'
           break
         case 'time_msg':
-          item = 'TimeItem'
+          item = 'TipsItem'
           break
       }
       return item
@@ -226,7 +248,6 @@ export default {
         bounceTime: 400,
         bindToWrapper: true
       })
-
       this.chatScroll.on('scroll', (pos) => {
         this.scrollY = Math.abs(Math.round(pos.y))
         console.log(this.scrollY)
@@ -237,6 +258,7 @@ export default {
       this.inputStatus = val
       if (val) {
         // 键盘弹出
+        this.curExtendBar.type = false
         // 聊天内容滚动到最底部
         this._resolveKeyboard()
 
@@ -246,6 +268,7 @@ export default {
         // 监听聊天区域滑动，触发回调关闭软键盘，重置聊天区域高度
         this.chatScroll.once('touchEnd', () => {
           this.inputEle.blur()
+          // this.curExtendBar.type = false
         }, this)
       } else {
         // 键盘收起
@@ -263,6 +286,25 @@ export default {
         console.log(`submit ==> ${text}`)
       } else {
         console.log(text)
+      }
+    },
+    toggleExtend(mode) {
+      if (mode) {
+        this.curExtendBar.type = true
+      }
+      this.chatScroll.once('touchEnd', () => {
+        this.curExtendBar.type = false
+      }, this)
+      switch (mode) {
+        case 'gift':
+          this.curExtendBar.component = 'SendGift'
+          break
+        case 'express':
+          this.curExtendBar.component = 'SendExpress'
+          break
+        case 'file':
+          this.curExtendBar.component = 'SendFile'
+          break
       }
     },
     // _reloadChatContentHeight() {
@@ -319,6 +361,7 @@ export default {
 
 <style lang="less">
 @import '~@/common/style/mixin.less';
+@import '~@/common/style/theme.less';
 
 .chat {
   position: relative;
@@ -336,6 +379,9 @@ export default {
     height: calc(~'100% - 5rem');
     display: flex;
     flex-direction: column;
+    &.extendBarOpen {
+      height: calc(~'100% - 29rem');
+    }
     .chat-wrapper {
       position: relative;
       width: 100%;
@@ -375,6 +421,11 @@ export default {
       height: auto;
       flex-shrink: 0;
     }
+  }
+  .extend-bar {
+    height: 24rem;
+    background-color: @bg-normal;
+    color: #000;
   }
 }
 </style>
