@@ -10,6 +10,7 @@ import Router from 'vue-router'
 const main = () => import('@/App')
 const room = () => import('@/views/mainRoom')
 const share = () => import('@/views/share')
+const line = () => import('@/views/mainRoom/video/line')
 
 Vue.use(Router)
 
@@ -27,11 +28,16 @@ export default new Router({
           component: room
         },
         {
-          path: '/share',
-          name: 'share',
-          component: share
+          path: '/line',
+          name: 'line',
+          component: line
         }
       ]
+    },
+    {
+      path: '/share',
+      name: 'share',
+      component: share
     }
   ],
   base: '/mobile/'
