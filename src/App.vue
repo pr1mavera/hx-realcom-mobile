@@ -1,8 +1,9 @@
 <template>
   <div id="app">
     <keep-alive>
-      <main-room></main-room>
-      <share v-if="false"></share>
+      <router-view></router-view>
+      <!-- <main-room></main-room>
+      <share></share> -->
     </keep-alive>
   </div>
 </template>
