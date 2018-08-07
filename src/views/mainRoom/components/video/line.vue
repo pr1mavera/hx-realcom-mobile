@@ -1,11 +1,11 @@
 <template>
-    $END$
+  <div class="line">
+
+  </div>
 </template>
 
 <script>
-    export default {
-        name: "line.vue"
-    }
+export default {}
 </script>
 
 <style scoped>
