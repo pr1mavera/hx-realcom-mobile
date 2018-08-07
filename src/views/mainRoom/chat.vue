@@ -1,7 +1,7 @@
 <template>
   <div class="chat">
     <header-bar></header-bar>
-    <div class="chat-room" ref="chatRoom" :class="{'extendBarOpen': curExtendBar.type}">
+    <div class="chat-room transition-bezier" ref="chatRoom" :class="{'extendBarOpen': curExtendBar.type}">
       <div class="chat-wrapper" ref="chatScroll">
         <div class="chat-content" ref="chatContent">
           <ul>
@@ -29,13 +29,14 @@
       </div>
       <input-bar
         ref="inputBar"
+        :isFocus="this.inputStatus"
         :class="{'inputFocus': inputStatus}"
-        @isInputfocus="isInputfocus"
+        @targetInputBuffer="targetInputBuffer"
         @chatInputChange="chatInputChange"
         @toggleExtend="toggleExtend"
       ></input-bar>
     </div>
-    <div class="extend-bar" v-if="curExtendBar.type">
+    <div class="extend-bar transition-bezier" :class="{'extendBarOpen': curExtendBar.type}">
       <keep-alive>
         <component
           :is="curExtendBar.component"
@@ -253,45 +254,59 @@ export default {
         console.log(this.scrollY)
       })
     },
-    // 键盘弹出或收起
-    isInputfocus(val) {
-      this.inputStatus = val
-      if (val) {
-        // 键盘弹出
+    targetInputBuffer() {
+      if (this.curExtendBar.type) {
+        const self = this
         this.curExtendBar.type = false
-        // 聊天内容滚动到最底部
-        this._resolveKeyboard()
-
-        // 定义观察者实时监听输入框状态变化，更新聊天区域高度
-        // this._reloadChatContentHeight()
-        // const self = this
-        // 监听聊天区域滑动，触发回调关闭软键盘，重置聊天区域高度
-        this.chatScroll.once('touchEnd', () => {
-          this.inputEle.blur()
-          // this.curExtendBar.type = false
-        }, this)
+        setTimeout(function() {
+          self._inputFocus()
+        }, 200)
       } else {
-        // 键盘收起
-        // this.inputObserver.disconnect()
-        // this.inputObserver = null
-        this.chatScroll.refresh()
-        this.chatScroll.scrollToElement(this.$refs.chatContentEnd, 400)
+        this.inputStatus === false ? this._inputFocus() : this._inputBlur()
       }
+    },
+    _inputFocus() {
+      console.log('键盘弹出辣=========================')
+      this.inputStatus = true
+      this.$refs.inputBar.setInputEditState(true)
+      this.inputEle.focus()
+      // document.getElementById('input-content-hook').focus()
+      // 聊天内容滚动到最底部
+      this._resolveKeyboard()
+      // 监听聊天区域滑动，触发回调关闭软键盘，重置聊天区域高度
+      this.chatScroll.once('touchEnd', () => {
+        this._inputBlur()
+      }, this)
+    },
+    _inputBlur() {
+      this.inputStatus = false
+      console.log('键盘收起辣=========================')
+      this.inputEle.blur()
+      this.$refs.inputBar.removeInputEditState()
+      this.chatScroll.refresh()
+      this.chatScroll.scrollToElement(this.$refs.chatContentEnd, 400)
     },
     chatInputChange(text, isEnter) {
       if (isEnter) {
         // 提交，清空输入框，重新计算滚动区域高度，键盘收起
         this.inputEle.innerText = ''
-        this.inputEle.blur()
+        this._inputBlur()
         console.log(`submit ==> ${text}`)
       } else {
         console.log(text)
       }
     },
     toggleExtend(mode) {
-      if (mode) {
+      if (this.inputStatus) {
+        this._inputBlur()
+        const self = this
+        setTimeout(function() {
+          self.curExtendBar.type = true
+        }, 300)
+      } else {
         this.curExtendBar.type = true
       }
+      // this.curExtendBar.type = true
       this.chatScroll.once('touchEnd', () => {
         this.curExtendBar.type = false
       }, this)
@@ -379,8 +394,10 @@ export default {
     height: calc(~'100% - 5rem');
     display: flex;
     flex-direction: column;
+    transition: all 0.3s;
     &.extendBarOpen {
-      height: calc(~'100% - 29rem');
+      // height: calc(~'100% - 29rem');
+      transform: translateY(-24rem);
     }
     .chat-wrapper {
       position: relative;
@@ -426,6 +443,11 @@ export default {
     height: 24rem;
     background-color: @bg-normal;
     color: #000;
+    transition: all 0.3s;
+    &.extendBarOpen {
+      // height: calc(~'100% - 29rem');
+      transform: translateY(-24rem);
+    }
   }
 }
 </style>

@@ -6,13 +6,23 @@
       </svg>
     </div>
     <div class="input-bar-item input-box" :class="{'visible-padding-left': !status}">
-      <div class="input-content"
+      <!-- <div class="input-content"
         id="input-content-hook"
         ref="inputContent"
         contenteditable="true"
         type="text"
-        @focus="chatFocus(true)"
-        @blur="chatFocus(false)"
+        @click="chatFocus"
+        @focus.prevent="chatFocus(true)"
+        @blur.prevent="chatFocus(false)"
+        @keyup="chatInput($event, false)"
+        @keyup.enter="chatInput($event, true)">
+        </br>
+      </div> -->
+      <div class="input-content"
+        id="input-content-hook"
+        ref="inputContent"
+        type="text"
+        @click="chatFocus"
         @keyup="chatInput($event, false)"
         @keyup.enter="chatInput($event, true)">
         </br>
@@ -40,6 +50,11 @@ export default {
     // XTextarea,
     // Group
   },
+  props: {
+    isFocus: {
+      type: Boolean
+    }
+  },
   data() {
     return {
       status: true
@@ -52,13 +67,24 @@ export default {
     toggleExtend(index) {
       this.$emit('toggleExtend', index === 1 ? 'gift' : index === 2 ? 'express' : 'file')
     },
-    chatFocus(val) {
-      this.$emit('isInputfocus', val)
+    chatFocus() {
+      if (this.isFocus === false) {
+        this.$emit('targetInputBuffer')
+      }
     },
     chatInput(event, isEnter) {
       const e = event || window.event
       const text = e.currentTarget.innerText
       this.$emit('chatInputChange', text, isEnter)
+    },
+    getInputEditState() {
+      return this.$refs.inputContent.getAttribute('contenteditable')
+    },
+    removeInputEditState() {
+      this.$refs.inputContent.removeAttribute('contenteditable')
+    },
+    setInputEditState(tag) {
+      this.$refs.inputContent.setAttribute('contenteditable', tag)
     }
   }
 }
