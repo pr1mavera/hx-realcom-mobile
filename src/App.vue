@@ -1,8 +1,9 @@
 <template>
   <div id="app">
     <keep-alive>
-      <main-room></main-room>
-      <share v-if="false"></share>
+      <router-view></router-view>
+      <!--<main-room></main-room>-->
+      <!--<share v-if="false"></share>-->
     </keep-alive>
   </div>
 </template>
@@ -27,6 +28,13 @@ export default {
   //   }
   // }
 }
+
+function refresh() {
+  // var width = document.documentElement.clientWidth;
+  document.documentElement.style.fontSize = document.documentElement.clientWidth / 75 + 'px'
+}
+refresh()
+window.onresize = refresh
 </script>
 
 <style lang="less">
@@ -39,7 +47,11 @@ input, textarea{
 html, body {
   width: 100%;
   height: 100%;
-  font-size: 62.5%;
+  /*font-size: 62.5%;*/
+}
+/*防止iPhone X 底部小黑条遮挡页面最底部内容的情况*/
+body {
+  padding-bottom: constant(safe-area-inset-bottom);
 }
 #app {
   height: 100%;
@@ -47,5 +59,54 @@ html, body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
+}
+
+/*---------对Nexus5做响应式------------*/
+@media screen and(min-width: 321px) and(max-width: 360px) {
+  html {
+    font-size: 4.8px !important;
+  }
+}
+
+/*-------对iPhone5做响应式-----------*/
+@media screen and(max-width: 321px) {
+  html {
+    font-size: 4.26667px !important;
+    // font-size: 41.92637px !important; // font-size:41.857137680 px !important;
+  }
+}
+
+/*---------对iPhone6做响应式---------*/
+@media screen and(min-width: 361px) and (max-width: 376px) {
+  html {
+    font-size: 5px !important;
+  }
+}
+
+/*-------对iPhone6 plus做响应式------*/
+@media screen and(min-width: 376px) and (max-width: 475px) {
+  html {
+    font-size: 5.52px !important;
+  }
+}
+
+/*---------对微信浏览器做的响应式-------*/
+@media screen and(min-width: 500px) and (max-width: 680px) {
+  html {
+    font-size: 6.66667px !important;
+  }
+}
+
+@media screen and(min-width: 680px) {
+  html {
+    font-size: 8.5px !important;
+  }
+}
+
+/*------------------pc端--------------*/
+@media screen and(min-width: 768px) {
+  html {
+    font-size: 5.6px !important;
+  }
 }
 </style>

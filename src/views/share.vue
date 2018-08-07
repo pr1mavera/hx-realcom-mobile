@@ -1,6 +1,6 @@
 <template>
   <div class="share">
-
+     there are some words for test
   </div>
 </template>
 
