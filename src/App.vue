@@ -30,8 +30,8 @@ export default {
 }
 
 function refresh() {
-  // var width = document.documentElement.clientWidth;
-  document.documentElement.style.fontSize = document.documentElement.clientWidth / 75 + 'px'
+  var docEle = document.documentElement
+  docEle.style.fontSize = docEle.clientWidth / 37.5 + 'px'
 }
 refresh()
 window.onresize = refresh
