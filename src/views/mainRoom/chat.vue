@@ -285,13 +285,9 @@ export default {
     _inputBlur() {
       this.inputStatus = false
       console.log('键盘收起辣=========================')
-      new Promise((resolve) => {
-        this.inputFocPos = this.$refs.inputBar.getCursortPosition(this.inputEle)
-        console.log(this.inputFocPos)
-        resolve()
-      }).then(() => {
-        this.inputEle.blur()
-      })
+      this.inputFocPos = this.$refs.inputBar.getCursortPosition(this.inputEle)
+      console.log(this.inputFocPos)
+      this.inputEle.blur()
       this.$refs.inputBar.removeInputEditState()
       this.chatScroll.refresh()
       this.chatScroll.scrollToElement(this.$refs.chatContentEnd, 400)
