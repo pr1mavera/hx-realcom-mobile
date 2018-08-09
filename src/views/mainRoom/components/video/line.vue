@@ -10,11 +10,11 @@
 </template>
 
 <script type="text/ecmascript-6">
-import ConnectSuccess from '@/views/mainRoom/components/video/connect-success'
+// import ConnectSuccess from '@/views/mainRoom/components/video/connect-success'
 
 export default {
   components: {
-    ConnectSuccess,
+    // ConnectSuccess,
     'ConnectSuccess': () => import('@/views/mainRoom/components/video/connect-success')
   }
 }
