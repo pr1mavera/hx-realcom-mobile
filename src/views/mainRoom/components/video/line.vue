@@ -77,7 +77,7 @@ export default {
         width: 15rem;
         display: block;
         color: #ffffff;
-        font-size: 4rem;
+        font-size: 2rem;
         line-height: 4rem;
         margin: 10rem auto 0;
         border-radius: 5px;

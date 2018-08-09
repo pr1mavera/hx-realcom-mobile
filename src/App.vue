@@ -30,8 +30,8 @@ export default {
 }
 
 function refresh() {
-  // var width = document.documentElement.clientWidth;
-  document.documentElement.style.fontSize = document.documentElement.clientWidth / 75 + 'px'
+  var docEle = document.documentElement
+  docEle.style.fontSize = docEle.clientWidth / 37.5 + 'px'
 }
 refresh()
 window.onresize = refresh
@@ -43,6 +43,9 @@ window.onresize = refresh
 input, textarea{
   -webkit-appearance: none;
   outline: none;
+}
+ul, li, ol, dl {
+  list-style-type: none;
 }
 html, body {
   width: 100%;
@@ -73,14 +76,14 @@ body {
 /*---------对Nexus5做响应式------------*/
 @media screen and(min-width: 321px) and(max-width: 360px) {
   html {
-    font-size: 4.8px !important;
+    font-size: 9.6px !important;
   }
 }
 
 /*-------对iPhone5做响应式-----------*/
 @media screen and(max-width: 321px) {
   html {
-    font-size: 4.26667px !important;
+    font-size: 8.5333px !important;
     // font-size: 41.92637px !important; // font-size:41.857137680 px !important;
   }
 }
@@ -88,34 +91,34 @@ body {
 /*---------对iPhone6做响应式---------*/
 @media screen and(min-width: 361px) and (max-width: 376px) {
   html {
-    font-size: 5px !important;
+    font-size: 10px !important;
   }
 }
 
 /*-------对iPhone6 plus做响应式------*/
 @media screen and(min-width: 376px) and (max-width: 475px) {
   html {
-    font-size: 5.52px !important;
+    font-size: 11.04px !important;
   }
 }
 
 /*---------对微信浏览器做的响应式-------*/
 @media screen and(min-width: 500px) and (max-width: 680px) {
   html {
-    font-size: 6.66667px !important;
+    font-size: 13.8889px !important;
   }
 }
 
 @media screen and(min-width: 680px) {
   html {
-    font-size: 8.5px !important;
+    font-size: 17px !important;
   }
 }
 
 /*------------------pc端--------------*/
 @media screen and(min-width: 768px) {
   html {
-    font-size: 5.6px !important;
+    font-size: 11.2px !important;
   }
 }
 </style>

@@ -71,7 +71,7 @@
     }
     .weui-icon-success {
       color: #ff444a;
-      font-size: 4rem;
+      font-size: 2rem;
       line-height: 4.7rem;
     }
     p {
@@ -81,7 +81,7 @@
       height: 4rem;
       color: #000000;
       line-height: 4.7rem;
-      font-size: 3.6rem;
+      font-size: 1.8rem;
       font-weight: bold;
       text-align: center;
     }
@@ -89,7 +89,7 @@
       color: #000000;
     }
     .confirm-tips {
-      font-size: 2.4rem;
+      font-size: 1.2rem;
       .num {
         color: #ff444a;
       }

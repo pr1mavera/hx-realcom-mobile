@@ -75,6 +75,7 @@ export default {
     chatInput(event, isEnter) {
       const e = event || window.event
       const text = e.currentTarget.innerText
+      // const l = document.getElementById('input-content-hook')
       this.$emit('chatInputChange', text, isEnter)
     },
     getInputEditState() {
@@ -85,6 +86,20 @@ export default {
     },
     setInputEditState(tag) {
       this.$refs.inputContent.setAttribute('contenteditable', tag)
+    },
+    getCursortPosition(element) {
+      let caretOffset = 0
+      const doc = element.ownerDocument || element.document
+      const win = doc.defaultView || doc.parentWindow
+      const sel = win.getSelection()
+      if (sel.rangeCount > 0) { // 中的区域
+        const range = sel.getRangeAt(0)
+        const preCaretRange = range.cloneRange() // 克隆一个选中区域
+        preCaretRange.selectNodeContents(element) // 设置选中区域的节点内容为当前节点
+        preCaretRange.setEnd(range.endContainer, range.endOffset) // 重置选中区域的结束位置
+        caretOffset = preCaretRange.toString().length
+      }
+      return caretOffset
     }
   }
 }
