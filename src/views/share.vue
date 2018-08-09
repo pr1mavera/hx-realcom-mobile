@@ -1,10 +1,6 @@
 <template>
   <div class="share">
-<<<<<<< HEAD
-     there are some words for test
-=======
-    shareshareshareshareshare
->>>>>>> 23bef283fba5a2e936739f365c3de7d0f0cb37fa
+    There are some words for test
   </div>
 </template>
 

@@ -1,27 +1,23 @@
 <template>
-  <section class="section line">
+  <section class="section">
     <div class="top"></div>
     <main class="main">
       <div class="img-box"><img scr=""></div>
+      <p class="tip">抱歉网络繁忙，视频连接失败，请稍后重连！</p>
       <a type="reset" class="btn-cancel">取 消</a>
-      <connect-success></connect-success>
+      <!--<connect-success></connect-success>-->
     </main>
   </section>
 </template>
 
-<script type="text/ecmascript-6">
-import ConnectSuccess from '@/views/mainRoom/components/video/connect-success'
-
-export default {
-  components: {
-    ConnectSuccess,
-    'ConnectSuccess': () => import('@/views/mainRoom/components/video/connect-success')
+<script>
+  export default {
+    // name: "connect-fail"
   }
-}
 </script>
 
 <style scoped lang="less">
-  .line {
+  .section {
     width: 100%;
     .top {
       width: 100%;
@@ -43,6 +39,12 @@ export default {
           vertical-align: middle;
         }
       }
+      .tip {
+        color: #ADADAD;
+        line-height: 1.25;
+        font-size: 2.8rem;
+        margin-top: 5.0rem;
+      }
       .btn-cancel {
         height: 4rem;
         width: 15rem;
@@ -50,7 +52,7 @@ export default {
         color: #ffffff;
         font-size: 4rem;
         line-height: 4rem;
-        margin: 10rem auto 0;
+        margin: 9rem auto 0;
         border-radius: 5px;
         text-align: center;
         background-color: #FF444A;

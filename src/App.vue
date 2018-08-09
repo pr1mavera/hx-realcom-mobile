@@ -60,7 +60,16 @@ body {
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
 }
-
+#app .weui-dialog {
+  opacity: .85;
+  overflow: auto;
+  border-radius: 10px;
+  .weui-dialog__ft {
+    .weui-dialog__btn, .weui-dialog__btn_default, .weui-dialog__btn_primary {
+      color: #2196f3;
+    }
+  }
+}
 /*---------对Nexus5做响应式------------*/
 @media screen and(min-width: 321px) and(max-width: 360px) {
   html {
