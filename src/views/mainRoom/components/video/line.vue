@@ -3,8 +3,12 @@
     <div class="top"></div>
     <main class="main">
       <div class="img-box"><img scr=""></div>
+      <div class="tips">
+        <p class="tips-top">当前还有<label class="num">{{num}}</label>人排队.</p>
+        <p class="tips-bottom">预计需要等待{{times}}分钟</p>
+      </div>
       <a type="reset" class="btn-cancel">取 消</a>
-      <connect-success></connect-success>
+      <connect-success v-if="connect"></connect-success>
     </main>
   </section>
 </template>
@@ -16,6 +20,13 @@ export default {
   components: {
     // ConnectSuccess,
     'ConnectSuccess': () => import('@/views/mainRoom/components/video/connect-success')
+  },
+  data() {
+    return {
+      connect: false,
+      num: 3,
+      times: 1
+    }
   }
 }
 </script>
@@ -41,6 +52,24 @@ export default {
         img {
           width: 100%;
           vertical-align: middle;
+        }
+      }
+      .tips {
+        line-height: 1.75;
+        text-align: center;
+        padding-top: 5.0rem;
+        letter-spacing: .05rem;
+        .tips-top {
+          color: #909090;
+          font-size: 3.6rem;
+          font-weight: bold;
+          .num {
+            color: #ff444a;
+          }
+        }
+        .tips-bottom {
+          color: #BBBBBB;
+          font-size: 3.2rem;
         }
       }
       .btn-cancel {
