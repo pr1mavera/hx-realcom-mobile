@@ -1,6 +1,7 @@
 <template>
   <div class="mainRoom">
-    <chat></chat>
+    <router-view></router-view>
+    <video></video>
   </div>
 </template>
 
@@ -8,7 +9,7 @@
 
 export default {
   components: {
-    'Chat': () => import('@/views/mainRoom/chat')
+    'Video': () => import('@/views/mainRoom/video')
   },
   data() {
     return {

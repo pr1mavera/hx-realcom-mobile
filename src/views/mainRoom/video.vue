@@ -1,12 +1,12 @@
 <template>
   <div class="video">
-
+    video
   </div>
 </template>
 
 <script type="text/ecmascript-6">
 export default {
-  
+
 }
 </script>
 

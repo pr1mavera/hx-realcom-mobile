@@ -1,6 +1,6 @@
 <template>
-  <div class="detail">
-    
+  <div class="serverDetail">
+    serverDetail
   </div>
 </template>
 
