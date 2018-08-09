@@ -39,6 +39,8 @@
     <div class="extend-bar transition-bezier" :class="{'extendBarOpen': curExtendBar.type}">
       <keep-alive>
         <component
+          :inputPos="inputFocPos"
+          @selectEmojiWithCode="selectEmojiWithCode"
           :is="curExtendBar.component"
         ></component>
       </keep-alive>
@@ -73,12 +75,14 @@ export default {
        * [inputStatus    输入框焦点状态]
        * [scrollY        消息显示区域滑动距离]
        * [inputEle       真实输入框元素]
+       * [inputFocPos    每次键盘弹出记录的光标位置]
        * [curExtendBar   当前弹出的额外输入内容的模式]
        * [chat           消息队列]
        */
       inputStatus: false,
       scrollY: 0,
       inputEle: null,
+      inputFocPos: 0,
       // inputObserver: null,
       curExtendBar: {
         type: false,
@@ -281,7 +285,13 @@ export default {
     _inputBlur() {
       this.inputStatus = false
       console.log('键盘收起辣=========================')
-      this.inputEle.blur()
+      new Promise((resolve) => {
+        this.inputFocPos = this.$refs.inputBar.getCursortPosition(this.inputEle)
+        console.log(this.inputFocPos)
+        resolve()
+      }).then(() => {
+        this.inputEle.blur()
+      })
       this.$refs.inputBar.removeInputEditState()
       this.chatScroll.refresh()
       this.chatScroll.scrollToElement(this.$refs.chatContentEnd, 400)
@@ -321,6 +331,11 @@ export default {
           this.curExtendBar.component = 'SendFile'
           break
       }
+    },
+    selectEmojiWithCode(code) {
+      let str = this.inputEle.innerText
+      str = `${str.substring(0, this.inputFocPos)}${code}${str.substring(this.inputFocPos, str.length)}`
+      this.inputEle.innerHTML = str
     },
     // _reloadChatContentHeight() {
     //   const self = this

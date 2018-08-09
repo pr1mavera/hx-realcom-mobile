@@ -37,6 +37,9 @@ input, textarea{
   -webkit-appearance: none;
   outline: none;
 }
+ul, li, ol, dl {
+  list-style-type: none;
+}
 html, body {
   width: 100%;
   height: 100%;
