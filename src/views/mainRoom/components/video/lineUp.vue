@@ -1,10 +1,16 @@
 <template>
   <section class="section line-up" v-show="isLineUpViewShow">
-    <div class="top"></div>
+    <!--<div class="top"></div>-->
     <main class="main">
-      <div class="img-box"><img scr=""></div>
+      <div class="img-box">
+          <img src="../../../../../static/img/lineing.png">
+        </div>
+      <div class="tips">
+        <p class="tips-top">当前还有<label class="num">{{num}}</label>人排队.</p>
+        <p class="tips-bottom">预计需要等待{{times}}分钟</p>
+      </div>
       <a type="reset" class="btn-cancel">取 消</a>
-      <connect-success></connect-success>
+      <connect-success v-if="connect"></connect-success>
     </main>
   </section>
 </template>
@@ -26,6 +32,13 @@ export default {
     ...mapGetters([
       'queueMode'
     ])
+  },
+  data() {
+    return {
+      connect: false,
+      num: 3,
+      times: 1
+    }
   }
 }
 </script>
@@ -33,24 +46,39 @@ export default {
 <style scoped lang="less">
   .line-up {
     width: 100%;
-    .top {
-      width: 100%;
-      height: 5rem;
-      position: fixed;
-      background-color: #FF444A;
-    }
     .main {
       padding: 10rem 0 0;
       .img-box {
         width: 11rem;
         height: 11rem;
         margin: 0 auto;
+        line-height: 11rem;
         text-align: center;
         border-radius: 50%;
         background-color: #D7DCE3;
         img {
-          width: 100%;
+          width: 5rem;
           vertical-align: middle;
+          animation: waiting 8s;
+          animation-timing-function: ease-in;
+        }
+      }
+      .tips {
+        line-height: 1.75;
+        text-align: center;
+        padding-top: 5.0rem;
+        letter-spacing: .05rem;
+        .tips-top {
+          color: #909090;
+          font-size: 1.8rem;
+          font-weight: bold;
+          .num {
+            color: #ff444a;
+          }
+        }
+        .tips-bottom {
+          color: #BBBBBB;
+          font-size: 1.6rem;
         }
       }
       .btn-cancel {
@@ -61,9 +89,18 @@ export default {
         font-size: 2rem;
         line-height: 4rem;
         margin: 10rem auto 0;
-        border-radius: 5px;
+        border-radius: 2rem;
         text-align: center;
-        background-color: #FF444A;
+        background: linear-gradient(to right, #FF8C6A, #FF80A0);
+      }
+      /*animation*/
+      @keyframes waiting {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(1800deg);
+        }
       }
     }
   }

@@ -421,7 +421,7 @@ export default {
 </script>
 
 <style lang="less">
-@import '~@/common/style/mixin.less';
+@import '../../common/style/mixin.less';
 @import '~@/common/style/theme.less';
 
 .chat {

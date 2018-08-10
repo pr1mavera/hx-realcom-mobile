@@ -6,7 +6,7 @@
              @on-confirm="onConfirm"
              @on-show="onShow"
              @on-hide="onHide">
-      <div class="avatar"></div>
+      <div class="avatar"><img src=""></div>
       <p class="confirm-bd-tit" style="">
              <icon type="success"></icon> 转接成功！
       </p>
@@ -30,8 +30,8 @@
     data() {
       return {
         show: true,
-        num: 3,
-        name: '丽丽'
+        name: '丽丽',
+        num: 2
       }
     },
     methods: {
@@ -56,7 +56,7 @@
 
 <style scoped lang="less">
 .connect-success {
-  letter-spacing: .15rem;
+  letter-spacing: .1rem;
   .weui-dialog {
     overflow: auto!important;
     .avatar {
