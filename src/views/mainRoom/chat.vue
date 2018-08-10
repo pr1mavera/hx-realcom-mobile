@@ -273,8 +273,10 @@ export default {
       console.log('键盘弹出辣=========================')
       this.inputStatus = true
       this.$refs.inputBar.setInputEditState(true)
+      this.$nextTick(() => {
+        this.inputEle.focus()
+      })
 
-      this.inputEle.focus()
       // document.querySelector('#input-content-hook').focus()
       // document.getElementById('input-content-hook').focus()
       // 聊天内容滚动到最底部
