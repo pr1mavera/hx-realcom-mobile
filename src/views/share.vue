@@ -1,12 +1,16 @@
 <template>
   <div class="share">
     There are some words for test
+    <assess v-if="true"></assess>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
 export default {
-
+  components: {
+  //  'ConnectSuccess': () => import('@/views/mainRoom/components/video/connect-success')
+    'Assess': () => import('@/views/mainRoom/components/assess')
+  }
 }
 </script>
 

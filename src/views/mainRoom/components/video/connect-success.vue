@@ -70,7 +70,7 @@
       border-radius: 50%;
     }
     .weui-icon-success {
-      color: #ff444a;
+      color: #FF959C;
       font-size: 2rem;
       line-height: 4.7rem;
     }

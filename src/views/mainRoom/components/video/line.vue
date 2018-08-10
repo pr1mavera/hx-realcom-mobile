@@ -25,7 +25,7 @@ export default {
   },
   data() {
     return {
-      connect: false,
+      connect: true,
       num: 3,
       times: 1
     }
