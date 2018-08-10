@@ -40,9 +40,10 @@
       },
       onConfirm(msg) {
         console.log('on confirm')
-        if (msg) {
-          alert(msg)
-        }
+        // if (msg) {
+        //   alert(msg)
+        // }
+        this.$emit('confirmToVideo')
       },
       onHide() {
         console.log('on hide')
