@@ -52,8 +52,8 @@
 import BScroll from 'better-scroll'
 import HeaderBar from '@/views/mainRoom/components/chat/header-bar'
 import InputBar from '@/views/mainRoom/components/chat/input-bar'
-
 import { needToReloadDate } from '@/common/js/dateConfig.js'
+import { debounce } from '@/common/js/util.js'
 
 export default {
   components: {
@@ -262,9 +262,9 @@ export default {
       if (this.curExtendBar.type) {
         const self = this
         this.curExtendBar.type = false
-        setTimeout(function() {
+        debounce(() => {
           self._inputFocus()
-        }, 200)
+        }, 300)()
       } else {
         this.inputStatus === false ? this._inputFocus() : this._inputBlur()
       }
@@ -273,7 +273,11 @@ export default {
       console.log('键盘弹出辣=========================')
       this.inputStatus = true
       this.$refs.inputBar.setInputEditState(true)
-      this.inputEle.focus()
+      this.$nextTick(() => {
+        this.inputEle.focus()
+      })
+
+      // document.querySelector('#input-content-hook').focus()
       // document.getElementById('input-content-hook').focus()
       // 聊天内容滚动到最底部
       this._resolveKeyboard()
@@ -306,6 +310,9 @@ export default {
       if (this.inputStatus) {
         this._inputBlur()
         const self = this
+        debounce(() => {
+          self.curExtendBar.type = true
+        }, 300)()
         setTimeout(function() {
           self.curExtendBar.type = true
         }, 300)
@@ -386,7 +393,7 @@ export default {
 </script>
 
 <style lang="less">
-@import '~@/common/style/mixin.less';
+@import '../../common/style/mixin.less';
 @import '~@/common/style/theme.less';
 
 .chat {

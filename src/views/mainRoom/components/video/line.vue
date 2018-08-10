@@ -89,7 +89,7 @@ export default {
           transform: rotate(0deg);
         }
         100% {
-          transform: rotate(3600deg);
+          transform: rotate(1800deg);
         }
       }
     }

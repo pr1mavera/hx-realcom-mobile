@@ -9,6 +9,8 @@ import Router from 'vue-router'
 */
 const main = () => import('@/App')
 const room = () => import('@/views/mainRoom')
+const chat = () => import('@/views/mainRoom/chat')
+const serverDetail = () => import('@/views/mainRoom/serverDetail')
 const share = () => import('@/views/share')
 const line = () => import('@/views/mainRoom/components/video/line')
 
@@ -25,7 +27,19 @@ export default new Router({
         {
           path: '/room',
           name: 'room',
-          component: room
+          component: room,
+          children: [
+            {
+              path: '/room/chat',
+              name: 'chat',
+              component: chat
+            },
+            {
+              path: '/room/serverDetail',
+              name: 'serverDetail',
+              component: serverDetail
+            }
+          ]
         },
         {
           path: '/line',
