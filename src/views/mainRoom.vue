@@ -28,11 +28,17 @@ export default {
     height: 100%;
     z-index: 10;
   }
-  // .video-bar {
-  //   position: absolute;
-  //   top: 0;
-  //   left: 0;
-  //   z-index: 100;
-  // }
+  .line-up {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 100;
+  }
+  .video-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 101;
+  }
 }
 </style>

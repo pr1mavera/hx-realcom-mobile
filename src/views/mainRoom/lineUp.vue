@@ -10,14 +10,15 @@
         <p class="tips-bottom">预计需要等待{{times}}分钟</p>
       </div>
       <a type="reset" class="btn-cancel">取 消</a>
-      <connect-success v-if="connect"></connect-success>
+      <connect-success v-if="connect" @confirmToVideo="confirmToVideo"></connect-success>
     </main>
   </section>
 </template>
 
 <script type="text/ecmascript-6">
-import { mapGetters } from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
 import { queueStatus } from '@/common/js/status'
+import { debounce } from '@/common/js/util'
 // import ConnectSuccess from '@/views/mainRoom/components/video/connect-success'
 
 export default {
@@ -35,17 +36,37 @@ export default {
   },
   data() {
     return {
-      connect: true,
+      connect: false,
       num: 3,
       times: 1
     }
+  },
+  mounted() {
+    this.connectComplete()
+  },
+  methods: {
+    connectComplete() {
+      debounce(() => {
+        this.connect = true
+      }, 3000)()
+    },
+    confirmToVideo() {
+      this.readyToVideoChat()
+    },
+    ...mapActions([
+      'readyToVideoChat'
+    ])
   }
 }
 </script>
 
 <style scoped lang="less">
+  @import '~@/common/style/theme.less';
+
   .line-up {
     width: 100%;
+    height: 100%;
+    background-color: @bg-light;
     .main {
       padding: 10rem 0 0;
       .img-box {
