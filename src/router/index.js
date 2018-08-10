@@ -12,7 +12,6 @@ const room = () => import('@/views/mainRoom')
 const chat = () => import('@/views/mainRoom/chat')
 const serverDetail = () => import('@/views/mainRoom/serverDetail')
 const share = () => import('@/views/share')
-const line = () => import('@/views/mainRoom/components/video/line')
 
 Vue.use(Router)
 
@@ -40,11 +39,6 @@ export default new Router({
               component: serverDetail
             }
           ]
-        },
-        {
-          path: '/line',
-          name: 'line',
-          component: line
         },
         {
           path: '/share',

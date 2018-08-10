@@ -1,5 +1,5 @@
 <template>
-  <section class="section line">
+  <section class="section line-up" v-show="isLineUpViewShow">
     <!--<div class="top"></div>-->
     <main class="main">
       <div class="img-box">
@@ -16,12 +16,22 @@
 </template>
 
 <script type="text/ecmascript-6">
+import { mapGetters } from 'vuex'
+import { queueStatus } from '@/common/js/status'
 // import ConnectSuccess from '@/views/mainRoom/components/video/connect-success'
 
 export default {
   components: {
     // ConnectSuccess,
     'ConnectSuccess': () => import('@/views/mainRoom/components/video/connect-success')
+  },
+  computed: {
+    isLineUpViewShow() {
+      return this.queueMode === queueStatus.queuing
+    },
+    ...mapGetters([
+      'queueMode'
+    ])
   },
   data() {
     return {
@@ -34,7 +44,7 @@ export default {
 </script>
 
 <style scoped lang="less">
-  .line {
+  .line-up {
     width: 100%;
     .main {
       padding: 10rem 0 0;

@@ -25,6 +25,7 @@
         </div>
         <fload-button
           :inputStatus="inputStatus"
+          @enterVideoLineUp="lineUpAlert = true"
         ></fload-button>
       </div>
       <input-bar
@@ -45,29 +46,47 @@
         ></component>
       </keep-alive>
     </div>
+    <div v-transfer-dom>
+      <confirm v-model="lineUpAlert"
+        :title="'您即将转入视频客服'"
+        @on-cancel="lineUpAlert = false"
+        @on-confirm="confirmToLineUp"
+      ></confirm>
+    </div>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
+import { mapGetters, mapActions } from 'vuex'
+import { Confirm, TransferDomDirective as TransferDom } from 'vux'
 import BScroll from 'better-scroll'
 import HeaderBar from '@/views/mainRoom/components/chat/header-bar'
 import InputBar from '@/views/mainRoom/components/chat/input-bar'
-import { needToReloadDate } from '@/common/js/dateConfig.js'
-import { debounce } from '@/common/js/util.js'
+import { needToReloadDate } from '@/common/js/dateConfig'
+import { debounce } from '@/common/js/util'
 
 export default {
+  directives: {
+    TransferDom
+  },
   components: {
     /**
      * 注册组件
      */
     HeaderBar,
     InputBar,
+    Confirm,
     'ContentItem': () => import('@/views/mainRoom/components/chat/content-item'),
     'TipsItem': () => import('@/views/mainRoom/components/chat/tips-item'),
     'FloadButton': () => import('@/views/mainRoom/components/chat/fload-button'),
     'SendFile': () => import('@/views/mainRoom/components/chat/send-file'),
     'SendExpress': () => import('@/views/mainRoom/components/chat/send-express'),
     'SendGift': () => import('@/views/mainRoom/components/chat/send-gift')
+  },
+  computed: {
+    ...mapGetters([
+
+    ])
   },
   data() {
     return {
@@ -88,6 +107,7 @@ export default {
         type: false,
         component: ''
       },
+      lineUpAlert: false,
       chat: [
         {
           groupId: '372331123',
@@ -262,6 +282,7 @@ export default {
       if (this.curExtendBar.type) {
         const self = this
         this.curExtendBar.type = false
+        this.$refs.inputBar.setInputEditState('true')
         debounce(() => {
           self._inputFocus()
         }, 300)()
@@ -272,11 +293,8 @@ export default {
     _inputFocus() {
       console.log('键盘弹出辣=========================')
       this.inputStatus = true
-      this.$refs.inputBar.setInputEditState(true)
-      this.$nextTick(() => {
-        this.inputEle.focus()
-      })
-
+      this.$refs.inputBar.setInputEditState('true')
+      this.inputEle.focus()
       // document.querySelector('#input-content-hook').focus()
       // document.getElementById('input-content-hook').focus()
       // 聊天内容滚动到最底部
@@ -292,7 +310,7 @@ export default {
       this.inputFocPos = this.$refs.inputBar.getCursortPosition(this.inputEle)
       console.log(this.inputFocPos)
       this.inputEle.blur()
-      this.$refs.inputBar.removeInputEditState()
+      this.$refs.inputBar.setInputEditState('false')
       this.chatScroll.refresh()
       this.chatScroll.scrollToElement(this.$refs.chatContentEnd, 400)
     },
@@ -339,6 +357,13 @@ export default {
       let str = this.inputEle.innerText
       str = `${str.substring(0, this.inputFocPos)}${code}${str.substring(this.inputFocPos, str.length)}`
       this.inputEle.innerHTML = str
+    },
+    confirmToLineUp() {
+      this.lineUpAlert = false
+      const self = this
+      debounce(() => {
+        self.enterToLineUp()
+      }, 1000)()
     },
     // _reloadChatContentHeight() {
     //   const self = this
@@ -387,7 +412,10 @@ export default {
         self.chatScroll.scrollToElement(self.$refs.chatContentEnd, 400)
         window.onresize = null
       }
-    }
+    },
+    ...mapActions([
+      'enterToLineUp'
+    ])
   }
 }
 </script>
