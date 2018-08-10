@@ -1,7 +1,10 @@
 <template>
   <div class="main-room">
-    <router-view class="router-view"></router-view>
-    <videoBar class="video-bar" v-if="false"></videoBar>
+    <keep-alive>
+      <router-view class="router-view"></router-view>
+    </keep-alive>
+    <lineUp class="line-up"></lineUp>
+    <videoBar class="video-bar"></videoBar>
   </div>
 </template>
 
@@ -9,12 +12,8 @@
 
 export default {
   components: {
-    'videoBar': () => import('@/views/mainRoom/videoBar')
-  },
-  data() {
-    return {
-
-    }
+    'videoBar': () => import('@/views/mainRoom/videoBar'),
+    'lineUp': () => import('@/views/mainRoom/lineUp')
   }
 }
 </script>

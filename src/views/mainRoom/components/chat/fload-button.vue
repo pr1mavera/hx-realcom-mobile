@@ -3,6 +3,7 @@
     <button
       class="item extend-click transition-bezier"
       :disabled="inputStatus"
+      @click="enterVideoLineUp"
       :class="[{'visible-when-input': inputStatus, 'item-1': !inputStatus}]">
       <svg class="icon" aria-hidden="true">
         <use xlink:href="#icon-wode"></use>
@@ -38,6 +39,9 @@ export default {
   methods: {
     callPhone() {
       window.location.href = 'tel:95300'
+    },
+    enterVideoLineUp() {
+      this.$emit('enterVideoLineUp')
     }
   }
 }

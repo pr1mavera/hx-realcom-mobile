@@ -30,6 +30,7 @@
     data() {
       return {
         show: true,
+        num: 3,
         name: '丽丽'
       }
     },

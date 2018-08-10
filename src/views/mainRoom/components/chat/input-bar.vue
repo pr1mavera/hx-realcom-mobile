@@ -22,6 +22,7 @@
         id="input-content-hook"
         ref="inputContent"
         type="text"
+        contentEditable="false"
         @click="chatFocus"
         @keyup="chatInput($event, false)"
         @keyup.enter="chatInput($event, true)">
@@ -79,13 +80,13 @@ export default {
       this.$emit('chatInputChange', text, isEnter)
     },
     getInputEditState() {
-      return this.$refs.inputContent.getAttribute('contenteditable')
+      return this.$refs.inputContent.getAttribute('contentEditable')
     },
     removeInputEditState() {
-      this.$refs.inputContent.removeAttribute('contenteditable')
+      this.$refs.inputContent.removeAttribute('contentEditable')
     },
     setInputEditState(tag) {
-      this.$refs.inputContent.setAttribute('contenteditable', tag)
+      this.$refs.inputContent.setAttribute('contentEditable', tag)
     },
     getCursortPosition(element) {
       let caretOffset = 0

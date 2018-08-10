@@ -5,6 +5,7 @@ import App from './App'
 // import FastClick from 'fastclick'
 import { WechatPlugin, AlertPlugin, ToastPlugin, ConfirmPlugin, LoadingPlugin } from 'vux'
 import router from './router'
+import store from './store'
 
 Vue.use(WechatPlugin)
 Vue.use(AlertPlugin)
@@ -20,6 +21,7 @@ Vue.config.productionTip = false
 new Vue({
   el: '#app',
   router,
+  store,
   components: { App },
   template: '<App/>'
 })
