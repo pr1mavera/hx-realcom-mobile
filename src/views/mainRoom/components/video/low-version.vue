@@ -43,7 +43,7 @@
       .tip .update {
         color: #ADADAD;
         line-height: 1.25;
-        font-size: 2.8rem;
+        font-size: 1.4rem;
       }
       .update {
         margin-top: 3rem;
@@ -53,7 +53,7 @@
         width: 15rem;
         display: block;
         color: #ffffff;
-        font-size: 4rem;
+        font-size: 2rem;
         line-height: 4rem;
         margin: 6rem auto 0;
         border-radius: 5px;
