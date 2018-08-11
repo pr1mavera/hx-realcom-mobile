@@ -40,7 +40,7 @@ window.onresize = refresh
 <style lang="less">
 @import '~vux/src/styles/reset.less';
 /*- 引入关闭按钮 -*/
-@import '~vux/src/styles/close.less';
+/*@import '~vux/src/styles/close.less';*/
 
 input, textarea{
   -webkit-appearance: none;
