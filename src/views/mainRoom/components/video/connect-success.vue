@@ -29,7 +29,7 @@
     },
     data() {
       return {
-        show: true,
+        show: false,
         name: '丽丽',
         num: 2
       }

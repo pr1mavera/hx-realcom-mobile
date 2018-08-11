@@ -1,25 +1,49 @@
 <template>
-  <div class="video-bar" v-show="isVideoBarShow">
+  <div class="video-bar" v-show="isVideoBarOpen">
+    <!-- 排队 -->
+    <line-up class="line-up" v-show="isLineUpShow"></line-up>
+    <!-- 最大化 -->
     <div class="full-screen-container" v-show="fullScreen">
-      <div class="normal-video"></div>
-      <div class="mini-video"></div>
+      <div class="video-header">
+        <div class="avatar">
+          <img src="/static/img/avatar.png">
+        </div>
+        <div class="name">丽丽</div>
+      </div>
+      <video-footer @minimizeVideoBar="closeVideoBar"></video-footer>
+      <div class="server-video-window">
+        <video src="videofile.ogg" autoplay poster="posterimage.jpg"></video>
+      </div>
+      <div class="customer-video-window">
+        <video src="videofile.ogg" autoplay poster="posterimage.jpg"></video>
+      </div>
     </div>
+    <!-- 最小化 -->
     <div class="mini-container" v-show="!fullScreen" @click="openVideoBar">
-      <div class="normal-video"></div>
+      <div class="server-video-window">
+        <video src="videofile.ogg" autoplay poster="posterimage.jpg"></video>
+      </div>
     </div>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
 import { mapGetters, mapMutations } from 'vuex'
-import { roomStatus, queueStatus } from '@/common/js/status'
+import { queueStatus } from '@/common/js/status'
 // import { videoBarMixin } from '@/common/js/mixin'
 
 export default {
   // mixins: [videoBarMixin],
+  components: {
+    'LineUp': () => import('@/views/mainRoom/components/video/line-up'),
+    'VideoFooter': () => import('@/views/mainRoom/components/video/video-footer')
+  },
   computed: {
-    isVideoBarShow() {
-      return this.queueMode === queueStatus.queueOver && this.roomMode === roomStatus.videoChat
+    isVideoBarOpen() {
+      return this.queueMode === queueStatus.queuing || this.queueMode === queueStatus.queueOver
+    },
+    isLineUpShow() {
+      return this.queueMode === queueStatus.queuing
     },
     ...mapGetters([
       'fullScreen',
@@ -36,6 +60,9 @@ export default {
     openVideoBar() {
       this.setFullScreen(true)
     },
+    closeVideoBar() {
+      this.setFullScreen(false)
+    },
     ...mapMutations({
       setFullScreen: 'SET_FULL_SCREEN'
     })
@@ -44,7 +71,17 @@ export default {
 </script>
 
 <style lang="less">
+@import '~@/common/style/theme.less';
+
 .video-bar {
+  .line-up {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 102;
+  }
   .full-screen-container {
     position: fixed;
     left: 0;
@@ -52,22 +89,73 @@ export default {
     top: 0;
     bottom: 0;
     z-index: 101;
-    .normal-video {
+    .video-header {
+      position: absolute;
+      top: 2.6rem;
+      left: 1.8rem;
+      width: 6rem;
+      height: 14rem;
+      text-align: center;
+      z-index: 10;
+      .avatar {
+        width: 6rem;
+        height: 6rem;
+        border-radius: 50%;
+        background: linear-gradient(to right, #FF8C6A, #FF80A0);
+        img {
+          width: 5.5rem;
+          height: 5.5rem;
+          border-radius: 50%;
+          padding: 0.25rem;
+        }
+      }
+      .name {
+        display: inline-block;
+        vertical-align: top;
+        background-color: rgba(229, 186, 197, .7);
+        border-radius: 1.5rem;
+        font-size: 1.2rem;
+        padding: 0.01rem 1rem;
+        color: @text-lighter;
+        margin: 1rem 0;
+      }
+    }
+    .video-footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      z-index: 10;
+    }
+    .server-video-window {
+      position: fixed;
+      top: 0;
+      right: 0;
       width: 100%;
       height: 100%;
       background-color: #666;
+      z-index: 0;
+      video {
+        width: 100%;
+        height: 100%;
+      }
     }
-    .mini-video {
+    .customer-video-window {
       position: fixed;
       top: 0;
       right: 0;
       margin: .5rem .5rem 0 0;
-      width: 8.8rem;
-      height: 15.2rem;
+      width: 9rem;
+      height: 17.2rem;
       border-radius: .4rem;
       z-index: 200;
       background-color: #222;
       overflow: hidden;
+      z-index: 1;
+      video {
+        width: 100%;
+        height: 100%;
+      }
     }
   }
   .mini-container {
@@ -75,16 +163,20 @@ export default {
     top: 0;
     right: 0;
     margin: .5rem .5rem 0 0;
-    width: 8.8rem;
-    height: 15.2rem;
+    width: 9rem;
+    height: 17.2rem;
     border-radius: .4rem;
     z-index: 200;
     background-color: #222;
     overflow: hidden;
-    .normal-video {
+    .server-video-window {
       width: 100%;
       height: 100%;
       background-color: #666;
+      video {
+        width: 100%;
+        height: 100%;
+      }
     }
   }
 }

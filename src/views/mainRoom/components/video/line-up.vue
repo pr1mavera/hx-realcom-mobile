@@ -1,23 +1,23 @@
 <template>
-  <section class="section line-up" v-show="isLineUpViewShow">
+  <section class="section line-up">
     <!--<div class="top"></div>-->
     <main class="main">
       <div class="img-box">
-          <img src="../../../static/img/lineing.png">
+          <img src="/static/img/lineing.png">
         </div>
       <div class="tips">
         <p class="tips-top">当前还有<label class="num">{{num}}</label>人排队.</p>
         <p class="tips-bottom">预计需要等待{{times}}分钟</p>
       </div>
       <a type="reset" class="btn-cancel">取 消</a>
-      <connect-success v-if="connect" @confirmToVideo="confirmToVideo"></connect-success>
+      <connect-success ref="connectSuccess" @confirmToVideo="confirmToVideo"></connect-success>
     </main>
   </section>
 </template>
 
 <script type="text/ecmascript-6">
 import { mapGetters, mapActions } from 'vuex'
-import { queueStatus } from '@/common/js/status'
+// import { queueStatus } from '@/common/js/status'
 import { debounce } from '@/common/js/util'
 // import ConnectSuccess from '@/views/mainRoom/components/video/connect-success'
 
@@ -27,28 +27,27 @@ export default {
     'ConnectSuccess': () => import('@/views/mainRoom/components/video/connect-success')
   },
   computed: {
-    isLineUpViewShow() {
-      return this.queueMode === queueStatus.queuing
-    },
     ...mapGetters([
-      'queueMode'
+      // 'queueMode'
     ])
   },
   data() {
     return {
-      connect: false,
       num: 3,
       times: 1
     }
   },
   mounted() {
-    this.connectComplete()
+    const self = this
+    this.$nextTick(() => {
+      debounce(() => {
+        self.connectComplete()
+      }, 10000)()
+    })
   },
   methods: {
     connectComplete() {
-      debounce(() => {
-        this.connect = true
-      }, 3000)()
+      this.$refs.connectSuccess.show = true
     },
     confirmToVideo() {
       this.readyToVideoChat()

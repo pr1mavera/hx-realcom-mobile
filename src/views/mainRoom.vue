@@ -3,7 +3,6 @@
     <keep-alive>
       <router-view class="router-view"></router-view>
     </keep-alive>
-    <lineUp class="line-up"></lineUp>
     <videoBar class="video-bar"></videoBar>
   </div>
 </template>
@@ -12,8 +11,7 @@
 
 export default {
   components: {
-    'videoBar': () => import('@/views/mainRoom/videoBar'),
-    'lineUp': () => import('@/views/mainRoom/lineUp')
+    'videoBar': () => import('@/views/mainRoom/videoBar')
   }
 }
 </script>
@@ -27,12 +25,6 @@ export default {
     width: 100%;
     height: 100%;
     z-index: 10;
-  }
-  .line-up {
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 100;
   }
   .video-bar {
     position: absolute;
