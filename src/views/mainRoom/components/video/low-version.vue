@@ -58,7 +58,7 @@
         margin: 6rem auto 0;
         border-radius: 5px;
         text-align: center;
-        background-color: #FF444A;
+        background: linear-gradient(to right, #FF8C6A, #FF80A0);
       }
     }
   }
