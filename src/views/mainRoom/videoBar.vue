@@ -24,6 +24,11 @@
           src="videofile.ogg"
           poster="posterimage.jpg"
         ></video>
+        <!-- <video
+          :id="`v_${members[0].id}`"
+          autoplay
+          playinline
+        ></video> -->
       </div>
       <div class="customer-video-window">
         <video
@@ -45,6 +50,11 @@
           src="videofile.ogg"
           poster="posterimage.jpg"
         ></video>
+        <!-- <video
+          :id="`v_${members[0].id}`"
+          autoplay
+          playinline
+        ></video> -->
       </div>
     </div>
   </div>

@@ -12,7 +12,7 @@ export const webRtcRoomMixin = {
     ])
   },
   mounted() {
-    this.enterToRoom()
+
   },
   data() {
     return {
@@ -139,6 +139,7 @@ export const webRtcRoomMixin = {
       })
       this.RTC.on('onRemoteStreamUpdate', (info) => {
         const videoElement = document.getElementById('remoteVideo')
+        // const videoElement = document.getElementById(`v_${info.videoId}`)
         if (videoElement) {
             videoElement.srcObject = null
         }
@@ -206,7 +207,8 @@ export const webRtcRoomMixin = {
       self.courseName = courseInfo.courseName
       // 创建房间
       this.RTC.createRoom({
-        roomid: parseInt(self.courseId, 10),
+        // roomid: parseInt(self.courseId, 10),
+        roomid: 12345678,
         role: 'miniwhite'
       }, () => {
           console.info('ENTER RTC ROOM OK')
@@ -260,7 +262,7 @@ export const webRtcRoomMixin = {
               courseName: query.courseName
             }
             // 本地存储，刷新的时候还是同一个房间号
-            localStorage.setItem('course_info', JSON.stringify(info))
+            // localStorage.setItem('course_info', JSON.stringify(info))
             self.afterCreateRoom(info)
           },
           () => {
@@ -295,7 +297,8 @@ export const webRtcRoomMixin = {
           // 进房间
           self.RTC.createRoom(
             {
-              roomid: parseInt(self.courseId, 10),
+              // roomid: parseInt(self.courseId, 10),
+              roomid: 12345678,
               role: 'miniwhite'
             },
             () => {},

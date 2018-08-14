@@ -36,7 +36,8 @@ export default {
       num: 3,
       times: 1,
       loginInfo: {
-        userID: localStorage.getItem('userID') || `userid_web_${Date.now().toString()}`,
+        // userID: localStorage.getItem('userID') || `userid_web_${Date.now().toString()}`,
+        userID: `userid_web_${Date.now().toString()}`,
         userName: null
       },
       room: null,
