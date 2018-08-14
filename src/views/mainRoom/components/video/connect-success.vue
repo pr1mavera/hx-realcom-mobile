@@ -6,7 +6,7 @@
              @on-confirm="onConfirm"
              @on-show="onShow"
              @on-hide="onHide">
-      <div class="avatar"><img src=""></div>
+      <div class="avatar"><img src="/static/img/avatar.png"></div>
       <p class="confirm-bd-tit" style="">
              <icon type="success"></icon> 转接成功！
       </p>
@@ -67,8 +67,15 @@
       top: -4rem;
       left: 50%;
       margin-left: -4rem;
-      background: #ff444a;
+      background: linear-gradient(to right, #FF8C6A, #FF80A0);
       border-radius: 50%;
+      img {
+        width: 88%;
+        height: 88%;
+        border-radius: 50%;
+        margin-top: 6%;
+        vertical-align: middle;
+      }
     }
     .weui-icon-success {
       color: #FF959C;

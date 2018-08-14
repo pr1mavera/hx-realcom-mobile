@@ -4,6 +4,7 @@
     <main class="main">
       <div class="img-box"><img scr=""></div>
       <p class="tip">抱歉网络繁忙，视频连接失败，请稍后重连！</p>
+      <!-- todo 设计图有修改，样式还未同步更改 -->
       <a type="reset" class="btn-cancel">取 消</a>
       <!--<connect-success></connect-success>-->
     </main>

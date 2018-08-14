@@ -75,6 +75,16 @@ body {
     }
   }
 }
+
+.popup-main .eva-more .vux-slider > .vux-indicator > a > .vux-icon-dot.active {
+  background-color: #ff444a!important;
+}
+
+.popup-main .eva-more .vux-slider > .vux-indicator > a > .vux-icon-dot {
+  border: 1px solid #ff444a;
+  border-radius: 50%;
+  background-color: #f1f1f1;
+}
 /*---------对Nexus5做响应式------------*/
 @media screen and(min-width: 321px) and(max-width: 360px) {
   html {

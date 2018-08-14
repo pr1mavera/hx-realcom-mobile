@@ -1,7 +1,8 @@
 <template>
   <div class="share">
     There are some words for test
-    <assess v-if="true"></assess>
+    <!-- 测试评价组件 -->
+    <assess v-if="false"></assess>
   </div>
 </template>
 
