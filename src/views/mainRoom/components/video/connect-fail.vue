@@ -1,30 +1,38 @@
 <template>
   <section class="section">
-    <div class="top"></div>
+    <!--<div class="top"></div>-->
     <main class="main">
-      <div class="img-box"><img scr=""></div>
+      <div class="img-box"><img src="/static/img/avatar.png"></div>
       <p class="tip">抱歉网络繁忙，视频连接失败，请稍后重连！</p>
-      <!-- todo 设计图有修改，样式还未同步更改 -->
-      <a type="reset" class="btn-cancel">取 消</a>
-      <!--<connect-success></connect-success>-->
+      <flexbox>
+        <flexbox-item :gutter= "5" >
+          <x-button :gradients="['#FF8C6A', '#FF80A0']" style="width: 12rem;">取 消</x-button>
+        </flexbox-item>
+        <flexbox-item>
+          <x-button :gradients="['#1D62F0', '#19D5FD']" style="width: 12rem;">重 连</x-button>
+        </flexbox-item>
+      </flexbox>
     </main>
   </section>
 </template>
 
 <script>
+  import { XButton, Flexbox, FlexboxItem } from 'vux'
   export default {
     // name: "connect-fail"
+    components: {
+      XButton,
+      Flexbox,
+      FlexboxItem
+    }
   }
 </script>
 
 <style scoped lang="less">
   .section {
     width: 100%;
-    .top {
-      width: 100%;
-      height: 5rem;
-      position: fixed;
-      background-color: #FF444A;
+    .vux-flexbox {
+      margin: 9rem 0 0;
     }
     .main {
       padding: 10rem 0 0;
@@ -44,19 +52,8 @@
         color: #ADADAD;
         line-height: 1.25;
         font-size: 1.4rem;
-        margin-top: 5.0rem;
-      }
-      .btn-cancel {
-        height: 4rem;
-        width: 15rem;
-        display: block;
-        color: #ffffff;
-        font-size: 2rem;
-        line-height: 4rem;
-        margin: 9rem auto 0;
-        border-radius: 5px;
+        margin: 5.0rem 0 0;
         text-align: center;
-        background-color: #FF444A;
       }
     }
   }
