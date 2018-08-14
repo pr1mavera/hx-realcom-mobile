@@ -1,10 +1,10 @@
 <template>
   <div class="input-bar border-1px-before border-1px-after">
-    <div class="input-bar-item left-item" v-if="status">
-      <svg class="icon extend-click" aria-hidden="true" @click="changeRoomMode">
+    <!-- <div class="input-bar-item left-item" v-if="status">
+      <svg class="icon extend-click" aria-hidden="true">
         <use xlink:href="#icon-wode"></use>
       </svg>
-    </div>
+    </div> -->
     <div class="input-bar-item input-box" :class="{'visible-padding-left': !status}">
       <!-- <div class="input-content"
         id="input-content-hook"
@@ -58,13 +58,10 @@ export default {
   },
   data() {
     return {
-      status: true
+      status: false
     }
   },
   methods: {
-    changeRoomMode() {
-
-    },
     toggleExtend(index) {
       this.$emit('toggleExtend', index === 1 ? 'gift' : index === 2 ? 'express' : 'file')
     },
