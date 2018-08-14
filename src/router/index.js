@@ -12,6 +12,7 @@ const room = () => import('@/views/mainRoom')
 const chat = () => import('@/views/mainRoom/chat')
 const serverDetail = () => import('@/views/mainRoom/serverDetail')
 const share = () => import('@/views/share')
+// const connectFail => import('@views/mainRoom/')
 
 Vue.use(Router)
 
