@@ -34,22 +34,40 @@ export default {
   data() {
     return {
       num: 3,
-      times: 1
+      times: 1,
+      loginInfo: {
+        userID: localStorage.getItem('userID') || `userid_web_${Date.now().toString()}`,
+        userName: null
+      },
+      room: null,
+      joinFlag: false,
+      nickName: null,
+      hasClass: false,
+      courseItems: [],
+      screenShotImgSrc: ''
     }
   },
   mounted() {
     const self = this
-    this.$nextTick(() => {
-      debounce(() => {
-        self.connectComplete()
-      }, 10000)()
-    })
+    debounce(() => {
+      self.connectComplete()
+    }, 1000)()
   },
   methods: {
     connectComplete() {
       this.$refs.connectSuccess.show = true
     },
     confirmToVideo() {
+      this.$router.push({
+        path: '/room/chat',
+        query: {
+          cmd: 'create',
+          creator: 12345678,
+          courseName: 12345678,
+          userID: this.loginInfo.userID
+        }
+      })
+      this.$emit('ready')
       this.readyToVideoChat()
     },
     ...mapActions([

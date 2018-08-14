@@ -8,7 +8,9 @@
     <div class="content-box" :class="[{'right-content-box': isSelf, 'left-content-box': !isSelf}]">
       <p class="name" v-if="!isSelf">{{name}}</p>
       <div class="content" :class="[{'right-content-style': isSelf, 'left-content-style': !isSelf}]">
-        <span class="text">{{text}}</span>
+        <span class="text" v-html="text" v-if="this.types === 'text_msg'"></span>
+        <span class="text" v-if="this.types === 'no_result'">小华智力有限，好像听不太懂您的问题呢，可转<span @click="enterToMenChat">人工客服</span></span>
+        <!-- <span class="text" v-html="text"></span> -->
         <!-- <div class="line"></div>
         <div class="content-cell">
 
@@ -25,6 +27,11 @@
 
 <script type="text/ecmascript-6">
 export default {
+  components: {
+    no_result: {
+			template: '<span>小华智力有限，好像听不太懂您的问题呢，可转<span @click="enterToMenChat">人工客服</span></span>'
+		}
+  },
   props: {
     isSelf: {
       type: Boolean
@@ -34,6 +41,9 @@ export default {
     },
     text: {
       type: String
+    },
+    types: {
+      type: String
     }
   },
   data() {
@@ -41,8 +51,13 @@ export default {
 
     }
   },
-  created() {
+  mounted() {
     console.log('chat-content-item ===> 你个组件你被引用了哈哈哈')
+  },
+  methods: {
+    enterToMenChat() {
+      this.$emit('enterToMenChat')
+    }
   }
 }
 </script>
@@ -118,6 +133,9 @@ export default {
         line-height: 2rem;
         max-width: 100%;
         word-wrap: break-word;
+        span {
+          color: rgb(82, 144, 239);
+        }
       }
     }
   }

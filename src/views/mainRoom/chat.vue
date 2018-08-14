@@ -1,6 +1,6 @@
 <template>
   <div class="chat">
-    <header-bar></header-bar>
+    <!-- <header-bar></header-bar> -->
     <div class="chat-room transition-bezier" ref="chatRoom" :class="{'extendBarOpen': curExtendBar.type}">
       <div class="chat-wrapper" ref="chatScroll">
         <div class="chat-content" ref="chatContent">
@@ -13,6 +13,7 @@
                 :name="item.nickName"
                 :text="item.msg"
                 :types="item.type"
+                @enterToMenChat="enterToMenChat"
               ></component>
               <!-- <content-item
                 :isSelf="item.textType === 0 ? false : true"
@@ -57,7 +58,7 @@
 </template>
 
 <script type="text/ecmascript-6">
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters, mapMutations, mapActions } from 'vuex'
 import { Confirm, TransferDomDirective as TransferDom } from 'vux'
 import BScroll from 'better-scroll'
 import HeaderBar from '@/views/mainRoom/components/chat/header-bar'
@@ -203,10 +204,10 @@ export default {
           groupId: '372331123',
           identifier: 'userid_web_1530869554913',
           nickName: '小华',
-          msg: '小华智力有限，好像听不太懂您的问题呢，转人工服务？',
+          msg: 'text_msg_no_result',
           textType: 0,
           time: '2018-03-28 15:23:45',
-          type: 'text_msg',
+          type: 'no_result',
           MsgTimestamp: '372331'
         }
       ]
@@ -253,16 +254,19 @@ export default {
       return newObj
     },
     _showItemByType(type) {
-      let item = ''
+      let component = ''
       switch (type) {
         case 'text_msg':
-          item = 'ContentItem'
+          component = 'ContentItem'
           break
         case 'time_msg':
-          item = 'TipsItem'
+          component = 'TipsItem'
+          break
+        case 'no_result':
+          component = 'ContentItem'
           break
       }
-      return item
+      return component
       // return type === 'text_msg' ? 'ContentItem' : type === 'time_msg' ? 'TimeItem' : ''
     },
     _initScroll() {
@@ -324,6 +328,9 @@ export default {
         console.log(text)
       }
     },
+    enterToMenChat() {
+      console.log('人工客服排队')
+    },
     toggleExtend(mode) {
       if (this.inputStatus) {
         this._inputBlur()
@@ -331,9 +338,6 @@ export default {
         debounce(() => {
           self.curExtendBar.type = true
         }, 300)()
-        setTimeout(function() {
-          self.curExtendBar.type = true
-        }, 300)
       } else {
         this.curExtendBar.type = true
       }
@@ -413,6 +417,9 @@ export default {
         window.onresize = null
       }
     },
+    ...mapMutations({
+      setModeToMenChat: 'SET_ROOM_MODE'
+    }),
     ...mapActions([
       'enterToLineUp'
     ])
@@ -437,7 +444,8 @@ export default {
   .chat-room {
     position: relative;
     width: 100%;
-    height: calc(~'100% - 5rem');
+    // height: calc(~'100% - 5rem');
+    height: 100%;
     display: flex;
     flex-direction: column;
     transition: all 0.3s;

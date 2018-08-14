@@ -1,7 +1,11 @@
 <template>
-  <div class="video-bar" v-show="isVideoBarOpen">
+  <div class="video-bar" v-if="isVideoBarOpen">
     <!-- 排队 -->
-    <line-up class="line-up" v-show="isLineUpShow"></line-up>
+    <line-up
+      class="line-up"
+      v-show="isLineUpShow"
+      @ready="enterToRoom"
+    ></line-up>
     <!-- 最大化 -->
     <div class="full-screen-container" v-show="fullScreen">
       <div class="video-header">
@@ -12,16 +16,35 @@
       </div>
       <video-footer @minimizeVideoBar="closeVideoBar"></video-footer>
       <div class="server-video-window">
-        <video src="videofile.ogg" autoplay poster="posterimage.jpg"></video>
+        <video
+          id="remoteVideo"
+          muted
+          autoplay
+          playsinline
+          src="videofile.ogg"
+          poster="posterimage.jpg"
+        ></video>
       </div>
       <div class="customer-video-window">
-        <video src="videofile.ogg" autoplay poster="posterimage.jpg"></video>
+        <video
+          id="localVideo"
+          autoplay
+          playsinline
+          src="videofile.ogg"
+          poster="posterimage.jpg"
+        ></video>
       </div>
     </div>
     <!-- 最小化 -->
     <div class="mini-container" v-show="!fullScreen" @click="openVideoBar">
       <div class="server-video-window">
-        <video src="videofile.ogg" autoplay poster="posterimage.jpg"></video>
+        <video
+          id="remoteVideo"
+          autoplay
+          playsinline
+          src="videofile.ogg"
+          poster="posterimage.jpg"
+        ></video>
       </div>
     </div>
   </div>
@@ -30,10 +53,10 @@
 <script type="text/ecmascript-6">
 import { mapGetters, mapMutations } from 'vuex'
 import { queueStatus } from '@/common/js/status'
-// import { videoBarMixin } from '@/common/js/mixin'
+import { webRtcRoomMixin } from '@/common/js/mixin'
 
 export default {
-  // mixins: [videoBarMixin],
+  mixins: [webRtcRoomMixin],
   components: {
     'LineUp': () => import('@/views/mainRoom/components/video/line-up'),
     'VideoFooter': () => import('@/views/mainRoom/components/video/video-footer')
@@ -138,6 +161,7 @@ export default {
       video {
         width: 100%;
         height: 100%;
+        object-fit: cover;
       }
     }
     .customer-video-window {
@@ -155,6 +179,7 @@ export default {
       video {
         width: 100%;
         height: 100%;
+        object-fit: cover;
       }
     }
   }
@@ -176,6 +201,7 @@ export default {
       video {
         width: 100%;
         height: 100%;
+        object-fit: cover;
       }
     }
   }
