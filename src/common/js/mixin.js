@@ -114,6 +114,7 @@ export const webRtcRoomMixin = {
     initRTC() {
       const self = this
       const query = this.$route.query
+      // eslint-disable-next-line
       this.RTC = new WebRTCAPI({
         'sdkAppId': self.sdkAppID,
         'userId': self.userID,
