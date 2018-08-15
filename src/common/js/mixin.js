@@ -114,7 +114,7 @@ export const webRtcRoomMixin = {
     initRTC() {
       const self = this
       const query = this.$route.query
-      this.RTC = new query({
+      this.RTC = new WebRTCAPI({
         'sdkAppId': self.sdkAppID,
         'userId': self.userID,
         'userSig': self.userSig,
