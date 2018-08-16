@@ -93,12 +93,10 @@ export const RTCRoomMixin = {
       })
       this.RTC.on('onRemoteStreamUpdate', (info) => {
         const videoElement = document.getElementById('remoteVideo')
-        // const videoElement = document.getElementById(`v_${info.videoId}`)
-        if (videoElement) {
-            videoElement.srcObject = null
-        }
+        const videoElementMini = document.getElementById('remoteVideoMini')
         if (info && info.stream) {
           videoElement.srcObject = info.stream
+          videoElementMini.srcObject = info.stream
         }
       })
 
