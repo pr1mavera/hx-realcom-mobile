@@ -18,7 +18,6 @@
       <div class="server-video-window">
         <video
           id="remoteVideo"
-          muted
           autoplay
           playsinline
           src="videofile.ogg"
@@ -33,6 +32,7 @@
       <div class="customer-video-window">
         <video
           id="localVideo"
+          muted
           autoplay
           playsinline
           src="videofile.ogg"
