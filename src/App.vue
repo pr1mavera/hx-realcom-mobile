@@ -39,6 +39,7 @@ window.onresize = refresh
 
 <style lang="less">
 @import '~vux/src/styles/reset.less';
+
 /*- 引入关闭按钮 -*/
 /*@import '~vux/src/styles/close.less';*/
 
@@ -85,6 +86,7 @@ body {
   border-radius: 50%;
   background-color: #f1f1f1;
 }
+
 /*---------对Nexus5做响应式------------*/
 @media screen and(min-width: 321px) and(max-width: 360px) {
   html {
