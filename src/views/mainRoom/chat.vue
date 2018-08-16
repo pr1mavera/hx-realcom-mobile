@@ -27,6 +27,7 @@
         <fload-button
           :inputStatus="inputStatus"
           @enterVideoLineUp="lineUpAlert = true"
+          @ios-guide="showGuide"
         ></fload-button>
       </div>
       <input-bar
@@ -54,6 +55,7 @@
         @on-confirm="confirmToLineUp"
       ></confirm>
     </div>
+    <ios-guide v-if="iosGuide"></ios-guide>
   </div>
 </template>
 
@@ -82,7 +84,8 @@ export default {
     'FloadButton': () => import('@/views/mainRoom/components/chat/fload-button'),
     'SendFile': () => import('@/views/mainRoom/components/chat/send-file'),
     'SendExpress': () => import('@/views/mainRoom/components/chat/send-express'),
-    'SendGift': () => import('@/views/mainRoom/components/chat/send-gift')
+    'SendGift': () => import('@/views/mainRoom/components/chat/send-gift'),
+    'IosGuide': () => import('@/views/mainRoom/components/video/ios-guide')
   },
   computed: {
     ...mapGetters([
@@ -210,7 +213,8 @@ export default {
           type: 'no_result',
           MsgTimestamp: '372331'
         }
-      ]
+      ],
+      iosGuide: false
     }
   },
   mounted() {
@@ -422,7 +426,11 @@ export default {
     }),
     ...mapActions([
       'enterToLineUp'
-    ])
+    ]),
+    showGuide(data) {
+      this.iosGuide = data
+      // console.log(data)
+    }
   }
 }
 </script>

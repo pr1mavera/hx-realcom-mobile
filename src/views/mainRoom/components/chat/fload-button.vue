@@ -29,8 +29,16 @@
   </div>
 </template>
 
+<!--<script src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>-->
+
 <script type="text/ecmascript-6">
+
 export default {
+  data() {
+    return {
+      iosGuide: false
+    }
+  },
   props: {
     inputStatus: {
       type: Boolean
@@ -41,7 +49,35 @@ export default {
       window.location.href = 'tel:95300'
     },
     enterVideoLineUp() {
-      this.$emit('enterVideoLineUp')
+      // 判断手机类型, 系统的版本
+      const u = navigator.userAgent
+      // 若当前手机为安卓机
+      if (u.indexOf('Android') > -1 || u.indexOf('Linux') > -1) {
+        this.$emit('enterVideoLineUp')
+        // 判断系统的版本
+        const ua = navigator.userAgent.toLowerCase()
+        const reg = /android [\d._]+/gi
+        const version = (ua.match(reg) + '').replace(/[^0-9|_.]/ig, '').replace(/_/ig, '.')
+        console.log('Android的版本为' + version)
+      } else if (u.indexOf('iPhone') > -1) {
+        // 当前手机为苹果手机
+        const ua = navigator.userAgent.toLowerCase()
+        // 判断是否在微信内置浏览器内
+        // eslint-disable-next-line
+        if (ua.match(/MicroMessenger/i) == 'micromessenger') {
+          this.$emit('ios-guide', 'true')// 将传数据给其父元素
+          // 点击右上角显示的菜单项
+          // wx.showMenuItems({
+          //   menuList: [
+          //     'menuItem:openWithSafari'
+          //   ] // 要显示的菜单项，
+          // })
+        } else {
+          this.$emit('enterVideoLineUp')
+        }
+      } else if (u.indexOf('Windows Phone') > -1) {
+        alert(' window phone（同学赶紧换个手机吧） ')
+      }
     }
   }
 }
