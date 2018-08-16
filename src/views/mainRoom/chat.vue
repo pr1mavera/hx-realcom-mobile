@@ -6,20 +6,20 @@
         <div class="chat-content" ref="chatContent">
           <ul>
             <li class="chat-content-block chat-content-start" ref="chatContentStart"></li>
-            <li class="chat-content-li" v-for="item in this.chat" :key="item.MsgTimestamp">
+            <li class="chat-content-li" v-for="(msg, index) in this.msgs" :key="msg.time || index">
               <component
-                :is="_showItemByType(item.type)"
-                :isSelf="item.textType === 0 ? false : true"
-                :name="item.nickName"
-                :text="item.msg"
-                :types="item.type"
+                :is="_showItemByType(msg.msgType)"
+                :isSelf="msg.isSelfSend"
+                :name="msg.who"
+                :text="msg.content"
+                :types="msg.msgType"
                 @enterToMenChat="enterToMenChat"
               ></component>
-              <!-- <content-item
-                :isSelf="item.textType === 0 ? false : true"
-                :name="item.nickName"
-                :text="item.msg"
-              ></content-item> -->
+              <!-- <content-msg
+                :isSelf="msg.isSelfSend"
+                :name="msg.who"
+                :text="msg.content"
+              ></content-msg> -->
             </li>
             <li class="chat-content-block chat-content-end" ref="chatContentEnd"></li>
           </ul>
@@ -65,11 +65,16 @@ import HeaderBar from '@/views/mainRoom/components/chat/header-bar'
 import InputBar from '@/views/mainRoom/components/chat/input-bar'
 import { needToReloadDate } from '@/common/js/dateConfig'
 import { debounce } from '@/common/js/util'
+import { setUserInfoMixin, IMMixin } from '@/common/js/mixin'
 
 export default {
   directives: {
     TransferDom
   },
+  mixins: [
+    setUserInfoMixin,
+    IMMixin
+  ],
   components: {
     /**
      * 注册组件
@@ -86,7 +91,7 @@ export default {
   },
   computed: {
     ...mapGetters([
-
+      'msgs'
     ])
   },
   data() {
@@ -109,106 +114,27 @@ export default {
         component: ''
       },
       lineUpAlert: false,
-      chat: [
+      historyMsgs: [
         {
-          groupId: '372331123',
-          identifier: 'userid_web_1530869554913',
-          nickName: '小华',
-          msg: '尊贵的客人，您好！',
-          textType: 0,
+          who: '小华',
+          content: '尊贵的客人，您好！',
+          isSelfSend: false,
           time: '2018-03-28 08:45:19',
-          type: 'text_msg',
-          MsgTimestamp: '372331123'
+          msgType: 'text_msg'
         },
         {
-          groupId: '372331123',
-          identifier: 'userid_web_1530869554913',
-          nickName: '客人',
-          msg: 'hello！你好',
-          textType: 1,
-          time: '2018-03-28 08:45:19',
-          type: 'text_msg',
-          MsgTimestamp: '3723311223'
+          who: '客人',
+          content: 'hello！你好',
+          isSelfSend: true,
+          time: '2018-03-28 08:45:56',
+          msgType: 'text_msg'
         },
         {
-          groupId: '372331123',
-          identifier: 'userid_web_1530869554913',
-          nickName: '小华',
-          msg: '请问您又有什么问题了呢？',
-          textType: 0,
-          time: '2018-03-28 08:45:59',
-          type: 'text_msg',
-          MsgTimestamp: '37233112'
-        },
-        {
-          groupId: '372331123',
-          identifier: 'userid_web_1530869554913',
-          nickName: '客人',
-          msg: '我想要测试一条数据，一条数据你懂么',
-          textType: 1,
-          time: '2018-03-28 08:45:59',
-          type: 'text_msg',
-          MsgTimestamp: '3723'
-        },
-        {
-          groupId: '372331123',
-          identifier: 'userid_web_1530869554913',
-          nickName: '小华',
-          msg: '小华智力有限，好像听不太懂您的问题呢，转人工服务？',
-          textType: 0,
-          time: '2018-03-28 08:45:59',
-          type: 'text_msg',
-          MsgTimestamp: '37233112335'
-        },
-        {
-          groupId: '372331123',
-          identifier: 'userid_web_1530869554913',
-          nickName: '小华',
-          msg: '尊贵的客人，您好！',
-          textType: 0,
-          time: '2018-03-28 08:52:59',
-          type: 'text_msg',
-          MsgTimestamp: '37233112300'
-        },
-        {
-          groupId: '372331123',
-          identifier: 'userid_web_1530869554913',
-          nickName: '客人',
-          msg: 'hello！你好',
-          textType: 1,
-          time: '2018-03-28 09:46:59',
-          type: 'text_msg',
-          MsgTimestamp: '3723311234567'
-        },
-        {
-          groupId: '372331123',
-          identifier: 'userid_web_1530869554913',
-          nickName: '小华',
-          msg: '请问您又有什么问题了呢？',
-          textType: 0,
-          time: '2018-03-28 08:46:59',
-          type: 'text_msg',
-          MsgTimestamp: '37233112309'
-        },
-        {
-          groupId: '372331123',
-          identifier: 'userid_web_1530869554913',
-          nickName: '客人',
-          msg: '我想要测试一条数据，一条数据你懂么',
-          textType: 1,
-          time: '2018-03-28 15:23:01',
-          type: 'text_msg',
-          MsgTimestamp: '37'
-        },
-        {
-          groupId: '372331123',
-          identifier: 'userid_web_1530869554913',
-          nickName: '小华',
-          msg: 'text_msg_no_result',
-          textType: 0,
+          who: '小华',
+          content: 'text_msg_no_result',
+          isSelfSend: false,
           time: '2018-03-28 15:23:45',
-          type: 'no_result',
-          MsgTimestamp: '372331'
+          msgType: 'no_result'
         }
       ]
     }
@@ -223,18 +149,20 @@ export default {
       this.inputEle = self.$refs.inputBar.$refs.inputContent
       this._initScroll()
     })
+    // 拉取历史消息
+    this.setMsgs(this.historyMsgs)
   },
   methods: {
     _initChatMsgList() {
       let map = []
-      let timeCache = this.chat[0].time
+      let timeCache = this.historyMsgs[0].time
       let temp = {
         msg: timeCache,
         type: 'time_msg',
         MsgTimestamp: this.msg
       }
       map.push(this._shallowCopy(temp))
-      this.chat.forEach((item) => {
+      this.historyMsgs.forEach((item) => {
         if (needToReloadDate(timeCache, item.time)) {
           temp.msg = item.time
           timeCache = temp.msg
@@ -242,7 +170,7 @@ export default {
         }
         map.push(item)
       })
-      this.chat = map
+      this.historyMsgs = map
       console.log(map)
     },
     // 浅拷贝
@@ -322,6 +250,7 @@ export default {
       if (isEnter) {
         // 提交，清空输入框，重新计算滚动区域高度，键盘收起
         this.inputEle.innerText = ''
+        this.sendTextMsg(text)
         this._inputBlur()
         console.log(`submit ==> ${text}`)
       } else {
@@ -329,7 +258,35 @@ export default {
       }
     },
     enterToMenChat() {
+      const self = this
       console.log('人工客服排队')
+      debounce(() => {
+        self.$router.push({
+          path: '/room/chat',
+          // query: {
+          //   cmd: 'enter',
+          //   groupID: '12345678',
+          //   userID: 'cust-test',
+          //   userName: '田老师红烧肉盖饭'
+          // }
+          query: {
+            cmd: 'create',
+            userID: 'cs-test',
+            userName: '膳当家黄焖鸡米饭'
+          }
+        })
+        self.readyToMenChat()
+      }, 1000)()
+    },
+    readyToMenChat() {
+      const query = this.$route.query
+      // new Promise((resolve) => {
+      //   this.setUserInfoToEnterRoom(query)
+      //   resolve()
+      // }).then(()=> {
+      //   this.initIM(query)
+      // })
+      this.setUserInfoToEnterRoom(query, this.initIM)
     },
     toggleExtend(mode) {
       if (this.inputStatus) {
@@ -418,7 +375,8 @@ export default {
       }
     },
     ...mapMutations({
-      setModeToMenChat: 'SET_ROOM_MODE'
+      setModeToMenChat: 'SET_ROOM_MODE',
+      setMsgs: 'SET_MSGS'
     }),
     ...mapActions([
       'enterToLineUp'
@@ -457,6 +415,7 @@ export default {
       position: relative;
       width: 100%;
       height: auto;
+      min-height: calc(~'100% - 4.6rem');
       overflow: hidden;
       background-color: @bg-normal;
       flex-basis: auto;

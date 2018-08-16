@@ -23,7 +23,8 @@ const IM = (() => {
             alert(err.ErrorInfo)
           }
         )
-      }, fail
+      },
+      fail
     )
   }
 
@@ -69,6 +70,7 @@ const IM = (() => {
         function(resp) {
           // JoinedSuccess:加入成功; WaitAdminApproval:等待管理员审批
           if (resp.JoinedStatus && resp.JoinedStatus === 'JoinedSuccess') {
+            console.log('进群成功')
             webim.Log.info('进群成功')
           } else {
             alert('进群失败')
@@ -179,6 +181,7 @@ const IM = (() => {
       groupId: options.groupId,
       data: options.msg,
       desc: '{"nickName":"' + options.nickName + '","msgType":"' + options.msgType + '"}',
+      // desc: `{"nickName":"${options.nickName}","msgType":"${options.msgType}","time":"${options.time}"}`,
       ext: 'TEXT',
       identifier: options.identifier,
       nickName: options.nickName

@@ -1,6 +1,7 @@
 // /* eslint-disable */
 const WebRTCRoom = (() => {
   const serverDomain = '//xzb.qcloud.com/webrtc/weapp/webrtc_room'
+  const serverDomainPrivate = '//192.168.8.102:5757/room'
   // eslint-disable-next-line
   let requestNum = 0
   let heart = '' // 判断心跳变量
@@ -35,6 +36,35 @@ const WebRTCRoom = (() => {
     }
     httpRequest({
       url: serverDomain + object.url,
+      data: object.data || {},
+      method: 'POST',
+      success: function(res) {
+        if (res.data.code) {
+          console.error(`请求失败, req=${JSON.stringify(object)}, resp=${JSON.stringify(res.data)}`)
+          object.fail && object.fail({
+            errCode: res.data.code,
+            errMsg: res.data.message
+          })
+          return
+        }
+        object.success && object.success(res)
+      },
+      fail: object.fail || function() {},
+      complete: object.complete || function() {}
+    })
+  }
+
+  function requestPrivate(object) {
+    if (!serverDomainPrivate) {
+      console.error('serverDomainPrivate')
+      object.fail && object.fail({
+        errCode: -1,
+        errMsg: 'serverDomainPrivate为空, 请调用init接口进行设置'
+      })
+      return
+    }
+    httpRequest({
+      url: serverDomainPrivate + object.url,
       data: object.data || {},
       method: 'POST',
       success: function(res) {
@@ -127,6 +157,7 @@ const WebRTCRoom = (() => {
 
   return {
     request,
+    requestPrivate,
     heart,
     heartBeatReq,
     heartBeatFailCount
@@ -139,13 +170,25 @@ export default {
     if (userID) {
       data.userID = userID
     }
-    WebRTCRoom.request({
-      url: '/get_login_info',
+    WebRTCRoom.requestPrivate({
+      url: '/getLoginInfo',
       data: data,
       success: success,
       fail: fail
     })
   },
+  // getLoginInfo: function(userID, success, fail) {
+  //   var data = {}
+  //   if (userID) {
+  //     data.userID = userID
+  //   }
+  //   WebRTCRoom.request({
+  //     url: '/get_login_info',
+  //     data: data,
+  //     success: success,
+  //     fail: fail
+  //   })
+  // },
 
   getRoomList: function(index, count, success, fail) {
     WebRTCRoom.request({

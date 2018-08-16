@@ -1,4 +1,8 @@
-export const SET_ID = 'SET_ID'
+export const SET_USER_INFO = 'SET_USER_INFO'
+
+export const SET_ROOM_ID = 'SET_ROOM_ID'
+
+export const SET_MSGS = 'SET_MSGS'
 
 export const SET_FULL_SCREEN = 'SET_FULL_SCREEN'
 

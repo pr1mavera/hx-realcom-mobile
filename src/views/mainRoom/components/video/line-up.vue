@@ -35,17 +35,16 @@ export default {
     return {
       num: 3,
       times: 1,
+      // loginInfo: {
+      //   // userID: `userid_web_${Date.now().toString()}`,
+      //   userID: 'cust-test',
+      //   userName: '田老师红烧肉盖饭'
+      // },
       loginInfo: {
-        // userID: localStorage.getItem('userID') || `userid_web_${Date.now().toString()}`,
-        userID: `userid_web_${Date.now().toString()}`,
-        userName: null
-      },
-      room: null,
-      joinFlag: false,
-      nickName: null,
-      hasClass: false,
-      courseItems: [],
-      screenShotImgSrc: ''
+        // userID: `userid_web_${Date.now().toString()}`,
+        userID: 'cs-test',
+        userName: '膳当家黄焖鸡米饭'
+      }
     }
   },
   mounted() {
@@ -61,11 +60,17 @@ export default {
     confirmToVideo() {
       this.$router.push({
         path: '/room/chat',
+        // query: {
+        //   cmd: 'enter',
+        //   roomID: 'cs-test',
+        //   userID: this.loginInfo.userID,
+        //   userName: this.loginInfo.userName
+        // }
         query: {
           cmd: 'create',
-          creator: 12345678,
-          courseName: 12345678,
-          userID: this.loginInfo.userID
+          roomName: '12345678',
+          userID: this.loginInfo.userID,
+          userName: this.loginInfo.userName
         }
       })
       this.$emit('ready')

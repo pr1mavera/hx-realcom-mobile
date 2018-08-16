@@ -1,89 +1,78 @@
-import { mapGetters, mapMutations, mapActions } from 'vuex'
+import { mapGetters, mapMutations } from 'vuex'
 import WebRTCRoom from '@/server/webRTCRoom'
 import IM from '@/server/im'
 import WebRTCAPI from 'WebRTCAPI'
 // import { formatDate } from '@/common/js/dateConfig.js'
 // import { roomStatus, queueStatus } from '@/common/js/status'
-export const webRtcRoomMixin = {
-  computed: {
-    ...mapGetters([
-      'fullScreen',
-      'roomMode',
-      'queueMode'
-    ])
-  },
-  mounted() {
 
-  },
+export const setUserInfoMixin = {
   data() {
     return {
-      RTC: null,
-      courseName: null, // 房间名
-      courseId: null, // 房间id
-      selfName: null,
-      selfRole: '主播',
-      userID: null, // 用户id
-      isRoomCreator: false,
-      members: [
-        // { name: "李明", id: "2343", reqeust: true, ts: new Date()-30*60*1000},
-      ],
-      canDraw: false,
-      userAuthData: { // 用户鉴权信息
-      },
-      heartBeatTask: null // 心跳任务定时器
+      userID: '',
+      userName: '',
+      roomName: ''
     }
   },
   methods: {
-    enterToRoom(WebRTCAPI) {
-      const query = this.$route.query
-      console.log('Main.mounted: ', JSON.stringify(query))
+    setUserInfoToEnterRoom(query, ...Func) {
       if (!query) {
-          alert('请先登录!')
-      } else if (query.cmd === 'create') {
-          this.userID = query.userID
-          this.selfRole = '坐席'
-          this.canDraw = true
-          this.isRoomCreator = true
-          this.courseName = query.courseName || '新房间'
-          this.selfName = query.creator
-      } else if (query.cmd === 'enter') {
-          this.userID = query.userID
-          if (query.roomCreator === this.userID) { // 相当于老师重新加入房间
-              this.selfRole = '坐席'
-              this.canDraw = true
-              this.isRoomCreator = true
-          } else {
-              this.selfRole = '客户'
-              this.canDraw = false
-              this.isRoomCreator = false
-          }
-          this.selfName = query.userName
-          this.roomID = query.roomID
+        alert('请先登录!')
       } else if (query.cmd !== 'create' && query.cmd !== 'enter') {
-          alert('发生错误，无法识别身份')
+        alert('发生错误，无法识别身份')
+      } else {
+        this.userID = query.userID
+        this.userName = query.userName
+        this.roomName = query.roomName
+        if (query.cmd === 'enter') {
+          this.setRoomId(query.roomID)
+        }
       }
       const self = this
       WebRTCRoom.getLoginInfo(
-        self.userID,
+        this.userID,
         (res) => {
-          self.userAuthData = res.data
-          self.userID = res.data.userID
-          self.userSig = res.data.userSig
-          self.accountType = res.data.accountType
-          self.sdkAppID = res.data.sdkAppID
-          localStorage.setItem('userID', self.userID)
-          self.initRTC()
+          const info = {
+            userID: res.data.userID,
+            selfName: this.userName,
+            accountType: res.data.accountType,
+            sdkAppID: res.data.sdkAppID,
+            userSig: res.data.userSig
+          }
+          self.setUserInfo(info)
+
+          Func && Func.forEach((fn) => {
+            fn(query)
+          })
         }
       )
     },
-    initRTC() {
+    ...mapMutations({
+      setUserInfo: 'SET_USER_INFO',
+      setRoomId: 'SET_ROOM_ID'
+    })
+  }
+}
+
+export const RTCRoomMixin = {
+  data() {
+    return {
+      RTC: null
+    }
+  },
+  computed: {
+    ...mapGetters([
+      'userInfo',
+      'roomId'
+    ])
+  },
+  methods: {
+    initRTC(query) {
       const self = this
-      const query = this.$route.query
       this.RTC = new WebRTCAPI({
-        'sdkAppId': self.sdkAppID,
-        'userId': self.userID,
-        'userSig': self.userSig,
-        'accountType': self.accountType
+        'sdkAppId': self.userInfo.sdkAppID,
+        'userId': self.userInfo.userID,
+        'userSig': self.userInfo.userSig,
+        'accountType': self.userInfo.accountType
       }, () => {
         if (query.cmd === 'create') {
             self.actionCreateRoom(query)
@@ -111,29 +100,6 @@ export const webRtcRoomMixin = {
         if (info && info.stream) {
           videoElement.srcObject = info.stream
         }
-        // if (info && info.stream) {
-        //   const temp = []
-        //   // eslint-disable-next-line
-        //   for (let i = 0; i < self.members.length; i++) {
-        //     if (self.members[i].openId !== info.openId) {
-        //       temp.push(self.members[i])
-        //     }
-        //   }
-        //   const member = {
-        //     id: info.videoId,
-        //     name: info.openId,
-        //     request: false,
-        //     role: '主播',
-        //     roleText: '连麦',
-        //     ts: Date.now(),
-        //     stream: info.stream,
-        //     openId: info.openId
-        //   }
-        //   temp.push(member)
-        //   self.members = temp
-        // } else {
-        //   console.info(`${info.openId}进入了房间`)
-        // }
       })
 
       this.RTC.on('onRemoteStreamRemove', (info) => {
@@ -167,13 +133,12 @@ export const webRtcRoomMixin = {
       })
     },
     afterCreateRoom(courseInfo) {
-      const self = this
-      self.courseId = courseInfo.courseId
-      self.courseName = courseInfo.courseName
+      // const self = this
+      this.setRoomId(courseInfo.roomId)
       // 创建房间
       this.RTC.createRoom({
         // roomid: parseInt(self.courseId, 10),
-        roomid: 12345678,
+        roomid: courseInfo.roomId,
         role: 'miniwhite'
       }, () => {
           console.info('ENTER RTC ROOM OK')
@@ -183,73 +148,18 @@ export const webRtcRoomMixin = {
           // self.goHomeRouter()
         }
       })
-      // this.initIM()
-      // this.renderMemberList()
     },
     actionCreateRoom(query) {
       console.log('-> action create room')
       const self = this
-
-      // 本地存储，刷新的时候还是同一个房间号
-      if (localStorage.getItem('course_info')) {
-        const courseInfo = JSON.parse(localStorage.getItem('course_info'))
-        console.log('localstorage', courseInfo)
-        self.afterCreateRoom(courseInfo)
-        self.heartBeatTask = WebRTCRoom.startHeartBeat(
-          self.userID,
-          courseInfo.courseId,
-          () => {},
-          () => {
-            // self.$toast.center('心跳包超时，请重试~')
-            console.log('心跳包超时，请重试~')
-            // self.goHomeRouter()
-          }
-        )
-      } else {
-        WebRTCRoom.createRoom(
-          self.userID,
-          self.selfName,
-          query.courseName,
-          (res) => {
-            // 发送心跳包
-            self.heartBeatTask = WebRTCRoom.startHeartBeat(
-              self.userID,
-              res.data.roomID,
-              () => {},
-              () => {
-                // self.$toast.center('心跳包超时，请重试~')
-                console.log('心跳包超时，请重试~')
-                // self.goHomeRouter()
-              }
-            )
-            const info = {
-              courseId: res.data.roomID,
-              courseName: query.courseName
-            }
-            // 本地存储，刷新的时候还是同一个房间号
-            // localStorage.setItem('course_info', JSON.stringify(info))
-            self.afterCreateRoom(info)
-          },
-          () => {
-            // error, 返回
-            // self.goHomeRouter()
-          }
-        )
-      }
-    },
-    actionEnterRoom(query) {
-      const self = this
-      self.courseId = query.roomID
-      self.courseName = query.roomInfo
-      self.selfName = query.userName
-      WebRTCRoom.enterRoom(
-        self.userID,
-        query.userName,
-        self.courseId,
+      WebRTCRoom.createRoom(
+        self.userInfo.userID,
+        self.userInfo.selfName,
+        self.roomName,
         (res) => {
           // 发送心跳包
           self.heartBeatTask = WebRTCRoom.startHeartBeat(
-            self.userID,
+            self.userInfo.userID,
             res.data.roomID,
             () => {},
             () => {
@@ -258,12 +168,42 @@ export const webRtcRoomMixin = {
               // self.goHomeRouter()
             }
           )
-
+          const info = {
+            // 测试阶段默认'12345678'
+            roomId: self.roomId || '12345678',
+            // roomId: res.data.roomID, ///////////////////////////////////////////////////////////////
+            roomName: self.roomName
+          }
+          self.afterCreateRoom(info)
+        },
+        () => {
+          // error, 返回
+        }
+      )
+    },
+    actionEnterRoom(query) {
+      const self = this
+      WebRTCRoom.enterRoom(
+        self.userInfo.userID,
+        self.userInfo.userName,
+        self.roomId,
+        (res) => {
+          // 发送心跳包
+          self.heartBeatTask = WebRTCRoom.startHeartBeat(
+            self.userInfo.userID,
+            self.roomId,
+            () => {},
+            () => {
+              // self.$toast.center('心跳包超时，请重试~')
+              console.log('心跳包超时，请重试~')
+              // self.goHomeRouter()
+            }
+          )
           // 进房间
           self.RTC.createRoom(
             {
               // roomid: parseInt(self.courseId, 10),
-              roomid: 12345678,
+              roomid: self.roomId,
               role: 'miniwhite'
             },
             () => {},
@@ -274,30 +214,116 @@ export const webRtcRoomMixin = {
               }
             }
           )
-          // self.initIM()
-          // self.renderMemberList()
         },
         () => {
           // error, 返回
-          // self.goHomeRouter()
         }
       )
     },
-    logout() {
-      // 推出登录
-      console.log('logout clicked')
-      // if (confirm("退出登录吗？")) {
-      //     self.goHomeRouter()
-      // }
-    },
-    ...mapMutations([
+    ...mapMutations({
+      setRoomId: 'SET_ROOM_ID'
+    })
+  }
+}
 
-    ]),
-    ...mapActions([
-
+export const IMMixin = {
+  computed: {
+    ...mapGetters([
+      'userInfo',
+      'roomId',
+      'msgs'
     ])
   },
-  beforeDestroy() {
-    IM.logout()
+  data() {
+    return {
+
+    }
+  },
+  methods: {
+    initIM(query) {
+      const self = this
+      self.onMsgNotify.bind(this)
+      const loginInfo = {
+        sdkAppID: self.userInfo.sdkAppID,
+        appIDAt3rd: self.userInfo.sdkAppID,
+        identifier: self.userInfo.userID,
+        identifierNick: self.userInfo.selfName,
+        accountType: self.userInfo.accountType,
+        userSig: self.userInfo.userSig
+      }
+      console.debug('initIM', loginInfo)
+      IM.login(
+        loginInfo,
+        {
+          'onBigGroupMsgNotify': self.onBigGroupMsgNotify,
+          'onMsgNotify': self.onMsgNotify
+        },
+        () => {
+          console.log('===============================> initIM success <===============================')
+          IM.joinGroup('12345678', self.userInfo.userID)
+        },
+        (err) => {
+          alert(err.ErrorInfo)
+        }
+      )
+    },
+    onBigGroupMsgNotify(newMsgList) {
+      if (newMsgList && newMsgList.length > 0) {
+        const msgsObj = IM.parseMsgs(newMsgList)
+        // msgsObj[time] = formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss')
+        let temp = this.msgs
+        temp = temp.concat(msgsObj.textMsgs)
+        this.setMsgs(temp)
+        console.log(this.msgs)
+      }
+    },
+    onMsgNotify(msgs) {
+      if (msgs && msgs.length > 0) {
+        const msgsObj = IM.parseMsgs(msgs)
+        msgsObj.textMsgs.forEach((msg) => {
+          const content = JSON.parse(msg.content)
+          if (content.cmd === 'sketchpad') {
+            const body = JSON.parse(content.data.msg)
+            if (body.type === 'request' && body.action === 'currentBoard') {
+              if (this.$refs.sketchpadCom) {
+                const currentBoard = this.$refs.sketchpadCom.getCurrentBoard()
+                const boardBg = this.$refs.sketchpadCom.getBoardBg() || {}
+                IM.sendBoardMsg({
+                  groupId: this.courseId,
+                  msg: JSON.stringify({
+                    action: body.action,
+                    currentBoard
+                    // boardBg: JSON.stringify(boardBg)
+                  }),
+                  nickName: this.selfName,
+                  identifier: this.userID
+                })
+                // 如果有图片则补发图片
+                const bgUrl = boardBg[currentBoard] && boardBg[currentBoard].url
+                if (bgUrl) {
+                  this.sendBoardBgPicMsg(currentBoard, bgUrl)
+                  setTimeout(() => {
+                      this.sendSwitchBoardMsg(currentBoard)
+                  }, 500)
+                }
+              }
+            }
+          }
+        })
+      }
+    },
+    sendTextMsg(text) {
+      const self = this
+      IM.sendRoomTextMsg({
+        groupId: '12345678',
+        msg: text,
+        nickName: self.userInfo.selfName,
+        identifier: self.userInfo.userID,
+        msgType: 'text_msg'
+      })
+    },
+    ...mapMutations({
+      setMsgs: 'SET_MSGS'
+    })
   }
 }
