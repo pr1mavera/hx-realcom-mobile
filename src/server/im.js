@@ -1,12 +1,11 @@
-/* eslint-disable */
-// import webim from '@/common/js/webim.min.js'
-
-// const meStrophe = require('webim.min.js')
+import webim from 'webim'
 
 const IM = (() => {
   function login(loginInfo, listeners, succ, fail) {
     webim.login(
-      loginInfo, listeners, {
+      loginInfo,
+      listeners,
+      {
         isLogOn: false
       },
       function() {

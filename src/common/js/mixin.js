@@ -1,6 +1,7 @@
 import { mapGetters, mapMutations, mapActions } from 'vuex'
 import WebRTCRoom from '@/server/webRTCRoom'
 import IM from '@/server/im'
+import WebRTCAPI from 'WebRTCAPI'
 // import { formatDate } from '@/common/js/dateConfig.js'
 // import { roomStatus, queueStatus } from '@/common/js/status'
 export const webRtcRoomMixin = {
@@ -22,54 +23,18 @@ export const webRtcRoomMixin = {
       selfName: null,
       selfRole: '主播',
       userID: null, // 用户id
-      canLink: false,
-      showSelfPreviewed: 0,
-      toggleSketchPage: false,
       isRoomCreator: false,
-      togglePusherText: '',
-      inputSketchpadData: null,
-      showSketchpad: false,
-      isFullScreen: false,
       members: [
-          // { name: "李明", id: "2343", reqeust: true, ts: new Date()-30*60*1000},
+        // { name: "李明", id: "2343", reqeust: true, ts: new Date()-30*60*1000},
       ],
-      member_list: [],
-      requestMembers: [],
-      refleshTask: null,
-      requestingPushers: [{
-          id: '1',
-          'name': 'jacqiu'
-      }],
-      pusherVideosDisplay: [false, false, false, false, false, false],
-      pushers: {},
-      msgs: [], // chat list
-      nameMap: {
-          '@TIM#SYSTEM': ''
-      }, // userId : nickName
-      messages: [
-          //   {name: '李明', admin: false, id: '2343', text: '大家好，准备上课了！'},
-          //   {name: '王老师', admin: true, id: '2343', text: '上课啦！'}
-      ],
-      inputMessage: '',
-      // lastUpdateTime: formatDate(Date.now() - 10 * 1000 * 60, 'hh:mm:ss'),
-      recentMembers: [],
-      mode: 'camera',
-      memberUpdateTimer: null,
-      imOptions: {
-          sendMsg: () => 'sendMsgFunction'
-      },
       canDraw: false,
-      getMemberListSto: null,
       userAuthData: { // 用户鉴权信息
       },
       heartBeatTask: null // 心跳任务定时器
     }
   },
   methods: {
-    loadWebRtcResources() {
-
-    },
-    enterToRoom() {
+    enterToRoom(WebRTCAPI) {
       const query = this.$route.query
       console.log('Main.mounted: ', JSON.stringify(query))
       if (!query) {
@@ -114,7 +79,6 @@ export const webRtcRoomMixin = {
     initRTC() {
       const self = this
       const query = this.$route.query
-      // eslint-disable-next-line
       this.RTC = new WebRTCAPI({
         'sdkAppId': self.sdkAppID,
         'userId': self.userID,
@@ -219,8 +183,8 @@ export const webRtcRoomMixin = {
           // self.goHomeRouter()
         }
       })
-      this.initIM()
-      this.renderMemberList()
+      // this.initIM()
+      // this.renderMemberList()
     },
     actionCreateRoom(query) {
       console.log('-> action create room')
@@ -310,8 +274,8 @@ export const webRtcRoomMixin = {
               }
             }
           )
-          self.initIM()
-          self.renderMemberList()
+          // self.initIM()
+          // self.renderMemberList()
         },
         () => {
           // error, 返回
@@ -319,140 +283,12 @@ export const webRtcRoomMixin = {
         }
       )
     },
-    getMemberList() {
-      const self = this
-      WebRTCRoom.get_room_members(self.courseId, (data) => {
-        console.debug(data)
-        if (data.data.code === 0) {
-          data.data.members.forEach((item) => {
-            self.nameMap[item.userID] = item.nickName
-          })
-          self.member_list = data.data.members
-        }
-      }, (err) => {
-        if (err && err.errCode === 3) {
-          // self.goHomeRouter()
-        }
-      })
-    },
-    renderMemberList() {
-      const self = this
-      this.stopRenderMemberList()
-      self.getMemberList()
-      this.getMemberListSto = setTimeout(() => {
-        self.renderMemberList()
-      }, 3000)
-    },
-    stopRenderMemberList() {
-        clearTimeout(this.getMemberListSto)
-    },
-    initIM() {
-      const self = this
-      self.onMsgNotify.bind(this)
-      const loginInfo = {
-        sdkAppID: self.sdkAppID,
-        appIDAt3rd: self.sdkAppID,
-        identifier: self.userID,
-        identifierNick: self.selfName,
-        accountType: self.accountType,
-        userSig: self.userSig
-      }
-      console.debug('initIM', loginInfo)
-      IM.login(
-        loginInfo,
-        {
-          // 'onBigGroupMsgNotify': self.onBigGroupMsgNotify,
-          'onMsgNotify': self.onMsgNotify
-        },
-        () => {
-          IM.joinGroup(self.courseId, self.userID)
-        },
-        (err) => {
-          alert(err.ErrorInfo)
-        }
-      )
-    },
-    onMsgNotify(msgs) {
-      if (msgs && msgs.length > 0) {
-        const msgsObj = IM.parseMsgs(msgs)
-        msgsObj.textMsgs.forEach((msg) => {
-          const content = JSON.parse(msg.content)
-          if (content.cmd === 'sketchpad') {
-            const body = JSON.parse(content.data.msg)
-            if (body.type === 'request' && body.action === 'currentBoard') {
-              if (this.$refs.sketchpadCom) {
-                const currentBoard = this.$refs.sketchpadCom.getCurrentBoard()
-                const boardBg = this.$refs.sketchpadCom.getBoardBg() || {}
-                IM.sendBoardMsg({
-                  groupId: this.courseId,
-                  msg: JSON.stringify({
-                    action: body.action,
-                    currentBoard
-                    // boardBg: JSON.stringify(boardBg)
-                  }),
-                  nickName: this.selfName,
-                  identifier: this.userID
-                })
-                // 如果有图片则补发图片
-                const bgUrl = boardBg[currentBoard] && boardBg[currentBoard].url
-                if (bgUrl) {
-                  this.sendBoardBgPicMsg(currentBoard, bgUrl)
-                  setTimeout(() => {
-                    this.sendSwitchBoardMsg(currentBoard)
-                  }, 500)
-                }
-              }
-            }
-          }
-        })
-      }
-    },
-    sendBoardBgPicMsg(boardId, url) {
-      const data = JSON.stringify({
-        seq: 1,
-        timestamp: new Date().getTime(),
-        value: {
-          actions: [{
-            action: 201,
-            cleanBoard: 0,
-            mode: 0,
-            time: new Date().getTime() / 1000,
-            seq: new Date().getTime(),
-            url
-          }],
-          boardId,
-          operator: this.userID
-        }
-      })
-      IM.sendBoardMsg({
-        groupId: this.courseId,
-        msg: data,
-        nickName: this.selfName,
-        identifier: this.userID
-      })
-    },
-    sendSwitchBoardMsg(boardId) {
-      const data = JSON.stringify({
-        seq: 1,
-        timestamp: new Date().getTime(),
-        value: {
-          actions: [{
-            'action': 401,
-            'time': new Date().getTime() / 1000,
-            'seq': new Date().getTime(),
-            'toBoardId': boardId,
-            'deleteBoards': []
-          }],
-          boardId,
-          operator: this.userID
-        }
-      })
-      IM.sendBoardMsg({
-        groupId: this.courseId,
-        msg: data,
-        nickName: this.selfName,
-        identifier: this.userID
-      })
+    logout() {
+      // 推出登录
+      console.log('logout clicked')
+      // if (confirm("退出登录吗？")) {
+      //     self.goHomeRouter()
+      // }
     },
     ...mapMutations([
 
@@ -460,5 +296,8 @@ export const webRtcRoomMixin = {
     ...mapActions([
 
     ])
+  },
+  beforeDestroy() {
+    IM.logout()
   }
 }
