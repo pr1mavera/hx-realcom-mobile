@@ -267,17 +267,17 @@ export default {
       debounce(() => {
         self.$router.push({
           path: '/room/chat',
-          // query: {
-          //   cmd: 'enter',
-          //   groupID: '12345678',
-          //   userID: 'cust-test',
-          //   userName: '田老师红烧肉盖饭'
-          // }
           query: {
-            cmd: 'create',
-            userID: 'cs-test',
-            userName: '膳当家黄焖鸡米饭'
+            cmd: 'enter',
+            groupID: '12345678',
+            userID: 'cust-test',
+            userName: '田老师红烧肉盖饭'
           }
+          // query: {
+          //   cmd: 'create',
+          //   userID: 'cs-test',
+          //   userName: '膳当家黄焖鸡米饭'
+          // }
         })
         self.readyToMenChat()
       }, 1000)()
@@ -378,17 +378,17 @@ export default {
         window.onresize = null
       }
     },
+    showGuide(data) {
+      this.iosGuide = data
+      // console.log(data)
+    },
     ...mapMutations({
       setModeToMenChat: 'SET_ROOM_MODE',
       setMsgs: 'SET_MSGS'
     }),
     ...mapActions([
       'enterToLineUp'
-    ]),
-    showGuide(data) {
-      this.iosGuide = data
-      // console.log(data)
-    }
+    ])
   }
 }
 </script>

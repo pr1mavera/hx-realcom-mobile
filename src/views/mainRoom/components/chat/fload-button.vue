@@ -32,11 +32,6 @@
 <script type="text/ecmascript-6">
 
 export default {
-  data() {
-    return {
-      iosGuide: false
-    }
-  },
   props: {
     inputStatus: {
       type: Boolean
@@ -69,7 +64,7 @@ export default {
           // wx.showMenuItems({
           //   menuList: [
           //     'menuItem:openWithSafari'
-          //   ] // 要显示的菜单项，
+          //   ] // 要显示的菜单项，只显示在浏览器中打开
           // })
         } else {
           this.$emit('enterVideoLineUp')
@@ -79,26 +74,6 @@ export default {
         alert(' window phone（同学赶紧换个手机吧） ')
       }
     }
-    // post请求 拉取群漫游数据
-    // getRecording(url, params) {
-    //   return new Promise(resolve, reject) => {
-    //     Vue.$http.post(
-    //       url,
-    //       {
-    //         params
-    //       },
-    //       {elmulateJAON: true}
-    //     )
-    //       .then((res) => {
-    //         // 成功后的回调
-    //         resolve(res.body);
-    //       })
-    //       .catch((res) => {
-    //         // 失败的回调
-    //         reject(res.body)
-    //       })
-    //   }
-    // }
   }
 }
 </script>

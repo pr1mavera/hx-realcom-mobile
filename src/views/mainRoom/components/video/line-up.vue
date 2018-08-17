@@ -35,16 +35,16 @@ export default {
     return {
       num: 3,
       times: 1,
-      // loginInfo: {
-      //   // userID: `userid_web_${Date.now().toString()}`,
-      //   userID: 'cust-test',
-      //   userName: '田老师红烧肉盖饭'
-      // },
       loginInfo: {
         // userID: `userid_web_${Date.now().toString()}`,
-        userID: 'cs-test',
-        userName: '膳当家黄焖鸡米饭'
+        userID: 'cust-test',
+        userName: '田老师红烧肉盖饭'
       }
+      // loginInfo: {
+      //   // userID: `userid_web_${Date.now().toString()}`,
+      //   userID: 'cs-test',
+      //   userName: '膳当家黄焖鸡米饭'
+      // }
     }
   },
   mounted() {
