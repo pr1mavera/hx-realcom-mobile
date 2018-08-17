@@ -19,9 +19,12 @@
 import { mapGetters, mapActions } from 'vuex'
 // import { queueStatus } from '@/common/js/status'
 import { debounce } from '@/common/js/util'
-// import ConnectSuccess from '@/views/mainRoom/components/video/connect-success'
+import { RTCSystemMsgMixin } from '@/common/js/mixin'
 
 export default {
+  mixins: [
+    RTCSystemMsgMixin
+  ],
   components: {
     // ConnectSuccess,
     'ConnectSuccess': () => import('@/views/mainRoom/components/video/connect-success')
@@ -55,6 +58,15 @@ export default {
   },
   methods: {
     connectComplete() {
+      const systemMsg = {
+        userID: 'cs-test',
+        msgBody: {
+          data: '0',
+          desc: '视频排队成功desc',
+          ext: '视频排队成功ext'
+        }
+      }
+      this.lineUpOkPushSystemMsg(systemMsg)
       this.$refs.connectSuccess.show = true
     },
     confirmToVideo() {

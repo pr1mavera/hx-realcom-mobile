@@ -68,11 +68,11 @@ const WebRTCRoom = (() => {
       data: object.data || {},
       method: 'POST',
       success: function(res) {
-        if (res.data.code) {
-          console.error(`请求失败, req=${JSON.stringify(object)}, resp=${JSON.stringify(res.data)}`)
+        if (res.code) {
+          console.error(`请求失败, req=${JSON.stringify(object)}, resp=${JSON.stringify(res)}`)
           object.fail && object.fail({
-            errCode: res.data.code,
-            errMsg: res.data.message
+            errCode: res.code,
+            errMsg: res.message
           })
           return
         }
@@ -189,6 +189,55 @@ export default {
   //     fail: fail
   //   })
   // },
+
+  /**
+   *
+   * 向用户推送一条消息
+   * msgBody:{
+   "userID":"cs-test",   --用户ID
+   "msgBody":
+   {
+   	"data":"0",           --推送的数据
+   	"desc":"提示信息",    --描述信息
+   	"ext":"扩展信息"      --扩展信息
+    }
+   }
+   * @param msgBody
+   * @param success
+   * @param fail
+   */
+
+  pushUserMsg: function(msgBody, success, fail) {
+    WebRTCRoom.requestPrivate({
+      url: '/pushMsg',
+      data: msgBody,
+      success: success,
+      fail: fail
+    })
+  },
+
+  /**
+   * 拉取群漫游消息
+   * @param groupId
+   * @param msgNumber
+   * @param success
+   * @param fail
+   */
+  syncGroupC2CMsg: function(groupID, msgNum, success, fail) {
+    var data = {}
+    if (groupID) {
+      data.groupID = groupID
+    }
+    if (msgNum) {
+      data.msgNum = msgNum
+    }
+    WebRTCRoom.requestPrivate({
+      url: '/syncGroupC2CMsg',
+      data: JSON.stringify(data),
+      success: success,
+      fail: fail
+    })
+  },
 
   getRoomList: function(index, count, success, fail) {
     WebRTCRoom.request({

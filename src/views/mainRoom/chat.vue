@@ -161,9 +161,8 @@ export default {
       let map = []
       let timeCache = this.historyMsgs[0].time
       let temp = {
-        msg: timeCache,
-        type: 'time_msg',
-        MsgTimestamp: this.msg
+        content: timeCache,
+        msgType: 'time_msg'
       }
       map.push(this._shallowCopy(temp))
       this.historyMsgs.forEach((item) => {
@@ -268,7 +267,7 @@ export default {
         self.$router.push({
           path: '/room/chat',
           query: {
-            cmd: 'enter',
+            cmd: 'create',
             groupID: '12345678',
             userID: 'cust-test',
             userName: '田老师红烧肉盖饭'
@@ -378,17 +377,17 @@ export default {
         window.onresize = null
       }
     },
-    showGuide(data) {
-      this.iosGuide = data
-      // console.log(data)
-    },
     ...mapMutations({
       setModeToMenChat: 'SET_ROOM_MODE',
       setMsgs: 'SET_MSGS'
     }),
     ...mapActions([
       'enterToLineUp'
-    ])
+    ]),
+    showGuide(data) {
+      this.iosGuide = data
+      // console.log(data)
+    }
   }
 }
 </script>

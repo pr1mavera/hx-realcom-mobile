@@ -23,11 +23,6 @@
           src="videofile.ogg"
           poster="posterimage.jpg"
         ></video>
-        <!-- <video
-          :id="`v_${members[0].id}`"
-          autoplay
-          playinline
-        ></video> -->
       </div>
       <div class="customer-video-window">
         <video
@@ -44,17 +39,12 @@
     <div class="mini-container" v-show="!fullScreen" @click="openVideoBar">
       <div class="server-video-window">
         <video
-          id="remoteVideo"
+          id="remoteVideoMini"
           autoplay
           playsinline
           src="videofile.ogg"
           poster="posterimage.jpg"
         ></video>
-        <!-- <video
-          :id="`v_${members[0].id}`"
-          autoplay
-          playinline
-        ></video> -->
       </div>
     </div>
   </div>
@@ -102,12 +92,6 @@ export default {
     },
     readyToVideo() {
       const query = this.$route.query
-      // new Promise((resolve) => {
-      //   this.setUserInfoToEnterRoom(query, this.initRTC)
-      //   resolve()
-      // }).then(()=> {
-      //   this.initIM(query)
-      // })
       this.setUserInfoToEnterRoom(query, this.initRTC, this.initIM)
     },
     ...mapMutations({
