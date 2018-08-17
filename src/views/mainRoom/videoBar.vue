@@ -4,7 +4,7 @@
     <line-up
       class="line-up"
       v-show="isLineUpShow"
-      @ready="enterToRoom"
+      @ready="readyToVideo"
     ></line-up>
     <!-- 最大化 -->
     <div class="full-screen-container" v-show="fullScreen">
@@ -63,10 +63,14 @@
 <script type="text/ecmascript-6">
 import { mapGetters, mapMutations } from 'vuex'
 import { queueStatus } from '@/common/js/status'
-import { webRtcRoomMixin } from '@/common/js/mixin'
+import { setUserInfoMixin, RTCRoomMixin, IMMixin } from '@/common/js/mixin'
 
 export default {
-  mixins: [webRtcRoomMixin],
+  mixins: [
+    setUserInfoMixin,
+    RTCRoomMixin,
+    IMMixin
+  ],
   components: {
     'LineUp': () => import('@/views/mainRoom/components/video/line-up'),
     'VideoFooter': () => import('@/views/mainRoom/components/video/video-footer')
@@ -95,6 +99,16 @@ export default {
     },
     closeVideoBar() {
       this.setFullScreen(false)
+    },
+    readyToVideo() {
+      const query = this.$route.query
+      // new Promise((resolve) => {
+      //   this.setUserInfoToEnterRoom(query, this.initRTC)
+      //   resolve()
+      // }).then(()=> {
+      //   this.initIM(query)
+      // })
+      this.setUserInfoToEnterRoom(query, this.initRTC, this.initIM)
     },
     ...mapMutations({
       setFullScreen: 'SET_FULL_SCREEN'
