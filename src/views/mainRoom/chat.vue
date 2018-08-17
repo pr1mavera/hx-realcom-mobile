@@ -161,9 +161,8 @@ export default {
       let map = []
       let timeCache = this.historyMsgs[0].time
       let temp = {
-        msg: timeCache,
-        type: 'time_msg',
-        MsgTimestamp: this.msg
+        content: timeCache,
+        msgType: 'time_msg'
       }
       map.push(this._shallowCopy(temp))
       this.historyMsgs.forEach((item) => {
@@ -267,17 +266,17 @@ export default {
       debounce(() => {
         self.$router.push({
           path: '/room/chat',
-          // query: {
-          //   cmd: 'enter',
-          //   groupID: '12345678',
-          //   userID: 'cust-test',
-          //   userName: '田老师红烧肉盖饭'
-          // }
           query: {
             cmd: 'create',
-            userID: 'cs-test',
-            userName: '膳当家黄焖鸡米饭'
+            groupID: '12345678',
+            userID: 'cust-test',
+            userName: '田老师红烧肉盖饭'
           }
+          // query: {
+          //   cmd: 'create',
+          //   userID: 'cs-test',
+          //   userName: '膳当家黄焖鸡米饭'
+          // }
         })
         self.readyToMenChat()
       }, 1000)()

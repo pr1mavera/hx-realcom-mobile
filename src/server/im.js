@@ -257,6 +257,48 @@ const IM = (() => {
     })
   }
 
+  // 发送图片
+  function sendPic(images, msgInfo, callback) {
+      if (!msgInfo.groupId) {
+        console.error('您还没有进入房间，暂不能聊天')
+        return
+      }
+      var selSess = new webim.Session(webim.SESSION_TYPE.GROUP, msgInfo.groupId, msgInfo.groupId, null, Math.round(new Date().getTime() / 1000))
+      var isSend = true // 是否为自己发送
+      var seq = -1 // 消息序列，-1表示sdk自动生成，用于去重
+      var random = Math.round(Math.random() * 4294967296) // 消息随机数，用于去重
+      var msgTime = Math.round(new Date().getTime() / 1000) // 消息时间戳
+      var subType = webim.GROUP_MSG_SUB_TYPE.COMMON
+      var msg = new webim.Msg(selSess, isSend, seq, random, msgTime, msgInfo.identifier, subType, msgInfo.nickName)
+      var imagesObj = new webim.Msg.Elem.Images(images.File_UUID)
+      for (var i in images.URL_INFO) {
+          var img = images.URL_INFO[i]
+          var newImg
+          var type
+          switch (img.PIC_TYPE) {
+              case 1: // 原图
+                  type = 1 // 原图
+                  break
+              case 2:// 小图（缩略图）
+                  type = 3 // 小图
+                  break
+              case 4:// 大图
+                  type = 2 // 大图
+                  break
+          }
+          newImg = new webim.Msg.Elem.Images.Image(type, img.PIC_Size, img.PIC_Width, img.PIC_Height, img.DownUrl)
+          imagesObj.addImage(newImg)
+      }
+      msg.addImage(imagesObj)
+
+      // 调用发送图片接口
+      webim.sendMsg(msg, function(resp) {
+          console.log('发送图片成功')
+      }, function(err) {
+          alert(err.ErrorInfo)
+      })
+  }
+
   return {
     login,
     logout,
@@ -266,7 +308,8 @@ const IM = (() => {
     parseMsg,
     parseMsgs,
     sendMsg,
-    sendBoardMsg
+    sendBoardMsg,
+    sendPic
   }
 })()
 

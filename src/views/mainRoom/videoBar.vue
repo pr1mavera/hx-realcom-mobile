@@ -92,12 +92,6 @@ export default {
     },
     readyToVideo() {
       const query = this.$route.query
-      // new Promise((resolve) => {
-      //   this.setUserInfoToEnterRoom(query, this.initRTC)
-      //   resolve()
-      // }).then(()=> {
-      //   this.initIM(query)
-      // })
       this.setUserInfoToEnterRoom(query, this.initRTC, this.initIM)
     },
     ...mapMutations({

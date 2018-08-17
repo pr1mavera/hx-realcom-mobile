@@ -39,7 +39,7 @@ export const setUserInfoMixin = {
             userSig: res.data.userSig
           }
           self.setUserInfo(info)
-
+          // 执行回调
           Func && Func.forEach((fn) => {
             fn(query)
           })
@@ -267,6 +267,7 @@ export const IMMixin = {
     },
     onBigGroupMsgNotify(newMsgList) {
       if (newMsgList && newMsgList.length > 0) {
+        alert('onBigGroupMsgNotify')
         const msgsObj = IM.parseMsgs(newMsgList)
         // msgsObj[time] = formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss')
         let temp = this.msgs
@@ -277,6 +278,7 @@ export const IMMixin = {
     },
     onMsgNotify(msgs) {
       if (msgs && msgs.length > 0) {
+        alert('onMsgNotify')
         const msgsObj = IM.parseMsgs(msgs)
         msgsObj.textMsgs.forEach((msg) => {
           const content = JSON.parse(msg.content)
@@ -323,5 +325,17 @@ export const IMMixin = {
     ...mapMutations({
       setMsgs: 'SET_MSGS'
     })
+  }
+}
+
+export const RTCSystemMsgMixin = {
+  methods: {
+    lineUpOkPushSystemMsg(systemMsg) {
+      WebRTCRoom.pushUserMsg(systemMsg, (res) => {
+        console.log('排队完成，推送系统消息成功')
+      }, () => {
+        console.log('推送系统消息失败')
+      })
+    }
   }
 }
