@@ -2,7 +2,7 @@
   <div class="share">
     There are some words for test
     <!-- 测试评价组件 -->
-    <assess v-if="false"></assess>
+    <assess v-if="true"></assess>
   </div>
 </template>
 

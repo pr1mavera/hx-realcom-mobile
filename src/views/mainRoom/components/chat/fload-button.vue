@@ -30,6 +30,7 @@
 </template>
 
 <script type="text/ecmascript-6">
+// import WebRTCRoom from '@/server/webRTCRoom'
 
 export default {
   props: {
@@ -43,36 +44,62 @@ export default {
     },
     enterVideoLineUp() {
       // 判断手机类型, 系统的版本
-      const u = navigator.userAgent
-      // 若当前手机为安卓机
-      if (u.indexOf('Android') > -1 || u.indexOf('Linux') > -1) {
-        this.$emit('enterVideoLineUp')
-        // 判断系统的版本
+      const device = sessionStorage.getItem('device')
+      const browser = sessionStorage.getItem('browser')
+      if (device === 'Android') {
         const ua = navigator.userAgent.toLowerCase()
         const reg = /android [\d._]+/gi
         const version = (ua.match(reg) + '').replace(/[^0-9|_.]/ig, '').replace(/_/ig, '.')
         console.log('Android的版本为：' + version)
-      } else if (u.indexOf('iPhone') > -1) {
-        // 当前手机为苹果手机
-        const ua = navigator.userAgent.toLowerCase()
-        // 判断是否在微信内置浏览器内
-        // eslint-disable-next-line
-        if (ua.match(/MicroMessenger/i) == 'micromessenger') {
-          this.$emit('ios-guide', 'true') // 将传数据给其父元素,提示用户在浏览器中打开
-          // alert('这是微信内置浏览器')
-          // 点击右上角显示的菜单项
-          // wx.showMenuItems({
-          //   menuList: [
-          //     'menuItem:openWithSafari'
-          //   ] // 要显示的菜单项，只显示在浏览器中打开
-          // })
-        } else {
-          this.$emit('enterVideoLineUp')
-          // alert('这不是微信内置浏览器')
-        }
-      } else if (u.indexOf('Windows Phone') > -1) {
-        alert(' window phone（同学赶紧换个手机吧） ')
+      } else if (device === 'iPhone' && browser === 'wx') {
+        // 将传数据给其父元素,提示用户在浏览器中打开
+        this.$emit('ios-guide', 'true')
+        // 点击右上角显示的菜单项
+        // wx.showMenuItems({
+        //   menuList: [
+        //     'menuItem:openWithSafari'
+        //   ] // 要显示的菜单项，只显示在浏览器中打开
+        // })
+      } else if (device === 'iPhone' && browser === 'safari') {
+        this.$emit('enterVideoLineUp')
       }
+      // // 若当前手机为安卓机
+      // if (u.indexOf('Android') > -1 || u.indexOf('Linux') > -1) {
+      //   this.$emit('enterVideoLineUp')
+      //   // 判断系统的版本
+      //   const ua = navigator.userAgent.toLowerCase()
+      //   const reg = /android [\d._]+/gi
+      //   const version = (ua.match(reg) + '').replace(/[^0-9|_.]/ig, '').replace(/_/ig, '.')
+      //   console.log('Android的版本为：' + version)
+      //
+      //   // 在此处为测试 拉取漫游信息
+      //   const groupID = '12345678'
+      //   const ReqMsgNumber = 3
+      //   WebRTCRoom.syncGroupC2CMsg(groupID, ReqMsgNumber, (res) => {
+      //    alert(JSON.stringify(res.data.RspMsgList))
+      //   }, () => {
+      //     console.log('fails')
+      //   })
+      // } else if (u.indexOf('iPhone') > -1) {
+      //   // 当前手机为苹果手机
+      //   const ua = navigator.userAgent.toLowerCase()
+      //   // eslint-disable-next-line
+      //   if (ua.match(/MicroMessenger/i) == 'micromessenger') {
+      //     this.$emit('ios-guide', 'true') // 将传数据给其父元素,提示用户在浏览器中打开
+      //     // alert('这是微信内置浏览器')
+      //     // 点击右上角显示的菜单项
+      //     // wx.showMenuItems({
+      //     //   menuList: [
+      //     //     'menuItem:openWithSafari'
+      //     //   ] // 要显示的菜单项，只显示在浏览器中打开
+      //     // })
+      //   } else {
+      //     this.$emit('enterVideoLineUp')
+      //     // alert('这不是微信内置浏览器')
+      //   }
+      // } else if (u.indexOf('Windows Phone') > -1) {
+      //   alert(' window phone（同学赶紧换个手机吧） ')
+      // }
     }
   }
 }
