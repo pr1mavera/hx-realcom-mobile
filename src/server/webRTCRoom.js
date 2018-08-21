@@ -233,7 +233,7 @@ export default {
     }
     WebRTCRoom.requestPrivate({
       url: '/syncGroupC2CMsg',
-      data: JSON.stringify(data),
+      data,
       success: success,
       fail: fail
     })
