@@ -11,6 +11,12 @@ const state = {
   },
   roomId: null,
   msgs: [],
+  extendBarOpen: false,
+  inputBarOpen: false,
+  extendBarLaunch: {
+    isOpen: false,
+    component: ''
+  },
   fullScreen: false, // 视频客服开启时，videoRoom的全屏或缩小状态
   roomMode: roomStatus.AIChat,
   queueMode: queueStatus.noneQueue

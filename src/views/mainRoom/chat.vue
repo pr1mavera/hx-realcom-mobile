@@ -1,7 +1,7 @@
 <template>
   <div class="chat">
     <!-- <header-bar></header-bar> -->
-    <div class="chat-room transition-bezier" ref="chatRoom" :class="{'extendBarOpen': curExtendBar.type}">
+    <div class="chat-room transition-bezier" ref="chatRoom" :class="{'extendBarOpen': isExtendBarOpen}">
       <div class="chat-wrapper" ref="chatScroll">
         <div class="chat-content" ref="chatContent">
           <ul>
@@ -36,10 +36,11 @@
         :class="{'inputFocus': inputStatus}"
         @targetInputBuffer="targetInputBuffer"
         @chatInputChange="chatInputChange"
-        @toggleExtend="toggleExtend"
+        @toggleExtend="toggleExtendBar"
       ></input-bar>
     </div>
-    <div class="extend-bar transition-bezier" :class="{'extendBarOpen': curExtendBar.type}">
+    <extend-bar :class="{'extendBarOpen': isExtendBarOpen}"></extend-bar>
+    <div class="extend-bar-launch transition-bezier" :class="{'extendBarOpen': curExtendBar.type}">
       <keep-alive>
         <component
           :inputPos="inputFocPos"
@@ -87,6 +88,7 @@ export default {
     'ContentItem': () => import('@/views/mainRoom/components/chat/content-item'),
     'TipsItem': () => import('@/views/mainRoom/components/chat/tips-item'),
     'FloadButton': () => import('@/views/mainRoom/components/chat/fload-button'),
+    'extendBar': () => import('@/views/mainRoom/components/chat/extend-bar'),
     'SendFile': () => import('@/views/mainRoom/components/chat/send-file'),
     'SendExpress': () => import('@/views/mainRoom/components/chat/send-express'),
     'SendGift': () => import('@/views/mainRoom/components/chat/send-gift'),
@@ -94,7 +96,10 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'msgs'
+      'msgs',
+      'extendBarOpen',
+      'inputBarOpen',
+      'extendBarLaunch'
     ])
   },
   data() {
@@ -112,6 +117,7 @@ export default {
       inputEle: null,
       inputFocPos: 0,
       // inputObserver: null,
+      isExtendBarOpen: false,
       curExtendBar: {
         type: false,
         component: ''
@@ -203,6 +209,7 @@ export default {
     _initScroll() {
       this.chatScroll = new BScroll(this.$refs.chatScroll, {
         click: true,
+        // autoBlur: false,
         probeType: 3,
         swipeBounceTime: 200,
         bounceTime: 400,
@@ -290,6 +297,9 @@ export default {
       //   this.initIM(query)
       // })
       this.setUserInfoToEnterRoom(query, this.initIM)
+    },
+    toggleExtendBar() {
+      this.isExtendBarOpen = true
     },
     toggleExtend(mode) {
       if (this.inputStatus) {
@@ -409,27 +419,26 @@ export default {
   .chat-room {
     position: relative;
     width: 100%;
-    // height: calc(~'100% - 5rem');
     height: 100%;
     display: flex;
     flex-direction: column;
     transition: all 0.3s;
     &.extendBarOpen {
       // height: calc(~'100% - 29rem');
-      transform: translateY(-24rem);
+      transform: translateY(-10rem);
     }
     .chat-wrapper {
       position: relative;
       width: 100%;
       height: auto;
-      min-height: calc(~'100% - 4.6rem');
+      // min-height: calc(~'100% - 4.6rem');
       overflow: hidden;
       background-color: @bg-normal;
-      flex-basis: auto;
-      flex-shrink: 1;
+      flex: 1;
+      // flex-basis: auto;
+      // flex-shrink: 1;
       .chat-content {
         width: 100%;
-        // min-height: 100%;
         background-color: @bg-normal;
         ul {
           .chat-content-block {
@@ -454,12 +463,23 @@ export default {
       }
     }
     .input-bar {
-      flex-basis: auto;
-      height: auto;
-      flex-shrink: 0;
+      // flex-basis: 0;
+      // height: auto;
+      // flex-shrink: 0;
+      justify-content: flex-end;
     }
   }
   .extend-bar {
+    height: 10rem;
+    background-color: @bg-normal;
+    color: @text-normal;
+    transition: all 0.3s;
+    &.extendBarOpen {
+      // height: calc(~'100% - 29rem');
+      transform: translateY(-10rem);
+    }
+  }
+  .extend-bar-launch {
     height: 24rem;
     background-color: @bg-normal;
     color: #000;
