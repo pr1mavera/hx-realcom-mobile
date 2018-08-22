@@ -12,10 +12,10 @@
         <div class="eva-more" v-if="stars > 0">
           <flexbox>
             <flexbox-item>
-              <x-button plain style="width: 10rem;border-radius:99px;font-size: 1.4rem;color: #D9DADE;border-color: #D9DADE;">解决了问题</x-button>
+              <x-button plain style="width: 11rem;border-radius:99px;font-size: 1.2rem;color: #D9DADE;border-color: #D9DADE;">解决了问题</x-button>
             </flexbox-item>
             <flexbox-item>
-              <x-button plain style="width: 10rem;border-radius:99px; font-size: 1.4rem;color: #D9DADE;border-color: #D9DADE;">没有解决问题</x-button>
+              <x-button plain style="width: 11.2rem;border-radius:99px; font-size: 1.2rem;color: #D9DADE;border-color: #D9DADE;">没有解决问题</x-button>
             </flexbox-item>
           </flexbox>
           <swiper height="9.5rem" style="background: #F1F1F1;margin-top: 1.4rem;" dots-class="custom-bottom"
@@ -78,11 +78,11 @@
     .vux-x-icon {
       fill: #FF959C;
       position: relative;
-      right: -10.5rem;
+      right: -44%;
     }
     .popup-main {
       position: relative;
-      width: 24rem;
+      width: 88%;
       opacity: .85;
       margin: 0 auto;
       align-self: center;
