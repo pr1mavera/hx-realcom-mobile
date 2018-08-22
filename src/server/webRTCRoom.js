@@ -1,7 +1,7 @@
 // /* eslint-disable */
 const WebRTCRoom = (() => {
   const serverDomain = '//xzb.qcloud.com/webrtc/weapp/webrtc_room'
-  const serverDomainPrivate = '//192.168.8.102:5757/room'
+  const serverDomainPrivate = 'https://vnap-webrtctest.ihxlife.com/room'
   // eslint-disable-next-line
   let requestNum = 0
   let heart = '' // 判断心跳变量
