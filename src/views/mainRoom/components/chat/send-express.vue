@@ -109,14 +109,17 @@ export default {
     }
   },
   mounted() {
-    this._normalizeEmojiList()
+    const self = this
+    this.$nextTick(() => {
+      self._normalizeEmojiList()
+    })
   },
   methods: {
     _normalizeEmojiList() {
       const row = 3 // 行
       const col = 8 // 列
       const singleNum = row * col // 一页的表情个数
-      const totalPage = Math.floor((emojiMap.length + 1) / singleNum) + 1 // 页数
+      const totalPage = (emojiMap.length / singleNum >>> 0) + 1 // 页数
       const map = emojiMap
       for (let i = 0; i < totalPage; i++) {
         const list = map.slice(i * singleNum, (i + 1) * singleNum)
@@ -126,7 +129,7 @@ export default {
         }
         this.express[1].list.push(temp)
       }
-      console.log(this.express[1].list)
+      console.dir(this.express[1].list)
     },
     onEmojiMenuClick(index) {
       this.currIndex = index

@@ -10,7 +10,7 @@
 
 <script>
 import deviceConfig from './config/device'
-import wxConfig from './config/wechat'
+// import wxConfig from './config/wechat'
 
 export default {
   name: 'App',
@@ -20,8 +20,7 @@ export default {
   },
   created() {
     deviceConfig()
-    wxConfig()
-    console.log('create')
+    // wxConfig()
   }
   // watch: {
   //   $route() {
