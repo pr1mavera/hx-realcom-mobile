@@ -21,6 +21,7 @@ export default {
   created() {
     deviceConfig()
     wxConfig()
+    console.log('create')
   }
   // watch: {
   //   $route() {

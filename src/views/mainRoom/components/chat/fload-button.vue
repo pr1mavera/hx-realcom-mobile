@@ -30,6 +30,7 @@
 </template>
 
 <script type="text/ecmascript-6">
+// 调用拉取漫游信息的接口
 // import WebRTCRoom from '@/server/webRTCRoom'
 
 export default {
@@ -72,7 +73,7 @@ export default {
       //   const version = (ua.match(reg) + '').replace(/[^0-9|_.]/ig, '').replace(/_/ig, '.')
       //   console.log('Android的版本为：' + version)
       //
-      //   // 在此处为测试 拉取漫游信息
+      //   在此处为测试 拉取漫游信息
       //   const groupID = '12345678'
       //   const ReqMsgNumber = 3
       //   WebRTCRoom.syncGroupC2CMsg(groupID, ReqMsgNumber, (res) => {
