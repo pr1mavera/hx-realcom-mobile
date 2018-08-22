@@ -19,26 +19,25 @@
         </br>
       </div> -->
       <div class="input-content"
+        placeholder="请输入..."
         id="input-content-hook"
         ref="inputContent"
         type="text"
-        contentEditable="false"
+        contentEditable="true"
         @click="chatFocus"
         @keyup="chatInput($event, false)"
-        @keyup.enter="chatInput($event, true)">
-        </br>
-      </div>
+        @keyup.enter="chatInput($event, true)"></div>
     </div>
     <div class="input-bar-item right-item">
-      <svg class="icon extend-click" aria-hidden="true" @click="toggleExtend(1)">
-        <use xlink:href="#icon-wode"></use>
-      </svg>
       <svg class="icon extend-click" aria-hidden="true" @click="toggleExtend(2)">
+        <use xlink:href="#icon-jiahao"></use>
+      </svg>
+      <!-- <svg class="icon extend-click" aria-hidden="true" @click="toggleExtend(2)">
         <use xlink:href="#icon-wode"></use>
       </svg>
       <svg class="icon extend-click" aria-hidden="true" @click="toggleExtend(3)">
         <use xlink:href="#icon-wode"></use>
-      </svg>
+      </svg> -->
     </div>
   </div>
 </template>
@@ -72,7 +71,7 @@ export default {
     },
     chatInput(event, isEnter) {
       const e = event || window.event
-      const text = e.currentTarget.innerText
+      const text = e.currentTarget.textContent
       // const l = document.getElementById('input-content-hook')
       this.$emit('chatInputChange', text, isEnter)
     },
@@ -108,6 +107,7 @@ export default {
 @import '~@/common/style/mixin.less';
 
 .input-bar {
+  .border-1px-after(@label-line-normal);
   .border-1px-before(@label-line-normal);
   // position: relative;
   // left: 0;
@@ -137,35 +137,38 @@ export default {
     &.input-box {
       width: 100%;
       height: 100%;
-      padding: 0.6rem 0;
+      padding: 0.7rem 0;
       box-sizing: border-box;
       &.visible-padding-left {
         padding-left: 0.8rem;
       }
       .input-content {
+        content:attr(placeholder);
         width: 100%;
         line-height: 2.2rem;
         min-height: 3.2rem;
         max-height: 12rem;
-        _height: 3.2rem;
         outline: 0;
         word-wrap: break-word;
         word-break: break-all;
         overflow-x: hidden;
         overflow-y: auto;
-        _overflow-y: visible;
-        border-radius: 5px;
+        // border-radius: 5px;
         padding: 0.5rem;
-        border: 0.05rem solid @label-line-normal;
+        // border: 0.05rem solid @label-line-normal;
         font-size: 1.4rem;
         box-sizing: border-box;
         color: @text-normal;
-        background-color: @bg-normal;
+        // background-color: @bg-normal;
         transition: all .5s cubic-bezier(0.11, 0.62, 0.23, 1);
         -webkit-overflow-scrolling: touch;
+        &:empty:before {
+          content: attr(placeholder);
+          color: @label-line-normal;
+          font-size: 1.2rem;
+        }
         &:focus {
-          border-color: @label-line-light;
-          background-color: #fff;
+          content: none;
         }
       }
     }
@@ -173,12 +176,17 @@ export default {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      width: 8.4rem;
-      flex-basis: 8.4rem;
+      width: 4.6rem;
+      flex-basis: 4.6rem;
       height: 4.6rem;
-      padding: 0 0.8rem;
+      // padding: 0 0.8rem;
       flex-grow: 0;
       flex-shrink: 0;
+      .icon {
+        margin: 0 auto;
+        width: 1.4rem;
+        height: 1.4rem;
+      }
     }
     .icon {
       display: block;
@@ -187,6 +195,7 @@ export default {
       // padding: 0 1.2rem;
       fill: @label-line-normal;
       background-color: transparent;
+      border-radius: 50%;
     }
   }
 

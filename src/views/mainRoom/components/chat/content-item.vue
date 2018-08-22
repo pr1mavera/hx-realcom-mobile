@@ -7,7 +7,7 @@
     </div>
     <div class="content-box" :class="[{'right-content-box': isSelf, 'left-content-box': !isSelf}]">
       <p class="name" v-if="!isSelf">{{name}}</p>
-      <div class="content" :class="[{'right-content-style': isSelf, 'left-content-style': !isSelf}]">
+      <div class="content chat-content-shadow" :class="[{'right-content-style': isSelf, 'left-content-style': !isSelf}]">
         <span class="text" v-html="text" v-if="this.types === 'text_msg'"></span>
         <span class="text" v-if="this.types === 'no_result'">小华智力有限，好像听不太懂您的问题呢，可转<span @click="enterToMenChat">人工客服</span></span>
         <!-- <span class="text" v-html="text"></span> -->
@@ -121,12 +121,14 @@ export default {
         border-radius: 0.4rem 1.5rem 1.5rem 1.5rem;
         color: @text-normal;
         background-color: @bg-light;
+        .chat-content-shadow(@bg-light-shadow)
         // left: 0;
       }
       &.right-content-style {
         border-radius: 1.5rem 0.4rem 1.5rem 1.5rem;
         color: @text-lighter;
         background-color: @text-special;
+        .chat-content-shadow(@text-special-shadow)
         // right: 0;
       }
       .text {
