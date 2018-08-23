@@ -1,7 +1,8 @@
 import { mapGetters, mapMutations } from 'vuex'
 import WebRTCRoom from '@/server/webRTCRoom'
 import IM from '@/server/im'
-import WebRTCAPI from 'WebRTCAPI'
+import WebRTCAPI from 'webRTCAPI'
+
 // import { formatDate } from '@/common/js/dateConfig.js'
 // import { roomStatus, queueStatus } from '@/common/js/status'
 
@@ -273,6 +274,7 @@ export const IMMixin = {
         let temp = this.msgs
         temp = temp.concat(msgsObj.textMsgs)
         this.setMsgs(temp)
+        this.chatScroll.refresh && this.chatScroll.refresh()
         console.log(this.msgs)
       }
     },

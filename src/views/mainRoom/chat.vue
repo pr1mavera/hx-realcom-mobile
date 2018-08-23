@@ -1,7 +1,10 @@
 <template>
   <div class="chat">
     <!-- <header-bar></header-bar> -->
-    <div class="chat-room transition-bezier" ref="chatRoom" :class="{'extendBarOpen': isExtendBarOpen}">
+    <div
+      class="chat-room transition-bezier"
+      ref="chatRoom"
+      :class="[{'extend-bar-open': this.extendBarOpen, 'extend-bar-launch-open': extendBarLaunchOpen}]">
       <div class="chat-wrapper" ref="chatScroll">
         <div class="chat-content" ref="chatContent">
           <ul>
@@ -25,22 +28,22 @@
           </ul>
         </div>
         <fload-button
-          :inputStatus="inputStatus"
+          :inputStatus="this.inputBarOpen"
           @enterVideoLineUp="lineUpAlert = true"
           @ios-guide="showGuide"
         ></fload-button>
       </div>
       <input-bar
         ref="inputBar"
-        :isFocus="this.inputStatus"
-        :class="{'inputFocus': inputStatus}"
+        :isFocus="this.inputBarOpen"
+        :class="{'inputFocus': this.inputBarOpen}"
         @targetInputBuffer="targetInputBuffer"
         @chatInputChange="chatInputChange"
         @toggleExtend="toggleExtendBar"
       ></input-bar>
     </div>
-    <extend-bar :class="{'extendBarOpen': isExtendBarOpen}"></extend-bar>
-    <div class="extend-bar-launch transition-bezier" :class="{'extendBarOpen': curExtendBar.type}">
+    <extend-bar :class="{'extend-bar-open': this.extendBarOpen}"></extend-bar>
+    <!-- <div class="extend-bar-launch transition-bezier" :class="{'extend-bar-open': curExtendBar.type}">
       <keep-alive>
         <component
           :inputPos="inputFocPos"
@@ -48,7 +51,7 @@
           :is="curExtendBar.component"
         ></component>
       </keep-alive>
-    </div>
+    </div> -->
     <div v-transfer-dom>
       <confirm v-model="lineUpAlert"
         :title="'您即将转入视频客服'"
@@ -69,6 +72,7 @@ import InputBar from '@/views/mainRoom/components/chat/input-bar'
 import { needToReloadDate } from '@/common/js/dateConfig'
 import { debounce } from '@/common/js/util'
 import { setUserInfoMixin, IMMixin } from '@/common/js/mixin'
+import { toggleBarStatus } from '@/common/js/status'
 
 export default {
   directives: {
@@ -89,39 +93,31 @@ export default {
     'TipsItem': () => import('@/views/mainRoom/components/chat/tips-item'),
     'FloadButton': () => import('@/views/mainRoom/components/chat/fload-button'),
     'extendBar': () => import('@/views/mainRoom/components/chat/extend-bar'),
-    'SendFile': () => import('@/views/mainRoom/components/chat/send-file'),
-    'SendExpress': () => import('@/views/mainRoom/components/chat/send-express'),
-    'SendGift': () => import('@/views/mainRoom/components/chat/send-gift'),
+    // 'SendFile': () => import('@/views/mainRoom/components/chat/send-file'),
+    // 'SendExpress': () => import('@/views/mainRoom/components/chat/send-express'),
+    // 'SendGift': () => import('@/views/mainRoom/components/chat/send-gift'),
     'IosGuide': () => import('@/views/mainRoom/components/video/ios-guide')
   },
   computed: {
     ...mapGetters([
       'msgs',
       'extendBarOpen',
-      'inputBarOpen',
-      'extendBarLaunch'
+      'inputBarOpen'
     ])
   },
   data() {
     return {
       /**
-       * [inputStatus    输入框焦点状态]
        * [scrollY        消息显示区域滑动距离]
        * [inputEle       真实输入框元素]
        * [inputFocPos    每次键盘弹出记录的光标位置]
-       * [curExtendBar   当前弹出的额外输入内容的模式]
        * [chat           消息队列]
        */
-      inputStatus: false,
       scrollY: 0,
       inputEle: null,
       inputFocPos: 0,
       // inputObserver: null,
-      isExtendBarOpen: false,
-      curExtendBar: {
-        type: false,
-        component: ''
-      },
+      extendBarLaunchOpen: false,
       lineUpAlert: false,
       historyMsgs: [
         {
@@ -219,40 +215,53 @@ export default {
         this.scrollY = Math.abs(Math.round(pos.y))
         console.log(this.scrollY)
       })
+      this.chatScroll.on('touchEnd', () => {
+        if (this.inputBarOpen || this.extendBarOpen) {
+          this.toggleBar(toggleBarStatus.allFold)
+          this._inputBlur()
+        }
+      }, this)
     },
     targetInputBuffer() {
-      if (this.curExtendBar.type) {
-        const self = this
-        this.curExtendBar.type = false
-        this.$refs.inputBar.setInputEditState('true')
-        debounce(() => {
-          self._inputFocus()
-        }, 300)()
+      if (this.inputBarOpen) {
+        // 软键盘收起
+        this.toggleBar(toggleBarStatus.allFold)
+        this._inputBlur()
       } else {
-        this.inputStatus === false ? this._inputFocus() : this._inputBlur()
+        // 软键盘弹出
+        const self = this
+        this.$refs.inputBar.setInputEditState('true')
+        this.toggleBar(toggleBarStatus.inputBar).then(() => {
+          self._inputFocus()
+        })
+        // const self = this
+        // return new Promise((resolve) => {
+        //   self.toggleBar(toggleBarStatus.inputBar)
+        //   resolve()
+        //   // self.$refs.inputBar.setInputEditState('true')
+        // }).then(() => {
+        //   debugger
+        //   self._inputFocus()
+        // })
       }
     },
     _inputFocus() {
       console.log('键盘弹出辣=========================')
-      this.inputStatus = true
-      this.$refs.inputBar.setInputEditState('true')
-      this.inputEle.focus()
+      // this.$refs.inputBar.setInputEditState('true')
+      document.getElementById('input-content-hook').focus()
+
+      // this.inputEle.focus()
       // document.querySelector('#input-content-hook').focus()
       // document.getElementById('input-content-hook').focus()
       // 聊天内容滚动到最底部
       this._resolveKeyboard()
-      // 监听聊天区域滑动，触发回调关闭软键盘，重置聊天区域高度
-      this.chatScroll.once('touchEnd', () => {
-        this._inputBlur()
-      }, this)
     },
     _inputBlur() {
-      this.inputStatus = false
       console.log('键盘收起辣=========================')
       this.inputFocPos = this.$refs.inputBar.getCursortPosition(this.inputEle)
       console.log(this.inputFocPos)
       this.inputEle.blur()
-      this.$refs.inputBar.setInputEditState('false')
+      this.$refs.inputBar.removeInputEditState()
       this.chatScroll.refresh()
       this.chatScroll.scrollToElement(this.$refs.chatContentEnd, 400)
     },
@@ -261,6 +270,7 @@ export default {
         // 提交，清空输入框，重新计算滚动区域高度，键盘收起
         this.inputEle.innerText = ''
         this.sendTextMsg(text)
+        this.setInputBar(false)
         this._inputBlur()
         console.log(`submit ==> ${text}`)
       } else {
@@ -290,41 +300,25 @@ export default {
     },
     readyToMenChat() {
       const query = this.$route.query
-      // new Promise((resolve) => {
-      //   this.setUserInfoToEnterRoom(query)
-      //   resolve()
-      // }).then(()=> {
-      //   this.initIM(query)
-      // })
       this.setUserInfoToEnterRoom(query, this.initIM)
     },
     toggleExtendBar() {
-      this.isExtendBarOpen = true
-    },
-    toggleExtend(mode) {
-      if (this.inputStatus) {
-        this._inputBlur()
+      if (this.extendBarOpen) {
+        this.toggleBar(toggleBarStatus.allFold)
+      } else if (this.inputBarOpen) {
         const self = this
-        debounce(() => {
-          self.curExtendBar.type = true
-        }, 300)()
+        return new Promise((resolve) => {
+          self.setInputBar(false)
+          // self.$refs.inputBar.setInputEditState('false')
+          self._inputBlur()
+          debounce(() => {
+            resolve()
+          }, 1000)()
+        }).then(() => {
+          self.toggleBar(toggleBarStatus.extendBar)
+        })
       } else {
-        this.curExtendBar.type = true
-      }
-      // this.curExtendBar.type = true
-      this.chatScroll.once('touchEnd', () => {
-        this.curExtendBar.type = false
-      }, this)
-      switch (mode) {
-        case 'gift':
-          this.curExtendBar.component = 'SendGift'
-          break
-        case 'express':
-          this.curExtendBar.component = 'SendExpress'
-          break
-        case 'file':
-          this.curExtendBar.component = 'SendFile'
-          break
+        this.toggleBar(toggleBarStatus.extendBar)
       }
     },
     selectEmojiWithCode(code) {
@@ -389,10 +383,12 @@ export default {
     },
     ...mapMutations({
       setModeToMenChat: 'SET_ROOM_MODE',
-      setMsgs: 'SET_MSGS'
+      setMsgs: 'SET_MSGS',
+      setInputBar: 'SET_INPUT_BAR'
     }),
     ...mapActions([
-      'enterToLineUp'
+      'enterToLineUp',
+      'toggleBar'
     ]),
     showGuide(data) {
       this.iosGuide = data
@@ -423,7 +419,7 @@ export default {
     display: flex;
     flex-direction: column;
     transition: all 0.3s;
-    &.extendBarOpen {
+    &.extend-bar-open {
       // height: calc(~'100% - 29rem');
       transform: translateY(-10rem);
     }
@@ -433,13 +429,15 @@ export default {
       height: auto;
       // min-height: calc(~'100% - 4.6rem');
       overflow: hidden;
-      background-color: @bg-normal;
+      // background-color: @bg-normal;
       flex: 1;
+      background-image: url('~/static/img/chat/chatBG.png');
+      background-size: cover;
       // flex-basis: auto;
       // flex-shrink: 1;
       .chat-content {
         width: 100%;
-        background-color: @bg-normal;
+        // background-color: @bg-normal;
         ul {
           .chat-content-block {
             width: 100%;
@@ -474,7 +472,7 @@ export default {
     background-color: @bg-normal;
     color: @text-normal;
     transition: all 0.3s;
-    &.extendBarOpen {
+    &.extend-bar-open {
       // height: calc(~'100% - 29rem');
       transform: translateY(-10rem);
     }
@@ -484,7 +482,7 @@ export default {
     background-color: @bg-normal;
     color: #000;
     transition: all 0.3s;
-    &.extendBarOpen {
+    &.extend-bar-open {
       // height: calc(~'100% - 29rem');
       transform: translateY(-24rem);
     }

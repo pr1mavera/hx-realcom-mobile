@@ -1,6 +1,7 @@
 <template>
   <div class="content-item" :class="[{'item-padding-left': isSelf, 'item-padding-right': !isSelf}]">
     <div class="avatar" v-if="!isSelf">
+      <div class="bot-avatar bg-image"></div>
       <svg class="icon extend-click" aria-hidden="true">
         <use xlink:href="#icon-wode"></use>
       </svg>
@@ -78,6 +79,7 @@ export default {
     padding-right: 9rem;
   }
   .avatar {
+    position: relative;
     width: 4.2rem;
     height: 4.2rem;
     background-color: @text-light;
@@ -85,6 +87,14 @@ export default {
     margin: 0 1rem;
     overflow: hidden;
     align-items: flex-start;
+    .bot-avatar {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      .bg-image('~/static/img/chat/xiaohua');
+    }
     .icon {
       width: 1.2rem;
       height: 1.2rem;

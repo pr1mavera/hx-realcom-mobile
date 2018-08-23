@@ -6,6 +6,9 @@ import App from './App'
 import { WechatPlugin, AlertPlugin, ToastPlugin, ConfirmPlugin, LoadingPlugin } from 'vux'
 import router from './router'
 import store from './store'
+// import WebRTCAPI from 'WebRTCAPI'
+// import webim from 'webim'
+
 // 移动端调试 vConsole
 let VConsole = require('../node_modules/vconsole/dist/vconsole.min')
 // eslint-disable-next-line
@@ -16,6 +19,9 @@ Vue.use(AlertPlugin)
 Vue.use(ToastPlugin)
 Vue.use(ConfirmPlugin)
 Vue.use(LoadingPlugin)
+
+// Vue.use(WebRTCAPI)
+// Vue.use(webim)
 
 // FastClick.attach(document.body) // 移动端消除300ms
 

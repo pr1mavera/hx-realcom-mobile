@@ -8,8 +8,6 @@ export const extendBarOpen = state => state.extendBarOpen
 
 export const inputBarOpen = state => state.inputBarOpen
 
-export const extendBarLaunch = state => state.extendBarLaunch
-
 export const fullScreen = state => state.fullScreen
 
 export const roomMode = state => state.roomMode

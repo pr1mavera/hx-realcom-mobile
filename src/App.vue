@@ -47,6 +47,9 @@ input, textarea{
   -webkit-appearance: none;
   outline: none;
 }
+button {
+  outline: none;
+}
 ul, li, ol, dl {
   list-style-type: none;
 }

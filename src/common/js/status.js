@@ -1,3 +1,9 @@
+export const toggleBarStatus = {
+  allFold: 0,
+  inputBar: 1, // 软键盘
+  extendBar: 2 // 拓展层
+}
+
 export const roomStatus = { // 房间聊天状态
   AIChat: 0, // 机器人
   menChat: 1, // 人工
