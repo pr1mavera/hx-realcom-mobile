@@ -1,5 +1,6 @@
 export default () => {
   const u = navigator.userAgent
+
   if (u.indexOf('Android') > -1 || u.indexOf('Linux') > -1) {
     // Android
     sessionStorage.setItem('device', 'Android')

@@ -69,6 +69,8 @@ import InputBar from '@/views/mainRoom/components/chat/input-bar'
 import { needToReloadDate } from '@/common/js/dateConfig'
 import { debounce } from '@/common/js/util'
 import { setUserInfoMixin, IMMixin } from '@/common/js/mixin'
+// 调用拉取漫游信息的接口
+import WebRTCRoom from '@/server/webRTCRoom'
 
 export default {
   directives: {
@@ -387,17 +389,37 @@ export default {
         window.onresize = null
       }
     },
+    showGuide(data) {
+      this.iosGuide = data
+      // console.log(data)
+    },
+    // 若ios用户 不在微信内置浏览器中打开该页面 则需要拉取漫游信息
+    async judgeRoam() {
+      const device = sessionStorage.getItem('device')
+      const browser = sessionStorage.getItem('browser')
+
+      if (device === 'iPhone' && browser === 'safari') {
+        this.$options.methods.getRoamMessage()
+      }
+    },
+    // 拉取漫游消息
+    getRoamMessage() {
+      // const groupID = '12345678'
+      const groupID = this.$route.query.groupId
+      const ReqMsgNumber = 3
+      WebRTCRoom.syncGroupC2CMsg(groupID, ReqMsgNumber, (res) => {
+        alert(JSON.stringify(res.data.RspMsgList))
+      }, (res) => {
+        console.log('error:' + res)
+      })
+    },
     ...mapMutations({
       setModeToMenChat: 'SET_ROOM_MODE',
       setMsgs: 'SET_MSGS'
     }),
     ...mapActions([
       'enterToLineUp'
-    ]),
-    showGuide(data) {
-      this.iosGuide = data
-      // console.log(data)
-    }
+    ])
   }
 }
 </script>

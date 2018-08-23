@@ -1,7 +1,7 @@
 <template>
   <section class="section">
     <main class="main">
-      <div class="img-box"><img src=""></div>
+      <div class="img-box"><img src="/static/img/systemUpgrade.png"></div>
       <p class="tips">
         非常抱歉，当前版本过低，无法接入视频客服</p>
       <p class="tips">请把手机系统升级为11.0版本或以上</p>
@@ -24,14 +24,17 @@
 <style scoped lang="less">
   .section {
     width: 100%;
+    min-height: 100vh;
+    position: fixed;
+    top: 0;
+    z-index: 2;
+    background: #ffffff;
     .main {
       padding: 10rem 0 0;
       .img-box {
-        width: 11rem;
-        height: 11rem;
+        width: 14.6rem;
         margin: 0 auto;
         text-align: center;
-        background-color: #D7DCE3;
         img {
           width: 100%;
           vertical-align: middle;
