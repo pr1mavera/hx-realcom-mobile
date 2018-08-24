@@ -28,6 +28,7 @@
           :inputStatus="inputStatus"
           @enterVideoLineUp="lineUpAlert = true"
           @ios-guide="showGuide"
+          @low-version="tipsUpgrade"
         ></fload-button>
       </div>
       <input-bar
@@ -57,6 +58,7 @@
       ></confirm>
     </div>
     <ios-guide v-if="iosGuide"></ios-guide>
+    <low-version v-if="lowVersion"></low-version>
   </div>
 </template>
 
@@ -94,7 +96,8 @@ export default {
     'SendFile': () => import('@/views/mainRoom/components/chat/send-file'),
     'SendExpress': () => import('@/views/mainRoom/components/chat/send-express'),
     'SendGift': () => import('@/views/mainRoom/components/chat/send-gift'),
-    'IosGuide': () => import('@/views/mainRoom/components/video/ios-guide')
+    'IosGuide': () => import('@/views/mainRoom/components/video/ios-guide'),
+    'LowVersion': () => import('@/views/mainRoom/components/video/low-version')
   },
   computed: {
     ...mapGetters([
@@ -148,7 +151,8 @@ export default {
           msgType: 'no_result'
         }
       ],
-      iosGuide: false
+      iosGuide: false,
+      lowVersion: false
     }
   },
   mounted() {
@@ -163,6 +167,8 @@ export default {
     })
     // 拉取历史消息
     this.setMsgs(this.historyMsgs)
+    // 拉取漫游消息
+    this.getRoamMessage()
   },
   methods: {
     _initChatMsgList() {
@@ -393,26 +399,30 @@ export default {
       this.iosGuide = data
       // console.log(data)
     },
+    tipsUpgrade(data) {
+      this.lowVersion = data
+    },
+
     // 若ios用户 不在微信内置浏览器中打开该页面 则需要拉取漫游信息
-    async judgeRoam() {
+    getRoamMessage() {
       const device = sessionStorage.getItem('device')
       const browser = sessionStorage.getItem('browser')
 
       if (device === 'iPhone' && browser === 'safari') {
-        this.$options.methods.getRoamMessage()
+        // const groupID = '12345678'
+        const groupID = this.$route.query.groupId
+        const ReqMsgNumber = 2
+        WebRTCRoom.syncGroupC2CMsg(groupID, ReqMsgNumber, (res) => {
+          const roamMsgList = res.data.RspMsgList
+          for (var i in roamMsgList) {
+            console.log('漫游消息：' + i + JSON.stringify(roamMsgList[i].MsgBody))
+          }
+        }, (res) => {
+          console.log('error:' + res)
+        })
       }
     },
-    // 拉取漫游消息
-    getRoamMessage() {
-      // const groupID = '12345678'
-      const groupID = this.$route.query.groupId
-      const ReqMsgNumber = 3
-      WebRTCRoom.syncGroupC2CMsg(groupID, ReqMsgNumber, (res) => {
-        alert(JSON.stringify(res.data.RspMsgList))
-      }, (res) => {
-        console.log('error:' + res)
-      })
-    },
+
     ...mapMutations({
       setModeToMenChat: 'SET_ROOM_MODE',
       setMsgs: 'SET_MSGS'

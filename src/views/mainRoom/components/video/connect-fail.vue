@@ -35,7 +35,7 @@
     position: fixed;
     top: 0;
     z-index: 2;
-    background: #ffffff;
+    background: #F4F4F4;
     .vux-flexbox {
       margin: 9rem 0 0;
     }

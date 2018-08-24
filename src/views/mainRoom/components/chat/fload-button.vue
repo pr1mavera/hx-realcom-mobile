@@ -81,21 +81,24 @@ export default {
       } else if (device === 'iPhone') {
           // 判断iOS的系统版本
           const ver = ua.match(/cpu iphone os (.*?) like mac os/)
-          const version = ver[1].replace(/_/g, '.')
+          const version = parseFloat(ver[1].replace(/_/g, '.'))
           if (version < 11) {
             alert('当前ios的版本为：' + version + '，请升级系统版本')
+            this.$emit('low-version', 'true')
           } else if (device === 'iPhone' && browser === 'wx') {
+            alert('当前ios的版本为：' + version)
               // 当前在微信内置浏览器中，弹层提示用户在浏览器中打开
               this.$emit('ios-guide', 'true')
               // 传参给query
               this.$router.push({
                   path: '/',
-                  name: '',
+                  name: 'chat',
                   query: {
                     groupId: '12345678'
                   }
               })
           } else if (device === 'iPhone' && browser === 'safari') {
+              alert('当前ios的版本为：' + version + '！')
               this.$emit('enterVideoLineUp')
           }
       }

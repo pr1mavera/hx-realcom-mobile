@@ -100,8 +100,8 @@ export default {
 
   .line-up {
     width: 100%;
-    height: 100%;
-    background-color: @bg-light;
+    min-height: 100%;
+    background-color: @bg-normal;
     .main {
       padding: 10rem 0 0;
       .img-box {
