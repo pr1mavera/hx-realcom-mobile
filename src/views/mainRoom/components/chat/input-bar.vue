@@ -203,10 +203,11 @@ export default {
           margin: 0 auto;
           width: 1.4rem;
           height: 1.4rem;
-          transition: all 0.3s ease-in-out;
+          transition: all 0.4s ease-in-out;
+          // transition-delay: 0.65s;
           &.extend-Bar-Open {
-            transform: rotate(405deg) scale(1.5);
-            fill: @text-normal;
+            transform: rotate(135deg);
+            // fill: @text-normal;
           }
         }
       }

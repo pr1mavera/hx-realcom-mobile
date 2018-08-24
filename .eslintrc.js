@@ -36,6 +36,7 @@ module.exports = {
     'quote-props': ['error', 'as-needed', { 'keywords': true, 'unnecessary': false }],
     'no-console': 0,
     'no-alert': 0,
-    'vue/no-parsing-error': [2, { 'invalid-first-character-of-tag-name': false, 'x-invalid-end-tag': false }]
+    'vue/no-parsing-error': [2, { 'invalid-first-character-of-tag-name': false, 'x-invalid-end-tag': false }],
+    'camelcase': 0
   }
 }
