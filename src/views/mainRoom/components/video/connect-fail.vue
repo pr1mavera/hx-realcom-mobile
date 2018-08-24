@@ -5,11 +5,11 @@
       <div class="img-box"><img src="/static/img/networkBusy.png"></div>
       <p class="tip">抱歉网络繁忙，视频连接失败，请稍后重连！</p>
       <flexbox>
-        <flexbox-item :gutter= "5" >
-          <x-button :gradients="['#FF8C6A', '#FF80A0']" style="width: 12rem;">取 消</x-button>
+        <flexbox-item :gutter="3">
+          <x-button :gradients="['#FF8C6A', '#FF80A0']" style="width: 12.5rem;">取 消</x-button>
         </flexbox-item>
         <flexbox-item>
-          <x-button :gradients="['#1D62F0', '#19D5FD']" style="width: 12rem;">重 连</x-button>
+          <x-button :gradients="['#1D62F0', '#19D5FD']" style="width: 12.5rem;">重 连</x-button>
         </flexbox-item>
       </flexbox>
     </main>

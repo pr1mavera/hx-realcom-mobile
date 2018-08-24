@@ -7,10 +7,10 @@
     </div>
     <flexbox>
       <flexbox-item :gutter="5">
-        <x-button :gradients="['#FF8C6A', '#FF80A0']" style="width: 12rem;">取 消</x-button>
+        <x-button :gradients="['#FF8C6A', '#FF80A0']" style="width: 12.5rem;">取 消</x-button>
       </flexbox-item>
       <flexbox-item>
-        <x-button :gradients="['#1D62F0', '#19D5FD']" style="width: 12rem;">其他客服</x-button>
+        <x-button :gradients="['#1D62F0', '#19D5FD']" style="width: 12.5rem;">其他客服</x-button>
       </flexbox-item>
     </flexbox>
   </section>
@@ -31,13 +31,18 @@
 <style scoped lang="less">
   section {
     width: 100%;
+    min-height: 100vh;
+    position: fixed;
+    top: 0;
+    z-index: 2;
+    background: #F4F4F4;
     padding: 10rem 0 0;
     .vux-flexbox {
       margin: 9rem 0 0;
     }
     .img-box {
-      width: 11rem;
-      height: 11rem;
+      width: 8.8rem;
+      height: 8.8rem;
       margin: 0 auto;
       text-align: center;
       border-radius: 50%;
@@ -51,14 +56,14 @@
     }
     .tips {
       color: #ADADAD;
-      line-height: 1.25;
       font-size: 1.4rem;
-      margin: 5.0rem 0 0;
+      margin: 4.0rem 0 0;
       text-align: center;
       .tips-big {
         color: #9E9E9E;
         font-weight: bold;
         font-size: 2rem;
+        margin-bottom: 1.6rem;
       }
     }
   }

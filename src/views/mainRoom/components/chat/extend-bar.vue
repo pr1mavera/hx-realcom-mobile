@@ -40,21 +40,21 @@ export default {
 
     },
     extendBarEnter() {
-      var keyframes = anime({
-        targets: '#keyframes .el',
-        translateX: [
-          { value: 250, duration: 1000, delay: 500, elasticity: 0 }
-        ],
-        translateY: [
-          { value: -40, duration: 500, elasticity: 100 }
-        ],
-        scaleX: [
-          { value: 4, duration: 100, delay: 500, easing: 'easeOutExpo' }
-        ],
-        scaleY: [
-          { value: 2, duration: 50, delay: 1000, easing: 'easeOutExpo' }
-        ]
-      })
+      // var keyframes = anime({
+      //   targets: '#keyframes .el',
+      //   translateX: [
+      //     { value: 250, duration: 1000, delay: 500, elasticity: 0 }
+      //   ],
+      //   translateY: [
+      //     { value: -40, duration: 500, elasticity: 100 }
+      //   ],
+      //   scaleX: [
+      //     { value: 4, duration: 100, delay: 500, easing: 'easeOutExpo' }
+      //   ],
+      //   scaleY: [
+      //     { value: 2, duration: 50, delay: 1000, easing: 'easeOutExpo' }
+      //   ]
+      // })
     },
     extendBarAfterEnter() {
 

@@ -29,12 +29,12 @@ export default {
   // }
 }
 
-function refresh() {
-  var docEle = document.documentElement
-  docEle.style.fontSize = docEle.clientWidth / 37.5 + 'px'
-}
-refresh()
-window.onresize = refresh
+// function refresh() {
+//   var docEle = document.documentElement
+//   docEle.style.fontSize = docEle.clientWidth / 37.5 + 'px'
+// }
+// refresh()
+// window.onresize = refresh
 </script>
 
 <style lang="less">
