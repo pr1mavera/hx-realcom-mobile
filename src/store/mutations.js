@@ -16,9 +16,6 @@ const mutations = {
   [types.SET_INPUT_BAR](state, option) {
     state.inputBarOpen = option
   },
-  [types.SET_EXTEND_BAR_LAUNCH](state, option) {
-    state.extendBarLaunch = option
-  },
   [types.SET_FULL_SCREEN](state, flag) {
     state.fullScreen = flag
   },

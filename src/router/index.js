@@ -31,12 +31,6 @@ export default new Router({
             {
               path: '/room/chat',
               name: 'chat',
-              query: {
-                cmd: 'create',
-                creator: '111',
-                courseName: '111',
-                userID: `userid_web_${Date.now().toString()}`
-              },
               component: chat
             },
             {
@@ -52,6 +46,10 @@ export default new Router({
           component: share
         }
       ]
+    },
+    {
+      path: '/',
+      redirect: '/mobile/room/chat'
     }
   ],
   base: '/mobile/'

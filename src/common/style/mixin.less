@@ -49,8 +49,10 @@
   @x2: '@2x.png';
   @x3: '@3x.png';
   background-image: url('@{url}@{x2}');
+  background-size: cover;
   @media (-webkit-min-device-pixel-ratio: 3), (min-device-pixel-ratio: 3) {
     background-image: url('@{url}@{x3}');
+    background-size: cover;
   }
 }
 

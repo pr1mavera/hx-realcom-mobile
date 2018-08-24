@@ -3,7 +3,7 @@
     <button
       class="item extend-click transition-bezier"
       :disabled="inputStatus"
-      @click="enterVideoLineUp"
+      @click="callPhone"
       :class="[{'visible-when-input': inputStatus, 'item-1': !inputStatus}]">
       <svg class="icon" aria-hidden="true">
         <use xlink:href="#icon-dianhuakefu"></use>
@@ -12,7 +12,7 @@
     <button
       class="item extend-click transition-bezier"
       :disabled="inputStatus"
-      @click="callPhone"
+      @click="enterVideoLineUp"
       :class="[{'visible-when-input': inputStatus, 'item-2': !inputStatus}]">
       <svg class="icon" aria-hidden="true">
         <use xlink:href="#icon-shipinkefu"></use>
@@ -29,7 +29,6 @@
     <button
       class="item extend-click transition-bezier"
       :disabled="inputStatus"
-      @click="enterVideoLineUp"
       :class="[{'visible-when-input': inputStatus, 'item-4': !inputStatus}]">
       <svg class="icon" aria-hidden="true">
         <use xlink:href="#icon-pinglun"></use>

@@ -41,7 +41,7 @@ let webpackConfig = {
   },
   externals: {
     webim: 'webim',
-    WebRTCAPI: 'WebRTCAPI',
+    webRTCAPI: 'WebRTCAPI',
   },
   module: {
     rules: [

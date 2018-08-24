@@ -19,19 +19,21 @@
         </br>
       </div> -->
       <div class="input-content"
+        autofocus
         placeholder="请输入..."
         id="input-content-hook"
         ref="inputContent"
         type="text"
-        contentEditable="true"
         @click="chatFocus"
         @keyup="chatInput($event, false)"
         @keyup.enter="chatInput($event, true)"></div>
     </div>
     <div class="input-bar-item right-item">
-      <svg class="icon extend-click" aria-hidden="true" @click="toggleExtend(2)">
-        <use xlink:href="#icon-jiahao"></use>
-      </svg>
+      <button class="input-bar-item-btn" @click="toggleExtend">
+        <svg class="icon extend-click" aria-hidden="true" :class="{'extend-Bar-Open': this.extendBarOpen}">
+          <use xlink:href="#icon-jiahao"></use>
+        </svg>
+      </button>
       <!-- <svg class="icon extend-click" aria-hidden="true" @click="toggleExtend(2)">
         <use xlink:href="#icon-wode"></use>
       </svg>
@@ -43,6 +45,7 @@
 </template>
 
 <script type="text/ecmascript-6">
+import { mapGetters } from 'vuex'
 // import { XTextarea, Group } from 'vux'
 
 export default {
@@ -55,19 +58,25 @@ export default {
       type: Boolean
     }
   },
+  computed: {
+    ...mapGetters([
+      'extendBarOpen'
+    ])
+  },
   data() {
     return {
       status: false
     }
   },
   methods: {
-    toggleExtend(index) {
-      this.$emit('toggleExtend', index === 1 ? 'gift' : index === 2 ? 'express' : 'file')
+    toggleExtend() {
+      this.$emit('toggleExtend')
     },
     chatFocus() {
-      if (this.isFocus === false) {
-        this.$emit('targetInputBuffer')
-      }
+      // if (this.isFocus === false) {
+      //   this.$emit('targetInputBuffer')
+      // }
+      this.$emit('targetInputBuffer')
     },
     chatInput(event, isEnter) {
       const e = event || window.event
@@ -143,7 +152,6 @@ export default {
         padding-left: 0.8rem;
       }
       .input-content {
-        content:attr(placeholder);
         width: 100%;
         line-height: 2.2rem;
         min-height: 3.2rem;
@@ -162,6 +170,7 @@ export default {
         // background-color: @bg-normal;
         transition: all .5s cubic-bezier(0.11, 0.62, 0.23, 1);
         -webkit-overflow-scrolling: touch;
+        -webkit-user-select: text;
         &:empty:before {
           content: attr(placeholder);
           color: @label-line-normal;
@@ -182,10 +191,24 @@ export default {
       // padding: 0 0.8rem;
       flex-grow: 0;
       flex-shrink: 0;
-      .icon {
+      .input-bar-item-btn {
+        width: 2.4rem;
+        height: 2.4rem;
+        border: 0;
+        padding: 0;
+        background-color: unset;
         margin: 0 auto;
-        width: 1.4rem;
-        height: 1.4rem;
+        border-radius: 50%;
+        .icon {
+          margin: 0 auto;
+          width: 1.4rem;
+          height: 1.4rem;
+          transition: all 0.3s ease-in-out;
+          &.extend-Bar-Open {
+            transform: rotate(405deg) scale(1.5);
+            fill: @text-normal;
+          }
+        }
       }
     }
     .icon {
