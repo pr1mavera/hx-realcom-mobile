@@ -38,8 +38,6 @@
 </template>
 
 <script type="text/ecmascript-6">
-// 调用拉取漫游信息的接口
-// import WebRTCRoom from '@/server/webRTCRoom'
 
 export default {
   props: {
@@ -68,28 +66,55 @@ export default {
       //     alert('不支持WebRTC')
       //   }
       // })
+
       // 判断手机类型, 系统的版本
       const device = sessionStorage.getItem('device')
       const browser = sessionStorage.getItem('browser')
+      const ua = navigator.userAgent.toLowerCase()
+
       if (device === 'Android') {
-        const ua = navigator.userAgent.toLowerCase()
         const reg = /android [\d._]+/gi
         const version = (ua.match(reg) + '').replace(/[^0-9|_.]/ig, '').replace(/_/ig, '.')
-        console.log('Android的版本为：' + version)
-      } else if (device === 'iPhone' && browser === 'wx') {
-        // 将传数据给其父元素,提示用户在浏览器中打开
-        this.$emit('ios-guide', 'true')
-        return
+        console.log('该Android的版本为：' + version)
+        this.$emit('enterVideoLineUp')
+      } else if (device === 'iPhone') {
+          // 判断iOS的系统版本
+          const ver = ua.match(/cpu iphone os (.*?) like mac os/)
+          const version = parseFloat(ver[1].replace(/_/g, '.'))
+          if (version < 11) {
+            alert('当前ios的版本为：' + version + '，请升级系统版本')
+            this.$emit('low-version', 'true')
+          } else if (device === 'iPhone' && browser === 'wx') {
+            alert('当前ios的版本为：' + version)
+              // 当前在微信内置浏览器中，弹层提示用户在浏览器中打开
+              this.$emit('ios-guide', 'true')
+              // 传参给query
+              this.$router.push({
+                  path: '/',
+                  name: 'chat',
+                  query: {
+                    groupId: '12345678'
+                  }
+              })
+          } else if (device === 'iPhone' && browser === 'safari') {
+              alert('当前ios的版本为：' + version + '！')
+              this.$emit('enterVideoLineUp')
+          }
+      }
+      // else if (device === 'iPhone' && browser === 'wx') {
+        // 将传数据给其父元素,弹层提示用户在浏览器中打开
+        // this.$emit('ios-guide', 'true')
+        // return
         // 点击右上角显示的菜单项
         // wx.showMenuItems({
         //   menuList: [
         //     'menuItem:openWithSafari'
         //   ] // 要显示的菜单项，只显示在浏览器中打开
         // })
-      } else if (device === 'iPhone' && browser === 'safari') {
-
-      }
-      this.$emit('enterVideoLineUp')
+      // } else if (device === 'iPhone' && browser === 'safari') {
+      //   this.$emit('enterVideoLineUp')
+      // }
+      // this.$emit('enterVideoLineUp')
       // // 若当前手机为安卓机
       // if (u.indexOf('Android') > -1 || u.indexOf('Linux') > -1) {
       //   this.$emit('enterVideoLineUp')

@@ -2,7 +2,7 @@
   <section class="section">
     <!--<div class="top"></div>-->
     <main class="main">
-      <div class="img-box"><img src="/static/img/avatar.png"></div>
+      <div class="img-box"><img src="/static/img/networkBusy.png"></div>
       <p class="tip">抱歉网络繁忙，视频连接失败，请稍后重连！</p>
       <flexbox>
         <flexbox-item :gutter= "5" >
@@ -31,18 +31,21 @@
 <style scoped lang="less">
   .section {
     width: 100%;
+    min-height: 100vh;
+    position: fixed;
+    top: 0;
+    z-index: 2;
+    background: #F4F4F4;
     .vux-flexbox {
       margin: 9rem 0 0;
     }
     .main {
       padding: 10rem 0 0;
       .img-box {
-        width: 11rem;
-        height: 11rem;
+        width: 18.6rem;
         margin: 0 auto;
         text-align: center;
         border-radius: 50%;
-        background-color: #D7DCE3;
         img {
           width: 100%;
           vertical-align: middle;

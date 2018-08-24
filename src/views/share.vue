@@ -2,14 +2,19 @@
   <div class="share">
     There are some words for test
     <!-- 测试评价组件 -->
-    <assess v-if="true"></assess>
+    <!--<assess v-if="true"></assess>-->
+    <!--<connect-fail></connect-fail>-->
+    <!--<low-version></low-version>-->
   </div>
 </template>
 
 <script type="text/ecmascript-6">
+// import ConnectFail from "./mainRoom/components/video/connect-fail";
 export default {
   components: {
-    'Assess': () => import('@/views/mainRoom/components/assess')
+    'Assess': () => import('@/views/mainRoom/components/assess'),
+    'ConnectFail': () => import('@/views/mainRoom/components/video/connect-fail'),
+    'LowVersion': () => import('@/views/mainRoom/components/video/low-version')
   }
 }
 </script>
