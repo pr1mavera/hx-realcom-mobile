@@ -42,7 +42,7 @@
         @toggleExtend="toggleExtendBar"
       ></input-bar>
     </div>
-    <extend-bar :class="{'extend-bar-open': this.extendBarOpen}"></extend-bar>
+    <extend-bar></extend-bar>
     <!-- <div class="extend-bar-launch transition-bezier" :class="{'extend-bar-open': curExtendBar.type}">
       <keep-alive>
         <component
@@ -468,14 +468,16 @@ export default {
     }
   }
   .extend-bar {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
     height: 10rem;
-    background-color: @bg-normal;
+    // height: 10rem;
+    // background-color: @bg-normal;
     color: @text-normal;
     transition: all 0.3s;
-    &.extend-bar-open {
-      // height: calc(~'100% - 29rem');
-      transform: translateY(-10rem);
-    }
+    z-index: -1;
   }
   .extend-bar-launch {
     height: 24rem;
