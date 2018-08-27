@@ -2,31 +2,31 @@
   <div class="video-footer">
     <div class="footer-bar">
       <div class="hang-up">
-        <button class="footer-btn">
+        <button class="footer-btn footer-btn-hang-up">
           <svg class="icon extend-click" aria-hidden="true">
-            <use xlink:href="#icon-wode"></use>
+            <use xlink:href="#icon-guaduan"></use>
           </svg>
         </button>
       </div>
       <div class="menu">
-        <button class="footer-btn">
+        <button class="footer-btn footer-btn-gift">
           <svg class="icon extend-click" aria-hidden="true">
-            <use xlink:href="#icon-wode"></use>
+            <use xlink:href="#icon-liwu"></use>
           </svg>
         </button>
-        <button class="footer-btn">
+        <button class="footer-btn footer-btn-star">
           <svg class="icon extend-click" aria-hidden="true">
-            <use xlink:href="#icon-wode"></use>
+            <use xlink:href="#icon-pingjia"></use>
           </svg>
         </button>
-        <button class="footer-btn">
+        <button class="footer-btn footer-btn-switch">
           <svg class="icon extend-click" aria-hidden="true">
-            <use xlink:href="#icon-wode"></use>
+            <use xlink:href="#icon-qiehuanshexiangtou"></use>
           </svg>
         </button>
-        <button class="footer-btn" @click="minimizeVideoBar">
+        <button class="footer-btn footer-btn-screen" @click="minimizeVideoBar">
           <svg class="icon extend-click" aria-hidden="true">
-            <use xlink:href="#icon-wode"></use>
+            <use xlink:href="#icon-suoxiao"></use>
           </svg>
         </button>
       </div>
@@ -83,11 +83,28 @@ export default {
       margin: 0;
       border: 0;
       border-radius: 50%;
-      background-color: #000;
-      opacity: .3;
+      background-color: rgba(0, 0, 0, .3);
+      &.footer-btn-hang-up {
+        background-color: rgba(255, 149, 156, .5);
+      }
+      &.footer-btn-gift {
+        background-color: unset;
+      }
+      &.footer-btn-star {
+        background-color: unset;
+      }
+      &.footer-btn-switch {
+
+      }
+      &.footer-btn-screen {
+        .icon {
+          width: 2rem;
+          height: 2rem;
+        }
+      }
       .icon {
-        width: 1.8rem;
-        height: 1.8rem;
+        width: 2.4rem;
+        height: 2.4rem;
         fill: @text-lighter;
       }
     }

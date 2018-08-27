@@ -28,7 +28,7 @@
           </ul>
         </div>
         <fload-button
-          :inputStatus="this.inputBarOpen"
+          :barStatus="this.inputBarOpen || this.extendBarOpen"
           @enterVideoLineUp="lineUpAlert = true"
           @ios-guide="showGuide"
         ></fload-button>
@@ -42,7 +42,12 @@
         @toggleExtend="toggleExtendBar"
       ></input-bar>
     </div>
-    <extend-bar></extend-bar>
+    <extend-bar
+      ref="extendBar"
+      @selectEmojiWithCode="selectEmojiWithCode"
+      @sendSectionShow="extendBarLaunchOpen = true"
+      @deleteBtn="onDeleteBtnClick"
+    ></extend-bar>
     <!-- <div class="extend-bar-launch transition-bezier" :class="{'extend-bar-open': curExtendBar.type}">
       <keep-alive>
         <component
@@ -216,9 +221,15 @@ export default {
         console.log(this.scrollY)
       })
       this.chatScroll.on('touchEnd', () => {
-        if (this.inputBarOpen || this.extendBarOpen) {
-          this.toggleBar(toggleBarStatus.allFold)
+        if (this.inputBarOpen) {
+          this.setInputBar(false)
           this._inputBlur()
+        } else if (this.extendBarOpen) {
+          this.setExtendBar(false)
+          this.extendBarLaunchOpen = false
+          this.$refs.extendBar.giftSectionShow = false
+          this.$refs.extendBar.expressSectionShow = false
+          // this.toggleExtendBar()
         }
       }, this)
     },
@@ -258,8 +269,8 @@ export default {
     },
     _inputBlur() {
       console.log('键盘收起辣=========================')
-      this.inputFocPos = this.$refs.inputBar.getCursortPosition(this.inputEle)
-      console.log(this.inputFocPos)
+      // this.inputFocPos = this.$refs.inputBar.getCursortPosition(this.inputEle)
+      // console.log(this.inputFocPos)
       this.inputEle.blur()
       this.$refs.inputBar.removeInputEditState()
       this.chatScroll.refresh()
@@ -304,7 +315,10 @@ export default {
     },
     toggleExtendBar() {
       if (this.extendBarOpen) {
-        this.toggleBar(toggleBarStatus.allFold)
+        this.setExtendBar(false)
+        this.extendBarLaunchOpen = false
+        this.$refs.extendBar.giftSectionShow = false
+        this.$refs.extendBar.expressSectionShow = false
       } else if (this.inputBarOpen) {
         const self = this
         return new Promise((resolve) => {
@@ -320,6 +334,10 @@ export default {
       } else {
         this.toggleBar(toggleBarStatus.extendBar)
       }
+    },
+    onDeleteBtnClick() {
+      // 删除
+      console.log('我想删点东西，比如说田老师红烧肉')
     },
     selectEmojiWithCode(code) {
       let str = this.inputEle.innerText
@@ -384,7 +402,8 @@ export default {
     ...mapMutations({
       setModeToMenChat: 'SET_ROOM_MODE',
       setMsgs: 'SET_MSGS',
-      setInputBar: 'SET_INPUT_BAR'
+      setInputBar: 'SET_INPUT_BAR',
+      setExtendBar: 'SET_EXTEND_BAR'
     }),
     ...mapActions([
       'enterToLineUp',
@@ -422,6 +441,9 @@ export default {
     &.extend-bar-open {
       // height: calc(~'100% - 29rem');
       transform: translateY(-10rem);
+    }
+    &.extend-bar-launch-open {
+      transform: translateY(-23rem);
     }
     .chat-wrapper {
       position: relative;
@@ -472,7 +494,7 @@ export default {
     left: 0;
     bottom: 0;
     width: 100%;
-    height: 10rem;
+    height: 23rem;
     // height: 10rem;
     // background-color: @bg-normal;
     color: @text-normal;

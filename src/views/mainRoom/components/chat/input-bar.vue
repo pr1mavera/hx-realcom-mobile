@@ -5,7 +5,7 @@
         <use xlink:href="#icon-wode"></use>
       </svg>
     </div> -->
-    <div class="input-bar-item input-box" :class="{'visible-padding-left': !status}">
+    <div class="input-bar-item input-box">
       <!-- <div class="input-content"
         id="input-content-hook"
         ref="inputContent"
@@ -29,23 +29,25 @@
         @keyup.enter="chatInput($event, true)"></div>
     </div>
     <div class="input-bar-item right-item">
-      <button class="input-bar-item-btn" @click="toggleExtend">
-        <svg class="icon extend-click" aria-hidden="true" :class="{'extend-Bar-Open': this.extendBarOpen}">
-          <use xlink:href="#icon-jiahao"></use>
-        </svg>
-      </button>
-      <!-- <svg class="icon extend-click" aria-hidden="true" @click="toggleExtend(2)">
-        <use xlink:href="#icon-wode"></use>
-      </svg>
-      <svg class="icon extend-click" aria-hidden="true" @click="toggleExtend(3)">
-        <use xlink:href="#icon-wode"></use>
-      </svg> -->
+      <transition
+        @enter="sendBtnEnter"
+        @leave="sendBtnLeave">
+        <button id="sendBtn" class="sendBtn" v-if="this.inputBarOpen">发送</button>
+      </transition>
+      <transition name="send-plus" mode="out-in">
+        <button class="input-bar-item-btn" v-if="!this.inputBarOpen" @click="toggleExtend">
+          <svg class="icon extend-click" aria-hidden="true" :class="{'extend-Bar-Open': this.extendBarOpen}">
+            <use xlink:href="#icon-jiahao"></use>
+          </svg>
+        </button>
+      </transition>
     </div>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
 import { mapGetters } from 'vuex'
+import anime from 'animejs'
 // import { XTextarea, Group } from 'vux'
 
 export default {
@@ -60,7 +62,8 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'extendBarOpen'
+      'extendBarOpen',
+      'inputBarOpen'
     ])
   },
   data() {
@@ -106,6 +109,36 @@ export default {
         caretOffset = preCaretRange.toString().length
       }
       return caretOffset
+    },
+    sendBtnEnter() {
+      const extendBarKeyframes = anime.timeline()
+      extendBarKeyframes.add({
+        targets: '#sendBtn',
+        translateX: [
+          { value: [-46, 0], duration: 500, delay: 300, easing: 'easeInOutQuart' }
+        ],
+        translateY: [
+          { value: [10, 0], duration: 200, delay: 300, easing: 'easeInOutQuart' }
+        ],
+        scaleX: [
+          { value: [0.1, 1], duration: 200, delay: 300, easing: 'linear' }
+        ],
+        scaleY: [
+          { value: [0.2, 1], duration: 100, delay: 300, easing: 'linear' }
+        ],
+        borderRadius: [
+          { value: [50, 5], duration: 200, delay: 400, easing: 'easeInOutQuart' }
+        ],
+        opacity: [
+          { value: [0, 1], duration: 300, delay: 300, easing: 'easeInOutQuart' }
+        ],
+        color: [
+          { value: '#fff', duration: 500, delay: 400, easing: 'easeInOutQuart' }
+        ]
+      })
+    },
+    sendBtnLeave() {
+
     }
   }
 }
@@ -144,13 +177,11 @@ export default {
       height: 4.6rem;
     }
     &.input-box {
-      width: 100%;
+      // min-width: calc(~'100% - 9rem');
       height: 100%;
-      padding: 0.7rem 0;
+      padding: 0.7rem 0 0.7rem 0.8rem;
+      flex: 1;
       box-sizing: border-box;
-      &.visible-padding-left {
-        padding-left: 0.8rem;
-      }
       .input-content {
         width: 100%;
         line-height: 2.2rem;
@@ -182,22 +213,33 @@ export default {
       }
     }
     &.right-item {
+      position: relative;
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      width: 4.6rem;
-      flex-basis: 4.6rem;
+      align-items: flex-end;
+      min-width: 4.6rem;
       height: 4.6rem;
-      // padding: 0 0.8rem;
       flex-grow: 0;
-      flex-shrink: 0;
+      .send-plus-enter-active, .send-plus-leave-active {
+        transition: all .5s ease;
+        transition-delay: .3s;
+      }
+      .send-plus-enter, .send-plus-leave-to {
+        opacity: 0;
+        transform: translateX(4.6rem);
+      }
       .input-bar-item-btn {
+        position: absolute;
+        top: 0;
+        right: 0;
         width: 2.4rem;
         height: 2.4rem;
+        // flex-basis: 4.6rem;
+        margin: 1.1rem;
+        flex-shrink: 0;
         border: 0;
         padding: 0;
         background-color: unset;
-        margin: 0 auto;
         border-radius: 50%;
         .icon {
           margin: 0 auto;
@@ -210,6 +252,23 @@ export default {
             // fill: @text-normal;
           }
         }
+      }
+      .sendBtn {
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 6.4rem;
+        height: 3.2rem;
+        background: rgba(33,150,243,1);
+        border-radius: 50%;
+        color: rgba(33,150,243,1);
+        font-size: 1.6rem;
+        border: 0;
+        padding: 0;
+        margin: 0.7rem 0.8rem;
+        flex-shrink: 0;
+        // transform: translate(-46px, 32px) scaleX(0.1) scaleY(0.2);
+        // opacity: 0;
       }
     }
     .icon {
