@@ -7,7 +7,8 @@
         <x-icon type="ios-close" @click.native="cancelAssess" size="30"></x-icon>
         <div class="eva-part">
           <p>请对{{name}}本次的服务进行评价</p>
-          <rater v-model="stars" active-color="#FEC656"></rater>
+          <rater v-model="stars"
+                 star="<svg class='icon' style='width:2rem; height:2rem;' aria-hidden='true'><use xlink:href='#icon-pingjiaxingxingkongxin'></use></svg>" active-color="red"></rater>
         </div>
         <div class="eva-more" v-if="stars > 0">
           <flexbox>
@@ -63,6 +64,8 @@
         next: true
       }
     },
+    mounted() {
+    },
     methods: {
       cancelAssess() {
         this.showAssess = false
@@ -82,7 +85,7 @@
     }
     .popup-main {
       position: relative;
-      width: 88%;
+      width: 27rem;
       opacity: .85;
       margin: 0 auto;
       align-self: center;
@@ -108,7 +111,7 @@
         }
       }
       .eva-part {
-        font-size: 1.5rem;
+        font-size: 1.2rem;
         padding: 1.5rem 0 0;
         .vux-rater {
           padding: 2.5rem 0 3rem;
@@ -120,7 +123,6 @@
             width: 9rem;
             cursor: pointer;
             font-size: 1.6rem;
-            border-radius: 2rem;
           }
         }
       }
