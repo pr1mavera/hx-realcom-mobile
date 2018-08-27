@@ -6,31 +6,34 @@
           <tab-item :selected="currIndex === 0" @on-item-click="onEmojiMenuClick">
             <div class="menu-nav-item">
               <svg class="icon extend-click" aria-hidden="true">
-                <use xlink:href="#icon-wode"></use>
+                <use xlink:href="#icon-lishibiaoqing"></use>
               </svg>
             </div>
           </tab-item>
           <tab-item :selected="currIndex === 1" @on-item-click="onEmojiMenuClick">
             <div class="menu-nav-item">
               <svg class="icon extend-click" aria-hidden="true">
-                <use xlink:href="#icon-wode"></use>
+                <use xlink:href="#icon-biaoqing-"></use>
               </svg>
             </div>
           </tab-item>
           <tab-item :selected="currIndex === 2" @on-item-click="onEmojiMenuClick">
             <div class="menu-nav-item">
-              <svg class="icon extend-click" aria-hidden="true">
+              <div class="menu-nav-xiaohua bg-image"></div>
+              <!-- <svg class="icon extend-click" aria-hidden="true">
                 <use xlink:href="#icon-wode"></use>
-              </svg>
+              </svg> -->
             </div>
           </tab-item>
         </tab>
       </div>
       <div class="nav-delete">
         <div class="menu-nav-item">
-          <svg class="icon extend-click" aria-hidden="true">
-            <use xlink:href="#icon-wode"></use>
-          </svg>
+          <div class="menu-nav-delete" @click="this.$emit('deleteBtn')">
+            <svg class="icon extend-click" aria-hidden="true">
+              <use xlink:href="#icon-chahao"></use>
+            </svg>
+          </div>
         </div>
       </div>
     </div>
@@ -39,7 +42,7 @@
         0000000000000
       </div>
       <div class="emoji-swiper" v-if="currIndex === 1">
-        <swiper  dots-position="center">
+        <swiper dots-position="center">
           <swiper-item v-for="(page, index) in express[1].list" :key="index">
             <ul>
               <li
@@ -143,6 +146,7 @@ export default {
 
 <style lang="less">
 @import '~@/common/style/theme.less';
+@import '~@/common/style/mixin.less';
 
 .send-express {
   position: relative;
@@ -173,11 +177,17 @@ export default {
               z-index: 5;
               width: 4.6rem;
               height: 4.6rem;
+              .menu-nav-xiaohua {
+                width: 2.4rem;
+                height: 2.4rem;
+                margin: 1.1rem;
+                .bg-image('~/static/img/chat/xiaohua');
+              }
               .icon {
                 display: block;
-                width: 2rem;
-                height: 2rem;
-                padding: 1.3rem;
+                width: 2.4rem;
+                height: 2.4rem;
+                padding: 1.1rem;
                 fill: #000;
                 background-color: transparent;
               }
@@ -193,14 +203,35 @@ export default {
       .menu-nav-item {
         width: 4.6rem;
         height: 4.6rem;
-        .icon {
-          display: block;
-          width: 2rem;
+        .menu-nav-delete {
+          position: relative;
+          width: 2.8rem;
           height: 2rem;
-          padding: 1.3rem;
-          fill: #000;
-          background-color: transparent;
+          margin: 1.3rem 0 1.3rem 1rem;
+          background-color: #FF444A;
+          border-top-right-radius: .3rem;
+          border-bottom-right-radius: .3rem;
+          &::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -1.6rem;
+            border-right: #FF444A solid 0.8rem;
+            border-left: #fff solid 0.8rem;
+            border-top: #fff solid 1rem;
+            border-bottom: #fff solid 1rem;
+            width: 0;
+            height: 0;
+          }
+          .icon {
+            display: block;
+            width: 1rem;
+            height: 1rem;
+            padding: 0.5rem 0 0.5rem 0.8rem;
+            fill: #fff;
+          }
         }
+
       }
     }
   }
@@ -221,7 +252,7 @@ export default {
           .vux-swiper-item {
             width: 100%;
             height: 100%;
-            padding: 2.6rem;
+            padding: 1.8rem 2.6rem;
             box-sizing: border-box;
             ul {
               display: flex;

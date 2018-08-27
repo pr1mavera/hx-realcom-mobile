@@ -2,34 +2,34 @@
   <div class="fload-button">
     <button
       class="item extend-click transition-bezier"
-      :disabled="inputStatus"
+      :disabled="barStatus"
       @click="callPhone"
-      :class="[{'visible-when-input': inputStatus, 'item-1': !inputStatus}]">
+      :class="[{'visible-when-input': barStatus, 'item-1': !barStatus}]">
       <svg class="icon" aria-hidden="true">
         <use xlink:href="#icon-dianhuakefu"></use>
       </svg>
     </button>
     <button
       class="item extend-click transition-bezier"
-      :disabled="inputStatus"
+      :disabled="barStatus"
       @click="enterVideoLineUp"
-      :class="[{'visible-when-input': inputStatus, 'item-2': !inputStatus}]">
+      :class="[{'visible-when-input': barStatus, 'item-2': !barStatus}]">
       <svg class="icon" aria-hidden="true">
         <use xlink:href="#icon-shipinkefu"></use>
       </svg>
     </button>
     <button
       class="item extend-click transition-bezier"
-      :disabled="inputStatus"
-      :class="[{'visible-when-input': inputStatus, 'item-3': !inputStatus}]">
+      :disabled="barStatus"
+      :class="[{'visible-when-input': barStatus, 'item-3': !barStatus}]">
       <svg class="icon" aria-hidden="true">
         <use xlink:href="#icon-zhuanshukefu"></use>
       </svg>
     </button>
     <button
       class="item extend-click transition-bezier"
-      :disabled="inputStatus"
-      :class="[{'visible-when-input': inputStatus, 'item-4': !inputStatus}]">
+      :disabled="barStatus"
+      :class="[{'visible-when-input': barStatus, 'item-4': !barStatus}]">
       <svg class="icon" aria-hidden="true">
         <use xlink:href="#icon-pinglun"></use>
       </svg>
@@ -41,7 +41,7 @@
 
 export default {
   props: {
-    inputStatus: {
+    barStatus: {
       type: Boolean
     }
   },

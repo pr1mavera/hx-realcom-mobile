@@ -10,11 +10,12 @@
     <div class="full-screen-container" v-show="fullScreen">
       <div class="video-header">
         <div class="avatar">
-          <img src="/static/img/avatar.png">
+          <img src="/static/img/avatar@2x.png">
         </div>
         <div class="name">丽丽</div>
       </div>
       <video-footer @minimizeVideoBar="closeVideoBar"></video-footer>
+      <video-msg-list></video-msg-list>
       <div class="server-video-window">
         <video
           id="remoteVideo"
@@ -63,7 +64,8 @@ export default {
   ],
   components: {
     'LineUp': () => import('@/views/mainRoom/components/video/line-up'),
-    'VideoFooter': () => import('@/views/mainRoom/components/video/video-footer')
+    'VideoFooter': () => import('@/views/mainRoom/components/video/video-footer'),
+    'VideoMsgList': () => import('@/views/mainRoom/components/video/video-msg-list'),
   },
   computed: {
     isVideoBarOpen() {
@@ -156,6 +158,15 @@ export default {
       bottom: 0;
       left: 0;
       width: 100%;
+      z-index: 10;
+    }
+    .video-msg-list {
+      position: absolute;
+      bottom: 6.8rem;
+      left: 2rem;
+      width: 20rem;
+      height: 10rem;
+      background-color: #000;
       z-index: 10;
     }
     .server-video-window {

@@ -19,27 +19,27 @@ export default {
     return {
       giftItems: [
         {
-          icon: '#icon-wode',
+          icon: 'http://192.168.8.106:3000/dist/static/img/caimeidangao',
           text: '草莓蛋糕'
         },
         {
-          icon: '#icon-wode',
+          icon: 'http://192.168.8.106:3000/dist/static/img/caimeidangao',
           text: '草莓蛋糕'
         },
         {
-          icon: '#icon-wode',
+          icon: 'http://192.168.8.106:3000/dist/static/img/caimeidangao',
           text: '草莓蛋糕'
         },
         {
-          icon: '#icon-wode',
+          icon: 'http://192.168.8.106:3000/dist/static/img/caimeidangao',
           text: '草莓蛋糕'
         },
         {
-          icon: '#icon-wode',
+          icon: 'http://192.168.8.106:3000/dist/static/img/caimeidangao',
           text: '草莓蛋糕'
         },
         {
-          icon: '#icon-wode',
+          icon: 'http://192.168.8.106:3000/dist/static/img/caimeidangao',
           text: '草莓蛋糕'
         }
       ]
@@ -55,7 +55,7 @@ export default {
   justify-content: flex-start;
   padding: 2.4rem 1.8rem;
   .send-extend-item {
-    height: 9.6rem;
+    height: 8.6rem;
     flex-basis: 25%;
     text-align: center;
   }
