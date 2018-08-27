@@ -12,6 +12,7 @@ const room = () => import('@/views/mainRoom')
 const chat = () => import('@/views/mainRoom/chat')
 const serverDetail = () => import('@/views/mainRoom/serverDetail')
 const share = () => import('@/views/share')
+const leaveMessage = () => import('@/views/mainRoom/leave-message')
 
 Vue.use(Router)
 
@@ -37,6 +38,11 @@ export default new Router({
               path: '/room/serverDetail',
               name: 'serverDetail',
               component: serverDetail
+            },
+            {
+              path: '/room/leaveMessage',
+              name: 'leaveMessage',
+              component: leaveMessage
             }
           ]
         },

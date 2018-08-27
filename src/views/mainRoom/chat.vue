@@ -438,7 +438,7 @@ export default {
 }
 </script>
 
-<style lang="less">
+<style scoped lang="less">
 @import '../../common/style/mixin.less';
 @import '~@/common/style/theme.less';
 
