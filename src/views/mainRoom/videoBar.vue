@@ -16,6 +16,24 @@
       </div>
       <video-footer @minimizeVideoBar="closeVideoBar"></video-footer>
       <video-msg-list></video-msg-list>
+      <div class="video-fload-btn">
+        <div class="item">
+          <div class="item-icon icon-hongxin">
+            <svg class="icon extend-click" aria-hidden="true">
+              <use xlink:href="#icon-xin-hong"></use>
+            </svg>
+          </div>
+          <div class="text">300</div>
+        </div>
+        <div class="item">
+          <div class="item-icon icon-zhuanfa">
+            <svg class="icon extend-click" aria-hidden="true">
+              <use xlink:href="#icon-zhuanfa"></use>
+            </svg>
+          </div>
+          <div class="text">100</div>
+        </div>
+      </div>
       <div class="server-video-window">
         <video
           id="remoteVideo"
@@ -162,12 +180,64 @@ export default {
     }
     .video-msg-list {
       position: absolute;
-      bottom: 6.8rem;
+      bottom: 9.8rem;
       left: 2rem;
-      width: 20rem;
+      right: 2rem;
       height: 10rem;
-      background-color: #000;
+      // background-color: #000;
       z-index: 10;
+    }
+    .video-fload-btn {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      right: 2rem;
+      margin: auto;
+      width: 4rem;
+      height: 14rem;
+      z-index: 10;
+      .item {
+        width: 100%;
+        text-align: center;
+        padding-bottom: 2rem;
+        .item-icon {
+          position: relative;
+          width: 4rem;
+          height: 4rem;
+          .icon {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            margin: auto;
+          }
+          &.icon-hongxin {
+            background-color: unset;
+            .icon {
+              width: 4rem;
+              height: 3rem;
+              fill: #FF959C;
+            }
+          }
+          &.icon-zhuanfa {
+            border-radius: 50%;
+            background-color: rgba(0, 0, 0, .2);
+            .icon {
+              width: 2.25rem;
+              height: 1.55rem;
+              fill: #fff;
+            }
+          }
+        }
+        .text {
+          line-height: 2rem;
+          font-size: 1.2rem;
+          margin-top: 0.3rem;
+          color: #fff;
+          // color: @text-normal;
+        }
+      }
     }
     .server-video-window {
       position: fixed;
@@ -189,7 +259,7 @@ export default {
       right: 0;
       margin: .5rem .5rem 0 0;
       width: 9rem;
-      height: 17.2rem;
+      height: 16.5rem;
       border-radius: .4rem;
       z-index: 200;
       background-color: #222;
@@ -208,7 +278,7 @@ export default {
     right: 0;
     margin: .5rem .5rem 0 0;
     width: 9rem;
-    height: 17.2rem;
+    height: 16.5rem;
     border-radius: .4rem;
     z-index: 200;
     background-color: #222;
