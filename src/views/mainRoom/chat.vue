@@ -31,7 +31,6 @@
           :barStatus="this.inputBarOpen || this.extendBarOpen"
           @enterVideoLineUp="lineUpAlert = true"
           @ios-guide="showGuide"
-          @low-version="tipsUpgrade"
         ></fload-button>
       </div>
       <input-bar
@@ -66,7 +65,6 @@
       ></confirm>
     </div>
     <ios-guide v-if="iosGuide"></ios-guide>
-    <low-version v-if="lowVersion"></low-version>
   </div>
 </template>
 
@@ -79,9 +77,7 @@ import InputBar from '@/views/mainRoom/components/chat/input-bar'
 import { needToReloadDate } from '@/common/js/dateConfig'
 import { debounce } from '@/common/js/util'
 import { setUserInfoMixin, IMMixin } from '@/common/js/mixin'
-import {toggleBarStatus} from '@/common/js/status'
-// 调用拉取漫游信息的接口
-import WebRTCRoom from '@/server/webRTCRoom'
+import { toggleBarStatus } from '@/common/js/status'
 
 export default {
   directives: {
@@ -105,8 +101,7 @@ export default {
     // 'SendFile': () => import('@/views/mainRoom/components/chat/send-file'),
     // 'SendExpress': () => import('@/views/mainRoom/components/chat/send-express'),
     // 'SendGift': () => import('@/views/mainRoom/components/chat/send-gift'),
-    'IosGuide': () => import('@/views/mainRoom/components/video/ios-guide'),
-    'LowVersion': () => import('@/views/mainRoom/components/video/low-version')
+    'IosGuide': () => import('@/views/mainRoom/components/video/ios-guide')
   },
   computed: {
     ...mapGetters([
@@ -152,8 +147,7 @@ export default {
           msgType: 'no_result'
         }
       ],
-      iosGuide: false,
-      lowVersion: false
+      iosGuide: false
     }
   },
   mounted() {
@@ -168,8 +162,6 @@ export default {
     })
     // 拉取历史消息
     this.setMsgs(this.historyMsgs)
-    // 拉取漫游消息
-    this.getRoamMessage()
   },
   methods: {
     _initChatMsgList() {
@@ -234,9 +226,7 @@ export default {
           this._inputBlur()
         } else if (this.extendBarOpen) {
           this.setExtendBar(false)
-          this.extendBarLaunchOpen = false
-          this.$refs.extendBar.giftSectionShow = false
-          this.$refs.extendBar.expressSectionShow = false
+          this.resetExtendBar()
           // this.toggleExtendBar()
         }
       }, this)
@@ -249,6 +239,7 @@ export default {
       } else {
         // 软键盘弹出
         const self = this
+        this.resetExtendBar()
         this.$refs.inputBar.setInputEditState('true')
         this.toggleBar(toggleBarStatus.inputBar).then(() => {
           self._inputFocus()
@@ -296,6 +287,11 @@ export default {
         console.log(text)
       }
     },
+    resetExtendBar() {
+      this.extendBarLaunchOpen = false
+      this.$refs.extendBar.giftSectionShow = false
+      this.$refs.extendBar.expressSectionShow = false
+    },
     enterToMenChat() {
       const self = this
       console.log('人工客服排队')
@@ -324,9 +320,7 @@ export default {
     toggleExtendBar() {
       if (this.extendBarOpen) {
         this.setExtendBar(false)
-        this.extendBarLaunchOpen = false
-        this.$refs.extendBar.giftSectionShow = false
-        this.$refs.extendBar.expressSectionShow = false
+        this.resetExtendBar()
       } else if (this.inputBarOpen) {
         const self = this
         return new Promise((resolve) => {
@@ -335,7 +329,7 @@ export default {
           self._inputBlur()
           debounce(() => {
             resolve()
-          }, 1000)()
+          }, 300)()
         }).then(() => {
           self.toggleBar(toggleBarStatus.extendBar)
         })
@@ -420,39 +414,7 @@ export default {
     showGuide(data) {
       this.iosGuide = data
       // console.log(data)
-    },
-    tipsUpgrade(data) {
-      this.lowVersion = data
-    },
-
-    // 若ios用户 不在微信内置浏览器中打开该页面 则需要拉取漫游信息
-    // 拉取漫游消息 this.$options.methods.getRoamMessage()
-    getRoamMessage() {
-      const device = sessionStorage.getItem('device')
-      const browser = sessionStorage.getItem('browser')
-
-      if (device === 'iPhone' && browser === 'safari') {
-        // const groupID = '12345678'
-        const groupID = this.$route.query.groupId
-        const ReqMsgNumber = 2
-        WebRTCRoom.syncGroupC2CMsg(groupID, ReqMsgNumber, (res) => {
-          const roamMsgList = res.data.RspMsgList
-          for (var i in roamMsgList) {
-            console.log('漫游消息：' + i + JSON.stringify(roamMsgList[i].MsgBody))
-          }
-        }, (res) => {
-          console.log('error:' + res)
-        })
-      }
-    },
-
-    ...mapMutations({
-      setModeToMenChat: 'SET_ROOM_MODE',
-      setMsgs: 'SET_MSGS'
-    }),
-    ...mapActions([
-      'enterToLineUp'
-    ])
+    }
   }
 }
 </script>

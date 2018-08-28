@@ -26,7 +26,8 @@
         type="text"
         @click="chatFocus"
         @keyup="chatInput($event, false)"
-        @keyup.enter="chatInput($event, true)"></div>
+        @keyup.enter="chatInput($event, true)"
+        ></div>
     </div>
     <div class="input-bar-item right-item">
       <transition
@@ -76,9 +77,6 @@ export default {
       this.$emit('toggleExtend')
     },
     chatFocus() {
-      // if (this.isFocus === false) {
-      //   this.$emit('targetInputBuffer')
-      // }
       this.$emit('targetInputBuffer')
     },
     chatInput(event, isEnter) {
@@ -217,7 +215,7 @@ export default {
       display: flex;
       justify-content: space-between;
       align-items: flex-end;
-      min-width: 4.6rem;
+      min-width: 8rem;
       height: 4.6rem;
       flex-grow: 0;
       .send-plus-enter-active, .send-plus-leave-active {
