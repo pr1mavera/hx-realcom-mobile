@@ -48,6 +48,8 @@
 <style scoped lang="less">
   @import '../../common/style/theme.less';
   .container {
+    height: unset;
+    min-height: 100vh;
     background: @bg-normal;
     .header {
       width: 100%;

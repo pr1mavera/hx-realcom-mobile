@@ -2,7 +2,7 @@
   <div class="send-extend-item">
     <div class="item-icon">
       <div class="item-icon-bg bg-image">
-        <img width=100% height=100% class="giftImg" :src="imgUrl">
+        <img width=110% height=100% class="giftImg" :src="imgUrl">
       </div>
       <svg class="icon extend-click" aria-hidden="true">
         <use xlink:href="#icon-wode"></use>
