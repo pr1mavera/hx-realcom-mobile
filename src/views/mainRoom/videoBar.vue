@@ -65,7 +65,7 @@ export default {
   components: {
     'LineUp': () => import('@/views/mainRoom/components/video/line-up'),
     'VideoFooter': () => import('@/views/mainRoom/components/video/video-footer'),
-    'VideoMsgList': () => import('@/views/mainRoom/components/video/video-msg-list'),
+    'VideoMsgList': () => import('@/views/mainRoom/components/video/video-msg-list')
   },
   computed: {
     isVideoBarOpen() {

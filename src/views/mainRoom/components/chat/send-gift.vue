@@ -19,27 +19,27 @@ export default {
     return {
       giftItems: [
         {
-          icon: 'http://192.168.8.106:3000/dist/static/img/caimeidangao',
+          icon: 'caomeidangao',
           text: '草莓蛋糕'
         },
         {
-          icon: 'http://192.168.8.106:3000/dist/static/img/caimeidangao',
+          icon: 'caomeidangao',
           text: '草莓蛋糕'
         },
         {
-          icon: 'http://192.168.8.106:3000/dist/static/img/caimeidangao',
+          icon: 'caomeidangao',
           text: '草莓蛋糕'
         },
         {
-          icon: 'http://192.168.8.106:3000/dist/static/img/caimeidangao',
+          icon: 'caomeidangao',
           text: '草莓蛋糕'
         },
         {
-          icon: 'http://192.168.8.106:3000/dist/static/img/caimeidangao',
+          icon: 'caomeidangao',
           text: '草莓蛋糕'
         },
         {
-          icon: 'http://192.168.8.106:3000/dist/static/img/caimeidangao',
+          icon: 'caomeidangao',
           text: '草莓蛋糕'
         }
       ]

@@ -2,14 +2,23 @@ import * as types from './mutation-types'
 // import { debounce } from '@/common/js/util'
 import { toggleBarStatus, roomStatus, queueStatus } from '@/common/js/status'
 
+// const sleep = async(duration) => {
+//   return new Promise((resolve, reject) => {
+//     setTimeout(resolve, duration)
+//   })
+// }
+
 // eslint-disable-next-line
 export const closeBarBuffer = function({ commit }, { mutationType, delay }) {
-// export const closeBarBuffer = function({ commit }) {
   return new Promise((resolve) => {
     commit(mutationType, false)
-    setTimeout(() => {
-      resolve()
-    }, delay)
+    // (async() => {
+    //   await sleep(delay)
+    //   resolve()
+    // })()
+    // setTimeout(() => {
+    resolve()
+    // }, delay)
     // debounce((resolve) => {
     //   resolve()
     // }, delay)()
@@ -26,10 +35,10 @@ export const toggleBar = function({ dispatch, commit, state }, type) {
       if (state.extendBarOpen) {
         return dispatch('closeBarBuffer', {
           mutationType: types.SET_EXTEND_BAR,
-          delay: 1000
+          delay: 0
         }).then(() => {
-          commit(types.SET_INPUT_BAR, true)
           return new Promise((resolve) => {
+            commit(types.SET_INPUT_BAR, true)
             resolve()
           })
         })
@@ -37,8 +46,8 @@ export const toggleBar = function({ dispatch, commit, state }, type) {
         //   commit(types.SET_INPUT_BAR, true)
         // })
       } else {
-        commit(types.SET_INPUT_BAR, true)
         return new Promise((resolve) => {
+          commit(types.SET_INPUT_BAR, true)
           resolve()
         })
       }

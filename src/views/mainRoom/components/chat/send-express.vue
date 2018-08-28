@@ -3,21 +3,21 @@
     <div class="menu-nav">
       <div class="nav-list">
         <tab :line-width="99" bar-active-color="#f4f4f4">
-          <tab-item :selected="currIndex === 0" @on-item-click="onEmojiMenuClick">
+          <tab-item :selected="currIndex === 0" @on-item-click="currIndex = 0">
             <div class="menu-nav-item">
               <svg class="icon extend-click" aria-hidden="true">
                 <use xlink:href="#icon-lishibiaoqing"></use>
               </svg>
             </div>
           </tab-item>
-          <tab-item :selected="currIndex === 1" @on-item-click="onEmojiMenuClick">
+          <tab-item :selected="currIndex === 1" @on-item-click="currIndex = 1">
             <div class="menu-nav-item">
               <svg class="icon extend-click" aria-hidden="true">
                 <use xlink:href="#icon-biaoqing-"></use>
               </svg>
             </div>
           </tab-item>
-          <tab-item :selected="currIndex === 2" @on-item-click="onEmojiMenuClick">
+          <tab-item :selected="currIndex === 2" @on-item-click="currIndex = 2">
             <div class="menu-nav-item">
               <div class="menu-nav-xiaohua bg-image"></div>
               <!-- <svg class="icon extend-click" aria-hidden="true">
@@ -38,8 +38,17 @@
       </div>
     </div>
     <div class="page-area">
-      <div v-if="currIndex === 0">
-        0000000000000
+      <div class="history-emoji" v-if="currIndex === 0">
+        <p v-if="!express[0].list.length" class="history-text">您当前还未发过表情</p>
+        <ul v-else>
+          <li
+            class="history-item-li"
+            v-for="item in express[0].list"
+            v-html="item.code"
+            :key="item.id"
+            @click="selectEmoji(item.code)"
+          ></li>
+        </ul>
       </div>
       <div class="emoji-swiper" v-if="currIndex === 1">
         <swiper dots-position="center">
@@ -56,8 +65,13 @@
           </swiper-item>
         </swiper>
       </div>
-      <div v-if="currIndex === 2">
-        2222222222222
+      <div class="xiaohua-express" v-if="currIndex === 2">
+        <send-extend-item
+          v-for="(item, index) in express[2].list"
+          :key="index"
+          :mode="item.mode"
+          :icon="item.icon"
+        ></send-extend-item>
       </div>
     </div>
   </div>
@@ -72,7 +86,8 @@ export default {
     Tab,
     TabItem,
     Swiper,
-    SwiperItem
+    SwiperItem,
+    'SendExtendItem': () => import('@/views/mainRoom/components/chat/send-extend-item')
   },
   props: {
     inputPos: {
@@ -85,27 +100,28 @@ export default {
       express: [
         {
           name: 'history',
-          icon: '#icon-wode',
           list: [
-            '#icon-wode',
-            '#icon-wode',
-            '#icon-wode',
-            '#icon-wode'
+            // {
+            //   code: '&#x1F600;',
+            //   id: 0
+            // }
           ]
         },
         {
           name: 'emoji',
-          icon: '#icon-wode',
           list: []
         },
         {
           name: 'xiaohua',
-          icon: '#icon-wode',
           list: [
-            '#icon-wode',
-            '#icon-wode',
-            '#icon-wode',
-            '#icon-wode'
+            {
+              icon: 'caomeidangao',
+              text: ''
+            },
+            {
+              icon: 'caomeidangao',
+              text: ''
+            }
           ]
         }
       ]
@@ -133,9 +149,6 @@ export default {
         this.express[1].list.push(temp)
       }
       console.dir(this.express[1].list)
-    },
-    onEmojiMenuClick(index) {
-      this.currIndex = index
     },
     selectEmoji(code) {
       this.$emit('selectEmojiWithCode', code)
@@ -240,6 +253,37 @@ export default {
     height: 100%;
     padding-bottom: 4.6rem;
     box-sizing: border-box;
+    .history-emoji {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      padding: 1.8rem 2.6rem;
+      box-sizing: border-box;
+      .history-text {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        margin: auto;
+        font-size: 1.4rem;
+        height: 1.4rem;
+        color: @text-normal;
+      }
+      ul {
+        display: flex;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+        .history-item-li {
+          // width: 2.4rem;
+          // height: 2.4rem;
+          font-size: 2.4rem;
+          padding-bottom: 1rem;
+          flex-basis: 12.5%;
+          text-align: center;
+        }
+      }
+    }
     .emoji-swiper {
       width: 100%;
       height: 100%;
@@ -269,6 +313,17 @@ export default {
             }
           }
         }
+      }
+    }
+    .xiaohua-express {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-start;
+      padding: 2.4rem 1.8rem;
+      .send-extend-item {
+        height: 8.6rem;
+        flex-basis: 25%;
+        text-align: center;
       }
     }
   }
