@@ -7,12 +7,14 @@ import Router from 'vue-router'
   // 主聊天界面
   const main = r => require.ensure([], () => r(mainM), 'main')
 */
-const main = () => import('@/App')
 const room = () => import('@/views/mainRoom')
 const chat = () => import('@/views/mainRoom/chat')
 const serverDetail = () => import('@/views/mainRoom/serverDetail')
 const share = () => import('@/views/share')
 const leaveMessage = () => import('@/views/mainRoom/leave-message')
+const cusServ = () => import('@/views/mainRoom/cusServ')
+const csList = () => import('@/views/mainRoom/components/service/cs-list')
+const csAdd = () => import('@/views/mainRoom/components/service/cs-add')
 
 Vue.use(Router)
 
@@ -20,38 +22,48 @@ export default new Router({
   mode: 'history',
   routes: [
     {
-      path: '/',
-      name: 'main',
-      component: main,
+      path: '/room',
+      name: 'room',
+      component: room,
       children: [
         {
-          path: '/room',
-          name: 'room',
-          component: room,
-          children: [
-            {
-              path: '/room/chat',
-              name: 'chat',
-              component: chat
-            },
-            {
-              path: '/room/serverDetail',
-              name: 'serverDetail',
-              component: serverDetail
-            },
-            {
-              path: '/room/leaveMessage',
-              name: 'leaveMessage',
-              component: leaveMessage
-            }
-          ]
+          path: '/room/chat',
+          name: 'chat',
+          component: chat
         },
         {
-          path: '/share',
-          name: 'share',
-          component: share
+          path: '/room/serverDetail',
+          name: 'serverDetail',
+          component: serverDetail
+        },
+        {
+          path: '/room/leaveMessage',
+          name: 'leaveMessage',
+          component: leaveMessage
+        },
+        {
+          path: '/room/cusServ',
+          name: 'cusServ',
+          component: cusServ,
+          children: [
+            {
+              path: '/room/cusServCenter/list',
+              name: 'cusServList',
+              component: csList
+            },
+            {
+              path: '/room/cusServCenter/add',
+              name: 'cusServAdd',
+              component: csAdd
+            }
+          ]
         }
       ]
+    },
+    {
+      path: '/share',
+      name: 'share',
+      component: share
     },
     {
       path: '/',
