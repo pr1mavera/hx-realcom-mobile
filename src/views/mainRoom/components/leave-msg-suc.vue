@@ -69,7 +69,8 @@ main {
     text-align: center;
   }
   .go-chat {
-   color: #00f;
+    cursor: pointer;
+    color: #00f;
     font-size: 1.5rem;
   }
 }
