@@ -56,11 +56,12 @@
       <p class="container-item-tit">我的小幸福</p>
       <send-gift></send-gift>
     </div>
+    <a class="btn-back" @click="window.history.go(-1)">返 回</a>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
-  import { Swiper, SwiperItem, XButton } from 'vux'
+  import { Swiper, SwiperItem, XButton, XCircle } from 'vux'
 
   // 顶部轮播图的列表
   const displayList = [
@@ -74,6 +75,7 @@
       Swiper,
       SwiperItem,
       XButton,
+      XCircle,
       'SendGift': () => import('@/views/mainRoom/components/chat/send-gift')
     },
     data() {
@@ -182,6 +184,17 @@
           color: @text-lighter-a;
         }
       }
+    }
+    .btn-back {
+      display: block;
+      width: 100%;
+      height: 5rem;
+      line-height: 5rem;
+      font-size: 1.8rem;
+      color: @text-lighter;
+      text-align: center;
+      margin-top: 2.5rem;
+      background: linear-gradient(to right, #FF905B, #FF7EAB);
     }
   }
 

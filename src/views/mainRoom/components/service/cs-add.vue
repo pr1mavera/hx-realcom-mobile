@@ -78,7 +78,7 @@
 </template>
 
 <script type="text/ecmascript-6">
-import { sleep, debounce } from '@/common/js/util'
+import { sleep } from '@/common/js/util'
 import anime from 'animejs'
 
 export default {

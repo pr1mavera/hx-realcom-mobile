@@ -1,5 +1,5 @@
 <template>
-  <div class="cus-serv">
+  <div class="cus-serv" style="background: #f4f4f4">
     <keep-alive>
       <router-view></router-view>
     </keep-alive>
