@@ -1,6 +1,5 @@
 <template>
   <div class="cus-serv">
-    cs-center
     <keep-alive>
       <router-view></router-view>
     </keep-alive>

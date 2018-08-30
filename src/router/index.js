@@ -47,12 +47,12 @@ export default new Router({
           component: cusServ,
           children: [
             {
-              path: '/room/cusServCenter/list',
+              path: '/room/cusServ/list',
               name: 'cusServList',
               component: csList
             },
             {
-              path: '/room/cusServCenter/add',
+              path: '/room/cusServ/add',
               name: 'cusServAdd',
               component: csAdd
             }
