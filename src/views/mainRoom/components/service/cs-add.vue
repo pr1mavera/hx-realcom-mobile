@@ -1,57 +1,58 @@
 <template>
   <div class="cs-add">
-    <transition @enter="switchLabelFrame">
-      <div class="cs-label-wrapper" id="csLabelWrapper" v-if="curLabelInfo">
-        <!-- :class="{'labelTransitionTiming': angle}" -->
-        <div
-          class="cs-label"
-          ref="csLabel"
-          @touchstart.stop.prevent="startSlide($event)"
-          @touchmove.stop.prevent="slideMove($event)"
-          @touchend.stop.prevent="endSlide($event)"
-          :style="setRotate"> <!-- 限制边框范围及显示阴影 -->
-          <div class="container">
-            <div class="header">
-              <img width=100% class="bg-img" src="/static/img/chat/csAddBg.png">
-              <div class="header-msg">
-                <div class="avatar">
-                  <img width=100% height=100% src="/static/img/avatar.png">
+    <div class="cs-label-wrapper">
+      <transition @enter="switchLabelFrame">
+        <div class="cs-label-container" id="csLabelContainer" v-if="curLabelInfo">
+          <div
+            class="cs-label"
+            ref="csLabel"
+            @touchstart.stop.prevent="startSlide($event)"
+            @touchmove.stop.prevent="slideMove($event)"
+            @touchend.stop.prevent="endSlide($event)"
+            :style="setRotate"> <!-- 限制边框范围及显示阴影 -->
+            <div class="container">
+              <div class="header">
+                <img width=100% class="header-img" src="/static/img/chat/csAddBg.png">
+                <div class="header-msg">
+                  <div class="avatar">
+                    <img width=100% height=100% src="/static/img/avatar.png">
+                  </div>
+                  <div class="nickname">{{curLabelInfo.nickname}}</div>
                 </div>
-                <div class="nickname">{{curLabelInfo.nickname}}</div>
               </div>
+              <div class="video-btn">
+                <button class="button">视频咨询</button>
+              </div>
+              <div class="cs-info">
+                <ul>
+                  <li class="cs-info-list">
+                    <span class="title">服务总量</span>
+                    <span class="text">
+                      <label>{{curLabelInfo.serviceTime}}次</label>
+                    </span>
+                  </li>
+                  <li class="cs-info-list">
+                    <span class="title">收到礼物</span>
+                    <span class="text">
+                      <label>{{curLabelInfo.gift}}次</label>
+                    </span>
+                  </li>
+                  <li class="cs-info-list">
+                    <span class="title">客服标签</span>
+                    <span class="text">
+                      <label>甜美可爱</label>
+                      <label>善解人意</label>
+                      <label>活泼可爱</label>
+                    </span>
+                  </li>
+                </ul>
+              </div>
+              <div class="footer-btn">设定喜欢的客服标签</div>
             </div>
-            <div class="video-btn">
-              <button class="button">视频咨询</button>
-            </div>
-            <div class="cs-info">
-              <ul>
-                <li class="cs-info-list">
-                  <span class="title">服务总量</span>
-                  <span class="text">
-                    <label>{{curLabelInfo.serviceTime}}次</label>
-                  </span>
-                </li>
-                <li class="cs-info-list">
-                  <span class="title">收到礼物</span>
-                  <span class="text">
-                    <label>{{curLabelInfo.gift}}次</label>
-                  </span>
-                </li>
-                <li class="cs-info-list">
-                  <span class="title">客服标签</span>
-                  <span class="text">
-                    <label>甜美可爱</label>
-                    <label>善解人意</label>
-                    <label>活泼可爱</label>
-                  </span>
-                </li>
-              </ul>
-            </div>
-            <div class="footer-btn">设定喜欢的客服标签</div>
           </div>
         </div>
-      </div>
-    </transition>
+      </transition>
+    </div>
     <div class="slide-tip">
       <div class="tip tip-left">
         <span class="label">
@@ -74,14 +75,31 @@
       <div class="btn btn-left">切 换</div>
       <div class="btn btn-right">添加为专属客服</div>
     </div>
+    <div class="fload-tip">
+      <div class="tip tip-left" :class="{'show-fload-tip-left': angle <= -targAngle}">
+        <svg class="icon extend-click" aria-hidden="true">
+          <use xlink:href="#icon-huanyipi"></use>
+        </svg>
+      </div>
+      <div class="tip tip-right" :class="{'show-fload-tip-right': angle >= targAngle}">
+        <svg class="icon extend-click" aria-hidden="true">
+          <use xlink:href="#icon-zhuanshukefu"></use>
+        </svg>
+        <badge text="1"></badge>
+      </div>
+    </div>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
 import { sleep } from '@/common/js/util'
+import { Badge } from 'vux'
 import anime from 'animejs'
 
 export default {
+  components: {
+    Badge
+  },
   data() {
     return {
       /**
@@ -97,7 +115,7 @@ export default {
       touch_start_x: 0,
       angle: 0,
       opacityNum: 1,
-      targAngle: 15,
+      targAngle: 10,
       endAngle: 40,
       curLabelInfo: null,
       cslist: [
@@ -114,7 +132,9 @@ export default {
           gift: 2561
         }
       ],
-      m_cslist: [] // 已添加的专属客服
+      m_cslist: [], // 已添加的专属客服
+      floadTipLeftAnimeCache: null,
+      floadTipRightAnimeCache: null
     }
   },
   computed: {
@@ -148,22 +168,15 @@ export default {
       // const e = event.targetTouches[0]
       if (Math.abs(this.angle) <= this.targAngle) {
         // 复原
-        this.angle = 1
         this.angle = 0
-        // const restoreAngle = anime({
-        //   targets: this.angle,
-        //   charged: 0,
-        //   round: 1,
-        //   easing: 'easeOutBack'
-        // })
-        // restoreAngle.play
       } else {
         if (this.angle > 0) {
           // 添加
           this.angle = this.endAngle
           // this.resetAngle()
           // 模拟请求服务，添加专属客服
-          await sleep(200)
+          await sleep(1000)
+          debugger
           this.resetAngle()
           console.log('addCS')
           await sleep(10)
@@ -172,7 +185,8 @@ export default {
           // 切换
           this.angle = -this.endAngle
           // this.resetAngle()
-          await sleep(200)
+          await sleep(1000)
+          debugger
           this.resetAngle()
           console.log('switchCS')
           await sleep(10)
@@ -199,11 +213,42 @@ export default {
     switchLabelFrame() {
       const extendBarframes = anime.timeline()
       extendBarframes.add({
-        targets: '#csLabelWrapper',
+        targets: '#csLabelContainer',
         scaleX: [0, 1],
         scaleY: [0, 1],
         duration: 200,
         easing: 'easeOutBack'
+      }).add({
+        targets: '#csLabelContainer .header',
+        translateY: [-100, 0],
+        opacity: [0, 1],
+        duration: 150,
+        offset: 150,
+        easing: 'easeInOutExpo'
+      }).add({
+        targets: '#csLabelContainer .video-btn',
+        scaleX: [0, 1],
+        scaleY: [0, 1],
+        translateY: [40, 0],
+        opacity: [0, 1],
+        duration: 150,
+        offset: 200,
+        easing: 'easeInOutExpo'
+      }).add({
+        targets: '#csLabelContainer .cs-info-list',
+        translateY: [20, 0],
+        opacity: [0, 1],
+        delay: function(el, i) { return i * 30 },
+        duration: 100,
+        offset: 250,
+        easing: 'easeInOutExpo'
+      }).add({
+        targets: '#csLabelContainer .footer-btn',
+        translateY: [20, 0],
+        opacity: [0, 1],
+        duration: 100,
+        offset: 350,
+        easing: 'easeInOutExpo'
       })
     }
   }
@@ -214,115 +259,121 @@ export default {
 @import '~@/common/style/theme.less';
 
 .cs-add {
+  position: relative;
   width: 100%;
   height: 100%;
   background-color: @bg-light-shadow;
+  overflow-x: hidden;
   .cs-label-wrapper{
     width: 100%;
+    height: 44rem;
     padding: 2.5rem;
     box-sizing: border-box;
-    .cs-label {
+    .cs-label-container {
       width: 100%;
-      border-radius: 1rem;
-      background-color: @bg-light;
-      box-shadow: 0 0.5rem 1.2rem 0 rgba(0, 0, 0, .05);
-      overflow: hidden;
-      transform-origin: 50% calc(~'50% + 700px');
-      // &.labelTransitionTiming {
-      //   transition: all .3s cubic-bezier(0.1, 0.4, 0.35, 1.48);
-      // }
-      transition: all .3s cubic-bezier(0.1, 0.4, 0.35, 1.48);
-      // transition: all .1s ease;
-      .container {
-        .header {
-          position: relative;
-          width: 100%;
-          height: 17.5rem;
-          text-align: center;
-          // background-image: url('~/static/img/chat/csAddBg.png');
-          // background-size: 100%;
-          .bg-img {
-            position: absolute;
-            top: 0;
-            left: 0;
-            z-index: 1;
-            object-fit: cover;
-          }
-          .header-msg {
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            margin: auto;
-            width: 10.2rem;
-            height: 12.6rem;
-            z-index: 10;
-            .avatar {
-              width: 10.2rem;
-              height: 10.2rem;
-              border-radius: 50%;
-              overflow: hidden;
-              img {
-                object-fit: cover;
-              }
-            }
-            .nickname {
-              font-size: 1.4rem;
-              padding-top: 1rem;
-              color: @text-lighter;
-            }
-          }
-        }
-        .video-btn {
-          width: 100%;
-          text-align: center;
-          .button {
-            background-color: #fff;
-            margin: 2rem 0 0 0;
-            padding: 0;
-            width: 6.5rem;
-            height: 2rem;
-            border: 1px solid rgba(255, 149, 156, .5);
-            border-radius: 1rem;
-            color: rgba(255, 149, 156, 1);
-            font-size: 1.2rem;
-          }
-        }
-        .cs-info {
-          width: 100%;
-          padding: 4rem 2rem 2rem 4rem;
-          color: @text-light;
-          font-size: 1.2rem;
-          box-sizing: border-box;
-          ul {
+      height: auto;
+      .cs-label {
+        width: 100%;
+        border-radius: 1rem;
+        background-color: @bg-light;
+        box-shadow: 0 0.5rem 1.2rem 0 rgba(0, 0, 0, .05);
+        overflow: hidden;
+        transform-origin: 50% calc(~'50% + 700px');
+        // &.labelTransitionTiming {
+        //   transition: all .3s cubic-bezier(0.1, 0.4, 0.35, 1.48);
+        // }
+        transition: transform .3s cubic-bezier(0.1, 0.4, 0.35, 1.48);
+        .container {
+          .header {
+            position: relative;
             width: 100%;
-            .cs-info-list {
-              width: 100%;
-              margin-bottom: .8rem;
-              display: flex;
-              justify-content:space-between;
-              .title {
-                width: 5rem;
-                font-weight: 700;
+            height: 17.5rem;
+            text-align: center;
+            // background-image: url('~/static/img/chat/csAddBg.png');
+            // background-size: 100%;
+            .header-img {
+              position: absolute;
+              top: 0;
+              left: 0;
+              z-index: 1;
+              object-fit: cover;
+            }
+            .header-msg {
+              position: absolute;
+              top: 0;
+              bottom: 0;
+              left: 0;
+              right: 0;
+              margin: auto;
+              width: 10.2rem;
+              height: 12.6rem;
+              z-index: 10;
+              .avatar {
+                width: 10.2rem;
+                height: 10.2rem;
+                border-radius: 50%;
+                overflow: hidden;
+                img {
+                  object-fit: cover;
+                }
               }
-              .text {
-                width: calc(~'100% - 6.4rem');
+              .nickname {
+                font-size: 1.4rem;
+                padding-top: 1rem;
+                color: @text-lighter;
+              }
+            }
+          }
+          .video-btn {
+            width: 100%;
+            text-align: center;
+            .button {
+              background-color: #fff;
+              margin: 2rem 0 0 0;
+              padding: 0;
+              width: 6.5rem;
+              height: 2rem;
+              border: 1px solid rgba(255, 149, 156, .5);
+              border-radius: 1rem;
+              color: rgba(255, 149, 156, 1);
+              font-size: 1.2rem;
+            }
+          }
+          .cs-info {
+            width: 100%;
+            padding: 4rem 2rem 2rem 4rem;
+            color: @text-light;
+            font-size: 1.2rem;
+            box-sizing: border-box;
+            ul {
+              width: 100%;
+              .cs-info-list {
+                width: 100%;
+                margin-bottom: .8rem;
                 display: flex;
-                flex-wrap: nowrap;
-                label {
-                  flex: 33.3%;
+                justify-content:space-between;
+                .title {
+                  width: 5rem;
+                  font-weight: 700;
+                }
+                .text {
+                  width: calc(~'100% - 6.4rem');
+                  display: flex;
+                  flex-wrap: nowrap;
+                  label {
+                    flex: 33.3%;
+                  }
                 }
               }
             }
           }
-        }
-        .footer-btn {
-          width: 100%;
-          padding: 0 0 1.8rem 4rem;
-          box-sizing: border-box;
-          color: rgba(255, 149, 156, 1);
-          font-size: 1.2rem;
+          .footer-btn {
+            width: 100%;
+            padding: 0 0 1.8rem 4rem;
+            box-sizing: border-box;
+            color: rgba(255, 149, 156, 1);
+            font-size: 1.2rem;
+          }
         }
       }
     }
@@ -394,6 +445,61 @@ export default {
         padding: 0 2rem;
         background: linear-gradient(to right, #FF8C6A, #FF80A0);
         color: @text-lighter;
+      }
+    }
+  }
+  .fload-tip {
+    position: absolute;
+    top: 2rem;
+    left: 0;
+    width: 100%;
+    height: 3rem;
+    z-index: 200;
+    .tip {
+      position: absolute;
+      top: 0;
+      width: 3rem;
+      height: 3rem;
+      border-radius: 50%;
+      box-sizing: border-box;
+      box-shadow: 0 0.5rem 1.2rem 0 rgba(0, 0, 0, .05);
+      transition: all .5s cubic-bezier(0.2, 0, 0.4, 1);
+      .icon {
+        width: 3rem;
+        height: 3rem;
+      }
+      &.tip-left {
+        left: 2rem;
+        border: solid .1rem #fff;
+        background-color: rgb(247, 224, 234);
+        transform: translateX(-50rem);
+        opacity: 0;
+        &.show-fload-tip-left {
+          transform: translateX(0);
+          opacity: 1;
+        }
+        .icon {
+          padding: 0.3rem;
+          width: 2.2rem;
+          height: 2.2rem;
+          fill: #fff;
+        }
+      }
+      &.tip-right {
+        right: 2rem;
+        transform: translateX(50rem);
+        opacity: 0;
+        &.show-fload-tip-right {
+          transform: translateX(0);
+          opacity: 1;
+        }
+        .vux-badge {
+          position: absolute;
+          right: -0.3rem;
+          bottom: -0.3rem;
+          vertical-align: bottom;
+          // line-height: 16px;
+        }
       }
     }
   }
