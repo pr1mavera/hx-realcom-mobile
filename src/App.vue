@@ -80,14 +80,19 @@ body {
   }
 }
 
+/* 评论组件中轮播图圆点的样式 */
 .popup-main .eva-more .vux-slider > .vux-indicator > a > .vux-icon-dot.active {
   background-color: #ff444a!important;
 }
-
 .popup-main .eva-more .vux-slider > .vux-indicator > a > .vux-icon-dot {
   border: 1px solid #ff444a;
   border-radius: 50%;
   background-color: #f1f1f1;
+}
+
+/*-小按钮的边框的颜色-*/
+.weui-btn:after {
+  border: 1px solid #FF959C!important;
 }
 
 /*---------对Nexus5做响应式------------*/

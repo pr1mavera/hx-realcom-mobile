@@ -1,7 +1,22 @@
 <template>
   <main class="main">
-    <img src="/static/img/ios-guide1.jpg">
-    <img class="guide-sec" src="/static/img/ios-guide2.jpg">
+    <!-- 点击右上角的手指 -->
+    <div class="step-one">
+      <img src="/static/img/ios-guide1.png">
+    </div>
+    <!-- 文字提示 -->
+    <div class="step-two">
+      <img src="/static/img/ios-guide2.png">
+    </div>
+    <div class="step-thr">
+      <img src="/static/img/ios-guide3.png">
+    </div>
+   <div class="step-four">
+     <img src="/static/img/ios-guide1.png">
+   </div>
+    <div class="step-fif">
+      <img style="" src="/static/img/ios-guide4.png">
+    </div>
   </main>
 </template>
 
@@ -19,12 +34,42 @@
     top: 0;
     opacity: .85;
     background: #626262;
-    img {
+    .step-one {
+      text-align: right;
+      img {
+        width: 7.6rem;
+        margin: 1rem 1.5rem 0;
+        vertical-align: middle;
+      }
+    }
+    .step-two, .step-thr {
+      text-align: center;
+      img {
+        width: 18rem;
+      }
+    }
+    .step-thr {
+      position: absolute;
+      bottom: 14.7rem;
       width: 100%;
     }
-    .guide-sec {
+    .step-four {
       position: absolute;
-      bottom: 0;
+      bottom: 4.5rem;
+      img {
+        display: block;
+        width: 8.7rem;
+        transform: rotate(180deg);
+        margin: 3rem 0 0 7rem;
+      }
+    }
+    .step-fif {
+      position: absolute;
+      bottom: 2.8rem;
+      img {
+        width: 4.3rem;
+        margin: 0 0 0 4.4rem;
+      }
     }
   }
 </style>

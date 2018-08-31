@@ -1,6 +1,7 @@
 <!-- 客服的个人中心 -->
 <template>
   <div class="serverDetail container">
+    <!-- 默认高度为180px, 如果设置aspect-ratio会根据宽度自动计算高度,如 :aspect-ratio="300/375" -->
     <swiper auto dots-class="custom-bottom" dots-position="center">
       <swiper-item class="swiper-demo-img" v-for="(item, index) in personalDisplay" :key="index">
         <img :src="item" style="width: 100%;object-fit: fill;">
@@ -100,6 +101,7 @@
 
   .container {
     height: unset;
+    padding-bottom: 6.5rem;
     background: @bg-normal;
     .count {
       height: 6rem;
@@ -186,6 +188,8 @@
       }
     }
     .btn-back {
+      position: fixed;
+      bottom: 0;
       display: block;
       width: 100%;
       height: 5rem;

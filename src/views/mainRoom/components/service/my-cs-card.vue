@@ -8,12 +8,12 @@
     </span>
     <div class="container-main">
       <div class="avatar">
-        <img src="/static/img/avatar@2x.png">
+        <img :src="avatarSrc">
       </div>
       <div class="info">
-        <p class="name">{{name}}</p>
-        <p>服务总量 {{num}}次</p>
-        <p>收到礼物 {{gifts}}份</p>
+        <p class="name">{{this.name}}</p>
+        <p>服务总量 {{this.num}}次</p>
+        <p>收到礼物 {{this.gifts}}份</p>
       </div>
     </div>
     <div class="btn-box" style="text-align: center">
@@ -29,11 +29,18 @@
     components: {
       XButton
     },
-    data() {
-      return {
-        name: '丽丽',
-        num: 2233,
-        gifts: 3345
+    props: {
+      avatarSrc: {
+        type: String
+      },
+      name: {
+        type: String
+      },
+      num: {
+        type: Number
+      },
+      gifts: {
+        type: Number
       }
     },
     methods: {
@@ -59,13 +66,10 @@
     background: url("/static/img/service/myCsCardBg.png") no-repeat;
     background-size: 22.65rem 5.85rem;
     background-color: #ffffff;
-    .weui-btn:after {
-      border: 1px solid #FF959C;;
-    }
     .close {
       position: absolute;
       top: 2.2rem;
-      right: 1.9rem;
+      right: 2rem;
     }
     .container-main {
       display: flex;
