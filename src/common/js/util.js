@@ -10,3 +10,11 @@ export function debounce(func, delay) {
     }, delay)
   }
 }
+
+export async function sleep(time) {
+  return new Promise((resolve, reject) => {
+    setTimeout(function() {
+      resolve()
+    }, time)
+  })
+}
