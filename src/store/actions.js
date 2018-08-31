@@ -1,12 +1,12 @@
 import * as types from './mutation-types'
-import { sleep } from '@/common/js/util'
+// import { sleep } from '@/common/js/util'
 import { toggleBarStatus, roomStatus, queueStatus } from '@/common/js/status'
 
 // eslint-disable-next-line
 export const closeBarBuffer = function({ commit }, { mutationType, delay }) {
   return new Promise(async(resolve) => {
     commit(mutationType, false)
-    await sleep(delay)
+    // await sleep(delay)
     resolve()
   })
 }
