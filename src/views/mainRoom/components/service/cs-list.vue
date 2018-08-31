@@ -55,7 +55,7 @@ export default {
     addCs() {
       console.log('添加专属客服')
       this.$router.push({
-        path: '/room/cusServCenter/add'
+        path: '/room/cusServ/add'
       })
     }
   }
@@ -64,6 +64,10 @@ export default {
 
 <style lang="less">
   .cs-list {
+    min-height: 100%;
+    padding-top: 2.5rem;
+    background: #f4f4f4;
+    box-sizing: border-box;
     .icon {
       width: 1.4rem;
       height: 1.4rem;
