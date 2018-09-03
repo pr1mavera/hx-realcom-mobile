@@ -76,12 +76,12 @@
       <div class="btn btn-right">添加为专属客服</div>
     </div>
     <div class="fload-tip">
-      <div class="tip tip-left" :class="{'show-fload-tip-left': angle <= -targAngle}">
+      <div class="tip tip-left" id="fload-tip-left" :class="{'show-fload-tip-left': angle <= -targAngle}">
         <svg class="icon extend-click" aria-hidden="true">
           <use xlink:href="#icon-huanyipi"></use>
         </svg>
       </div>
-      <div class="tip tip-right" :class="{'show-fload-tip-right': angle >= targAngle}">
+      <div class="tip tip-right" id="fload-tip-right" :class="{'show-fload-tip-right': angle >= targAngle}">
         <svg class="icon extend-click" aria-hidden="true">
           <use xlink:href="#icon-zhuanshukefu"></use>
         </svg>
@@ -176,7 +176,6 @@ export default {
           // this.resetAngle()
           // 模拟请求服务，添加专属客服
           await sleep(1000)
-          debugger
           this.resetAngle()
           console.log('addCS')
           await sleep(10)
@@ -186,7 +185,6 @@ export default {
           this.angle = -this.endAngle
           // this.resetAngle()
           await sleep(1000)
-          debugger
           this.resetAngle()
           console.log('switchCS')
           await sleep(10)
@@ -263,7 +261,6 @@ export default {
   width: 100%;
   height: 100%;
   background-color: @bg-light-shadow;
-  overflow-x: hidden;
   .cs-label-wrapper{
     width: 100%;
     height: 44rem;
@@ -451,13 +448,11 @@ export default {
   .fload-tip {
     position: absolute;
     top: 2rem;
-    left: 0;
     width: 100%;
     height: 3rem;
     z-index: 200;
     .tip {
       position: absolute;
-      top: 0;
       width: 3rem;
       height: 3rem;
       border-radius: 50%;

@@ -11,7 +11,7 @@ const production = {
 }
 
 const development = {
-  publicPath: 'http:///api'
+  publicPath: 'http://192.168.8.102:8080/api/v1'
 }
 
 const location = env === 'production' ? production : development

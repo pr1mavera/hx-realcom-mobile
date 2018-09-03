@@ -1,4 +1,4 @@
-export function debounce(func, delay) {
+export function debounce(func, time) {
   let timer
 
   return function(...args) {
@@ -7,14 +7,34 @@ export function debounce(func, delay) {
     }
     timer = setTimeout(() => {
       func.apply(this, args)
-    }, delay)
+      clearTimeout(timer)
+    }, time)
   }
 }
 
 export async function sleep(time) {
   return new Promise((resolve, reject) => {
-    setTimeout(function() {
+    // setTimeout(function() {
+    //   resolve()
+    // }, time)
+    debounce(() => {
       resolve()
-    }, time)
+    }, time)()
+  })
+}
+
+export function sleepByAnimation(time) {
+  return new Promise((resolve, reject) => {
+    var start = null
+    const step = function(timestamp) {
+      if (!start) start = timestamp
+      const progress = timestamp - start
+      if (progress < time) {
+        window.requestAnimationFrame(step)
+      } else {
+        resolve()
+      }
+    }
+    window.requestAnimationFrame(step)
   })
 }
