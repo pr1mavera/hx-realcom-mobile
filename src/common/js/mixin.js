@@ -2,6 +2,7 @@ import { mapGetters, mapMutations } from 'vuex'
 import WebRTCRoom from '@/server/webRTCRoom'
 import IM from '@/server/im'
 import WebRTCAPI from 'webRTCAPI'
+import { ERR_OK, getLoginInfo, pushUserMsg } from '@/server/index.js'
 
 // import { formatDate } from '@/common/js/dateConfig.js'
 // import { roomStatus, queueStatus } from '@/common/js/status'
@@ -15,6 +16,26 @@ export const setUserInfoMixin = {
     }
   },
   methods: {
+    async getUserInfo(data, query, ...Func) {
+      const res = await getLoginInfo(data)
+      if (res.code === ERR_OK) {
+        console.log('getUserInfo成功')
+        const info = {
+          userID: res.userID,
+          selfName: this.userName,
+          accountType: res.accountType,
+          sdkAppID: res.sdkAppID,
+          userSig: res.userSig
+        }
+        this.setUserInfo(info)
+        // 执行回调
+        Func && Func.forEach((fn) => {
+          fn(query)
+        })
+      } else {
+        console.log('error in getUserProfile')
+      }
+    },
     setUserInfoToEnterRoom(query, ...Func) {
       if (!query) {
         alert('请先登录!')
@@ -28,24 +49,26 @@ export const setUserInfoMixin = {
           this.setRoomId(query.roomID)
         }
       }
-      const self = this
-      WebRTCRoom.getLoginInfo(
-        this.userID,
-        (res) => {
-          const info = {
-            userID: res.data.userID,
-            selfName: this.userName,
-            accountType: res.data.accountType,
-            sdkAppID: res.data.sdkAppID,
-            userSig: res.data.userSig
-          }
-          self.setUserInfo(info)
-          // 执行回调
-          Func && Func.forEach((fn) => {
-            fn(query)
-          })
-        }
-      )
+      let data = {}
+      data.userID = this.userID
+      this.getUserInfo(data, query, ...Func)
+      // WebRTCRoom.getLoginInfo(
+      //   this.userID,
+      //   (res) => {
+      //     const info = {
+      //       userID: res.data.userID,
+      //       selfName: this.userName,
+      //       accountType: res.data.accountType,
+      //       sdkAppID: res.data.sdkAppID,
+      //       userSig: res.data.userSig
+      //     }
+      //     self.setUserInfo(info)
+      //     // 执行回调
+      //     Func && Func.forEach((fn) => {
+      //       fn(query)
+      //     })
+      //   }
+      // )
     },
     ...mapMutations({
       setUserInfo: 'SET_USER_INFO',
@@ -332,12 +355,13 @@ export const IMMixin = {
 
 export const RTCSystemMsgMixin = {
   methods: {
-    lineUpOkPushSystemMsg(systemMsg) {
-      WebRTCRoom.pushUserMsg(systemMsg, (res) => {
+    async lineUpOkPushSystemMsg(systemMsg) {
+      const res = await pushUserMsg(systemMsg)
+      if (res.code === ERR_OK) {
         console.log('排队完成，推送系统消息成功')
-      }, () => {
+      } else {
         console.log('推送系统消息失败')
-      })
+      }
     }
   }
 }

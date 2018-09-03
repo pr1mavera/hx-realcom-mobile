@@ -62,6 +62,7 @@
 </template>
 
 <script type="text/ecmascript-6">
+// import { wxConfig } from '@/server/index.js'
 import { mapGetters, mapMutations, mapActions } from 'vuex'
 import { Confirm, TransferDomDirective as TransferDom } from 'vux'
 import BScroll from 'better-scroll'
@@ -72,7 +73,8 @@ import { debounce } from '@/common/js/util'
 import { setUserInfoMixin, IMMixin } from '@/common/js/mixin'
 import {toggleBarStatus} from '@/common/js/status'
 // 调用拉取漫游信息的接口
-import WebRTCRoom from '@/server/webRTCRoom'
+import { ERR_OK, syncGroupC2CMsg } from '@/server/index.js'
+// import WebRTCRoom from '@/server/webRTCRoom'
 
 export default {
   directives: {
@@ -149,6 +151,7 @@ export default {
     }
   },
   mounted() {
+    // this.getUserProfile()
     // 初始化聊天信息
     // 真实项目中拿到对应数据之后再初始化
     this._initChatMsgList()
@@ -164,6 +167,14 @@ export default {
     this.getRoamMessage()
   },
   methods: {
+    // async getUserProfile() {
+    //   // eslint-disable-next-line
+    //   const res = await wxConfig('111111')
+    //   console.log(res.data)
+    //   if (res.code !== 0) {
+    //     console.log('error in getUserProfile')
+    //   }
+    // },
     _initChatMsgList() {
       let map = []
       let timeCache = this.historyMsgs[0].time
@@ -412,7 +423,7 @@ export default {
     ]),
 
     // 若ios用户 不在微信内置浏览器中打开该页面 则需要拉取漫游信息
-    getRoamMessage() {
+    async getRoamMessage() {
       const device = sessionStorage.getItem('device')
       const browser = sessionStorage.getItem('browser')
 
@@ -420,14 +431,27 @@ export default {
         // const groupID = '12345678'
         const groupID = this.$route.query.groupId
         const ReqMsgNumber = 2
-        WebRTCRoom.syncGroupC2CMsg(groupID, ReqMsgNumber, (res) => {
+        let data = {
+          groupID,
+          msgNum: ReqMsgNumber
+        }
+        const res = await syncGroupC2CMsg(data)
+        if (res.code === ERR_OK) {
           const roamMsgList = res.data.RspMsgList
           for (var i in roamMsgList) {
             console.log('漫游消息：' + i + JSON.stringify(roamMsgList[i].MsgBody))
           }
-        }, (res) => {
+        } else {
           console.log('error:' + res)
-        })
+        }
+        // WebRTCRoom.syncGroupC2CMsg(groupID, ReqMsgNumber, (res) => {
+        //   const roamMsgList = res.data.RspMsgList
+        //   for (var i in roamMsgList) {
+        //     console.log('漫游消息：' + i + JSON.stringify(roamMsgList[i].MsgBody))
+        //   }
+        // }, (res) => {
+        //   console.log('error:' + res)
+        // })
       }
     },
 

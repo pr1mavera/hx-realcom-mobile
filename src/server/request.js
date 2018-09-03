@@ -5,30 +5,46 @@ import conf from '../config/index'
 
 Vue.use(AjaxPlugin)
 Vue.use(ToastPlugin)
+// Vue.use('/', function(req, res, next) {
+//   res.header('Access-Control-Allow-Credentials', 'true')
+//   res.header('Access-Control-Allow-Origin', 'http://192.168.8.106:3000/')
+//   res.header('Access-Control-Allow-Header', 'X-Requested-With, Content-Type')
+//   res.header('Access-Control-Allow-Methods', 'PUT, POST, GET, DELETE, OPTIONS')
+// })
 
-Vue.http.defaults.withCredentials = true
+// Vue.http.defaults.withCredentials = true
 
-const host = conf.publicPath
+const publicHost = conf.publicPath
+const RTCRoomHost = conf.webRTCRoomPath
 
-Vue.http.interceptors.response.use(data => data, (error) => {
-  if (error.response.status === 401) {
-    const paramsString = encodeURI(window.location.href)
-    if (paramsString.indexOf('ticketActivity') > -1) {
-      // const href='http://'+window.location.host;
-      // console.log(this)
-      Vue.$vux.toast.text(error.response.data.msg, 'top')
-      setTimeout(() => {
-        window.location.href = `${error.response.data.loginUrl}?service=${paramsString}`
-      }, 500)
-    }
-  } else {
-    Vue.$vux.toast.text(error.response.data.msg, 'top')
+const hostFilter = hostType => {
+  switch (hostType) {
+    case 'public':
+      return publicHost
+    case 'RTCRoom':
+      return RTCRoomHost
   }
-  return Promise.reject(error)
-})
+}
+
+// Vue.http.interceptors.response.use(data => data, (error) => {
+//   if (error.response.status === 401) {
+//     const paramsString = encodeURI(window.location.href)
+//     if (paramsString.indexOf('ticketActivity') > -1) {
+//       // const href='http://'+window.location.host;
+//       // console.log(this)
+//       Vue.$vux.toast.text(error.response.data.msg, 'top')
+//       setTimeout(() => {
+//         window.location.href = `${error.response.data.loginUrl}?service=${paramsString}`
+//       }, 500)
+//     }
+//   } else {
+//     Vue.$vux.toast.text(error.response.data.msg, 'top')
+//   }
+//   return Promise.reject(error)
+// })
 
 export default {
-  post: (url, data, error, option) => Vue.http.post(host + url, data, option)
+  post: (hostType, url, data, error, option) => Vue.http.post(hostFilter(hostType) + url, data, option)
     .then(response => response.data)
     .catch((err) => {
       if (error) {
@@ -37,7 +53,7 @@ export default {
         console.error(err)
       }
     }),
-  get: (url, error, option) => Vue.http.get(host + url, option)
+  get: (hostType, url, error, option) => Vue.http.get(hostFilter(hostType) + url, option)
     .then(response => response.data)
     .catch((err) => {
       if (error) {
@@ -46,7 +62,7 @@ export default {
         console.log(err)
       }
     }),
-  getExternal: (url, error, option) => Vue.http.get(url, option)
+  getExternal: (hostType, url, error, option) => Vue.http.get(hostFilter(hostType) + url, option)
     .then(response => response.data)
     .catch((err) => {
       if (error) {
@@ -55,7 +71,7 @@ export default {
         console.log(err)
       }
     }),
-  put: (url, data, error, option) => Vue.http.put(host + url, data, option)
+  put: (hostType, url, data, error, option) => Vue.http.put(hostFilter(hostType) + url, data, option)
     .then(response => response.data)
     .catch((err) => {
       if (error) {
@@ -65,7 +81,7 @@ export default {
       }
     }),
   // eslint-disable-next-line
-  delete: (url, error, option) => Vue.http.delete(host + url, option)
+  delete: (hostType, url, error, option) => Vue.http.delete(hostFilter(hostType) + url, option)
     .then(response => response.data)
     .catch((err) => {
       if (error) {
@@ -74,7 +90,7 @@ export default {
         console.log(err)
       }
     }),
-  handleLessPost: (url, data, error, option) => Vue.http.post(host + url, data, option)
+  handleLessPost: (hostType, url, data, error, option) => Vue.http.post(hostFilter(hostType) + url, data, option)
     .catch((err) => {
       if (error) {
         error(err)
@@ -82,5 +98,5 @@ export default {
         console.error(err)
       }
     }),
-  url(path) { return host + path }
+  url(hostType, path) { return hostFilter(hostType) + path }
 }
