@@ -8,12 +8,12 @@
         <div class="eva-part">
           <p>请对{{name}}本次的服务进行评价</p>
           <rater v-model="stars"
-                 star="<svg class='icon' style='width:2rem; height:2rem;' aria-hidden='true'>
-                 <use xlink:href='#icon-pingjia'></use></svg>" active-color="red">
+                 star="<svg class='icon' style='width:2rem; height:2rem;fill:#bfbfbf;' aria-hidden='true'>
+                 <use xlink:href='#icon-xingxing'></use></svg>" :margin="8">
           </rater>
         </div>
         <div class="eva-more" v-if="stars > 0">
-          <flexbox>
+          <flexbox style="padding: 0 2rem;box-sizing: border-box;">
             <flexbox-item style="box-sizing: border-box;">
               <x-button mini style="width:10rem;color: #D9DADE;font-size: 1.2rem;background:rgba(255,255,255,.9)">解决了问题</x-button>
             </flexbox-item>
@@ -21,7 +21,7 @@
               <x-button mini style="width:10rem;color: #D9DADE;font-size: 1.2rem;background:rgba(255,255,255,.9)">没有解决</x-button>
             </flexbox-item>
           </flexbox>
-          <swiper height="9.5rem" style="background: #F1F1F1;margin-top: 1.4rem;" dots-class="custom-bottom"
+          <swiper height="9.5rem" style="background: #F1F1F1;margin-top: 1.5rem;" dots-class="custom-bottom"
                    dots-position="center">
             <swiper-item><h2 class="fadeInUp animated">test1</h2></swiper-item>
             <swiper-item><h2 class="fadeInUp animated">test2</h2></swiper-item>
@@ -84,10 +84,7 @@
     .vux-x-icon {
       fill: #FF959C;
       position: relative;
-      right: -44%;
-    }
-    .icon {
-      fill: #646464;
+      right: -11.2rem;
     }
     .popup-main {
       position: relative;
@@ -121,6 +118,11 @@
         padding: 1.5rem 0 0;
         .vux-rater {
           padding: 2.5rem 0 3rem;
+          a[class=is-active] {
+            .icon {
+              fill: #FEC656!important;
+            }
+          }
         }
       }
       .eva-more {
