@@ -49,15 +49,6 @@
       @sendSectionShow="extendBarLaunchOpen = true"
       @deleteBtn="onDeleteBtnClick"
     ></extend-bar>
-    <!-- <div class="extend-bar-launch transition-bezier" :class="{'extend-bar-open': curExtendBar.type}">
-      <keep-alive>
-        <component
-          :inputPos="inputFocPos"
-          @selectEmojiWithCode="selectEmojiWithCode"
-          :is="curExtendBar.component"
-        ></component>
-      </keep-alive>
-    </div> -->
     <div v-transfer-dom>
       <confirm v-model="lineUpAlert"
         :title="'您即将转入视频客服'"
@@ -74,7 +65,7 @@
 import { mapGetters, mapMutations, mapActions } from 'vuex'
 import { Confirm, TransferDomDirective as TransferDom } from 'vux'
 import BScroll from 'better-scroll'
-import HeaderBar from '@/views/mainRoom/components/chat/header-bar'
+// import HeaderBar from '@/views/mainRoom/components/chat/header-bar'
 import InputBar from '@/views/mainRoom/components/chat/input-bar'
 import { needToReloadDate } from '@/common/js/dateConfig'
 import { debounce } from '@/common/js/util'
@@ -95,7 +86,7 @@ export default {
     /**
      * 注册组件
      */
-    HeaderBar,
+    // HeaderBar,
     InputBar,
     Confirm,
     'ContentItem': () => import('@/views/mainRoom/components/chat/content-item'),
@@ -152,6 +143,7 @@ export default {
           msgType: 'no_result'
         }
       ],
+      translateX: 0,
       iosGuide: false,
       lowVersion: false
     }
@@ -248,29 +240,21 @@ export default {
         // 软键盘弹出
         const self = this
         this.resetExtendBar()
-        this.$refs.inputBar.setInputEditState('true')
+        self.$refs.inputBar.setInputEditState('true')
+
+        // this.toggleBar(toggleBarStatus.inputBar)
+        // self._inputFocus()
         this.toggleBar(toggleBarStatus.inputBar).then(() => {
           self._inputFocus()
         })
-        // const self = this
-        // return new Promise((resolve) => {
-        //   self.toggleBar(toggleBarStatus.inputBar)
-        //   resolve()
-        //   // self.$refs.inputBar.setInputEditState('true')
-        // }).then(() => {
-        //   debugger
-        //   self._inputFocus()
-        // })
       }
     },
     _inputFocus() {
       console.log('键盘弹出辣=========================')
       // this.$refs.inputBar.setInputEditState('true')
-      document.getElementById('input-content-hook').focus()
-
-      // this.inputEle.focus()
-      // document.querySelector('#input-content-hook').focus()
       // document.getElementById('input-content-hook').focus()
+
+      this.inputEle.focus()
       // 聊天内容滚动到最底部
       this._resolveKeyboard()
     },
@@ -541,16 +525,6 @@ export default {
     color: @text-normal;
     transition: all 0.3s;
     z-index: -1;
-  }
-  .extend-bar-launch {
-    height: 24rem;
-    background-color: @bg-normal;
-    color: #000;
-    transition: all 0.3s;
-    &.extend-bar-open {
-      // height: calc(~'100% - 29rem');
-      transform: translateY(-24rem);
-    }
   }
 }
 </style>
