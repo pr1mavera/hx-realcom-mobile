@@ -8,15 +8,17 @@
         <div class="eva-part">
           <p>请对{{name}}本次的服务进行评价</p>
           <rater v-model="stars"
-                 star="<svg class='icon' style='width:2rem; height:2rem;' aria-hidden='true'><use xlink:href='#icon-pingjiaxingxingkongxin'></use></svg>" active-color="red"></rater>
+                 star="<svg class='icon' style='width:2rem; height:2rem;' aria-hidden='true'>
+                 <use xlink:href='#icon-pingjia'></use></svg>" active-color="red">
+          </rater>
         </div>
         <div class="eva-more" v-if="stars > 0">
           <flexbox>
-            <flexbox-item>
-              <x-button plain style="width: 11rem;border-radius:99px;font-size: 1.2rem;color: #D9DADE;border-color: #D9DADE;">解决了问题</x-button>
+            <flexbox-item style="box-sizing: border-box;">
+              <x-button mini style="width:10rem;color: #D9DADE;font-size: 1.2rem;background:rgba(255,255,255,.9)">解决了问题</x-button>
             </flexbox-item>
             <flexbox-item>
-              <x-button plain style="width: 11.2rem;border-radius:99px; font-size: 1.2rem;color: #D9DADE;border-color: #D9DADE;">没有解决问题</x-button>
+              <x-button mini style="width:10rem;color: #D9DADE;font-size: 1.2rem;background:rgba(255,255,255,.9)">没有解决</x-button>
             </flexbox-item>
           </flexbox>
           <swiper height="9.5rem" style="background: #F1F1F1;margin-top: 1.4rem;" dots-class="custom-bottom"
@@ -68,6 +70,7 @@
     },
     methods: {
       cancelAssess() {
+        alert('您关闭了评价')
         this.showAssess = false
       }
     }
@@ -82,6 +85,9 @@
       fill: #FF959C;
       position: relative;
       right: -44%;
+    }
+    .icon {
+      fill: #646464;
     }
     .popup-main {
       position: relative;

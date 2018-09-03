@@ -22,14 +22,14 @@ export default {
           icon: 'caomeidangao',
           text: '草莓蛋糕'
         },
-        {
-          icon: 'caomeidangao',
-          text: '草莓蛋糕'
-        },
-        {
-          icon: 'caomeidangao',
-          text: '草莓蛋糕'
-        },
+        // {
+        //   icon: 'caomeidangao',
+        //   text: '草莓蛋糕'
+        // },
+        // {
+        //   icon: 'caomeidangao',
+        //   text: '草莓蛋糕'
+        // },
         {
           icon: 'caomeidangao',
           text: '草莓蛋糕'

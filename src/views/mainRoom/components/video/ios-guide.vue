@@ -50,12 +50,12 @@
     }
     .step-thr {
       position: absolute;
-      bottom: 14.7rem;
+      bottom: 19.7rem;
       width: 100%;
     }
     .step-four {
       position: absolute;
-      bottom: 4.5rem;
+      bottom: 9.5rem;
       img {
         display: block;
         width: 8.7rem;
@@ -65,7 +65,7 @@
     }
     .step-fif {
       position: absolute;
-      bottom: 2.8rem;
+      bottom: 7.8rem;
       img {
         width: 4.3rem;
         margin: 0 0 0 4.4rem;

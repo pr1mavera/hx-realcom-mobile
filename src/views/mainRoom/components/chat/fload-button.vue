@@ -38,6 +38,7 @@
 </template>
 
 <script type="text/ecmascript-6">
+  // import befor
 
 export default {
   props: {
@@ -101,6 +102,7 @@ export default {
               this.$emit('enterVideoLineUp')
           }
       }
+
       // else if (device === 'iPhone' && browser === 'wx') {
         // 将传数据给其父元素,弹层提示用户在浏览器中打开
         // this.$emit('ios-guide', 'true')

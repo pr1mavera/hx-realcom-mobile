@@ -61,28 +61,30 @@
     width: 86.67%;
     height: 19rem;
     position: relative;
-    margin: 2.5rem auto;
+    margin: 0 auto 2.5rem;
     border-radius: .5rem;
     background: url("/static/img/service/myCsCardBg.png") no-repeat;
+    box-shadow: 0 .3rem .5rem 0 rgba(148, 148, 148, 0.1);
     background-size: 22.65rem 5.85rem;
     background-color: #ffffff;
     .close {
       position: absolute;
-      top: 2.2rem;
-      right: 2rem;
+      top: 2.3rem;
+      right: 2.3rem;
     }
     .container-main {
       display: flex;
       padding: 2.5rem 0 0;
       margin: 0 0 4.2rem 2.8rem;
       .avatar {
-        width: 8rem;
-        height: 8rem;
+        width: 7.5rem;
+        height: 7.5rem;
         margin: 0 2rem 0 0;
         border-radius: 50%;
+        border: .25rem solid #ffffff;
         img {
           width: 100%;
-          height: 8rem;
+          height: 7.5rem;
           border-radius: 50%;
         }
       }
