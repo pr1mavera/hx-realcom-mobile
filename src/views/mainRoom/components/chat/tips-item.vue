@@ -1,11 +1,30 @@
 <template>
  <div class="tips-item">
-   <span class="item-span">{{text | timeFilter}}</span>
+   <span class="item-span" v-if="this.types === tipTypes.tip_time">{{text | timeFilter}}</span>
+   <span class="item-span" v-if="this.types === tipTypes.tip_normal">{{text}}</span>
+   <span class="item-span" v-if="this.types === tipTypes.tip_success">
+     <svg class="icon icon-success extend-click" aria-hidden="true">
+       <use xlink:href="#icon-chenggong"></use>
+     </svg>
+     视频客服转接成功，祝您沟通愉快！
+   </span>
+   <span class="item-span" v-if="this.types === tipTypes.tip_fail">
+     <svg class="icon icon-fail extend-click" aria-hidden="true">
+       <use xlink:href="#icon-zhuanjiemang"></use>
+     </svg>
+     人工客服忙
+     <span class="button">转其他客服</span>
+   </span>
+   <span class="item-span" v-if="this.types === tipTypes.tip_line_up">
+     当前排队{{num}}人，请耐心等待
+     <span class="button">取消排队</span>
+   </span>
  </div>
 </template>
 
 <script type="text/ecmascript-6">
 import { formatDate } from '@/common/js/dateConfig.js'
+import { tipTypes } from '@/common/js/status'
 
 export default {
   props: {
@@ -14,6 +33,12 @@ export default {
     },
     types: {
       type: String
+    }
+  },
+  data() {
+    return {
+      tipTypes: tipTypes,
+      num: 3
     }
   },
   created() {
@@ -47,6 +72,16 @@ export default {
     line-height: 1.4rem;
     border-radius: 5px;
     max-width: 50%;
+    .icon {
+      width: 1.4rem;
+      height: 1.4rem;
+      fill: #fff;
+      display: inline-block;
+      vertical-align: top;
+    }
+    .button {
+      color: #2196F3;
+    }
   }
 }
 </style>

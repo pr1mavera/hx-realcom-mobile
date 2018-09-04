@@ -109,8 +109,10 @@ const IM = (() => {
   function parseMsg(newMsg) {
     var msgItem = newMsg.getElems()[0]
     var type = msgItem.getType()
-    var who = newMsg.getFromAccount()
+    var nickName = newMsg.getFromAccount()
+    var msgStatus = ''
     var msgType = ''
+    var time = ''
     if (type === 'TIMCustomElem') {
       var content = msgItem.getContent() // 获取元素对象
       var ext = content.getExt() // '白板标签'
@@ -124,19 +126,23 @@ const IM = (() => {
         var desc = JSON.parse(content.getDesc())
           console.log(`========desc=======${desc}`)
         if (desc && desc.nickName) {
-          who = desc.nickName
-            msgType = desc.msgType
-            console.log(`=======msgType========${msgType}`)
+          nickName = desc.nickName
+          msgType = desc.msgType
+          msgStatus = desc.msgStatus
+          time = desc.time
+          console.log(`=======msgType========${msgType}`)
         }
       }
     }
     return {
       type: 'TEXT',
-      who,
+      nickName,
       content: newMsg.toHtml(),
       isSelfSend: newMsg.getIsSend(),
       isSystem: newMsg.getFromAccount() === '@TIM#SYSTEM' || false,
-      msgType
+      msgType,
+      msgStatus,
+      time
     }
   }
 
@@ -180,8 +186,7 @@ const IM = (() => {
     sendCustomMsg({
       groupId: options.groupId,
       data: options.msg,
-      desc: '{"nickName":"' + options.nickName + '","msgType":"' + options.msgType + '"}',
-      // desc: `{"nickName":"${options.nickName}","msgType":"${options.msgType}","time":"${options.time}"}`,
+      desc: `{"nickName":"${options.nickName}","msgType":"${options.msgType}","time":"${options.time}","msgStatus":"${options.msgStatus}"}`,
       ext: 'TEXT',
       identifier: options.identifier,
       nickName: options.nickName

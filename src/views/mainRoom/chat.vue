@@ -9,13 +9,14 @@
         <div class="chat-content" ref="chatContent">
           <ul>
             <li class="chat-content-block chat-content-start" ref="chatContentStart"></li>
-            <li class="chat-content-li" v-for="(msg, index) in this.msgs" :key="msg.time || index">
+            <li class="chat-content-li" v-for="(msg, index) in this.msgs" :key="index">
               <component
-                :is="_showItemByType(msg.msgType)"
+                :is="_showItemByType(msg.msgStatus)"
                 :isSelf="msg.isSelfSend"
-                :name="msg.who"
+                :name="msg.nickName"
                 :text="msg.content"
                 :types="msg.msgType"
+                :extend="msg.msgExtend"
                 @enterToMenChat="enterToMenChat"
               ></component>
               <!-- <content-msg
@@ -71,7 +72,7 @@ import InputBar from '@/views/mainRoom/components/chat/input-bar'
 import { needToReloadDate } from '@/common/js/dateConfig'
 import { debounce } from '@/common/js/util'
 import { setUserInfoMixin, IMMixin } from '@/common/js/mixin'
-import {toggleBarStatus} from '@/common/js/status'
+import { toggleBarStatus, msgStatus, msgTypes, tipTypes } from '@/common/js/status'
 // 调用拉取漫游信息的接口
 import { ERR_OK, syncGroupC2CMsg } from '@/server/index.js'
 // import WebRTCRoom from '@/server/webRTCRoom'
@@ -91,8 +92,10 @@ export default {
     // HeaderBar,
     InputBar,
     Confirm,
-    'ContentItem': () => import('@/views/mainRoom/components/chat/content-item'),
+    'MsgsItem': () => import('@/views/mainRoom/components/chat/msgs-item'),
     'TipsItem': () => import('@/views/mainRoom/components/chat/tips-item'),
+    'DialogItem': () => import('@/views/mainRoom/components/chat/dialog-item'),
+    'CardItem': () => import('@/views/mainRoom/components/chat/card-item'),
     'FloadButton': () => import('@/views/mainRoom/components/chat/fload-button'),
     'extendBar': () => import('@/views/mainRoom/components/chat/extend-bar'),
     // 'SendFile': () => import('@/views/mainRoom/components/chat/send-file'),
@@ -124,26 +127,89 @@ export default {
       lineUpAlert: false,
       historyMsgs: [
         {
-          who: '小华',
+          nickName: '小华',
           content: '尊贵的客人，您好！',
           isSelfSend: false,
           time: '2018-03-28 08:45:19',
-          msgType: 'text_msg'
+          msgStatus: msgStatus.msg,
+          msgType: msgTypes.msg_normal
         },
         {
-          who: '客人',
+          nickName: '客人',
           content: 'hello！你好',
           isSelfSend: true,
           time: '2018-03-28 08:45:56',
-          msgType: 'text_msg'
+          msgStatus: msgStatus.msg,
+          msgType: msgTypes.msg_normal
         },
         {
-          who: '小华',
-          content: 'text_msg_no_result',
+          nickName: '小华',
+          content: '',
           isSelfSend: false,
           time: '2018-03-28 15:23:45',
-          msgType: 'no_result'
-        }
+          msgStatus: msgStatus.msg,
+          msgType: msgTypes.msg_no_idea
+        },
+        {
+          content: '服务结束，期待与您的下次对话！',
+          time: '2018-03-28 15:23:14',
+          msgStatus: msgStatus.tip,
+          msgType: tipTypes.tip_normal
+        },
+        {
+          content: '',
+          time: '2018-03-28 15:23:44',
+          msgStatus: msgStatus.tip,
+          msgType: tipTypes.tip_success
+        },
+        {
+          content: '',
+          time: '2018-03-28 15:23:25',
+          msgStatus: msgStatus.tip,
+          msgType: tipTypes.tip_fail
+        },
+        {
+          content: '',
+          time: '2018-03-28 15:23:18',
+          msgStatus: msgStatus.tip,
+          msgType: tipTypes.tip_line_up
+        },
+        {
+          content: '',
+          nickName: '小华',
+          isSelfSend: false,
+          time: '2018-03-28 15:23:18',
+          msgStatus: msgStatus.msg,
+          msgType: msgTypes.msg_guess,
+          msgExtend: [
+            '常青树12345678？',
+            '常青树可以搭配什么产品?',
+            '什么事常青树？',
+            '人工服务'
+          ]
+        },
+        {
+          content: '小华很高兴为您服务，请点击以下问题或简要描述您的问题详细咨询',
+          nickName: '小华',
+          isSelfSend: false,
+          time: '2018-03-28 15:23:18',
+          msgStatus: msgStatus.msg,
+          msgType: msgTypes.msg_hot,
+          msgExtend: [
+            '常青树12345678？',
+            '常青树可以搭配什么产品?',
+            '什么事常青树？',
+            '人工服务'
+          ]
+        },
+        {
+          nickName: '小华',
+          content: '',
+          isSelfSend: false,
+          time: '2018-03-28 08:45:19',
+          msgStatus: msgStatus.msg,
+          msgType: msgTypes.msg_leave
+        },
       ],
       translateX: 0,
       iosGuide: false,
@@ -180,7 +246,9 @@ export default {
       let timeCache = this.historyMsgs[0].time
       let temp = {
         content: timeCache,
-        msgType: 'time_msg'
+        time: timeCache,
+        msgStatus: msgStatus.tip,
+        msgType: tipTypes.tip_time
       }
       map.push(this._shallowCopy(temp))
       this.historyMsgs.forEach((item) => {
@@ -205,14 +273,17 @@ export default {
     _showItemByType(type) {
       let component = ''
       switch (type) {
-        case 'text_msg':
-          component = 'ContentItem'
-          break
-        case 'time_msg':
+        case msgStatus.tip:
           component = 'TipsItem'
           break
-        case 'no_result':
-          component = 'ContentItem'
+        case msgStatus.msg:
+          component = 'MsgsItem'
+          break
+        case msgStatus.dialog:
+          component = 'DialogItem'
+          break
+        case msgStatus.card:
+          component = 'CardItem'
           break
       }
       return component

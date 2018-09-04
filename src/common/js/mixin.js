@@ -4,8 +4,8 @@ import IM from '@/server/im'
 import WebRTCAPI from 'webRTCAPI'
 import { ERR_OK, getLoginInfo, pushUserMsg } from '@/server/index.js'
 
-// import { formatDate } from '@/common/js/dateConfig.js'
-// import { roomStatus, queueStatus } from '@/common/js/status'
+import { formatDate } from '@/common/js/dateConfig.js'
+import { msgStatus, msgTypes } from '@/common/js/status'
 
 export const setUserInfoMixin = {
   data() {
@@ -291,7 +291,8 @@ export const IMMixin = {
     },
     onBigGroupMsgNotify(newMsgList) {
       if (newMsgList && newMsgList.length > 0) {
-        alert('onBigGroupMsgNotify')
+        // alert('onBigGroupMsgNotify')
+        console.log(newMsgList)
         const msgsObj = IM.parseMsgs(newMsgList)
         // msgsObj[time] = formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss')
         let temp = this.msgs
@@ -342,9 +343,11 @@ export const IMMixin = {
       IM.sendRoomTextMsg({
         groupId: '12345678',
         msg: text,
+        time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
         nickName: self.userInfo.selfName,
         identifier: self.userInfo.userID,
-        msgType: 'text_msg'
+        msgStatus: msgStatus.msg,
+        msgType: msgTypes.msg_normal
       })
     },
     ...mapMutations({

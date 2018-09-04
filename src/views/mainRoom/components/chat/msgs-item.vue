@@ -1,5 +1,5 @@
 <template>
-  <div class="content-item" :class="[{'item-padding-left': isSelf, 'item-padding-right': !isSelf}]">
+  <div class="msgs-item" :class="[{'item-padding-left': isSelf, 'item-padding-right': !isSelf}]">
     <div class="avatar" v-if="!isSelf">
       <div class="bot-avatar bg-image"></div>
       <svg class="icon extend-click" aria-hidden="true">
@@ -9,13 +9,34 @@
     <div class="content-box" :class="[{'right-content-box': isSelf, 'left-content-box': !isSelf}]">
       <p class="name" v-if="!isSelf">{{name}}</p>
       <div class="content chat-content-shadow" :class="[{'right-content-style': isSelf, 'left-content-style': !isSelf}]">
-        <span class="text" v-html="text" v-if="this.types === 'text_msg'"></span>
-        <span class="text" v-if="this.types === 'no_result'">小华智力有限，好像听不太懂您的问题呢，可转<span @click="enterToMenChat">人工客服</span></span>
-        <!-- <span class="text" v-html="text"></span> -->
-        <!-- <div class="line"></div>
-        <div class="content-cell">
-
-        </div> -->
+        <!-- 基本消息 -->
+        <span class="text" v-if="this.types === msgTypes.msg_normal" v-html="text"></span>
+        <!-- 转人工 -->
+        <span class="text" v-if="this.types === msgTypes.msg_no_idea">
+          小华智力有限，好像听不太懂您的问题呢，可转
+          <span class="button" @click="enterToMenChat">人工客服</span>
+        </span>
+        <!-- 热点问题 -->
+        <span class="text" v-if="this.types === msgTypes.msg_hot">
+          {{text}}
+          <span class="line"></span>
+          <span class="text-extend-hot">
+            <span class="text-extend">您可能想问：</span>
+            <span class="text-extend button" v-for="(item, index) in this.extend" :key="index">{{item}}</span>
+          </span>
+        </span>
+        <!-- 图片消息 -->
+        <span class="text" v-if="this.types === msgTypes.msg_img"></span>
+        <!-- 留言 -->
+        <span class="text" v-if="this.types === msgTypes.msg_leave">客服暂时不在，请<span class="button">点击留言</span>~</span>
+        <!-- 猜问题 -->
+        <span class="text" v-if="this.types === msgTypes.msg_guess">我猜您想知道这些问题</span>
+      </div>
+      <!-- 猜问题 模块 -->
+      <div class="content chat-content-shadow left-content-style content-extend" v-if="this.types === msgTypes.msg_guess">
+        <span class="text">
+          <span class="text-extend button" v-for="(item, index) in this.extend" :key="index">{{item}}</span>
+        </span>
       </div>
     </div>
     <!-- <div class="avatar" v-show="false">
@@ -27,12 +48,9 @@
 </template>
 
 <script type="text/ecmascript-6">
+import { msgTypes } from '@/common/js/status'
+
 export default {
-  components: {
-    no_result: {
-			template: '<span>小华智力有限，好像听不太懂您的问题呢，可转<span @click="enterToMenChat">人工客服</span></span>'
-		}
-  },
   props: {
     isSelf: {
       type: Boolean
@@ -45,11 +63,14 @@ export default {
     },
     types: {
       type: String
+    },
+    extend: {
+      type: Array
     }
   },
   data() {
     return {
-
+      msgTypes: msgTypes
     }
   },
   mounted() {
@@ -67,7 +88,7 @@ export default {
 @import '~@/common/style/theme.less';
 @import '~@/common/style/mixin.less';
 
-.content-item {
+.msgs-item {
   width: calc(~'100% - 9rem');
   // padding-top: 1.2rem;
   // padding-bottom: 1.2rem;
@@ -126,7 +147,7 @@ export default {
       width: auto;
       max-width: 100%;
       padding: 0.9rem 1.2rem;
-      margin-bottom: 1.8rem;
+      margin-bottom: 1.4rem;
       &.left-content-style {
         border-radius: 0.4rem 1.5rem 1.5rem 1.5rem;
         color: @text-normal;
@@ -141,12 +162,49 @@ export default {
         .chat-content-shadow(@text-special-shadow)
         // right: 0;
       }
+      &.content-extend{
+        width: 90%;
+        .text {
+          .text-extend {
+            display: block;
+            margin-bottom: 0.6rem;
+            &:last-child {
+              margin-bottom: 0;
+            }
+          }
+        }
+      }
       .text {
         line-height: 2rem;
         max-width: 100%;
         word-wrap: break-word;
-        span {
+        .button {
           color: rgb(82, 144, 239);
+        }
+        .line {
+          display: block;
+          width: 100%;
+          height: 0.1rem;
+          transform-origin: bottom left;
+          transform: scaleY(0.5);
+          background: linear-gradient(to right, @text-lighter-a, @text-lighter-a 0.5rem, transparent 0.5rem, transparent);
+          background-size: 1rem 100%;
+          margin: 0.9rem 0;
+        }
+        .text-label {
+          color: @text-lighter-a;
+        }
+        .text-extend-hot {
+          .text-extend {
+            display: block;
+            margin-bottom: 0.6rem;
+            &:first-child {
+              color: @text-lighter-a;
+            }
+            &:last-child {
+              margin-bottom: 0;
+            }
+          }
         }
       }
     }
