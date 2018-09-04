@@ -209,7 +209,7 @@ export default {
           time: '2018-03-28 08:45:19',
           msgStatus: msgStatus.msg,
           msgType: msgTypes.msg_leave
-        },
+        }
       ],
       translateX: 0,
       iosGuide: false,
@@ -515,14 +515,6 @@ export default {
         } else {
           console.log('error:' + res)
         }
-        // WebRTCRoom.syncGroupC2CMsg(groupID, ReqMsgNumber, (res) => {
-        //   const roamMsgList = res.data.RspMsgList
-        //   for (var i in roamMsgList) {
-        //     console.log('漫游消息：' + i + JSON.stringify(roamMsgList[i].MsgBody))
-        //   }
-        // }, (res) => {
-        //   console.log('error:' + res)
-        // })
       }
     },
 

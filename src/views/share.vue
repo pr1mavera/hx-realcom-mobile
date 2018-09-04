@@ -7,6 +7,7 @@
     <!--<low-version></low-version>-->
     <!--<service-busy v-if="serviceBusy"></service-busy>-->
     <!--<ios-guide></ios-guide>-->
+    <!--<video-ended></video-ended>-->
   </div>
 </template>
 
@@ -18,7 +19,8 @@ export default {
     'ConnectFail': () => import('@/views/mainRoom/components/video/connect-fail'),
     'LowVersion': () => import('@/views/mainRoom/components/video/low-version'),
     'ServiceBusy': () => import('@/views/mainRoom/components/video/service-busy'),
-    'IosGuide': () => import('@/views/mainRoom/components/video/ios-guide')
+    'IosGuide': () => import('@/views/mainRoom/components/video/ios-guide'),
+    'VideoEnded': () => import('@/views/mainRoom/components/video/video-ended')
   },
   data() {
     return {

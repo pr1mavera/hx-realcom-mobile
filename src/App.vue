@@ -95,6 +95,15 @@ body {
   border: 1px solid #FF959C!important;
 }
 
+/*-,评价组件星星颜色-*/
+.popup-main .vux-rater-box {
+  fill: #bfbfbf;
+}
+
+.popup-main .is-active {
+  fill: #FEC656;
+}
+
 /*---------对Nexus5做响应式------------*/
 @media screen and(min-width: 321px) and(max-width: 360px) {
   html {

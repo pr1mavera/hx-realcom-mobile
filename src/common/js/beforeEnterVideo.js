@@ -9,19 +9,20 @@
   const ua = navigator.userAgent.toLowerCase()
 
   if (device === 'Android') {
+    // 若为Android设备
     const reg = /android [\d._]+/gi
     const version = (ua.match(reg) + '').replace(/[^0-9|_.]/ig, '').replace(/_/ig, '.')
     console.log('该Android的系统版本为：' + version)
-    this.$emit('enterVideoLineUp')
+    this.$emit('enterVideoLineUp') // 通信,进入排队页面
   } else if (device === 'iPhone') {
-    // 判断iOS的系统版本
+    //  若为ios设备，则需判断iOS的系统版本
     const ver = ua.match(/cpu iphone os (.*?) like mac os/)
     const version = parseFloat(ver[1].replace(/_/g, '.'))
 
     // 当前版本过低
     if (version < 11) {
       alert('当前ios的版本为：' + version + '，请升级系统版本')
-      this.$emit('low-version', 'true')
+      this.$emit('low-version', 'true') // 弹层提示用户当前系统版本低
     } else if (device === 'iPhone' && browser === 'wx') {
       alert('当前ios的版本为：' + version)
       // 当前在微信内置浏览器中，弹层提示用户在浏览器中打开,
@@ -42,6 +43,7 @@
       })
     } else if (device === 'iPhone' && browser === 'safari') {
       alert('当前ios的版本为：' + version + '！')
+      // 进入排队的页面
       this.$emit('enterVideoLineUp')
     }
   }

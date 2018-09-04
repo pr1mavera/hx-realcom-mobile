@@ -7,27 +7,30 @@
         <x-icon type="ios-close" @click.native="cancelAssess" size="30"></x-icon>
         <div class="eva-part">
           <p>请对{{name}}本次的服务进行评价</p>
+          <!-- fill:#bfbfbf; 未评价时星星的颜色； #FEC656,评价点亮后星星的颜色 -->
           <rater v-model="stars"
-                 star="<svg class='icon' style='width:2rem; height:2rem;fill:#bfbfbf;' aria-hidden='true'>
+                 star="<svg class='icon' style='width:2rem;height:2rem;' aria-hidden='true'>
                  <use xlink:href='#icon-xingxing'></use></svg>" :margin="8">
           </rater>
         </div>
         <div class="eva-more" v-if="stars > 0">
           <flexbox style="padding: 0 2rem;box-sizing: border-box;">
             <flexbox-item style="box-sizing: border-box;">
-              <x-button mini style="width:10rem;color: #D9DADE;font-size: 1.2rem;background:rgba(255,255,255,.9)">解决了问题</x-button>
+              <x-button mini>解决了问题</x-button>
             </flexbox-item>
             <flexbox-item>
-              <x-button mini style="width:10rem;color: #D9DADE;font-size: 1.2rem;background:rgba(255,255,255,.9)">没有解决</x-button>
+              <x-button mini>没有解决</x-button>
             </flexbox-item>
           </flexbox>
-          <swiper height="9.5rem" style="background: #F1F1F1;margin-top: 1.5rem;" dots-class="custom-bottom"
-                   dots-position="center">
-            <swiper-item><h2 class="fadeInUp animated">test1</h2></swiper-item>
+          <swiper height="9.5rem" style="background: #F1F1F1;margin-top: 1.5rem;" dots-class="custom-bottom" dots-position="center">
+            <swiper-item><div class="btn-box"></div></swiper-item>
             <swiper-item><h2 class="fadeInUp animated">test2</h2></swiper-item>
-            <swiper-item><h2 class="fadeInUp animated">test3</h2></swiper-item>
-            <swiper-item><h2 class="fadeInUp animated">test4</h2></swiper-item>
-            <swiper-item><h2 class="fadeInUp animated">test5</h2></swiper-item>
+            <!--<swiper-item class="" v-for="(item, index) in btnBoxList" :key="index">-->
+              <!--<div class="btn-box" ></div>-->
+            <!--</swiper-item>-->
+            <swiper-item v-for="(item, index) in btnBoxList" :key="index">
+              <div class="btn-box"></div>
+            </swiper-item>
           </swiper>
           <flexbox style="margin: 2rem 0;">
             <flexbox-item>
@@ -45,6 +48,10 @@
 
 <script>
   import { TransferDom, Popup, Rater, XButton, Flexbox, FlexboxItem, Swiper, SwiperItem } from 'vux'
+
+  const btnList = [
+    ''
+  ]
   export default {
     directives: {
       TransferDom
@@ -63,8 +70,11 @@
         showAssess: true,
         name: '丽丽',
         stars: 0,
-        next: true
+        next: true,
+        btnBoxList: btnList
       }
+    },
+    computed: {
     },
     mounted() {
     },
@@ -97,8 +107,8 @@
       text-align: center;
       border-radius: 1rem;
       .avatar {
-        width: 8rem;
-        height: 8rem;
+        width: 7.5rem;
+        height: 7.5rem;
         position: absolute;
         top: -4rem;
         left: 50%;
@@ -106,10 +116,10 @@
         border-radius: 50%;
         background: linear-gradient(to right, #FF8C6A, #FF80A0);
         img {
-          width: 88%;
-          height: 88%;
+          width: 6.7rem;
+          height: 6.7rem;
           border-radius: 50%;
-          margin-top: 6%;
+          margin-top: .4rem;
           vertical-align: middle;
         }
       }
@@ -118,14 +128,20 @@
         padding: 1.5rem 0 0;
         .vux-rater {
           padding: 2.5rem 0 3rem;
-          a[class=is-active] {
-            .icon {
-              fill: #FEC656!important;
-            }
-          }
         }
       }
       .eva-more {
+        .vux-flexbox {
+          button {
+            width: 10rem;
+            color: #D9DADE;
+            font-size: 1.2rem;
+            background: rgba(255, 255, 255, .9);
+          }
+          .weui-btn:after {
+            border-color: rgba(214, 215, 220, 1) !important;
+          }
+        }
         .vux-slider + .vux-flexbox {
           button {
             width: 9rem;
