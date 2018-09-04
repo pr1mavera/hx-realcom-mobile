@@ -17,13 +17,16 @@
       </div>
     </div>
     <div class="btn-box" style="text-align: center">
-      <x-button mini @click.native="enterVideoLineUp" style="color: #FF959C;background: #fff;">视频咨询</x-button>
+      <x-button mini @click.native="enterVideoLineUp" style="color: #FF959C;background: #fff;">
+        视频咨询
+      </x-button>
     </div>
   </div>
 </template>
 
 <script>
   import { XButton } from 'vux'
+  // import '@/common/js/beforeEnterVideo'
   export default {
     // name: "my-cs-card"
     components: {

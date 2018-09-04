@@ -3,7 +3,7 @@
   <div class="serverDetail container">
     <!-- 默认高度为180px, 如果设置aspect-ratio会根据宽度自动计算高度,如 :aspect-ratio="300/375" -->
     <swiper auto dots-class="custom-bottom" dots-position="center">
-      <swiper-item class="swiper-demo-img" v-for="(item, index) in personalDisplay" :key="index">
+      <swiper-item class="swiper-img" v-for="(item, index) in personalDisplay" :key="index">
         <img :src="item" style="width: 100%;object-fit: fill;">
       </swiper-item>
     </swiper>
@@ -44,13 +44,8 @@
     <div class="container-item">
       <p class="container-item-tit">认识我</p>
       <div class="container-item-con">
-        <x-button mini style="margin-right: 1.5rem">温柔1</x-button>
-        <x-button mini style="margin-right: 1.5rem">可爱1</x-button>
-        <x-button mini style="margin-right: 1.5rem">鬼灵精怪3</x-button>
-        <x-button mini style="margin-right: 1.5rem">鬼灵精怪3</x-button>
-        <x-button mini style="margin-right: 1.5rem">鬼灵精怪3</x-button>
-        <x-button mini style="margin-right: 1.5rem">鬼灵精怪3</x-button>
-        <x-button mini style="margin-right: 1.5rem">鬼灵精怪3</x-button>
+        <!--<x-button mini style="margin-right: 1.5rem">温柔1</x-button>-->
+        <label-btn></label-btn>
       </div>
     </div>
     <div class="container-item">
@@ -77,7 +72,8 @@
       SwiperItem,
       XButton,
       XCircle,
-      'SendGift': () => import('@/views/mainRoom/components/chat/send-gift')
+      'SendGift': () => import('@/views/mainRoom/components/chat/send-gift'),
+      'LabelBtn': () => import('@/views/mainRoom/components/label-btn')
     },
     data() {
      return {

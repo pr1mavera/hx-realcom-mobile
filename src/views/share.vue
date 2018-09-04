@@ -2,12 +2,12 @@
   <div class="share">
     There are some words for test
     <!-- 测试评价组件 -->
-    <!--<assess v-if="true"></assess>-->
+    <assess v-if="true"></assess>
     <!--<connect-fail></connect-fail>-->
     <!--<low-version></low-version>-->
     <!--<service-busy v-if="serviceBusy"></service-busy>-->
     <!--<ios-guide></ios-guide>-->
-    <video-ended></video-ended>
+    <!--<video-ended></video-ended>-->
   </div>
 </template>
 
