@@ -9,7 +9,7 @@
         <div class="chat-content" ref="chatContent">
           <ul>
             <li class="chat-content-block chat-content-start" ref="chatContentStart"></li>
-            <li class="chat-content-li" v-for="(msg, index) in this.msgs" :key="index">
+            <li class="chat-content-li" v-for="(msg, index) in this.msgs" :key="index" :class="{'text-center': msg.msgStatus === msgStatus.tip}">
               <component
                 :is="_showItemByType(msg.msgStatus)"
                 :isSelf="msg.isSelfSend"
@@ -17,6 +17,7 @@
                 :text="msg.content"
                 :types="msg.msgType"
                 :extend="msg.msgExtend"
+                :cardInfo="msg.cardInfo"
                 @enterToMenChat="enterToMenChat"
               ></component>
               <!-- <content-msg
@@ -72,7 +73,7 @@ import InputBar from '@/views/mainRoom/components/chat/input-bar'
 import { needToReloadDate } from '@/common/js/dateConfig'
 import { debounce } from '@/common/js/util'
 import { setUserInfoMixin, IMMixin } from '@/common/js/mixin'
-import { toggleBarStatus, msgStatus, msgTypes, tipTypes } from '@/common/js/status'
+import { toggleBarStatus, msgStatus, msgTypes, tipTypes, dialogTypes, cardTypes } from '@/common/js/status'
 // 调用拉取漫游信息的接口
 import { ERR_OK, syncGroupC2CMsg } from '@/server/index.js'
 // import WebRTCRoom from '@/server/webRTCRoom'
@@ -125,7 +126,17 @@ export default {
       // inputObserver: null,
       extendBarLaunchOpen: false,
       lineUpAlert: false,
+      msgStatus: msgStatus,
       historyMsgs: [
+        {
+          time: '2018-03-28 08:45:19',
+          msgStatus: msgStatus.card,
+          msgType: cardTypes.bot_card,
+          cardInfo: {
+            avatar: '',
+            nickName: '小华'
+          }
+        },
         {
           nickName: '小华',
           content: '尊贵的客人，您好！',
@@ -184,8 +195,7 @@ export default {
           msgExtend: [
             '常青树12345678？',
             '常青树可以搭配什么产品?',
-            '什么事常青树？',
-            '人工服务'
+            '什么事常青树？'
           ]
         },
         {
@@ -196,10 +206,9 @@ export default {
           msgStatus: msgStatus.msg,
           msgType: msgTypes.msg_hot,
           msgExtend: [
-            '常青树12345678？',
-            '常青树可以搭配什么产品?',
-            '什么事常青树？',
-            '人工服务'
+            '华夏保险医保通怎么选合适',
+            '常青树可以搭配什么产品',
+            '我应该怎么续保'
           ]
         },
         {
@@ -585,6 +594,9 @@ export default {
           .chat-content-li {
             position: relative;
             width: 100%;
+            &.text-center {
+              text-align: center;
+            }
           }
         }
       }

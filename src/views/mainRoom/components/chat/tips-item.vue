@@ -58,26 +58,25 @@ export default {
 
 .tips-item {
   position: relative;
-  width: 100%;
-  min-height: 2.2rem;
-  text-align: center;
-  margin-bottom: 1.8rem;
+  display: inline-block;
+  max-width: 70%;
+  min-height: 1.2rem;
+  padding: 0.3rem 0.6rem;
+  margin: 0 auto 1.8rem;
+  transform: scale(calc(~'10 / 12'));
+  background-color: rgba(0, 0, 0, .2);
+  border-radius: 5px;
   .item-span {
-    // display: inline-block;
-    // vertical-align: middle;
-    background-color: rgba(0, 0, 0, .2);
+    vertical-align: middle;
     color: @text-lighter;
-    padding: 0.4rem 0.6rem;
     font-size: 1.2rem;
-    line-height: 1.4rem;
-    border-radius: 5px;
-    max-width: 50%;
+    height: 1.2rem;
     .icon {
-      width: 1.4rem;
-      height: 1.4rem;
+      width: 1.2rem;
+      height: 1.2rem;
       fill: #fff;
       display: inline-block;
-      vertical-align: top;
+      vertical-align: inherit;
     }
     .button {
       color: #2196F3;

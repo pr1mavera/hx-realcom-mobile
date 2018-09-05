@@ -1,7 +1,9 @@
 <template>
   <div class="msgs-item" :class="[{'item-padding-left': isSelf, 'item-padding-right': !isSelf}]">
     <div class="avatar" v-if="!isSelf">
-      <div class="bot-avatar bg-image"></div>
+      <div class="bot-avatar bg-image">
+        <img width=100% height=100% src="/static/img/chat/xiaohua@2x.png">
+      </div>
       <svg class="icon extend-click" aria-hidden="true">
         <use xlink:href="#icon-wode"></use>
       </svg>
@@ -23,6 +25,7 @@
           <span class="text-extend-hot">
             <span class="text-extend">您可能想问：</span>
             <span class="text-extend button" v-for="(item, index) in this.extend" :key="index">{{item}}</span>
+            <span class="text-extend button">人工服务</span>
           </span>
         </span>
         <!-- 图片消息 -->
@@ -36,6 +39,7 @@
       <div class="content chat-content-shadow left-content-style content-extend" v-if="this.types === msgTypes.msg_guess">
         <span class="text">
           <span class="text-extend button" v-for="(item, index) in this.extend" :key="index">{{item}}</span>
+          <span class="text-extend button">人工服务</span>
         </span>
       </div>
     </div>
@@ -105,7 +109,7 @@ export default {
     height: 4.2rem;
     background-color: @text-light;
     border-radius: 50%;
-    margin: 0 1rem;
+    margin: 0 1.2rem;
     overflow: hidden;
     align-items: flex-start;
     .bot-avatar {
@@ -114,7 +118,10 @@ export default {
       bottom: 0;
       left: 0;
       right: 0;
-      .bg-image('~/static/img/chat/xiaohua');
+      img {
+        object-fit: cover;
+      }
+      // .bg-image('~/static/img/chat/xiaohua');
     }
     .icon {
       width: 1.2rem;
@@ -125,7 +132,7 @@ export default {
   }
   .content-box {
     // position: relative;
-    width: calc(~'100% - 6.2rem');
+    width: calc(~'100% - 6.6rem');
     font-size: 1.4rem;
     display: flex;
     flex-direction: column;
@@ -148,6 +155,7 @@ export default {
       max-width: 100%;
       padding: 0.9rem 1.2rem;
       margin-bottom: 1.4rem;
+      box-sizing: border-box;
       &.left-content-style {
         border-radius: 0.4rem 1.5rem 1.5rem 1.5rem;
         color: @text-normal;
@@ -163,7 +171,7 @@ export default {
         // right: 0;
       }
       &.content-extend{
-        width: 90%;
+        width: 100%;
         .text {
           .text-extend {
             display: block;
