@@ -2,7 +2,7 @@
  *
  * Created by WangXj 。
  */
-(function() {
+export function beforeEnterVideo() {
   // 判断手机类型, 系统的版本
   const device = sessionStorage.getItem('device')
   const browser = sessionStorage.getItem('browser')
@@ -47,4 +47,4 @@
       this.$emit('enterVideoLineUp')
     }
   }
-})()
+}

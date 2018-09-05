@@ -73,8 +73,8 @@ import { debounce } from '@/common/js/util'
 import { setUserInfoMixin, IMMixin } from '@/common/js/mixin'
 import {toggleBarStatus} from '@/common/js/status'
 // 调用拉取漫游信息的接口
-import { ERR_OK, syncGroupC2CMsg } from '@/server/index.js'
 // import WebRTCRoom from '@/server/webRTCRoom'
+import { ERR_OK, syncGroupC2CMsg } from '@/server/index.js'
 
 export default {
   directives: {
