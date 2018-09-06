@@ -7,9 +7,9 @@
       </svg>
     </span>
     <div class="container-main">
-      <div class="avatar">
+      <a @click="enterSerCenter" class="avatar">
         <img :src="avatarSrc">
-      </div>
+      </a>
       <div class="info">
         <p class="name">{{this.name}}</p>
         <p>服务总量 {{this.num}}次</p>
@@ -26,6 +26,7 @@
 
 <script>
   import { XButton } from 'vux'
+  import { beforeEnterVideo } from '@/common/js/beforeEnterVideo'
   // import '@/common/js/beforeEnterVideo'
   export default {
     // name: "my-cs-card"
@@ -50,8 +51,13 @@
       removeCusSer() {
         alert('确定要移除该客服吗')
       },
+      enterSerCenter() {
+        this.$router.push({
+          path: '/room/serverDetail'
+        })
+      },
       enterVideoLineUp() {
-        alert('您即将接入视频客服')
+        beforeEnterVideo()
       }
     }
   }
