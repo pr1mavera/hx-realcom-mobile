@@ -5,24 +5,21 @@ import conf from '../config/index'
 
 Vue.use(AjaxPlugin)
 Vue.use(ToastPlugin)
-// Vue.use('/', function(req, res, next) {
+// Vue.use('/api', function(req, res, next) {
 //   res.header('Access-Control-Allow-Credentials', 'true')
-//   res.header('Access-Control-Allow-Origin', 'http://192.168.8.106:3000/')
-//   res.header('Access-Control-Allow-Header', 'X-Requested-With, Content-Type')
+//   res.header('Access-Control-Allow-Origin', '*')
+//   res.header('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type')
 //   res.header('Access-Control-Allow-Methods', 'PUT, POST, GET, DELETE, OPTIONS')
 // })
 
 // Vue.http.defaults.withCredentials = true
 
-const publicHost = conf.publicPath
-const RTCRoomHost = conf.webRTCRoomPath
-
 const hostFilter = hostType => {
   switch (hostType) {
     case 'public':
-      return publicHost
+      return conf.publicPath
     case 'RTCRoom':
-      return RTCRoomHost
+      return conf.webRTCRoomPath
   }
 }
 

@@ -8,10 +8,34 @@
 </template>
 
 <script type="text/ecmascript-6">
+import { ERR_OK, getUserInfoByOpenID } from '@/server/index.js'
+import { mapMutations } from 'vuex'
 
 export default {
   components: {
     'videoBar': () => import('@/views/mainRoom/videoBar')
+  },
+  data() {
+    return {
+
+    }
+  },
+  mounted() {
+    this._setUserBaseProfile('oKXX7wABsIulcFpdlbwUyMKGisjQ')
+  },
+  methods: {
+    async _setUserBaseProfile(openID) {
+      const res = await getUserInfoByOpenID(openID)
+      if (res.result.code === ERR_OK) {
+        console.log('============================= 我现在来请求 UserInfoByOpenID 辣 =============================')
+        this.setUserInfo(res.data.userInfo)
+      } else {
+        console.log('error in getUserInfoByOpenID')
+      }
+    },
+    ...mapMutations({
+      setUserInfo: 'SET_USER_INFO'
+    })
   }
 }
 </script>

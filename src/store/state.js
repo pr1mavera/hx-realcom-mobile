@@ -2,13 +2,9 @@
 import { roomStatus, queueStatus } from '@/common/js/status'
 
 const state = {
-  userInfo: {
-    userID: '',
-    selfName: '',
-    accountType: '',
-    sdkAppID: '',
-    userSig: ''
-  },
+  userInfo: {},
+  botInfo: {},
+  csInfo: {},
   roomId: null,
   msgs: [],
   extendBarOpen: false,
