@@ -2,7 +2,7 @@
   <div class="share">
     There are some words for test
     <!-- 测试评价组件 -->
-    <assess v-if="true"></assess>
+    <!--<assess v-if="true"></assess>-->
     <!--<connect-fail></connect-fail>-->
     <!--<low-version></low-version>-->
     <!--<service-busy v-if="serviceBusy"></service-busy>-->
@@ -33,5 +33,6 @@ export default {
 .share {
   width: 100%;
   height: 100%;
+  background: #f4f4f4;
 }
 </style>

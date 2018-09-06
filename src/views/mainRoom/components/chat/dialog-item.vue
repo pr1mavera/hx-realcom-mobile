@@ -1,15 +1,129 @@
 <template>
   <div class="dialog-item">
-
+    <div class="fail-container" v-if="this.types === dialogTypes.dialog_disconnect">
+      <div class="fail-con">
+        <img src="/static/img/chat/connect-fail@2x.png"
+             srcset="/static/img/chat/connect-fail.png 1x,
+                /static/img/chat/connect-fail@2x.png 2x,
+                /static/img/chat/connect-fail@3x.png 3x">
+        <div class="fail-con-left">
+          <p class="tit">连接已中断</p>
+          <p class="text">您已经有{{this.dialogInfo.disconnectTime}}}分钟没有回复信息，聊天自动中断！</p>
+        </div>
+      </div>
+      <div class="fail-bottom">
+        <a @click="reConnect">点击重新连接</a>
+      </div>
+    </div>
+    <div class="suc-con" v-if="this.types === dialogTypes.dialog_success">
+     <div class="avatar">
+       <img src="/static/img/avatar@2x.png">
+       <p class="name">{{this.dialogInfo.csName}}</p>
+     </div>
+     <div class="suc-con-left">
+       <p class="tit" style="padding: .8rem 0 1rem 0">尊贵的{{this.dialogInfo.rank}}客户</p>
+       <div style="display: flex">
+         <p class="text">人工客服切换成功！祝您沟通愉快！</p>
+         <div class="diamond">
+           <img src="/static/img/chat/diamond.png">
+         </div>
+       </div>
+     </div>
+   </div>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
-export default {
+import {dialogTypes} from '@/common/js/status'
 
+export default {
+  props: {
+    dialogInfo: {
+      type: Object
+    },
+    types: {
+      type: String
+    }
+  },
+  data() {
+    return {
+      dialogTypes: dialogTypes
+    }
+  },
+  methods: {
+    reConnect() {
+      console.log('重新连接')
+      this.$emit('enterVideoLineUp')
+    }
+  }
 }
 </script>
 
 <style lang="less">
+  @import '~@/common/style/theme.less';
+  @import '~@/common/style/mixin.less';
+
+  .dialog-item {
+    width: 27.5rem;
+    margin: 0 auto;
+    border-radius: .5rem;
+    background: @text-lighter;
+    .tit {
+      line-height: 1.5;
+      font-size: 1.4rem;
+      color: @text-normal;
+    }
+    .text {
+      line-height: 1.25;
+      font-size: 1.2rem;
+      color: @text-light;
+    }
+  }
+  .fail-container {
+    .fail-con {
+      display: flex;
+      padding: 1.9rem 8.5rem 1.9rem 1.9rem;
+      img {
+        flex: none;
+        width: 3.8rem;
+        height: 3.8rem;
+        margin: 0 1.9rem 0 0;
+      }
+    }
+    .fail-bottom {
+      font-size: 1.2rem;
+      color: #2196F3;
+      padding: .7rem 0;
+      text-align: center;
+      border-top: 1px solid @text-lighter-a;
+    }
+  }
+  .suc-con {
+    display: flex;
+    padding: 1rem 2rem;
+    .avatar {
+      width: fit-content;
+      text-align: center;
+      margin-right: 2rem;
+      img {
+        width: 5.6rem;
+        height: 5.6rem;
+        border-radius: 50%;
+      }
+      .name {
+        font-size: 1.2rem;
+        color: #cdcdcd;
+        padding-top: .8rem;
+      }
+    }
+    .diamond {
+      margin-left: .8rem;
+      img {
+        width: 5.2rem;
+        height: 2.9rem;
+        /*margin-top: 4.8rem;*/
+      }
+    }
+  }
 
 </style>

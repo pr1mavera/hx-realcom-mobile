@@ -18,6 +18,7 @@
                 :types="msg.msgType"
                 :extend="msg.msgExtend"
                 :cardInfo="msg.cardInfo"
+                :dialogInfo="msg.dialogInfo"
                 @enterToMenChat="enterToMenChat"
               ></component>
               <!-- <content-msg
@@ -135,6 +136,24 @@ export default {
           cardInfo: {
             avatar: '',
             nickName: '小华'
+          }
+        },
+        {
+          time: '2018-09-05 08:45:89',
+          msgStatus: msgStatus.dialog,
+          msgType: dialogTypes.dialog_success,
+          dialogInfo: {
+            avatar: '',
+            csName: '花花',
+            rank: '钻石'
+          }
+        },
+        {
+          time: '2018-09-05 08:46:66',
+          msgType: dialogTypes.dialog_disconnect,
+          msgStatus: msgStatus.dialog,
+          dialogInfo: {
+            disconnectTime: 5
           }
         },
         {

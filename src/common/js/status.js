@@ -42,8 +42,8 @@ export const msgTypes = {
 }
 
 export const dialogTypes = {
-  dialog_success: '0', // 转接成功
-  dialog_disconnect: '1'// 断开连接
+  dialog_success: '1', // 转接成功
+  dialog_disconnect: '0'// 断开连接
 }
 
 export const cardTypes = {
