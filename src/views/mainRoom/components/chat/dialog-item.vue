@@ -8,7 +8,7 @@
                 /static/img/chat/connect-fail@3x.png 3x">
         <div class="fail-con-left">
           <p class="tit">连接已中断</p>
-          <p class="text">您已经有{{this.dialogInfo.disconnectTime}}}分钟没有回复信息，聊天自动中断！</p>
+          <p class="text">您已经有{{this.dialogInfo.disconnectTime}}分钟没有回复信息，聊天自动中断！</p>
         </div>
       </div>
       <div class="fail-bottom">
