@@ -49,8 +49,9 @@ export const setUserInfoMixin = {
           this.setRoomId(query.roomID)
         }
       }
-      let data = {}
-      data.userID = this.userID
+      const data = {
+        userID: this.userID
+      }
       this.getUserInfo(data, query, ...Func)
       // WebRTCRoom.getLoginInfo(
       //   this.userID,

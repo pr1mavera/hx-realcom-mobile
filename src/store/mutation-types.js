@@ -1,5 +1,9 @@
 export const SET_USER_INFO = 'SET_USER_INFO'
 
+export const SET_BOT_INFO = 'SET_BOT_INFO'
+
+export const SET_CS_INFO = 'SET_CS_INFO'
+
 export const SET_ROOM_ID = 'SET_ROOM_ID'
 
 export const SET_MSGS = 'SET_MSGS'

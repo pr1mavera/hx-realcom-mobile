@@ -77,7 +77,7 @@ import { setUserInfoMixin, IMMixin } from '@/common/js/mixin'
 import { toggleBarStatus, msgStatus, msgTypes, tipTypes, dialogTypes, cardTypes } from '@/common/js/status'
 // 调用拉取漫游信息的接口
 // import WebRTCRoom from '@/server/webRTCRoom'
-import { ERR_OK, syncGroupC2CMsg } from '@/server/index.js'
+import { ERR_OK, getImgUrl, getBotInfo, syncGroupC2CMsg } from '@/server/index.js'
 
 export default {
   directives: {
@@ -128,117 +128,117 @@ export default {
       extendBarLaunchOpen: false,
       lineUpAlert: false,
       msgStatus: msgStatus,
-      historyMsgs: [
-        {
-          time: '2018-03-28 08:45:19',
-          msgStatus: msgStatus.card,
-          msgType: cardTypes.bot_card,
-          cardInfo: {
-            avatar: '',
-            nickName: '小华'
-          }
-        },
-        {
-          time: '2018-09-05 08:45:89',
-          msgStatus: msgStatus.dialog,
-          msgType: dialogTypes.dialog_success,
-          dialogInfo: {
-            avatar: '',
-            csName: '花花',
-            rank: '钻石'
-          }
-        },
-        {
-          time: '2018-09-05 08:46:66',
-          msgType: dialogTypes.dialog_disconnect,
-          msgStatus: msgStatus.dialog,
-          dialogInfo: {
-            disconnectTime: 5
-          }
-        },
-        {
-          nickName: '小华',
-          content: '尊贵的客人，您好！',
-          isSelfSend: false,
-          time: '2018-03-28 08:45:19',
-          msgStatus: msgStatus.msg,
-          msgType: msgTypes.msg_normal
-        },
-        {
-          nickName: '客人',
-          content: 'hello！你好',
-          isSelfSend: true,
-          time: '2018-03-28 08:45:56',
-          msgStatus: msgStatus.msg,
-          msgType: msgTypes.msg_normal
-        },
-        {
-          nickName: '小华',
-          content: '',
-          isSelfSend: false,
-          time: '2018-03-28 15:23:45',
-          msgStatus: msgStatus.msg,
-          msgType: msgTypes.msg_no_idea
-        },
-        {
-          content: '服务结束，期待与您的下次对话！',
-          time: '2018-03-28 15:23:14',
-          msgStatus: msgStatus.tip,
-          msgType: tipTypes.tip_normal
-        },
-        {
-          content: '',
-          time: '2018-03-28 15:23:44',
-          msgStatus: msgStatus.tip,
-          msgType: tipTypes.tip_success
-        },
-        {
-          content: '',
-          time: '2018-03-28 15:23:25',
-          msgStatus: msgStatus.tip,
-          msgType: tipTypes.tip_fail
-        },
-        {
-          content: '',
-          time: '2018-03-28 15:23:18',
-          msgStatus: msgStatus.tip,
-          msgType: tipTypes.tip_line_up
-        },
-        {
-          content: '',
-          nickName: '小华',
-          isSelfSend: false,
-          time: '2018-03-28 15:23:18',
-          msgStatus: msgStatus.msg,
-          msgType: msgTypes.msg_guess,
-          msgExtend: [
-            '常青树12345678？',
-            '常青树可以搭配什么产品?',
-            '什么事常青树？'
-          ]
-        },
-        {
-          content: '小华很高兴为您服务，请点击以下问题或简要描述您的问题详细咨询',
-          nickName: '小华',
-          isSelfSend: false,
-          time: '2018-03-28 15:23:18',
-          msgStatus: msgStatus.msg,
-          msgType: msgTypes.msg_hot,
-          msgExtend: [
-            '华夏保险医保通怎么选合适',
-            '常青树可以搭配什么产品',
-            '我应该怎么续保'
-          ]
-        },
-        {
-          nickName: '小华',
-          content: '',
-          isSelfSend: false,
-          time: '2018-03-28 08:45:19',
-          msgStatus: msgStatus.msg,
-          msgType: msgTypes.msg_leave
-        }
-      ],
+      // historyMsgs: [
+      //   {
+      //     time: '2018-03-28 08:45:19',
+      //     msgStatus: msgStatus.card,
+      //     msgType: cardTypes.bot_card,
+      //     cardInfo: {
+      //       avatar: '',
+      //       nickName: '小华'
+      //     }
+      //   },
+      //   {
+      //     time: '2018-09-05 08:45:89',
+      //     msgStatus: msgStatus.dialog,
+      //     msgType: dialogTypes.dialog_success,
+      //     dialogInfo: {
+      //       avatar: '',
+      //       csName: '花花',
+      //       rank: '钻石'
+      //     }
+      //   },
+      //   {
+      //     time: '2018-09-05 08:46:66',
+      //     msgType: dialogTypes.dialog_disconnect,
+      //     msgStatus: msgStatus.dialog,
+      //     dialogInfo: {
+      //       disconnectTime: 5
+      //     }
+      //   },
+      //   {
+      //     nickName: '小华',
+      //     content: '尊贵的客人，您好！',
+      //     isSelfSend: false,
+      //     time: '2018-03-28 08:45:19',
+      //     msgStatus: msgStatus.msg,
+      //     msgType: msgTypes.msg_normal
+      //   },
+      //   {
+      //     nickName: '客人',
+      //     content: 'hello！你好',
+      //     isSelfSend: true,
+      //     time: '2018-03-28 08:45:56',
+      //     msgStatus: msgStatus.msg,
+      //     msgType: msgTypes.msg_normal
+      //   },
+      //   {
+      //     nickName: '小华',
+      //     content: '',
+      //     isSelfSend: false,
+      //     time: '2018-03-28 15:23:45',
+      //     msgStatus: msgStatus.msg,
+      //     msgType: msgTypes.msg_no_idea
+      //   },
+      //   {
+      //     content: '服务结束，期待与您的下次对话！',
+      //     time: '2018-03-28 15:23:14',
+      //     msgStatus: msgStatus.tip,
+      //     msgType: tipTypes.tip_normal
+      //   },
+      //   {
+      //     content: '',
+      //     time: '2018-03-28 15:23:44',
+      //     msgStatus: msgStatus.tip,
+      //     msgType: tipTypes.tip_success
+      //   },
+      //   {
+      //     content: '',
+      //     time: '2018-03-28 15:23:25',
+      //     msgStatus: msgStatus.tip,
+      //     msgType: tipTypes.tip_fail
+      //   },
+      //   {
+      //     content: '',
+      //     time: '2018-03-28 15:23:18',
+      //     msgStatus: msgStatus.tip,
+      //     msgType: tipTypes.tip_line_up
+      //   },
+      //   {
+      //     content: '',
+      //     nickName: '小华',
+      //     isSelfSend: false,
+      //     time: '2018-03-28 15:23:18',
+      //     msgStatus: msgStatus.msg,
+      //     msgType: msgTypes.msg_guess,
+      //     msgExtend: [
+      //       '常青树12345678？',
+      //       '常青树可以搭配什么产品?',
+      //       '什么事常青树？'
+      //     ]
+      //   },
+      //   {
+      //     content: '小华很高兴为您服务，请点击以下问题或简要描述您的问题详细咨询',
+      //     nickName: '小华',
+      //     isSelfSend: false,
+      //     time: '2018-03-28 15:23:18',
+      //     msgStatus: msgStatus.msg,
+      //     msgType: msgTypes.msg_hot,
+      //     msgExtend: [
+      //       '华夏保险医保通怎么选合适',
+      //       '常青树可以搭配什么产品',
+      //       '我应该怎么续保'
+      //     ]
+      //   },
+      //   {
+      //     nickName: '小华',
+      //     content: '',
+      //     isSelfSend: false,
+      //     time: '2018-03-28 08:45:19',
+      //     msgStatus: msgStatus.msg,
+      //     msgType: msgTypes.msg_leave
+      //   }
+      // ],
       translateX: 0,
       iosGuide: false,
       lowVersion: false
@@ -248,17 +248,18 @@ export default {
     // this.getUserProfile()
     // 初始化聊天信息
     // 真实项目中拿到对应数据之后再初始化
-    this._initChatMsgList()
+    // this._initChatMsgList()
     // 初始化滚动
     const self = this
     this.$nextTick(() => {
       this.inputEle = self.$refs.inputBar.$refs.inputContent
+      this._setBotBaseInfo()
       this._initScroll()
     })
     // 拉取历史消息
-    this.setMsgs(this.historyMsgs)
+    // this.setMsgs(this.historyMsgs)
     // 获取漫游消息
-    this.getRoamMessage()
+    // this.getRoamMessage()
   },
   methods: {
     // async getUserProfile() {
@@ -269,6 +270,49 @@ export default {
     //     console.log('error in getUserProfile')
     //   }
     // },
+    async _setBotBaseInfo() {
+      const res = await getBotInfo()
+      if (res.result.code === ERR_OK) {
+        console.log('============================= 我现在来请求 BotInfo 辣 =============================')
+        const info = {
+          avatarUrl: getImgUrl(res.data.headUrl),
+          name: res.data.name
+        }
+        this.setBotInfo(info)
+        const botCard = {
+          msgStatus: msgStatus.card,
+          msgType: cardTypes.bot_card,
+          cardInfo: {
+            avatar: '',
+            nickName: '小华'
+          }
+        }
+        const botWelcomeMsg = {
+          nickName: res.data.name,
+          content: res.data.welcomeTip,
+          isSelfSend: false,
+          msgStatus: msgStatus.msg,
+          msgType: msgTypes.msg_normal
+        }
+        const botHotMsg = {
+          content: res.data.hotspotDoc,
+          nickName: res.data.name,
+          isSelfSend: false,
+          msgStatus: msgStatus.msg,
+          msgType: msgTypes.msg_hot,
+          msgExtend: res.data.hotspotQuestions.map((item) => {
+            return item.name
+          })
+        }
+        this.setMsgs(this.msgs.concat([
+          botCard,
+          botWelcomeMsg,
+          botHotMsg
+        ]))
+      } else {
+        console.log('error in getUserInfoByOpenID')
+      }
+    },
     _initChatMsgList() {
       let map = []
       let timeCache = this.historyMsgs[0].time
@@ -511,6 +555,7 @@ export default {
       this.lowVersion = data
     },
     ...mapMutations({
+      setBotInfo: 'SET_BOT_INFO',
       setModeToMenChat: 'SET_ROOM_MODE',
       setMsgs: 'SET_MSGS',
       setInputBar: 'SET_INPUT_BAR',
@@ -535,6 +580,7 @@ export default {
           msgNum: ReqMsgNumber
         }
         const res = await syncGroupC2CMsg(data)
+        debugger
         if (res.code === ERR_OK) {
           const roamMsgList = res.data.RspMsgList
           for (var i in roamMsgList) {
@@ -544,15 +590,7 @@ export default {
           console.log('error:' + res)
         }
       }
-    },
-
-    ...mapMutations({
-      setModeToMenChat: 'SET_ROOM_MODE',
-      setMsgs: 'SET_MSGS'
-    }),
-    ...mapActions([
-      'enterToLineUp'
-    ])
+    }
   }
 }
 </script>

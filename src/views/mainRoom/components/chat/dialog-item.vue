@@ -11,7 +11,7 @@
           <p class="text">您已经有{{this.dialogInfo.disconnectTime}}分钟没有回复信息，聊天自动中断！</p>
         </div>
       </div>
-      <div class="fail-bottom">
+      <div class="fail-bottom border-1px-before">
         <a @click="reConnect">点击重新连接</a>
       </div>
     </div>
@@ -59,7 +59,7 @@ export default {
 }
 </script>
 
-<style lang="less">
+<style scoped lang="less">
   @import '~@/common/style/theme.less';
   @import '~@/common/style/mixin.less';
 
@@ -82,7 +82,7 @@ export default {
   .fail-container {
     .fail-con {
       display: flex;
-      padding: 1.9rem 8.5rem 1.9rem 1.9rem;
+      padding: 1.9rem 6.5rem 1.9rem 1.9rem;
       img {
         flex: none;
         width: 3.8rem;
@@ -93,14 +93,19 @@ export default {
     .fail-bottom {
       font-size: 1.2rem;
       color: #2196F3;
-      padding: .7rem 0;
+      padding: .4rem 0;
       text-align: center;
-      border-top: 1px solid @text-lighter-a;
+      // border-top: 1px solid @text-lighter-a;
+      .border-1px-before(@label-line-normal);
+      a {
+        display: inline-block;
+        line-height: 1.2rem;
+      }
     }
   }
   .suc-con {
     display: flex;
-    padding: 1rem 2rem;
+    padding: 1rem 1.6rem;
     .avatar {
       width: fit-content;
       text-align: center;
@@ -113,7 +118,7 @@ export default {
       .name {
         font-size: 1.2rem;
         color: #cdcdcd;
-        padding-top: .8rem;
+        padding-top: .6rem;
       }
     }
     .diamond {

@@ -4,6 +4,12 @@ const mutations = {
   [types.SET_USER_INFO](state, info) {
     state.userInfo = info
   },
+  [types.SET_BOT_INFO](state, info) {
+    state.botInfo = info
+  },
+  [types.SET_CS_INFO](state, info) {
+    state.csInfo = info
+  },
   [types.SET_ROOM_ID](state, id) {
     state.roomId = id
   },
