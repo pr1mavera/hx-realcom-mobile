@@ -45,7 +45,7 @@ export const getUserInfoByOpenID = openID => http.get('public', `/video/user?ope
 export const getBotInfo = () => http.get('public', `/robot/query`)
 
 /**
- * [createBotSession 创建与机器人的会话]
+ * [createSession 创建与机器人的会话]
  */
 export const createSession = data => http.post('public', `/robot/session/create`, data)
 

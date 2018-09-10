@@ -256,12 +256,11 @@ export default {
     const self = this
     this.$nextTick(() => {
       self.inputEle = self.$refs.inputBar.$refs.inputContent
-      // self.setUserBaseProfile(
-      //   'oKXX7wABsIulcFpdlbwUyMKGisjQ', // 传入openID
-      //   self._initSession, // 成功后创建机器人会话
-      //   self._setBotBaseInfo // 成功后设置机器人基本信息
-      // )
-      self._initSession()
+      self.setUserBaseProfile(
+        'oKXX7wABsIulcFpdlbwUyMKGisjQ', // 传入openID
+        self._initSession, // 成功后创建机器人会话
+        self._setBotBaseInfo // 成功后设置机器人基本信息
+      )
       self._initScroll()
     })
     // 拉取历史消息
@@ -314,23 +313,11 @@ export default {
       }
     },
     async _initSession() {
-      // const data = {
-      //   userId: this.userInfo.userId,
-      //   userName: this.userInfo.userName,
-      //   userPhone: this.userInfo.userPhone
-      // }
-      const data = {
-        userId: '007b0776-aad8-4679-98a5-07dbd79d1d49',
-        userName: '李娟',
-        userPhone: '18653007763'
-      }
-
-      // const option = {
-      //   headers: {
-      //     'Content-type': 'application/x-www-form-urlencoded'
-      //   }
-      // }
-      const res = await createSession(data)
+      var params = new URLSearchParams()
+      params.append('userId', this.userInfo.userId)
+      params.append('userName', this.userInfo.userName)
+      params.append('userPhone', this.userInfo.userPhone)
+      const res = await createSession(params)
       if (res.result.code === ERR_OK) {
         console.log('============================= 我现在来请求 createSession 辣 =============================')
         console.log('会话创建成功')
