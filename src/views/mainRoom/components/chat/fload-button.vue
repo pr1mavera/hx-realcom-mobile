@@ -57,6 +57,10 @@ export default {
     enterVideoLineUp() {
       beforeEnterVideo()
 
+      const nextStatus = sessionStorage.getItem('enterVideoStatus')
+      this.$emit(nextStatus, 'true')
+      sessionStorage.removeItem('enterVideoStatus')
+
       // WebRTCAPI.fn.detectRTC({
       //   screenshare: false
       // }, function(info) {
