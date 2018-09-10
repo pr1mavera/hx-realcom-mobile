@@ -1,8 +1,8 @@
-import { mapGetters, mapMutations } from 'vuex'
+import { mapGetters, mapMutations, mapActions } from 'vuex'
 import WebRTCRoom from '@/server/webRTCRoom'
 import IM from '@/server/im'
 import WebRTCAPI from 'webRTCAPI'
-import { ERR_OK, getUserInfoByOpenID, getLoginInfo, pushUserMsg } from '@/server/index.js'
+import { ERR_OK, getUserInfoByOpenID, getLoginInfo, pushUserMsg, sendMsgToBot } from '@/server/index.js'
 // import { sleep } from '@/common/js/util'
 import { formatDate } from '@/common/js/dateConfig.js'
 import { msgStatus, msgTypes } from '@/common/js/status'
@@ -309,11 +309,20 @@ export const IMMixin = {
         console.log(newMsgList)
         const msgsObj = IM.parseMsgs(newMsgList)
         // msgsObj[time] = formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss')
-        let temp = this.msgs
-        temp = temp.concat(msgsObj.textMsgs)
-        this.setMsgs(temp)
+        // let temp = this.msgs
+        // temp = temp.concat(msgsObj.textMsgs)
+        // this.setMsgs(temp)
+        this.sendMsgs({
+          msgs: [
+            msgsObj.textMsgs
+          ],
+          scrollObj: this.chatScroll,
+          endObj: this.$refs.chatContentEnd
+        })
         this.chatScroll.refresh && this.chatScroll.refresh()
         console.log(this.msgs)
+        this.chatScroll.refresh()
+        this.chatScroll.scrollToElement(this.$refs.chatContentEnd, 400)
       }
     },
     onMsgNotify(msgs) {
@@ -352,6 +361,113 @@ export const IMMixin = {
         })
       }
     },
+    // ...mapMutations({
+    //   setMsgs: 'SET_MSGS'
+    // }),
+    ...mapActions([
+      'sendMsgs'
+    ])
+  }
+}
+
+export const sendMsgsMixin = {
+  computed: {
+    ...mapGetters([
+      'botInfo',
+      'userInfo'
+    ])
+  },
+  methods: {
+    async sendTextMsgToBot(question) {
+      // 保存用户输入
+      const ques = {
+        nickName: this.userInfo.userName,
+        content: question,
+        isSelfSend: true,
+        time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+        msgStatus: msgStatus.msg,
+        msgType: msgTypes.msg_normal
+      }
+      // this.setMsgs(this.msgs.concat([ques]))
+      this.sendMsgs({
+        msgs: [
+          ques
+        ],
+        scrollObj: this.chatScroll,
+        endObj: this.$refs.chatContentEnd
+      })
+      // 获取机器人返回
+      var params = new URLSearchParams()
+      params.append('question', question)
+      params.append('sessionId', this.roomId)
+      const res = await sendMsgToBot(params)
+      if (res.result.code === ERR_OK) {
+        // 此处将用户的输入保存至vuex
+        const answer = this.botAnswerfilter(res.data.answer.data)
+        // this.setMsgs(this.msgs.concat([answer]))
+        this.sendMsgs({
+          msgs: [
+            answer
+          ],
+          scrollObj: this.chatScroll,
+          endObj: this.$refs.chatContentEnd
+        })
+        console.log('============================= 我现在来请求 sendMsgToBot 辣 =============================')
+      } else {
+        alert('你可能不信，但是机器人崩了')
+      }
+    },
+    botAnswerfilter(data) {
+      let msg
+      if (data.info.length === 1) {
+        if (data.info[0].question === '如何转人工') {
+          // 转人工
+          msg = {
+            nickName: this.botInfo.name,
+            content: '',
+            isSelfSend: false,
+            time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+            msgStatus: msgStatus.msg,
+            msgType: msgTypes.msg_no_idea
+          }
+        } else {
+          // normal
+          msg = {
+            nickName: this.botInfo.name,
+            content: data.info[0].answer,
+            isSelfSend: false,
+            time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+            msgStatus: msgStatus.msg,
+            msgType: msgTypes.msg_normal
+          }
+        }
+      } else if (data.info.length === 3) {
+        // 猜问题
+        msg = {
+          nickName: this.botInfo.name,
+          content: '',
+          isSelfSend: false,
+          time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+          msgStatus: msgStatus.msg,
+          msgType: msgTypes.msg_guess,
+          msgExtend: [
+            {
+              question: data.info[0].question,
+              answer: data.info[0].answer
+            },
+            {
+              question: data.info[1].question,
+              answer: data.info[1].answer
+            },
+            {
+              question: data.info[2].question,
+              answer: data.info[2].answer
+            }
+          ]
+        }
+      }
+      return msg
+    },
     sendTextMsg(text) {
       const self = this
       IM.sendRoomTextMsg({
@@ -364,9 +480,9 @@ export const IMMixin = {
         msgType: msgTypes.msg_normal
       })
     },
-    ...mapMutations({
-      setMsgs: 'SET_MSGS'
-    })
+    ...mapActions([
+      'sendMsgs'
+    ])
   }
 }
 

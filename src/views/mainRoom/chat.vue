@@ -73,12 +73,12 @@ import BScroll from 'better-scroll'
 // import HeaderBar from '@/views/mainRoom/components/chat/header-bar'
 import InputBar from '@/views/mainRoom/components/chat/input-bar'
 import { needToReloadDate } from '@/common/js/dateConfig'
-import { debounce, sleep } from '@/common/js/util'
-import { setUserInfoMixin, IMMixin } from '@/common/js/mixin'
+import { debounce } from '@/common/js/util'
+import { setUserInfoMixin, IMMixin, sendMsgsMixin } from '@/common/js/mixin'
 import { roomStatus, toggleBarStatus, msgStatus, msgTypes, tipTypes, dialogTypes, cardTypes } from '@/common/js/status'
 // 调用拉取漫游信息的接口
 // import WebRTCRoom from '@/server/webRTCRoom'
-import { ERR_OK, getImgUrl, getBotInfo, createSession, sendMsgToBot, syncGroupC2CMsg } from '@/server/index.js'
+import { ERR_OK, getImgUrl, getBotInfo, createSession, syncGroupC2CMsg } from '@/server/index.js'
 
 export default {
   directives: {
@@ -86,7 +86,8 @@ export default {
   },
   mixins: [
     setUserInfoMixin,
-    IMMixin
+    IMMixin,
+    sendMsgsMixin
   ],
   components: {
     /**
@@ -132,6 +133,30 @@ export default {
       extendBarLaunchOpen: false,
       lineUpAlert: false,
       msgStatus: msgStatus,
+      // historyMsgs: [
+      //   {
+      //     content: '',
+      //     nickName: '小华',
+      //     isSelfSend: false,
+      //     time: '2018-03-28 15:23:18',
+      //     msgStatus: msgStatus.msg,
+      //     msgType: msgTypes.msg_guess,
+      //     msgExtend: [
+      //       {
+      //         question: '常青树12345678？',
+      //         answer: '1234'
+      //       },
+      //       {
+      //         question: '常青树可以搭配什么产品?',
+      //         answer: '1234'
+      //       },
+      //       {
+      //         question: '什么事常青树？',
+      //         answer: '1234'
+      //       }
+      //     ]
+      //   },
+      // ],
       // historyMsgs: [
       //   {
       //     time: '2018-03-28 08:45:19',
@@ -303,11 +328,20 @@ export default {
             return item.name
           })
         }
-        await this.setMsgs(this.msgs.concat([
-          botCard,
-          botWelcomeMsg,
-          botHotMsg
-        ]))
+        // await this.setMsgs(this.msgs.concat([
+        //   botCard,
+        //   botWelcomeMsg,
+        //   botHotMsg
+        // ]))
+        await this.sendMsgs({
+          msgs: [
+            botCard,
+            botWelcomeMsg,
+            botHotMsg
+          ],
+          scrollObj: this.chatScroll,
+          endObj: this.$refs.chatContentEnd
+        })
       } else {
         console.log('error in getUserInfoByOpenID')
       }
@@ -324,20 +358,6 @@ export default {
         this.setRoomId(res.data.id)
       } else {
         console.log('会话创建失败')
-      }
-    },
-    async sendTextMsgToBot(question) {
-      const data = {
-        question,
-        sessionId: this.roomId
-      }
-      const res = await sendMsgToBot(data)
-      if (res.result.code === ERR_OK) {
-        // 此处将用户的输入保存至vuex
-        console.log('============================= 我现在来请求 sendMsgToBot 辣 =============================')
-        // 此处处理机器人返回的答案
-      } else {
-        console.log('发送机器人会话失败')
       }
     },
     _initChatMsgList() {
@@ -593,13 +613,14 @@ export default {
     ...mapMutations({
       setBotInfo: 'SET_BOT_INFO',
       setModeToMenChat: 'SET_ROOM_MODE',
-      setMsgs: 'SET_MSGS',
+      // setMsgs: 'SET_MSGS',
       setInputBar: 'SET_INPUT_BAR',
       setExtendBar: 'SET_EXTEND_BAR'
     }),
     ...mapActions([
       'enterToLineUp',
-      'toggleBar'
+      'toggleBar',
+      'sendMsgs'
     ]),
     // 若ios用户 不在微信内置浏览器中打开该页面 则需要拉取漫游信息
     async getRoamMessage() {
