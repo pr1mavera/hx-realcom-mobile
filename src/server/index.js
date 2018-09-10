@@ -29,6 +29,9 @@ export const syncGroupC2CMsg = data => http.post('RTCRoom', '/syncGroupC2CMsg', 
  ************************************ public ************************************
  */
 
+/**
+ * [getImgUrl 获取照片流请求统一路径]
+ */
 export const getImgUrl = imgUrl => http.url('public', `/video/image/get?imgUrl=${imgUrl}`)
 
 /**
@@ -42,6 +45,11 @@ export const getUserInfoByOpenID = openID => http.get('public', `/video/user?ope
 export const getBotInfo = () => http.get('public', `/robot/query`)
 
 /**
- * [createBotSession 创建雨机器人的会话]
+ * [createBotSession 创建与机器人的会话]
  */
-export const createBotSession = data => http.post('public', `/robot/session/create`, data)
+export const createSession = data => http.post('public', `/robot/session/create`, data)
+
+/**
+ * [sendMsgToBot 发送消息给机器人]
+ */
+export const sendMsgToBot = data => http.post('public', `/robot/question/send`, data)

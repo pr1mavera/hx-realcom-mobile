@@ -2,26 +2,39 @@ import { mapGetters, mapMutations } from 'vuex'
 import WebRTCRoom from '@/server/webRTCRoom'
 import IM from '@/server/im'
 import WebRTCAPI from 'webRTCAPI'
-import { ERR_OK, getLoginInfo, pushUserMsg } from '@/server/index.js'
-
+import { ERR_OK, getUserInfoByOpenID, getLoginInfo, pushUserMsg } from '@/server/index.js'
+// import { sleep } from '@/common/js/util'
 import { formatDate } from '@/common/js/dateConfig.js'
 import { msgStatus, msgTypes } from '@/common/js/status'
 
 export const setUserInfoMixin = {
   data() {
     return {
-      userID: '',
+      userId: '',
       userName: '',
       roomName: ''
     }
   },
   methods: {
+    async setUserBaseProfile(openID, ...Func) {
+      const res = await getUserInfoByOpenID(openID)
+      if (res.result.code === ERR_OK) {
+        console.log('============================= 我现在来请求 UserInfoByOpenID 辣 =============================')
+        await this.setUserInfo(res.data.userInfo)
+        // await sleep(2000)
+        Func && Func.forEach(async function(fn) {
+          await fn()
+        })
+      } else {
+        console.log('error in getUserInfoByOpenID')
+      }
+    },
     async getUserInfo(data, query, ...Func) {
       const res = await getLoginInfo(data)
       if (res.code === ERR_OK) {
         console.log('getUserInfo成功')
         const info = {
-          userID: res.userID,
+          userId: res.userId,
           selfName: this.userName,
           accountType: res.accountType,
           sdkAppID: res.sdkAppID,
@@ -42,7 +55,7 @@ export const setUserInfoMixin = {
       } else if (query.cmd !== 'create' && query.cmd !== 'enter') {
         alert('发生错误，无法识别身份')
       } else {
-        this.userID = query.userID
+        this.userId = query.userId
         this.userName = query.userName
         this.roomName = query.roomName
         if (query.cmd === 'enter') {
@@ -50,14 +63,14 @@ export const setUserInfoMixin = {
         }
       }
       const data = {
-        userID: this.userID
+        userId: this.userId
       }
       this.getUserInfo(data, query, ...Func)
       // WebRTCRoom.getLoginInfo(
-      //   this.userID,
+      //   this.userId,
       //   (res) => {
       //     const info = {
-      //       userID: res.data.userID,
+      //       userId: res.data.userId,
       //       selfName: this.userName,
       //       accountType: res.data.accountType,
       //       sdkAppID: res.data.sdkAppID,
@@ -95,7 +108,7 @@ export const RTCRoomMixin = {
       const self = this
       this.RTC = new WebRTCAPI({
         'sdkAppId': self.userInfo.sdkAppID,
-        'userId': self.userInfo.userID,
+        'userId': self.userInfo.userId,
         'userSig': self.userInfo.userSig,
         'accountType': self.userInfo.accountType
       }, () => {
@@ -176,13 +189,13 @@ export const RTCRoomMixin = {
       console.log('-> action create room')
       const self = this
       WebRTCRoom.createRoom(
-        self.userInfo.userID,
+        self.userInfo.userId,
         self.userInfo.selfName,
         self.roomName,
         (res) => {
           // 发送心跳包
           self.heartBeatTask = WebRTCRoom.startHeartBeat(
-            self.userInfo.userID,
+            self.userInfo.userId,
             res.data.roomID,
             () => {},
             () => {
@@ -207,13 +220,13 @@ export const RTCRoomMixin = {
     actionEnterRoom(query) {
       const self = this
       WebRTCRoom.enterRoom(
-        self.userInfo.userID,
+        self.userInfo.userId,
         self.userInfo.userName,
         self.roomId,
         (res) => {
           // 发送心跳包
           self.heartBeatTask = WebRTCRoom.startHeartBeat(
-            self.userInfo.userID,
+            self.userInfo.userId,
             self.roomId,
             () => {},
             () => {
@@ -269,7 +282,7 @@ export const IMMixin = {
       const loginInfo = {
         sdkAppID: self.userInfo.sdkAppID,
         appIDAt3rd: self.userInfo.sdkAppID,
-        identifier: self.userInfo.userID,
+        identifier: self.userInfo.userId,
         identifierNick: self.userInfo.selfName,
         accountType: self.userInfo.accountType,
         userSig: self.userInfo.userSig
@@ -283,7 +296,7 @@ export const IMMixin = {
         },
         () => {
           console.log('===============================> initIM success <===============================')
-          IM.joinGroup('12345678', self.userInfo.userID)
+          IM.joinGroup('12345678', self.userInfo.userId)
         },
         (err) => {
           alert(err.ErrorInfo)
@@ -323,7 +336,7 @@ export const IMMixin = {
                     // boardBg: JSON.stringify(boardBg)
                   }),
                   nickName: this.selfName,
-                  identifier: this.userID
+                  identifier: this.userId
                 })
                 // 如果有图片则补发图片
                 const bgUrl = boardBg[currentBoard] && boardBg[currentBoard].url
@@ -346,7 +359,7 @@ export const IMMixin = {
         msg: text,
         time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
         nickName: self.userInfo.selfName,
-        identifier: self.userInfo.userID,
+        identifier: self.userInfo.userId,
         msgStatus: msgStatus.msg,
         msgType: msgTypes.msg_normal
       })

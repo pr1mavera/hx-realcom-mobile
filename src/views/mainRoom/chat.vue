@@ -43,6 +43,7 @@
         :class="{'inputFocus': this.inputBarOpen}"
         @targetInputBuffer="targetInputBuffer"
         @chatInputChange="chatInputChange"
+        @chatInputCommit="chatInputCommit"
         @toggleExtend="toggleExtendBar"
       ></input-bar>
     </div>
@@ -72,12 +73,12 @@ import BScroll from 'better-scroll'
 // import HeaderBar from '@/views/mainRoom/components/chat/header-bar'
 import InputBar from '@/views/mainRoom/components/chat/input-bar'
 import { needToReloadDate } from '@/common/js/dateConfig'
-import { debounce } from '@/common/js/util'
+import { debounce, sleep } from '@/common/js/util'
 import { setUserInfoMixin, IMMixin } from '@/common/js/mixin'
-import { toggleBarStatus, msgStatus, msgTypes, tipTypes, dialogTypes, cardTypes } from '@/common/js/status'
+import { roomStatus, toggleBarStatus, msgStatus, msgTypes, tipTypes, dialogTypes, cardTypes } from '@/common/js/status'
 // 调用拉取漫游信息的接口
 // import WebRTCRoom from '@/server/webRTCRoom'
-import { ERR_OK, getImgUrl, getBotInfo, syncGroupC2CMsg } from '@/server/index.js'
+import { ERR_OK, getImgUrl, getBotInfo, createSession, sendMsgToBot, syncGroupC2CMsg } from '@/server/index.js'
 
 export default {
   directives: {
@@ -108,7 +109,10 @@ export default {
   },
   computed: {
     ...mapGetters([
+      'userInfo',
       'msgs',
+      'roomMode',
+      'roomId',
       'extendBarOpen',
       'inputBarOpen'
     ])
@@ -245,16 +249,20 @@ export default {
     }
   },
   mounted() {
-    // this.getUserProfile()
     // 初始化聊天信息
     // 真实项目中拿到对应数据之后再初始化
     // this._initChatMsgList()
     // 初始化滚动
     const self = this
     this.$nextTick(() => {
-      this.inputEle = self.$refs.inputBar.$refs.inputContent
-      this._setBotBaseInfo()
-      this._initScroll()
+      self.inputEle = self.$refs.inputBar.$refs.inputContent
+      // self.setUserBaseProfile(
+      //   'oKXX7wABsIulcFpdlbwUyMKGisjQ', // 传入openID
+      //   self._initSession, // 成功后创建机器人会话
+      //   self._setBotBaseInfo // 成功后设置机器人基本信息
+      // )
+      self._initSession()
+      self._initScroll()
     })
     // 拉取历史消息
     // this.setMsgs(this.historyMsgs)
@@ -262,14 +270,6 @@ export default {
     // this.getRoamMessage()
   },
   methods: {
-    // async getUserProfile() {
-    //   // eslint-disable-next-line
-    //   const res = await wxConfig('111111')
-    //   console.log(res.data)
-    //   if (res.code !== 0) {
-    //     console.log('error in getUserProfile')
-    //   }
-    // },
     async _setBotBaseInfo() {
       const res = await getBotInfo()
       if (res.result.code === ERR_OK) {
@@ -304,13 +304,53 @@ export default {
             return item.name
           })
         }
-        this.setMsgs(this.msgs.concat([
+        await this.setMsgs(this.msgs.concat([
           botCard,
           botWelcomeMsg,
           botHotMsg
         ]))
       } else {
         console.log('error in getUserInfoByOpenID')
+      }
+    },
+    async _initSession() {
+      // const data = {
+      //   userId: this.userInfo.userId,
+      //   userName: this.userInfo.userName,
+      //   userPhone: this.userInfo.userPhone
+      // }
+      const data = {
+        userId: '007b0776-aad8-4679-98a5-07dbd79d1d49',
+        userName: '李娟',
+        userPhone: '18653007763'
+      }
+
+      // const option = {
+      //   headers: {
+      //     'Content-type': 'application/x-www-form-urlencoded'
+      //   }
+      // }
+      const res = await createSession(data)
+      if (res.result.code === ERR_OK) {
+        console.log('============================= 我现在来请求 createSession 辣 =============================')
+        console.log('会话创建成功')
+        this.setRoomId(res.data.id)
+      } else {
+        console.log('会话创建失败')
+      }
+    },
+    async sendTextMsgToBot(question) {
+      const data = {
+        question,
+        sessionId: this.roomId
+      }
+      const res = await sendMsgToBot(data)
+      if (res.result.code === ERR_OK) {
+        // 此处将用户的输入保存至vuex
+        console.log('============================= 我现在来请求 sendMsgToBot 辣 =============================')
+        // 此处处理机器人返回的答案
+      } else {
+        console.log('发送机器人会话失败')
       }
     },
     _initChatMsgList() {
@@ -421,17 +461,25 @@ export default {
       this.chatScroll.refresh()
       this.chatScroll.scrollToElement(this.$refs.chatContentEnd, 400)
     },
-    chatInputChange(text, isEnter) {
-      if (isEnter) {
-        // 提交，清空输入框，重新计算滚动区域高度，键盘收起
-        this.inputEle.innerText = ''
-        this.sendTextMsg(text)
-        this.setInputBar(false)
-        this._inputBlur()
-        console.log(`submit ==> ${text}`)
-      } else {
-        console.log(text)
+    chatInputChange(text) {
+      console.log(text)
+    },
+    chatInputCommit(text) {
+      this.inputEle.innerText = ''
+      switch (this.roomMode) {
+        case roomStatus.AIChat:
+          this.sendTextMsgToBot(text)
+          break
+        case roomStatus.menChat:
+          this.sendTextMsg(text)
+          break
+        case roomStatus.videoChat:
+          this.sendTextMsg(text)
+          break
       }
+      this.setInputBar(false)
+      this._inputBlur()
+      console.log(`submit ==> ${text}`)
     },
     resetExtendBar() {
       this.extendBarLaunchOpen = false
@@ -461,6 +509,7 @@ export default {
     },
     readyToMenChat() {
       const query = this.$route.query
+      this.setModeToMenChat(roomStatus.menChat)
       this.setUserInfoToEnterRoom(query, this.initIM)
     },
     toggleExtendBar() {
@@ -565,7 +614,6 @@ export default {
       'enterToLineUp',
       'toggleBar'
     ]),
-
     // 若ios用户 不在微信内置浏览器中打开该页面 则需要拉取漫游信息
     async getRoamMessage() {
       const device = sessionStorage.getItem('device')

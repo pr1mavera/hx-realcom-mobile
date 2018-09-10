@@ -26,14 +26,13 @@
         type="text"
         @click="chatFocus"
         @keyup="chatInput($event, false)"
-        @keyup.enter="chatInput($event, true)"
         ></div>
     </div>
     <div class="input-bar-item right-item">
       <transition
         @enter="sendBtnEnter"
         @leave="sendBtnLeave">
-        <button id="sendBtn" class="sendBtn" v-if="this.inputBarOpen">发送</button>
+        <button id="sendBtn" class="sendBtn" v-if="this.inputBarOpen" @click="chatInput($event, true)">发送</button>
       </transition>
       <transition name="send-plus" mode="out-in">
         <button class="input-bar-item-btn" v-if="!this.inputBarOpen" @click="toggleExtend">
@@ -83,7 +82,11 @@ export default {
       const e = event || window.event
       const text = e.currentTarget.textContent
       // const l = document.getElementById('input-content-hook')
-      this.$emit('chatInputChange', text, isEnter)
+      if (!isEnter) {
+        this.$emit('chatInputChange', text)
+      } else {
+        this.$emit('chatInputCommit', text)
+      }
     },
     getInputEditState() {
       return this.$refs.inputContent.getAttribute('contentEditable')
