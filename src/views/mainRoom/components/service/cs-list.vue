@@ -14,8 +14,8 @@
       <svg class="icon" aria-hidden="true">
         <use xlink:href="#icon-jiahao"></use>
       </svg>
-      添加客服</x-button>
-    <!-- v-if -->
+      {{ quota === 3 ? '查看更多': '添加客服' }}
+    </x-button>
   </div>
 </template>
 
@@ -55,9 +55,7 @@ export default {
     },
     addCs() {
       console.log('添加专属客服')
-      this.$router.push({
-        path: '/room/cusServ/add'
-      })
+      this.$router.push('/room/cusServ/add')
     }
   }
 }

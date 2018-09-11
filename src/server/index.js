@@ -53,3 +53,14 @@ export const createSession = data => http.post('public', `/robot/session/create`
  * [sendMsgToBot 发送消息给机器人]
  */
 export const sendMsgToBot = data => http.post('public', `/robot/question/send`, data)
+
+// 获取客服信息
+export const queryCsIn = async(openId) => http.get('public', `/video/user/cs/query`, {openId})
+
+// 专属客服添加
+// router.post('/api/v1/video/user/cs/create',controller.custinfoquery.createSpecialCustInfo);
+export const addCs = async(userId, csId) => http.post('public', `/video/user/cs/create`, {userId, csId})
+
+// 专属客服删除
+// router.del('/api/v1/video/user/cs/delete',controller.custinfoquery.deleteSpecialCustInfo);
+export const removeCs = async(userId, csId) => http.delete('public', `/video/user/cs/delete`, {userId, csId})
