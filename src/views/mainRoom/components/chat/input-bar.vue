@@ -68,7 +68,8 @@ export default {
   },
   data() {
     return {
-      status: false
+      status: false,
+      text: ''
     }
   },
   methods: {
@@ -79,13 +80,12 @@ export default {
       this.$emit('targetInputBuffer')
     },
     chatInput(event, isEnter) {
-      const e = event || window.event
-      const text = e.currentTarget.textContent
-      // const l = document.getElementById('input-content-hook')
       if (!isEnter) {
-        this.$emit('chatInputChange', text)
+        const e = event || window.event
+        this.text = e.currentTarget.textContent
+        this.$emit('chatInputChange', this.text)
       } else {
-        this.$emit('chatInputCommit', text)
+        this.$emit('chatInputCommit', this.text)
       }
     },
     getInputEditState() {

@@ -3,7 +3,7 @@ import { sleepByAnimation } from '@/common/js/util'
 import { toggleBarStatus, roomStatus, queueStatus } from '@/common/js/status'
 
 // eslint-disable-next-line
-export const closeBarBuffer = function({ commit }, { mutationType, delay }) {
+const closeBarBuffer = function({ commit }, { mutationType, delay }) {
   return (async function() {
     commit(mutationType, false)
     await sleepByAnimation(delay)
@@ -50,4 +50,10 @@ export const readyToVideoChat = function({ commit, state }) {
   commit(types.SET_FULL_SCREEN, true)
   commit(types.SET_QUEUE_MODE, queueStatus.queueOver)
   commit(types.SET_ROOM_MODE, roomStatus.videoChat)
+}
+
+export const sendMsgs = async function({ commit, state }, {msgs, scrollObj, endObj}) {
+  await commit(types.SET_MSGS, state.msgs.concat(msgs))
+  await scrollObj.refresh()
+  await scrollObj.scrollToElement(endObj, 400)
 }

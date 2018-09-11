@@ -38,7 +38,7 @@
       <!-- 猜问题 模块 -->
       <div class="content chat-content-shadow left-content-style content-extend" v-if="this.types === msgTypes.msg_guess">
         <span class="text">
-          <span class="text-extend button" v-for="(item, index) in this.extend" :key="index">{{item}}</span>
+          <span class="text-extend button" v-for="(item, index) in this.extend" :key="index">{{item.question}}</span>
           <span class="text-extend button">人工服务</span>
         </span>
       </div>
