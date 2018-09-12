@@ -262,6 +262,41 @@ const IM = (() => {
     })
   }
 
+  // 上传照片
+  function uploadPic(img, from_id, to_id, ...onProgress) {
+    var businessType // 业务类型，1-发群图片，2-向好友发图片
+    // if (selType === SessionType.C2C) { // 向好友发图片
+    //     businessType = webim.UPLOAD_PIC_BUSSINESS_TYPE.C2C_MSG
+    // } else if (selType === SessionType.GROUP) { // 发群图片
+    //     businessType = webim.UPLOAD_PIC_BUSSINESS_TYPE.GROUP_MSG
+    // }
+    businessType = webim.UPLOAD_PIC_BUSSINESS_TYPE.GROUP_MSG
+    // 封装上传图片请求
+    var opt = {
+      'file': img, // 图片对象
+      // 'onProgressCallBack': onProgress || (() => {}), // 上传图片进度条回调函数
+      'From_Account': from_id, // 发送者帐号
+      'To_Account': to_id, // 接收者
+      'businessType': businessType// 业务类型
+    }
+    // 上传图片
+    webim.uploadPic(
+      opt,
+      (resp) => {
+        // 上传成功发送图片
+        const info = {
+          groupId: '12345678',
+          identifier: ''
+        }
+        sendPic(resp, info)
+        console.log('上传成功发送图片')
+      },
+      (err) => {
+        alert(err.ErrorInfo)
+      }
+    )
+  }
+
   // 发送图片
   function sendPic(images, msgInfo, callback) {
       if (!msgInfo.groupId) {
@@ -314,6 +349,7 @@ const IM = (() => {
     parseMsgs,
     sendMsg,
     sendBoardMsg,
+    uploadPic,
     sendPic
   }
 })()

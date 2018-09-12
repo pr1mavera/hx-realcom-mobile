@@ -13,7 +13,7 @@ export const wxConfig = url => http.get('public', `/wxConfig?url=${url}`)
 /**
  * [getLoginInfo 获取用户登录信息]
  */
-export const getLoginInfo = data => http.post('RTCRoom', '/getLoginInfo', data)
+export const getLoginInfo = userId => http.get('RTCRoom', `/im/account/login?userId=${userId}`)
 
 /**
  * [pushUserMsg 推送系统消息]
@@ -45,7 +45,7 @@ export const getUserInfoByOpenID = openID => http.get('public', `/video/user?ope
 export const getBotInfo = () => http.get('public', `/robot/query`)
 
 /**
- * [createSession 创建与机器人的会话]
+ * [createSession 创建会话]
  */
 export const createSession = data => http.post('public', `/robot/session/create`, data)
 

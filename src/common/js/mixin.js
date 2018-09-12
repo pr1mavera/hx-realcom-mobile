@@ -3,7 +3,7 @@ import WebRTCRoom from '@/server/webRTCRoom'
 import IM from '@/server/im'
 import WebRTCAPI from 'webRTCAPI'
 import { ERR_OK, getUserInfoByOpenID, getLoginInfo, pushUserMsg, sendMsgToBot } from '@/server/index.js'
-// import { sleep } from '@/common/js/util'
+import { shallowCopy } from '@/common/js/util'
 import { formatDate } from '@/common/js/dateConfig.js'
 import { msgStatus, msgTypes } from '@/common/js/status'
 
@@ -15,6 +15,11 @@ export const setUserInfoMixin = {
       roomName: ''
     }
   },
+  computed: {
+    ...mapGetters([
+      'userInfo'
+    ])
+  },
   methods: {
     async setUserBaseProfile(openID, ...Func) {
       const res = await getUserInfoByOpenID(openID)
@@ -22,8 +27,8 @@ export const setUserInfoMixin = {
         console.log('============================= 我现在来请求 UserInfoByOpenID 辣 =============================')
         await this.setUserInfo(res.data.userInfo)
         // await sleep(2000)
-        Func && Func.forEach(async function(fn) {
-          await fn()
+        Func && Func.forEach(async(fn) => {
+          fn()
         })
       } else {
         console.log('error in getUserInfoByOpenID')
@@ -31,15 +36,12 @@ export const setUserInfoMixin = {
     },
     async getUserInfo(data, query, ...Func) {
       const res = await getLoginInfo(data)
-      if (res.code === ERR_OK) {
+      if (res.result.code === ERR_OK) {
         console.log('getUserInfo成功')
-        const info = {
-          userId: res.userId,
-          selfName: this.userName,
-          accountType: res.accountType,
-          sdkAppID: res.sdkAppID,
-          userSig: res.userSig
-        }
+        const info = shallowCopy(this.userInfo)
+        info.accountType = res.data.accountType
+        info.sdkAppID = res.data.sdkAppId
+        info.userSig = res.data.userSig
         this.setUserInfo(info)
         // 执行回调
         Func && Func.forEach((fn) => {
@@ -62,10 +64,7 @@ export const setUserInfoMixin = {
           this.setRoomId(query.roomID)
         }
       }
-      const data = {
-        userId: this.userId
-      }
-      this.getUserInfo(data, query, ...Func)
+      this.getUserInfo(this.userInfo.userId, query, ...Func)
       // WebRTCRoom.getLoginInfo(
       //   this.userId,
       //   (res) => {
@@ -283,7 +282,7 @@ export const IMMixin = {
         sdkAppID: self.userInfo.sdkAppID,
         appIDAt3rd: self.userInfo.sdkAppID,
         identifier: self.userInfo.userId,
-        identifierNick: self.userInfo.selfName,
+        identifierNick: self.userInfo.userName,
         accountType: self.userInfo.accountType,
         userSig: self.userInfo.userSig
       }
@@ -305,7 +304,7 @@ export const IMMixin = {
     },
     onBigGroupMsgNotify(newMsgList) {
       if (newMsgList && newMsgList.length > 0) {
-        // alert('onBigGroupMsgNotify')
+        alert('onBigGroupMsgNotify')
         console.log(newMsgList)
         const msgsObj = IM.parseMsgs(newMsgList)
         // msgsObj[time] = formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss')
@@ -313,9 +312,7 @@ export const IMMixin = {
         // temp = temp.concat(msgsObj.textMsgs)
         // this.setMsgs(temp)
         this.sendMsgs({
-          msgs: [
-            msgsObj.textMsgs
-          ],
+          msgs: msgsObj.textMsgs,
           scrollObj: this.chatScroll,
           endObj: this.$refs.chatContentEnd
         })
@@ -374,7 +371,8 @@ export const sendMsgsMixin = {
   computed: {
     ...mapGetters([
       'botInfo',
-      'userInfo'
+      'userInfo',
+      'csInfo'
     ])
   },
   methods: {
@@ -479,6 +477,9 @@ export const sendMsgsMixin = {
         msgStatus: msgStatus.msg,
         msgType: msgTypes.msg_normal
       })
+    },
+    sendImgMsg(img) {
+      IM.uploadPic(img, 'cust-test', 'cs-test')
     },
     ...mapActions([
       'sendMsgs'

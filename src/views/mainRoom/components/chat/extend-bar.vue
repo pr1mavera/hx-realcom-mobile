@@ -19,12 +19,13 @@
           <div class="text">表情</div>
         </div>
         <div class="extend-bar-button button_3">
-          <button class="img" @click="onSendImgClick">
+          <button class="img" @click="selectImgClick">
             <svg class="icon extend-click" aria-hidden="true">
               <use xlink:href="#icon-fasongtupian"></use>
             </svg>
           </button>
           <div class="text">图片</div>
+          <input type="file" ref="sendImgInput" accept="image/*" @change="onSendImgClick" v-show="false"/>
         </div>
       </div>
     </transition>
@@ -62,6 +63,9 @@ export default {
     selectEmojiWithCode(code) {
       this.$emit('selectEmojiWithCode', code)
     },
+    selectImgClick() {
+      this.$refs.sendImgInput.click()
+    },
     onSendGiftClick() {
       this.giftSectionShow = true
       this.$emit('sendSectionShow')
@@ -71,7 +75,7 @@ export default {
       this.$emit('sendSectionShow')
     },
     onSendImgClick() {
-
+      this.$emit('sendImg', this.$refs.sendImgInput.files[0])
     },
     _getPosAndScale() {
       const extendBarMaskBundle = {

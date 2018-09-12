@@ -52,6 +52,7 @@
       @selectEmojiWithCode="selectEmojiWithCode"
       @sendSectionShow="extendBarLaunchOpen = true"
       @deleteBtn="onDeleteBtnClick"
+      @sendImg="sendImgMsg"
     ></extend-bar>
     <div v-transfer-dom>
       <confirm v-model="lineUpAlert"
@@ -73,7 +74,7 @@ import BScroll from 'better-scroll'
 // import HeaderBar from '@/views/mainRoom/components/chat/header-bar'
 import InputBar from '@/views/mainRoom/components/chat/input-bar'
 import { needToReloadDate } from '@/common/js/dateConfig'
-import { debounce } from '@/common/js/util'
+import { debounce, shallowCopy } from '@/common/js/util'
 import { setUserInfoMixin, IMMixin, sendMsgsMixin } from '@/common/js/mixin'
 import { roomStatus, toggleBarStatus, msgStatus, msgTypes, tipTypes, dialogTypes, cardTypes } from '@/common/js/status'
 // 调用拉取漫游信息的接口
@@ -111,6 +112,7 @@ export default {
   computed: {
     ...mapGetters([
       'userInfo',
+      'botInfo',
       'msgs',
       'roomMode',
       'roomId',
@@ -278,15 +280,14 @@ export default {
     // 真实项目中拿到对应数据之后再初始化
     // this._initChatMsgList()
     // 初始化滚动
-    const self = this
     this.$nextTick(() => {
-      self.inputEle = self.$refs.inputBar.$refs.inputContent
-      self.setUserBaseProfile(
+      this.inputEle = this.$refs.inputBar.$refs.inputContent
+      this.setUserBaseProfile(
         'oKXX7wABsIulcFpdlbwUyMKGisjQ', // 传入openID
-        self._initSession, // 成功后创建机器人会话
-        self._setBotBaseInfo // 成功后设置机器人基本信息
+        this._initSession, // 成功后创建机器人会话
+        this._setBotBaseInfo // 成功后设置机器人基本信息
       )
-      self._initScroll()
+      this._initScroll()
     })
     // 拉取历史消息
     // this.setMsgs(this.historyMsgs)
@@ -307,8 +308,8 @@ export default {
           msgStatus: msgStatus.card,
           msgType: cardTypes.bot_card,
           cardInfo: {
-            avatar: '',
-            nickName: '小华'
+            avatar: this.botInfo.avatarUrl,
+            nickName: this.botInfo.name
           }
         }
         const botWelcomeMsg = {
@@ -328,12 +329,7 @@ export default {
             return item.name
           })
         }
-        // await this.setMsgs(this.msgs.concat([
-        //   botCard,
-        //   botWelcomeMsg,
-        //   botHotMsg
-        // ]))
-        await this.sendMsgs({
+        this.sendMsgs({
           msgs: [
             botCard,
             botWelcomeMsg,
@@ -369,7 +365,7 @@ export default {
         msgStatus: msgStatus.tip,
         msgType: tipTypes.tip_time
       }
-      map.push(this._shallowCopy(temp))
+      map.push(shallowCopy(temp))
       this.historyMsgs.forEach((item) => {
         if (needToReloadDate(timeCache, item.time)) {
           temp.msg = item.time
@@ -380,14 +376,6 @@ export default {
       })
       this.historyMsgs = map
       console.log(map)
-    },
-    // 浅拷贝
-    _shallowCopy(obj) {
-      let newObj = {}
-      for (let key in obj) {
-        newObj[key] = obj[key]
-      }
-      return newObj
     },
     _showItemByType(type) {
       let component = ''
@@ -502,12 +490,12 @@ export default {
           query: {
             cmd: 'create',
             groupID: '12345678',
-            userID: 'cust-test',
+            userId: 'cust-test',
             userName: '田老师红烧肉盖饭'
           }
           // query: {
           //   cmd: 'create',
-          //   userID: 'cs-test',
+          //   userId: 'cs-test',
           //   userName: '膳当家黄焖鸡米饭'
           // }
         })

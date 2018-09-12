@@ -5,7 +5,7 @@ const state = {
   userInfo: {},
   botInfo: {},
   csInfo: {},
-  roomId: null,
+  roomId: 12345678,
   msgs: [],
   extendBarOpen: false,
   inputBarOpen: false,

@@ -14,12 +14,12 @@ export function debounce(func, time) {
 
 export async function sleep(time) {
   return new Promise((resolve, reject) => {
-    // setTimeout(function() {
-    //   resolve()
-    // }, time)
-    debounce(() => {
+    setTimeout(function() {
       resolve()
-    }, time)()
+    }, time)
+    // debounce(() => {
+    //   resolve()
+    // }, time)()
   })
 }
 
@@ -37,4 +37,13 @@ export function sleepByAnimation(time) {
     }
     window.requestAnimationFrame(step)
   })
+}
+
+// 浅拷贝
+export function shallowCopy(obj) {
+  let newObj = {}
+  for (let key in obj) {
+    newObj[key] = obj[key]
+  }
+  return newObj
 }

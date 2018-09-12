@@ -39,13 +39,13 @@ export default {
       num: 3,
       times: 1,
       loginInfo: {
-        // userID: `userid_web_${Date.now().toString()}`,
-        userID: 'cust-test',
+        // userId: `userid_web_${Date.now().toString()}`,
+        userId: 'cust-test',
         userName: '田老师红烧肉盖饭'
       }
       // loginInfo: {
-      //   // userID: `userid_web_${Date.now().toString()}`,
-      //   userID: 'cs-test',
+      //   // userId: `userid_web_${Date.now().toString()}`,
+      //   userId: 'cs-test',
       //   userName: '膳当家黄焖鸡米饭'
       // }
     }
@@ -59,7 +59,7 @@ export default {
   methods: {
     connectComplete() {
       const systemMsg = {
-        userID: 'cs-test',
+        userId: 'cs-test',
         msgBody: {
           data: '0',
           desc: '视频排队成功desc',
@@ -75,13 +75,13 @@ export default {
         // query: {
         //   cmd: 'enter',
         //   roomID: 'cs-test',
-        //   userID: this.loginInfo.userID,
+        //   userId: this.loginInfo.userId,
         //   userName: this.loginInfo.userName
         // }
         query: {
           cmd: 'create',
           roomName: '12345678',
-          userID: this.loginInfo.userID,
+          userId: this.loginInfo.userId,
           userName: this.loginInfo.userName
         }
       })
