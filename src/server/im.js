@@ -109,10 +109,11 @@ const IM = (() => {
   function parseMsg(newMsg) {
     var msgItem = newMsg.getElems()[0]
     var type = msgItem.getType()
-    var nickName = newMsg.getFromAccount()
+    var nickName = newMsg.getFromAccountNick()
     var msgStatus = ''
     var msgType = ''
     var time = ''
+    debugger
     if (type === 'TIMCustomElem') {
       var content = msgItem.getContent() // 获取元素对象
       var ext = content.getExt() // '白板标签'
@@ -126,17 +127,25 @@ const IM = (() => {
         var desc = JSON.parse(content.getDesc())
           console.log(`========desc=======${desc}`)
         if (desc && desc.nickName) {
-          nickName = desc.nickName
           msgType = desc.msgType
           msgStatus = desc.msgStatus
           time = desc.time
           console.log(`=======msgType========${msgType}`)
         }
       }
+    } else if (type === 'TIMImageElem') {
+      var imgList = msgItem.getContent().ImageInfoArray // 获取元素对象
+      var imgData = {
+        big: imgList[0].url,
+        small: imgList[2].url
+      }
+      msgType = '5'
+      msgStatus = '1'
     }
     return {
       type: 'TEXT',
       nickName,
+      imgData,
       content: newMsg.toHtml(),
       isSelfSend: newMsg.getIsSend(),
       isSystem: newMsg.getFromAccount() === '@TIM#SYSTEM' || false,

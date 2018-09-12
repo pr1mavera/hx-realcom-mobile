@@ -10,7 +10,13 @@
     </div>
     <div class="content-box" :class="[{'right-content-box': isSelf, 'left-content-box': !isSelf}]">
       <p class="name" v-if="!isSelf">{{name}}</p>
-      <div class="content chat-content-shadow" :class="[{'right-content-style': isSelf, 'left-content-style': !isSelf}]">
+      <div
+        class="content chat-content-shadow"
+        :class="[{
+          'right-content-style': isSelf,
+          'left-content-style': !isSelf,
+          'padding-for-img': this.types === msgTypes.msg_img
+        }]">
         <!-- 基本消息 -->
         <span class="text" v-if="this.types === msgTypes.msg_normal" v-html="text"></span>
         <!-- 转人工 -->
@@ -29,7 +35,9 @@
           </span>
         </span>
         <!-- 图片消息 -->
-        <span class="text" v-if="this.types === msgTypes.msg_img"></span>
+        <span class="text" v-if="this.types === msgTypes.msg_img">
+          <img class="text-img" width="100" :src="this.imgSrc.small">
+        </span>
         <!-- 留言 -->
         <span class="text" v-if="this.types === msgTypes.msg_leave">客服暂时不在，请<span class="button">点击留言</span>~</span>
         <!-- 猜问题 -->
@@ -70,6 +78,9 @@ export default {
     },
     extend: {
       type: Array
+    },
+    imgSrc: {
+      type: Object
     }
   },
   data() {
@@ -182,10 +193,18 @@ export default {
           }
         }
       }
+      &.padding-for-img {
+        padding: 0;
+        overflow: hidden;
+        box-shadow: none;
+      }
       .text {
         line-height: 2rem;
         max-width: 100%;
         word-wrap: break-word;
+        .text-img {
+          vertical-align: middle;
+        }
         .button {
           color: rgb(82, 144, 239);
         }
