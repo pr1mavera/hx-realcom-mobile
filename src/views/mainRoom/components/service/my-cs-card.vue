@@ -27,7 +27,7 @@
 <script>
   import { XButton } from 'vux'
   import { beforeEnterVideo } from '@/common/js/beforeEnterVideo'
-  // import '@/common/js/beforeEnterVideo'
+  import {removeCs} from '../../../../server/index.js'
   export default {
     // name: "my-cs-card"
     components: {
@@ -48,8 +48,17 @@
       }
     },
     methods: {
-      removeCusSer() {
+      async removeCusSer() {
         alert('确定要移除该客服吗')
+        const userId = this.usierId
+        const cusSerId = this.cusSerId
+
+        const res = await removeCs(userId, cusSerId).catch(e => {
+          return e
+        })
+        if (res) {
+          console.log('该客服已不是您的专属客服')
+        }
       },
       enterSerCenter() {
         this.$router.push({
