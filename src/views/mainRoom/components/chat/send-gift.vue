@@ -6,6 +6,7 @@
       :mode="item.mode"
       :icon="item.icon"
       :text="item.text"
+      @click.native="selectGiftClick(index)"
     ></send-extend-item>
   </div>
 </template>
@@ -44,6 +45,11 @@ export default {
         }
       ]
     }
+  },
+  methods: {
+    selectGiftClick(type) {
+      this.$emit('selectGift', `${type + 1}`)
+    }
   }
 }
 </script>
@@ -56,7 +62,7 @@ export default {
   padding: 2.4rem 1.8rem;
   .send-extend-item {
     height: 8.6rem;
-    flex-basis: 25%;
+    flex: 25%;
     text-align: center;
   }
 }

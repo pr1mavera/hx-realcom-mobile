@@ -36,7 +36,12 @@
         </span>
         <!-- 图片消息 -->
         <span class="text" v-if="this.types === msgTypes.msg_img">
-          <img class="text-img" width="100" :src="this.imgSrc.small">
+          <img class="text-img" height=100% :src="this.imgSrc.small">
+        </span>
+        <!-- 礼物消息 -->
+        <span class="text" v-if="this.types === msgTypes.msg_gift">
+          我送了一个草莓蛋糕
+          <img class="text-gift" :src="`/static/img/caomeidangao@2x.png`">
         </span>
         <!-- 留言 -->
         <span class="text" v-if="this.types === msgTypes.msg_leave">客服暂时不在，请<span class="button">点击留言</span>~</span>
@@ -81,6 +86,9 @@ export default {
     },
     imgSrc: {
       type: Object
+    },
+    giftType: {
+      type: String
     }
   },
   data() {
@@ -197,11 +205,25 @@ export default {
         padding: 0;
         overflow: hidden;
         box-shadow: none;
+        .text {
+          display: inline-block;
+          height: 12rem;
+          background-color: #f00;
+        }
       }
       .text {
+        position: relative;
         line-height: 2rem;
         max-width: 100%;
         word-wrap: break-word;
+        .text-gift {
+          position: absolute;
+          width: 5.8rem;
+          top: 0;
+          bottom: 0;
+          left: -6rem;
+          margin: auto;
+        }
         .text-img {
           vertical-align: middle;
         }

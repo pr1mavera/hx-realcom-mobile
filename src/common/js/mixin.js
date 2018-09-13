@@ -304,22 +304,18 @@ export const IMMixin = {
     },
     onBigGroupMsgNotify(newMsgList) {
       if (newMsgList && newMsgList.length > 0) {
-        alert('onBigGroupMsgNotify')
-        console.log(newMsgList)
+        // alert('onBigGroupMsgNotify')
+        // console.log(newMsgList)
         const msgsObj = IM.parseMsgs(newMsgList)
-        // msgsObj[time] = formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss')
-        // let temp = this.msgs
-        // temp = temp.concat(msgsObj.textMsgs)
-        // this.setMsgs(temp)
+        // 给图片信息配置时间
+        if (msgsObj.textMsgs[0].time === '') {
+          msgsObj.textMsgs[0].time = formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss')
+        }
         this.sendMsgs({
           msgs: msgsObj.textMsgs,
           scrollObj: this.chatScroll,
           endObj: this.$refs.chatContentEnd
         })
-        this.chatScroll.refresh && this.chatScroll.refresh()
-        console.log(this.msgs)
-        this.chatScroll.refresh()
-        this.chatScroll.scrollToElement(this.$refs.chatContentEnd, 400)
       }
     },
     onMsgNotify(msgs) {
@@ -467,19 +463,36 @@ export const sendMsgsMixin = {
       return msg
     },
     sendTextMsg(text) {
-      const self = this
       IM.sendRoomTextMsg({
         groupId: '12345678',
         msg: text,
         time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
-        nickName: self.userInfo.selfName,
-        identifier: self.userInfo.userId,
+        nickName: this.userInfo.selfName,
+        identifier: this.userInfo.userId,
         msgStatus: msgStatus.msg,
         msgType: msgTypes.msg_normal
       })
     },
+    sendGiftMsg(type) {
+      IM.sendRoomTextMsg({
+        groupId: '12345678',
+        msg: '给你送了一个礼物',
+        time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+        nickName: this.userInfo.selfName,
+        identifier: this.userInfo.userId,
+        msgStatus: msgStatus.msg,
+        msgType: msgTypes.msg_gift,
+        giftType: type
+      })
+    },
     sendImgMsg(img) {
-      IM.uploadPic(img, 'cust-test', 'cs-test')
+      const info = {
+        from_id: 'cust-test',
+        to_id: 'cs-test',
+        groupId: '12345678',
+        identifier: ''
+      }
+      IM.uploadPic(img, info)
     },
     ...mapActions([
       'sendMsgs'
