@@ -27,13 +27,16 @@
 <script>
   import { XButton } from 'vux'
   import { beforeEnterVideo } from '@/common/js/beforeEnterVideo'
-  import {removeCs} from '../../../../server/index.js'
+  import {removeCs} from '@/server/index.js'
   export default {
     // name: "my-cs-card"
     components: {
       XButton
     },
     props: {
+      cusSerId: {
+        type: String
+      },
       avatarSrc: {
         type: String
       },
@@ -49,15 +52,14 @@
     },
     methods: {
       async removeCusSer() {
-        alert('确定要移除该客服吗')
-        const userId = this.usierId
+        const userId = '123'
         const cusSerId = this.cusSerId
-
-        const res = await removeCs(userId, cusSerId).catch(e => {
-          return e
-        })
+        // const userId = '123'
+        // const cusSerId = this.cusSerId
+        console.log('userId: ' + userId + ' ' + 'cusSerId:' + cusSerId)
+        const res = await removeCs(userId, cusSerId)
         if (res) {
-          console.log('该客服已不是您的专属客服')
+          console.log(JSON.stringify(res))
         }
       },
       enterSerCenter() {

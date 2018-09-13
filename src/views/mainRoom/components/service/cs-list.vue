@@ -3,55 +3,51 @@
     <my-cs-card
       v-for="(item, index) in myCsList"
       :key="index"
-      :avatarSrc="item.avatarSrc"
-      :name="item.name"
-      :num="item.num"
-      :gifts="item.gifts"
+      :cusSerId="item.id"
+      :avatarSrc="item.resultUrl"
+      :name="item.nickName"
+      :num="item.servTimes"
+      :gifts="item.giftCount"
     ></my-cs-card>
-    <p class="tips">您还可以添加 <span>{{quota}}</span> 名专属客服</p>
+    <p class="tips">您还可以添加 <span>{{3 - myCsList.length}}</span> 名专属客服</p>
     <x-button :gradients="['#FF8C6A', '#FF80A0']" @click.native="addCs"
               style="width: 15rem;height: 4rem;line-height: 4rem;font-size: 1.6rem;margin-top: 2rem;">
       <svg class="icon" aria-hidden="true">
         <use xlink:href="#icon-jiahao"></use>
       </svg>
-      {{ quota === 3 ? '查看更多': '添加客服' }}
+      {{ myCsList.length === 3 ? '查看更多': '添加客服' }}
     </x-button>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
   import {XButton} from 'vux'
-export default {
+  import {queryCsInfo} from '@/server/index.js'
 
+export default {
   components: {
     XButton,
     'myCsCard': () => import('@/views/mainRoom/components/service/my-cs-card')
   },
   data() {
     return {
-      myCsList: [
-        {
-          avatarSrc: '/static/img/avatar@2x.png',
-          name: '丽丽',
-          num: 2233,
-          gifts: 3345
-        },
-        {
-          avatarSrc: '/static/img/avatar@2x.png',
-          name: '花花',
-          num: 4578,
-          gifts: 9933
-        }
-      ],
-      quota: 3
+      myCsList: []
     }
   },
   mounted() {
-    this.getQuota()
+    this.getCsList()
   },
   methods: {
-    getQuota() {
-      this.quota = 3 - this.myCsList.length
+    async getCsList() {
+      const page = 1
+      const pageSize = -1
+      const userId = '123'
+      const listType = '1'
+      const res = await queryCsInfo(page, pageSize, userId, listType)
+      if (res) {
+        alert(JSON.stringify(res))
+        this.myCsList = res.data.csList
+      }
     },
     addCs() {
       console.log('添加专属客服')

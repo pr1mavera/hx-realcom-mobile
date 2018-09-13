@@ -55,12 +55,19 @@ export const createSession = (userId, userName, userPhone) => http.post('public'
 export const sendMsgToBot = data => http.post('public', `/robot/question/send`, data)
 
 // 获取客服信息
-export const queryCsIn = async(openId) => http.get('public', `/video/user/cs/query`, {openId})
+export const queryCsInfo = async(page, pageSize, userId, listType) => http.get('public', `/video/user/cs/query?page=${page}&pageSize=${pageSize}&userId=${userId}&listType=${listType}`)
 
 // 专属客服添加
-// router.post('/api/v1/video/user/cs/create',controller.custinfoquery.createSpecialCustInfo);
 export const addCs = async(userId, csId) => http.post('public', `/video/user/cs/create`, {userId, csId})
 
 // 专属客服删除
-// router.del('/api/v1/video/user/cs/delete',controller.custinfoquery.deleteSpecialCustInfo);
-export const removeCs = async(userId, csId) => http.delete('public', `/video/user/cs/delete`, {userId, csId})
+export const removeCs = async(userId, csId) => http.post('public', `/video/user/cs/delete`, {userId, csId})
+
+// 客服信息获取（获取客服的个人资料）
+export const getCsInfo = async(csId) => http.get('public', `/video/user/cs?csId=${csId}`)
+
+// 礼物查询信息
+export const viewGifts = async({page, pageSize}, csId) => http.get('public', `/video/user/gifts?page=${page}&page=${pageSize}&csId=${csId}`)
+
+// 标签信息查询
+export const viewLabels = async(page, pageSize, csId) => http.get('public', `/video/user/ labels?page=${page}&pageSize=${pageSize}&csId=${csId}`)
