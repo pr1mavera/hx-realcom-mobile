@@ -31,7 +31,21 @@ export default {
   },
   data() {
     return {
-      myCsList: []
+      myCsList: [
+        {
+          avatarSrc: '/static/img/avatar@2x.png',
+          name: '丽丽',
+          num: 2233,
+          gifts: 3345
+        },
+        {
+          avatarSrc: '/static/img/avatar@2x.png',
+          name: '花花',
+          num: 4578,
+          gifts: 9933
+        }
+      ],
+      quota: 3
     }
   },
   mounted() {
@@ -45,8 +59,8 @@ export default {
       const listType = '1'
       const res = await queryCsInfo(page, pageSize, userId, listType)
       if (res) {
-        alert(JSON.stringify(res))
-        this.myCsList = res.data.csList
+        // alert(JSON.stringify(res))
+        // this.myCsList = res.data.csList
       }
     },
     addCs() {
