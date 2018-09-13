@@ -28,8 +28,8 @@ export function formatDate(date, format) {
   return format
 }
 
-export function needToReloadDate(cache, next) {
-  const cacheT = new Date(cache.substr(0, 16).replace(/-/g, '/'))
-  const nextT = new Date(next.substr(0, 16).replace(/-/g, '/'))
-  return cacheT < nextT
+export function timeTipFormat(cache, next) {
+  const cacheT = new Date(cache.replace(/-/g, '/'))
+  const nextT = new Date(next.replace(/-/g, '/'))
+  return nextT - cacheT >= 60000
 }

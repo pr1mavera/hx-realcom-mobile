@@ -16,6 +16,7 @@
                 :name="msg.nickName"
                 :text="msg.content"
                 :imgSrc="msg.imgData"
+                :giftType="msg.giftType"
                 :types="msg.msgType"
                 :extend="msg.msgExtend"
                 :cardInfo="msg.cardInfo"
@@ -53,7 +54,8 @@
       @selectEmojiWithCode="selectEmojiWithCode"
       @sendSectionShow="extendBarLaunchOpen = true"
       @deleteBtn="onDeleteBtnClick"
-      @sendImg="sendImgMsg"
+      @sendImg="sendImgMsgClick"
+      @sendGift="sendGiftMsgClick"
     ></extend-bar>
     <div v-transfer-dom>
       <confirm v-model="lineUpAlert"
@@ -74,7 +76,7 @@ import { Confirm, TransferDomDirective as TransferDom } from 'vux'
 import BScroll from 'better-scroll'
 // import HeaderBar from '@/views/mainRoom/components/chat/header-bar'
 import InputBar from '@/views/mainRoom/components/chat/input-bar'
-import { needToReloadDate } from '@/common/js/dateConfig'
+import { timeTipFormat } from '@/common/js/dateConfig'
 import { debounce, shallowCopy } from '@/common/js/util'
 import { setUserInfoMixin, IMMixin, sendMsgsMixin } from '@/common/js/mixin'
 import { roomStatus, toggleBarStatus, msgStatus, msgTypes, tipTypes, dialogTypes, cardTypes } from '@/common/js/status'
@@ -344,11 +346,7 @@ export default {
       }
     },
     async _initSession() {
-      var params = new URLSearchParams()
-      params.append('userId', this.userInfo.userId)
-      params.append('userName', this.userInfo.userName)
-      params.append('userPhone', this.userInfo.userPhone)
-      const res = await createSession(params)
+      const res = await createSession(this.userInfo.userId, this.userInfo.userName, this.userInfo.userPhone)
       if (res.result.code === ERR_OK) {
         console.log('============================= 我现在来请求 createSession 辣 =============================')
         console.log('会话创建成功')
@@ -368,7 +366,7 @@ export default {
       }
       map.push(shallowCopy(temp))
       this.historyMsgs.forEach((item) => {
-        if (needToReloadDate(timeCache, item.time)) {
+        if (timeTipFormat(timeCache, item.time)) {
           temp.msg = item.time
           timeCache = temp.msg
           map.push(this._shallowCopy(temp))
@@ -507,6 +505,14 @@ export default {
       const query = this.$route.query
       this.setModeToMenChat(roomStatus.menChat)
       this.setUserInfoToEnterRoom(query, this.initIM)
+    },
+    sendImgMsgClick(file) {
+      this.toggleExtendBar()
+      this.sendImgMsg(file)
+    },
+    sendGiftMsgClick(type) {
+      this.toggleExtendBar()
+      this.sendGiftMsg(type)
     },
     toggleExtendBar() {
       if (this.extendBarOpen) {

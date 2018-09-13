@@ -1,12 +1,13 @@
 import * as types from './mutation-types'
-import { sleepByAnimation } from '@/common/js/util'
-import { toggleBarStatus, roomStatus, queueStatus } from '@/common/js/status'
+import { sleep } from '@/common/js/util'
+import { timeTipFormat } from '@/common/js/dateConfig.js'
+import { toggleBarStatus, roomStatus, queueStatus, msgStatus, tipTypes } from '@/common/js/status'
 
 // eslint-disable-next-line
-const closeBarBuffer = function({ commit }, { mutationType, delay }) {
+export const closeBarBuffer = function({ commit }, { mutationType, delay }) {
   return (async function() {
     commit(mutationType, false)
-    await sleepByAnimation(delay)
+    await sleep(delay)
   })()
 }
 
@@ -53,6 +54,27 @@ export const readyToVideoChat = function({ commit, state }) {
 }
 
 export const sendMsgs = async function({ commit, state }, {msgs, scrollObj, endObj}) {
+  if (msgs[0].msgStatus === msgStatus.msg) {
+    let lastT = null
+    // 缓存最后一条信息的时间
+    for (let i = state.msgs.length - 1; i > 0; i--) {
+      if (state.msgs[i].msgStatus === msgStatus.msg) {
+         lastT = state.msgs[i].time
+         break
+      }
+      console.log(`------------------------------------- 循环了 ${i} -------------------------------------`)
+    }
+    // 若间隔时间大于约定时间，则生成时间信息tip
+    if (lastT && timeTipFormat(lastT, msgs[0].time)) {
+      const tip = [{
+        content: msgs[0].time,
+        time: msgs[0].time,
+        msgStatus: msgStatus.tip,
+        msgType: tipTypes.tip_normal
+      }]
+      await commit(types.SET_MSGS, state.msgs.concat(tip))
+    }
+  }
   await commit(types.SET_MSGS, state.msgs.concat(msgs))
   await scrollObj.refresh()
   await scrollObj.scrollToElement(endObj, 400)

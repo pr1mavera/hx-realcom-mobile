@@ -113,25 +113,16 @@ const IM = (() => {
     var msgStatus = ''
     var msgType = ''
     var time = ''
-    debugger
+    var giftType = ''
     if (type === 'TIMCustomElem') {
       var content = msgItem.getContent() // 获取元素对象
-      var ext = content.getExt() // '白板标签'
-      var data = content.getData() // 数据
-      if (ext === 'TXWhiteBoardExt') {
-        return {
-          type: 'TXWhiteBoardExt',
-          data: data
-        }
-      } else if (ext === 'TEXT') {
-        var desc = JSON.parse(content.getDesc())
-          console.log(`========desc=======${desc}`)
-        if (desc && desc.nickName) {
-          msgType = desc.msgType
-          msgStatus = desc.msgStatus
-          time = desc.time
-          console.log(`=======msgType========${msgType}`)
-        }
+      var desc = JSON.parse(content.getDesc())
+      msgType = desc.msgType
+      msgStatus = desc.msgStatus
+      time = desc.time
+      var ext = JSON.parse(content.getExt())
+      if (ext.giftType) {
+        giftType = ext.giftType
       }
     } else if (type === 'TIMImageElem') {
       var imgList = msgItem.getContent().ImageInfoArray // 获取元素对象
@@ -143,7 +134,6 @@ const IM = (() => {
       msgStatus = '1'
     }
     return {
-      type: 'TEXT',
       nickName,
       imgData,
       content: newMsg.toHtml(),
@@ -151,7 +141,8 @@ const IM = (() => {
       isSystem: newMsg.getFromAccount() === '@TIM#SYSTEM' || false,
       msgType,
       msgStatus,
-      time
+      time,
+      giftType
     }
   }
 
@@ -196,7 +187,7 @@ const IM = (() => {
       groupId: options.groupId,
       data: options.msg,
       desc: `{"nickName":"${options.nickName}","msgType":"${options.msgType}","time":"${options.time}","msgStatus":"${options.msgStatus}"}`,
-      ext: 'TEXT',
+      ext: `{"giftType":"${options.giftType}"}`,
       identifier: options.identifier,
       nickName: options.nickName
     }, function() {
@@ -272,7 +263,7 @@ const IM = (() => {
   }
 
   // 上传照片
-  function uploadPic(img, from_id, to_id, ...onProgress) {
+  function uploadPic(img, extInfo) {
     var businessType // 业务类型，1-发群图片，2-向好友发图片
     // if (selType === SessionType.C2C) { // 向好友发图片
     //     businessType = webim.UPLOAD_PIC_BUSSINESS_TYPE.C2C_MSG
@@ -284,8 +275,8 @@ const IM = (() => {
     var opt = {
       'file': img, // 图片对象
       // 'onProgressCallBack': onProgress || (() => {}), // 上传图片进度条回调函数
-      'From_Account': from_id, // 发送者帐号
-      'To_Account': to_id, // 接收者
+      'From_Account': extInfo.from_id, // 发送者帐号
+      'To_Account': extInfo.to_id, // 接收者
       'businessType': businessType// 业务类型
     }
     // 上传图片
@@ -293,11 +284,7 @@ const IM = (() => {
       opt,
       (resp) => {
         // 上传成功发送图片
-        const info = {
-          groupId: '12345678',
-          identifier: ''
-        }
-        sendPic(resp, info)
+        sendPic(resp, extInfo)
         console.log('上传成功发送图片')
       },
       (err) => {

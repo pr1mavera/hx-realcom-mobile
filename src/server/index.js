@@ -47,7 +47,7 @@ export const getBotInfo = () => http.get('public', `/robot/query`)
 /**
  * [createSession 创建会话]
  */
-export const createSession = data => http.post('public', `/robot/session/create`, data)
+export const createSession = (userId, userName, userPhone) => http.post('public', `/robot/session/create`, { userId, userName, userPhone })
 
 /**
  * [sendMsgToBot 发送消息给机器人]

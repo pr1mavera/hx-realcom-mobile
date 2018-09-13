@@ -38,7 +38,9 @@ export const msgTypes = {
   msg_guess: '2', // 猜问题(机器人)
   msg_leave: '3', // 请留言(机器人)
   msg_no_idea: '4', // 直接转人工(机器人)
-  msg_img: '5' // 发送图片
+  msg_img: '5', // 发送图片
+  msg_gift: '6', // 礼物消息
+  msg_liked: '7' // 点赞消息
 }
 
 export const dialogTypes = {
@@ -48,4 +50,11 @@ export const dialogTypes = {
 
 export const cardTypes = {
   bot_card: '0' // 刚进入时机器人卡片
+}
+
+export const giftTypes = {
+  gift_1: '1',
+  gift_2: '2',
+  gift_3: '3',
+  gift_4: '4'
 }

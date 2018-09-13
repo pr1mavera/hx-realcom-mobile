@@ -25,12 +25,12 @@
             </svg>
           </button>
           <div class="text">图片</div>
-          <input type="file" ref="sendImgInput" accept="image/*" @change="onSendImgClick" v-show="false"/>
+          <input type="file" ref="sendImgInput" accept="image/*" @change="onSendImgChange" v-show="false"/>
         </div>
       </div>
     </transition>
     <section class="extend-bar-section send-gift-section" v-show="giftSectionShow">
-      <send-gift></send-gift>
+      <send-gift @selectGift="selectGift"></send-gift>
     </section>
     <section class="extend-bar-section send-express-section" v-show="expressSectionShow">
       <send-express @selectEmojiWithCode="selectEmojiWithCode" @deleteBtn="this.$emit('deleteBtn')"></send-express>
@@ -63,6 +63,9 @@ export default {
     selectEmojiWithCode(code) {
       this.$emit('selectEmojiWithCode', code)
     },
+    selectGift(type) {
+      this.$emit('sendGift', type)
+    },
     selectImgClick() {
       this.$refs.sendImgInput.click()
     },
@@ -74,7 +77,7 @@ export default {
       this.expressSectionShow = true
       this.$emit('sendSectionShow')
     },
-    onSendImgClick() {
+    onSendImgChange() {
       this.$emit('sendImg', this.$refs.sendImgInput.files[0])
     },
     _getPosAndScale() {
