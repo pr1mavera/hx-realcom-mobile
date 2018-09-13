@@ -73,7 +73,7 @@
     </div>
     <div class="slide-btn">
       <div class="btn btn-left">切 换</div>
-      <div class="btn btn-right">添加为专属客服</div>
+      <div class="btn btn-right" @click="addCS">添加为专属客服</div>
     </div>
     <div class="fload-tip">
       <div class="tip tip-left" id="fload-tip-left" :class="{'show-fload-tip-left': angle <= -targAngle}">
@@ -95,6 +95,7 @@
 import { sleep } from '@/common/js/util'
 import { Badge } from 'vux'
 import anime from 'animejs'
+import { addCs, queryCsInfo } from '@/server/index.js'
 
 export default {
   components: {
@@ -143,6 +144,7 @@ export default {
     }
   },
   mounted() {
+    this.getCsList()
     this.$nextTick(() => {
       this.curLabelInfo = this.cslist[0]
     })
@@ -192,10 +194,19 @@ export default {
         }
       }
     },
-    addCS() {
+    // 将当前客服添加为专属客服
+    async addCS() {
+      const userId = '123'
+      const cuSerId = '123'
+
       this.m_cslist.push(this.curLabelInfo)
       // this.cslist.splice(0, 1)
       this.curLabelInfo = this.cslist[0]
+
+      const res = await addCs(userId, cuSerId)
+      if (res) {
+        console.log(JSON.stringify(res))
+      }
     },
     switchCS() {
       const temp = this.cslist[0]
@@ -248,6 +259,20 @@ export default {
         offset: 350,
         easing: 'easeInOutExpo'
       })
+    },
+    // 分页获取客服列表
+    async getCsList() {
+      const page = 1
+      const pageSize = -1
+      const userId = '123'
+      const listType = '2'
+      const res = await queryCsInfo(page, pageSize, userId, listType)
+      if (res) {
+        console.log('所有客服列表' + JSON.stringify(res))
+        // const totalPage = res.data.totalCount
+        // (if totalPage === -1) {不计算}else{}
+        this.cslist = res.data.csList
+      }
     }
   }
 }
@@ -432,6 +457,7 @@ export default {
       border-radius: 2rem;
       font-size: 1.4rem;
       line-height: 4rem;
+      cursor: pointer;
       &.btn-left {
         padding: 0 3rem;
         background-color: #fff;

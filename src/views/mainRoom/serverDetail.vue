@@ -10,35 +10,35 @@
     <div class="count">
       <div class="count-rate-bg">
         <div class="count-rate">
-          <span>{{ rate }}</span>
+          <span>{{ cuSerInfo.feedback }}</span>
           <p style="line-height: 1.25;font-size: 1.2rem">好评率</p>
         </div>
       </div>
       <div class="count-like">
         <svg class="icon" aria-hidden="true"><use xlink:href="#icon-xin-hong1"></use></svg>
-        <span style="font-size: 1.2rem;">&nbsp;{{ likeNum }}</span>
+        <span style="font-size: 1.2rem;">&nbsp;{{ cuSerInfo.likesCount }}</span>
       </div>
     </div>
     <div class="container-item flex-box">
       <div class="flex-box-item">
-        <p><span style="">{{years}}</span>年</p>
+        <p><span style="">{{ cuSerInfo.servYears }}</span>年</p>
         <p class="tips">服务年限</p>
       </div>
       <div class="flex-box-item">
-        <p><span>{{peopleNum}}</span>人</p>
+        <p><span>{{ cuSerInfo.servTimes }}</span>人</p>
         <p class="tips">服务人数</p>
       </div>
       <div class="flex-box-item">
-        <p><span>{{myNum}}</span>次</p>
+        <p><span>{{ cuSerInfo.servTimes }}</span>次</p>
         <p class="tips">为我服务</p>
       </div>
     </div>
     <div class="container-item about-me">
       <p class="container-item-tit">关于我</p>
       <div class="container-item-con ">
-        <div class="about-me-item"><div class="tit">家乡</div>{{hometown}}</div>
-        <div class="about-me-item"><div class="tit">星座</div>{{constellation}}</div>
-        <div class="about-me-item"><div class="tit">爱好</div>{{hobby}}</div>
+        <div class="about-me-item"><div class="tit">星座</div>{{cuSerInfo.starSign}}</div>
+        <div class="about-me-item"><div class="tit">家乡</div>{{cuSerInfo.hometown}}</div>
+        <div class="about-me-item"><div class="tit">爱好</div>{{cuSerInfo.hobby}}</div>
       </div>
     </div>
     <div class="container-item">
@@ -58,13 +58,10 @@
 
 <script type="text/ecmascript-6">
   import { Swiper, SwiperItem, XButton, XCircle } from 'vux'
+  import { getCsInfo, getImgUrl } from '@/server/index.js'
 
   // 顶部轮播图的列表
-  const displayList = [
-    '/static/img/leaveMsg/leaveMsgBg.png',
-    '/static/img/leaveMsg/leaveMsgBg.png',
-    '/static/img/leaveMsg/leaveMsgBg.png'
-  ]
+  // const displayList = []
 
   export default {
     components: {
@@ -77,16 +74,35 @@
     },
     data() {
      return {
-       personalDisplay: displayList,
-       rate: '98%',
-       likeNum: 200,
-       years: 1,
-       peopleNum: 20,
-       myNum: 5,
-       hometown: '新疆维吾尔自治区 克孜勒苏柯尔克孜自治州',
-       constellation: '天秤座',
-       hobby: '好吃 懒作 打游戏'
+       personalDisplay: [],
+       cuSerInfo: []
      }
+    },
+    mounted() {
+      this.getCsInfo()
+    },
+    methods: {
+      // 获取客服信息
+      async getCsInfo() {
+        const cuSerId = '123'
+        const res = await getCsInfo(cuSerId)
+        if (res) {
+          this.cuSerInfo = res.data
+          const cuSerPic = res.data.photos
+
+          for (var i in cuSerPic) {
+            this.getPic(cuSerPic[i].url)
+          }
+        }
+      },
+
+      // 获取客服生活照的图片流
+      async getPic(url) {
+        const res = await getImgUrl(url)
+        if (res) {
+          this.personalDisplay.push(res)
+        }
+      }
     }
   }
 

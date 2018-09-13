@@ -11,7 +11,7 @@ const production = {
 }
 
 const development = {
-  publicPath: 'http://192.168.8.107:8080/api/v1',
+  publicPath: 'http://192.168.8.108:8080/api/v1',
   webRTCRoomPath: 'http://192.168.8.107:8082/api/v1'
 }
 
