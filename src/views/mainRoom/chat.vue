@@ -15,6 +15,7 @@
                 :isSelf="msg.isSelfSend"
                 :name="msg.nickName"
                 :text="msg.content"
+                :imgSrc="msg.imgData"
                 :types="msg.msgType"
                 :extend="msg.msgExtend"
                 :cardInfo="msg.cardInfo"
