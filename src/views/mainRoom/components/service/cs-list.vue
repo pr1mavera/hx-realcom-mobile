@@ -33,16 +33,16 @@ export default {
     return {
       myCsList: [
         {
-          avatarSrc: '/static/img/avatar@2x.png',
-          name: '丽丽',
-          num: 2233,
-          gifts: 3345
+          resultUrl: '/static/img/avatar@2x.png',
+          nickName: '丽丽',
+          servTimes: 2233,
+          giftCount: 3345
         },
         {
-          avatarSrc: '/static/img/avatar@2x.png',
-          name: '花花',
-          num: 4578,
-          gifts: 9933
+          resultUrl: '/static/img/avatar@2x.png',
+          nickName: '花花',
+          servTimes: 4578,
+          giftCount: 9933
         }
       ],
       quota: 3
