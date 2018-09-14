@@ -16,6 +16,12 @@ export default {
   components: {
     'SendExtendItem': () => import('@/views/mainRoom/components/chat/send-extend-item')
   },
+  props: {
+    giftsInfo: {
+      type: Array
+      // 数组默认值需从一个工厂函数获取
+    }
+  },
   data() {
     return {
       giftItems: [
@@ -46,9 +52,20 @@ export default {
       ]
     }
   },
+  mounted() {
+    this.getGiftsInfo()
+  },
   methods: {
     selectGiftClick(type) {
       this.$emit('selectGift', `${type + 1}`)
+    },
+    // 获取礼物列表
+    getGiftsInfo() {
+      // 个人中心获取的礼物的展示
+      if (this.giftsInfo !== undefined) {
+        this.giftItems = this.giftsInfo
+        console.log('================ 收到的礼物列表在此：' + JSON.stringify(this.giftsInfo))
+      }
     }
   }
 }
