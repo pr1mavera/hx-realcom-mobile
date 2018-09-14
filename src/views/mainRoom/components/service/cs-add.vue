@@ -17,7 +17,7 @@
                   <div class="avatar">
                     <img width=100% height=100% src="/static/img/avatar.png">
                   </div>
-                  <div class="nickname">{{curLabelInfo.nickname}}</div>
+                  <div class="nickname">{{curLabelInfo.nickName}}</div>
                 </div>
               </div>
               <div class="video-btn">
@@ -28,13 +28,13 @@
                   <li class="cs-info-list">
                     <span class="title">服务总量</span>
                     <span class="text">
-                      <label>{{curLabelInfo.serviceTime}}次</label>
+                      <label>{{curLabelInfo.servTimes}}次</label>
                     </span>
                   </li>
                   <li class="cs-info-list">
                     <span class="title">收到礼物</span>
                     <span class="text">
-                      <label>{{curLabelInfo.gift}}次</label>
+                      <label>{{curLabelInfo.giftCount}}次</label>
                     </span>
                   </li>
                   <li class="cs-info-list">
@@ -96,6 +96,7 @@ import { sleep } from '@/common/js/util'
 import { Badge } from 'vux'
 import anime from 'animejs'
 import { addCs, queryCsInfo } from '@/server/index.js'
+import {mapGetters} from 'vuex'
 
 export default {
   components: {
@@ -120,18 +121,18 @@ export default {
       endAngle: 40,
       curLabelInfo: null,
       cslist: [
-        {
-          cs_id: 123456,
-          nickname: '丽丽',
-          serviceTime: 12,
-          gift: 123
-        },
-        {
-          cs_id: 123456,
-          nickname: '田老师红烧肉',
-          serviceTime: 52372,
-          gift: 2561
-        }
+        // {
+        //   cs_id: 123456,
+        //   nickname: '丽丽',
+        //   serviceTime: 12,
+        //   gift: 123
+        // },
+        // {
+        //   cs_id: 123456,
+        //   nickname: '田老师红烧肉',
+        //   serviceTime: 52372,
+        //   gift: 2561
+        // }
       ],
       m_cslist: [], // 已添加的专属客服
       floadTipLeftAnimeCache: null,
@@ -141,13 +142,13 @@ export default {
   computed: {
     setRotate() {
       return `transform: rotateZ(${this.angle}deg); opacity: ${this.opacityNum};`
-    }
+    },
+    ...mapGetters([
+      'userInfo'
+    ])
   },
   mounted() {
     this.getCsList()
-    this.$nextTick(() => {
-      this.curLabelInfo = this.cslist[0]
-    })
   },
   methods: {
     startSlide(event) {
@@ -196,7 +197,8 @@ export default {
     },
     // 将当前客服添加为专属客服
     async addCS() {
-      const userId = '123'
+      // const userId = '123'
+      const userId = this.userInfo.userId
       const cuSerId = '123'
 
       this.m_cslist.push(this.curLabelInfo)
@@ -260,7 +262,8 @@ export default {
         easing: 'easeInOutExpo'
       })
     },
-    // 分页获取客服列表
+
+    // 分页获取客服列表(当前接口只能一次查询）
     async getCsList() {
       const page = 1
       const pageSize = -1
@@ -268,10 +271,12 @@ export default {
       const listType = '2'
       const res = await queryCsInfo(page, pageSize, userId, listType)
       if (res) {
-        console.log('所有客服列表' + JSON.stringify(res))
+        console.log('所有客服列表' + JSON.stringify(res.data.csList))
         // const totalPage = res.data.totalCount
-        // (if totalPage === -1) {不计算}else{}
+        // (if totalPage === -1) {不计算}else{pages = Math.flower(total / 5)}
         this.cslist = res.data.csList
+        this.curLabelInfo = this.cslist[0]
+        console.log('===========' + JSON.stringify(this.cslist) + '========')
       }
     }
   }
