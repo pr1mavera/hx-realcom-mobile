@@ -64,8 +64,8 @@
         @on-confirm="confirmToLineUp"
       ></confirm>
     </div>
-    <ios-guide v-if="iosGuide"></ios-guide>
-    <low-version v-if="lowVersion"></low-version>
+    <!--<ios-guide v-if="iosGuide"></ios-guide>-->
+    <!--<low-version v-if="lowVersion"></low-version>-->
   </div>
 </template>
 
