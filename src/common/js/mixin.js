@@ -2,10 +2,10 @@ import { mapGetters, mapMutations, mapActions } from 'vuex'
 import WebRTCRoom from '@/server/webRTCRoom'
 import IM from '@/server/im'
 // import WebRTCAPI from 'webRTCAPI'
-import { ERR_OK, getUserInfoByOpenID, getLoginInfo, createSession, pushUserMsg, sendMsgToBot } from '@/server/index.js'
+import { ERR_OK, getUserInfoByOpenID, getLoginInfo, createSession, pushSystemMsg, sendMsgToBot } from '@/server/index.js'
 import { shallowCopy } from '@/common/js/util'
 import { formatDate } from '@/common/js/dateConfig.js'
-import { msgStatus, msgTypes } from '@/common/js/status'
+import { queueStatus, systemMsgStatus, msgStatus, msgTypes } from '@/common/js/status'
 
 export const loginMixin = {
   data() {
@@ -111,12 +111,11 @@ export const RTCRoomMixin = {
   },
   computed: {
     ...mapGetters([
-      'userInfo',
-      'roomId'
+      'userInfo'
     ])
   },
   methods: {
-    initRTC(query) {
+    initRTC(room) {
       const self = this
       this.RTC = new WebRTCAPI({
         'sdkAppId': self.userInfo.sdkAppID,
@@ -124,11 +123,18 @@ export const RTCRoomMixin = {
         'userSig': self.userInfo.userSig,
         'accountType': self.userInfo.accountType
       }, () => {
-        if (query.cmd === 'create') {
-            self.actionCreateRoom(query)
-        } else if (query.cmd === 'enter') {
-            self.actionEnterRoom(query)
-        }
+        debugger
+        this.RTC.createRoom({
+          roomid: room,
+          role: 'miniwhite'
+        }, () => {
+            console.info('ENTER RTC ROOM OK')
+        }, (result) => {
+          if (result) {
+            console.error('ENTER RTC ROOM failed')
+            // self.goHomeRouter()
+          }
+        })
       }, (error) => {
         console.error(error)
       })
@@ -179,98 +185,95 @@ export const RTCRoomMixin = {
         console.warn('服务器超时断开')
         // self.goHomeRouter()
       })
-    },
-    afterCreateRoom(courseInfo) {
-      // const self = this
-      this.setRoomId(courseInfo.roomId)
-      // 创建房间
-      this.RTC.createRoom({
-        // roomid: parseInt(self.courseId, 10),
-        roomid: courseInfo.roomId,
-        role: 'miniwhite'
-      }, () => {
-          console.info('ENTER RTC ROOM OK')
-      }, (result) => {
-        if (result) {
-          console.error('ENTER RTC ROOM failed')
-          // self.goHomeRouter()
-        }
-      })
-    },
-    actionCreateRoom(query) {
-      console.log('-> action create room')
-      const self = this
-      WebRTCRoom.createRoom(
-        self.userInfo.userId,
-        self.userInfo.selfName,
-        self.roomName,
-        (res) => {
-          // 发送心跳包
-          self.heartBeatTask = WebRTCRoom.startHeartBeat(
-            self.userInfo.userId,
-            res.data.roomID,
-            () => {},
-            () => {
-              // self.$toast.center('心跳包超时，请重试~')
-              console.log('心跳包超时，请重试~')
-              // self.goHomeRouter()
-            }
-          )
-          const info = {
-            // 测试阶段默认'12345678'
-            roomId: self.roomId || '12345678',
-            // roomId: res.data.roomID, ///////////////////////////////////////////////////////////////
-            roomName: self.roomName
-          }
-          self.afterCreateRoom(info)
-        },
-        () => {
-          // error, 返回
-        }
-      )
-    },
-    actionEnterRoom(query) {
-      const self = this
-      WebRTCRoom.enterRoom(
-        self.userInfo.userId,
-        self.userInfo.userName,
-        self.roomId,
-        (res) => {
-          // 发送心跳包
-          self.heartBeatTask = WebRTCRoom.startHeartBeat(
-            self.userInfo.userId,
-            self.roomId,
-            () => {},
-            () => {
-              // self.$toast.center('心跳包超时，请重试~')
-              console.log('心跳包超时，请重试~')
-              // self.goHomeRouter()
-            }
-          )
-          // 进房间
-          self.RTC.createRoom(
-            {
-              // roomid: parseInt(self.courseId, 10),
-              roomid: self.roomId,
-              role: 'miniwhite'
-            },
-            () => {},
-            (result) => {
-              if (result) {
-                console.error('webrtc建房失败')
-                // self.goHomeRouter()
-              }
-            }
-          )
-        },
-        () => {
-          // error, 返回
-        }
-      )
-    },
-    ...mapMutations({
-      setRoomId: 'SET_ROOM_ID'
-    })
+    }
+    // afterCreateRoom(courseInfo) {
+    //   // const self = this
+    //   this.setRoomId(courseInfo.roomId)
+    //   // 创建房间
+    //   this.RTC.createRoom({
+    //     // roomid: parseInt(self.courseId, 10),
+    //     roomid: courseInfo.roomId,
+    //     role: 'miniwhite'
+    //   }, () => {
+    //       console.info('ENTER RTC ROOM OK')
+    //   }, (result) => {
+    //     if (result) {
+    //       console.error('ENTER RTC ROOM failed')
+    //       // self.goHomeRouter()
+    //     }
+    //   })
+    // },
+    // actionCreateRoom() {
+    //   console.log('-> action create room')
+    //   const self = this
+    //   WebRTCRoom.createRoom(
+    //     self.userInfo.userId,
+    //     self.userInfo.selfName,
+    //     self.roomName,
+    //     (res) => {
+    //       // 发送心跳包
+    //       self.heartBeatTask = WebRTCRoom.startHeartBeat(
+    //         self.userInfo.userId,
+    //         res.data.roomID,
+    //         () => {},
+    //         () => {
+    //           // self.$toast.center('心跳包超时，请重试~')
+    //           console.log('心跳包超时，请重试~')
+    //           // self.goHomeRouter()
+    //         }
+    //       )
+    //       const info = {
+    //         roomId: self.roomId
+    //       }
+    //       self.afterCreateRoom(info)
+    //     },
+    //     () => {
+    //       // error, 返回
+    //     }
+    //   )
+    // },
+    // actionEnterRoom() {
+    //   const self = this
+    //   WebRTCRoom.enterRoom(
+    //     self.userInfo.userId,
+    //     self.userInfo.userName,
+    //     self.roomId,
+    //     (res) => {
+    //       // 发送心跳包
+    //       self.heartBeatTask = WebRTCRoom.startHeartBeat(
+    //         self.userInfo.userId,
+    //         self.roomId,
+    //         () => {},
+    //         () => {
+    //           // self.$toast.center('心跳包超时，请重试~')
+    //           console.log('心跳包超时，请重试~')
+    //           // self.goHomeRouter()
+    //         }
+    //       )
+    //       // 进房间
+    //       self.RTC.createRoom(
+    //         {
+    //           // roomid: parseInt(self.courseId, 10),
+    //           roomid: self.roomId,
+    //           role: 'miniwhite'
+    //         },
+    //         () => {},
+    //         (result) => {
+    //           if (result) {
+    //             console.error('webrtc建房失败')
+    //             // self.goHomeRouter()
+    //           }
+    //         }
+    //       )
+    //     },
+    //     () => {
+    //       // error, 返回
+    //     }
+    //   )
+    // },
+    // ...mapMutations({
+    //   setRoomId: 'SET_ROOM_ID'
+    // })
   }
 }
 
@@ -336,43 +339,50 @@ export const IMMixin = {
     },
     onMsgNotify(msgs) {
       if (msgs && msgs.length > 0) {
-        alert('onMsgNotify')
-        const msgsObj = IM.parseMsgs(msgs)
-        msgsObj.textMsgs.forEach((msg) => {
-          const content = JSON.parse(msg.content)
-          if (content.cmd === 'sketchpad') {
-            const body = JSON.parse(content.data.msg)
-            if (body.type === 'request' && body.action === 'currentBoard') {
-              if (this.$refs.sketchpadCom) {
-                const currentBoard = this.$refs.sketchpadCom.getCurrentBoard()
-                const boardBg = this.$refs.sketchpadCom.getBoardBg() || {}
-                IM.sendBoardMsg({
-                  groupId: this.courseId,
-                  msg: JSON.stringify({
-                    action: body.action,
-                    currentBoard
-                    // boardBg: JSON.stringify(boardBg)
-                  }),
-                  nickName: this.selfName,
-                  identifier: this.userId
-                })
-                // 如果有图片则补发图片
-                const bgUrl = boardBg[currentBoard] && boardBg[currentBoard].url
-                if (bgUrl) {
-                  this.sendBoardBgPicMsg(currentBoard, bgUrl)
-                  setTimeout(() => {
-                      this.sendSwitchBoardMsg(currentBoard)
-                  }, 500)
-                }
+        const msgsObj = IM.parseMsgsInSystem(msgs).textMsgs[0]
+        switch (msgsObj.code) {
+          case systemMsgStatus.queuesReduce: // 人数减少
+
+            break
+          case systemMsgStatus.queuesSuccess: // 客户端排队成功
+            // 存vuex csInfo / roomId / fullScreen
+            const info = {
+              csId: msgsObj.csId
+            }
+            this.setCsInfo(info)
+            this.setRoomId(msgsObj.csId)
+            // this.setFullScreen(true)
+            // 发送系统消息，通知座席端视频接入
+            const systemMsg = {
+              userId: this.userInfo.userId,
+              msgBody: {
+                data: {
+                  code: systemMsgStatus.requestCsEntance,
+                  csId: msgsObj.csId,
+                  userId: this.userInfo.userId,
+                  userName: this.userInfo.userName,
+                  openId: 'oKXX7wABsIulcFpdlbwUyMKGisjQ'
+                },
+                desc: `${this.userInfo.userName}排队成功辣`,
+                ext: ''
               }
             }
-          }
-        })
+            RTCSystemMsg.systemMsg(systemMsg)
+            // 设置排队状态
+            this.setQueueMode(queueStatus.queueSuccess)
+            break
+          case systemMsgStatus.requestCsEntance: // 座席端视频接入请求
+
+            break
+        }
       }
     },
-    // ...mapMutations({
-    //   setMsgs: 'SET_MSGS'
-    // }),
+    ...mapMutations({
+      setQueueMode: 'SET_QUEUE_MODE',
+      setCsInfo: 'SET_CS_INFO',
+      setRoomId: 'SET_ROOM_ID'
+      // setFullScreen: 'SET_FULL_SCREEN'
+    }),
     ...mapActions([
       'sendMsgs'
     ])
@@ -516,15 +526,13 @@ export const sendMsgsMixin = {
   }
 }
 
-export const RTCSystemMsgMixin = {
-  methods: {
-    async lineUpOkPushSystemMsg(systemMsg) {
-      const res = await pushUserMsg(systemMsg)
-      if (res.code === ERR_OK) {
-        console.log('排队完成，推送系统消息成功')
-      } else {
-        console.log('推送系统消息失败')
-      }
+const RTCSystemMsg = {
+  async systemMsg(systemMsg) {
+    const res = await pushSystemMsg(systemMsg)
+    if (res.code === ERR_OK) {
+      console.log('排队完成，推送系统消息成功')
+    } else {
+      console.log('推送系统消息失败')
     }
   }
 }

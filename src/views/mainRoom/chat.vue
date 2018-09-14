@@ -543,6 +543,7 @@ export default {
       this.lineUpAlert = false
       // const query = this.$route.query
       this.setModeToMenChat(roomStatus.videoChat)
+      this.$router.push('/room/cusServ/list')
       // this.getUserInfo(this.userInfo.userId, query, this.initIM)
     },
     // _reloadChatContentHeight() {

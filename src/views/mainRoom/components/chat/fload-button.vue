@@ -56,12 +56,13 @@ export default {
     // },
     enterVideoLineUp() {
       // beforeEnterVideo()
+      this.$emit('enterVideoLineUp')
       //
       // const nextStatus = sessionStorage.getItem('enterVideoStatus')
       // this.$emit(nextStatus, 'true')
       // sessionStorage.removeItem('enterVideoStatus')
 
-      this.$router.push('/room/cusServ/list')
+      // this.$router.push('/room/cusServ/list')
 
       // WebRTCAPI.fn.detectRTC({
       //   screenshare: false

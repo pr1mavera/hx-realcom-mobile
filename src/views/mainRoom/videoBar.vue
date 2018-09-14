@@ -55,7 +55,7 @@
       </div>
     </div>
     <!-- 最小化 -->
-    <div class="mini-container" v-show="!fullScreen" @click="openVideoBar">
+    <div class="mini-container" v-show="isMiniBarOpen" @click="openVideoBar">
       <div class="server-video-window">
         <video
           id="remoteVideoMini"
@@ -72,13 +72,12 @@
 <script type="text/ecmascript-6">
 import { mapGetters, mapMutations } from 'vuex'
 import { queueStatus } from '@/common/js/status'
-import { loginMixin, RTCRoomMixin, IMMixin } from '@/common/js/mixin'
+import { RTCRoomMixin } from '@/common/js/mixin'
+import IM from '@/server/im.js'
 
 export default {
   mixins: [
-    loginMixin,
-    RTCRoomMixin,
-    IMMixin
+    RTCRoomMixin
   ],
   components: {
     'LineUp': () => import('@/views/mainRoom/components/video/line-up'),
@@ -87,15 +86,20 @@ export default {
   },
   computed: {
     isVideoBarOpen() {
-      return this.queueMode === queueStatus.queuing || this.queueMode === queueStatus.queueOver
+      return this.queueMode === queueStatus.queuing || this.queueMode === queueStatus.queueSuccess || this.queueMode === queueStatus.queueOver
+    },
+    isMiniBarOpen() {
+      return !this.fullScreen && this.queueMode === queueStatus.queueOver
     },
     isLineUpShow() {
-      return this.queueMode === queueStatus.queuing
+      return this.queueMode === queueStatus.queuing || this.queueMode === queueStatus.queueSuccess
     },
     ...mapGetters([
       'fullScreen',
       'roomMode',
-      'queueMode'
+      'roomId',
+      'queueMode',
+      'userInfo'
     ])
   },
   data() {
@@ -111,8 +115,10 @@ export default {
       this.setFullScreen(false)
     },
     readyToVideo() {
-      const query = this.$route.query
-      this.setUserInfoToEnterRoom(query, this.initRTC, this.initIM)
+      IM.joinGroup(this.roomId, this.userInfo.userId)
+      this.initRTC(this.roomId)
+      // const query = this.$route.query
+      // this.setUserInfoToEnterRoom(query, this.initRTC, this.initIM)
     },
     ...mapMutations({
       setFullScreen: 'SET_FULL_SCREEN'

@@ -16,9 +16,9 @@ export const wxConfig = url => http.get('public', `/wxConfig?url=${url}`)
 export const getLoginInfo = userId => http.get('RTCRoom', `/im/account/login?userId=${userId}`)
 
 /**
- * [pushUserMsg 推送系统消息]
+ * [pushSystemMsg 推送系统消息]
  */
-export const pushUserMsg = msgBody => http.post('RTCRoom', '/pushMsg', msgBody)
+export const pushSystemMsg = data => http.post('RTCRoom', '/im/msg/push', data)
 
 /**
  * [syncGroupC2CMsg 拉取漫游消息]

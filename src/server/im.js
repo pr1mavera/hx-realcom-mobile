@@ -116,6 +116,7 @@ const IM = (() => {
     var time = ''
     var giftType = ''
     if (type === 'TIMCustomElem') {
+      debugger
       var content = msgItem.getContent() // 获取元素对象
       var desc = JSON.parse(content.getDesc())
       msgType = desc.msgType
@@ -144,6 +145,52 @@ const IM = (() => {
       msgStatus,
       time,
       giftType
+    }
+  }
+
+  function parseMsgsInSystem(newMsgList) {
+    var textMsgs = []
+    var whiteBoardMsgs = []
+    for (var i in newMsgList) { // 遍历新消息
+      var msg = parseMsgInSystem(newMsgList[i])
+      if (msg && msg.type === 'TXWhiteBoardExt') {
+        whiteBoardMsgs.push(msg.data)
+      } else {
+        textMsgs.push(msg)
+      }
+    }
+    return {
+      textMsgs: textMsgs,
+      whiteBoardMsgs: whiteBoardMsgs
+    }
+  }
+
+  function parseMsgInSystem(newMsg) {
+    var msgItem = newMsg.getElems()[0]
+    var type = msgItem.getType()
+    var nickName = newMsg.getFromAccountNick()
+    var msgStatus = ''
+    var msgType = ''
+    var time = ''
+    var giftType = ''
+    if (type === 'TIMCustomElem') {
+      var content = msgItem.getContent() // 获取元素对象
+      var data = JSON.parse(content.getData())
+      var desc = content.getDesc()
+      // 配置参数
+      var code = data.code
+      var userId = data.userId
+      var csId = data.csId
+      var openId = data.openId
+      var userName = data.userName
+    }
+    return {
+      code,
+      userId,
+      csId,
+      openId,
+      userName,
+      desc
     }
   }
 
@@ -344,6 +391,8 @@ const IM = (() => {
     joinGroup,
     parseMsg,
     parseMsgs,
+    parseMsgInSystem,
+    parseMsgsInSystem,
     sendMsg,
     sendBoardMsg,
     uploadPic,

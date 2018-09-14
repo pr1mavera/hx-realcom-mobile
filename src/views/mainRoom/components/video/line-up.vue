@@ -10,29 +10,29 @@
         <p class="tips-bottom">预计需要等待{{times}}分钟</p>
       </div>
       <a type="reset" class="btn-cancel">取 消</a>
-      <connect-success ref="connectSuccess" @confirmToVideo="confirmToVideo"></connect-success>
+      <connect-success ref="connectSuccess" v-show="queueSuccess" @confirmToVideo="confirmToVideo"></connect-success>
     </main>
   </section>
 </template>
 
 <script type="text/ecmascript-6">
 import { mapGetters, mapActions } from 'vuex'
-// import { queueStatus } from '@/common/js/status'
-import { RTCSystemMsgMixin } from '@/common/js/mixin'
 import { ERR_OK, videoQueue } from '@/server/index.js'
+import { queueStatus } from '@/common/js/status'
 
 export default {
-  mixins: [
-    RTCSystemMsgMixin
-  ],
   components: {
     // ConnectSuccess,
     'ConnectSuccess': () => import('@/views/mainRoom/components/video/connect-success')
   },
   computed: {
     ...mapGetters([
-      'userInfo'
-    ])
+      'userInfo',
+      'queueMode'
+    ]),
+    queueSuccess() {
+      return this.queueMode === queueStatus.queueSuccess
+    }
   },
   data() {
     return {
@@ -52,9 +52,6 @@ export default {
   },
   mounted() {
     this.initQueue()
-    // debounce(() => {
-    //   self.connectComplete()
-    // }, 1000)()
   },
   methods: {
     async initQueue() {
@@ -69,36 +66,24 @@ export default {
         console.log('error in videoQueue')
       }
     },
-    connectComplete() {
-      const systemMsg = {
-        userId: 'cs-test',
-        msgBody: {
-          data: '0',
-          desc: '视频排队成功desc',
-          ext: '视频排队成功ext'
-        }
-      }
-      this.lineUpOkPushSystemMsg(systemMsg)
-      this.$refs.connectSuccess.show = true
-    },
     confirmToVideo() {
-      this.$router.push({
-        path: '/room/chat',
-        // query: {
-        //   cmd: 'enter',
-        //   roomID: 'cs-test',
-        //   userId: this.loginInfo.userId,
-        //   userName: this.loginInfo.userName
-        // }
-        query: {
-          cmd: 'create',
-          roomName: '12345678',
-          userId: this.loginInfo.userId,
-          userName: this.loginInfo.userName
-        }
-      })
-      this.$emit('ready')
+      // this.$router.push({
+      //   path: '/room/chat',
+      //   // query: {
+      //   //   cmd: 'enter',
+      //   //   roomID: 'cs-test',
+      //   //   userId: this.loginInfo.userId,
+      //   //   userName: this.loginInfo.userName
+      //   // }
+      //   query: {
+      //     cmd: 'create',
+      //     roomName: '12345678',
+      //     userId: this.loginInfo.userId,
+      //     userName: this.loginInfo.userName
+      //   }
+      // })
       this.readyToVideoChat()
+      this.$emit('ready')
     },
     ...mapActions([
       'readyToVideoChat'
