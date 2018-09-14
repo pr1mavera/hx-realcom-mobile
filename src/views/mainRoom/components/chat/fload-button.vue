@@ -39,7 +39,7 @@
 
 <script type="text/ecmascript-6">
 
-  import { beforeEnterVideo } from '@/common/js/beforeEnterVideo'
+  // import { beforeEnterVideo } from '@/common/js/beforeEnterVideo'
 
 export default {
   props: {
@@ -55,11 +55,13 @@ export default {
     //   beforeEnterVideo()
     // },
     enterVideoLineUp() {
-      beforeEnterVideo()
+      // beforeEnterVideo()
+      //
+      // const nextStatus = sessionStorage.getItem('enterVideoStatus')
+      // this.$emit(nextStatus, 'true')
+      // sessionStorage.removeItem('enterVideoStatus')
 
-      const nextStatus = sessionStorage.getItem('enterVideoStatus')
-      this.$emit(nextStatus, 'true')
-      sessionStorage.removeItem('enterVideoStatus')
+      this.$router.push('/room/cusServ/list')
 
       // WebRTCAPI.fn.detectRTC({
       //   screenshare: false

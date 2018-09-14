@@ -22,6 +22,7 @@
 
 <script type="text/ecmascript-6">
   import {XButton} from 'vux'
+  import {mapGetters} from 'vuex'
   import {queryCsInfo} from '@/server/index.js'
 
 export default {
@@ -29,21 +30,26 @@ export default {
     XButton,
     'myCsCard': () => import('@/views/mainRoom/components/service/my-cs-card')
   },
+  computed: {
+    ...mapGetters([
+      'userInfo'
+    ])
+  },
   data() {
     return {
       myCsList: [
-        {
-          resultUrl: '/static/img/avatar@2x.png',
-          nickName: '丽丽',
-          servTimes: 2233,
-          giftCount: 3345
-        },
-        {
-          resultUrl: '/static/img/avatar@2x.png',
-          nickName: '花花',
-          servTimes: 4578,
-          giftCount: 9933
-        }
+        // {
+        //   resultUrl: '/static/img/avatar@2x.png',
+        //   nickName: '丽丽',
+        //   servTimes: 2233,
+        //   giftCount: 3345
+        // },
+        // {
+        //   resultUrl: '/static/img/avatar@2x.png',
+        //   nickName: '花花',
+        //   servTimes: 4578,
+        //   giftCount: 9933
+        // }
       ],
       quota: 3
     }
@@ -53,14 +59,16 @@ export default {
   },
   methods: {
     async getCsList() {
+      // debugger
+      console.log('获取用户信息=>' + this.userInfo.userId)
       const page = 1
       const pageSize = -1
-      const userId = '123'
+      const userId = this.userInfo.userId // 获取用户的ID
       const listType = '1'
       const res = await queryCsInfo(page, pageSize, userId, listType)
       if (res) {
         // alert(JSON.stringify(res))
-        // this.myCsList = res.data.csList
+        this.myCsList = res.data.csList
       }
     },
     addCs() {

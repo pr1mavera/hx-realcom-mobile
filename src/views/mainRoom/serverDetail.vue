@@ -52,13 +52,13 @@
       <p class="container-item-tit">我的小幸福</p>
       <send-gift></send-gift>
     </div>
-    <a class="btn-back" @click="window.history.go(-1)">返 回</a>
+    <a class="btn-back" @click="history.go(-1)">返 回</a>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
   import { Swiper, SwiperItem, XButton, XCircle } from 'vux'
-  import { getCsInfo, getImgUrl } from '@/server/index.js'
+  import { getCsInfo, getImgUrl, viewGifts, viewLabels } from '@/server/index.js'
 
   // 顶部轮播图的列表
   // const displayList = []
@@ -75,16 +75,19 @@
     data() {
      return {
        personalDisplay: [],
-       cuSerInfo: []
+       cuSerInfo: [],
+       giftsInfo: []
      }
     },
     mounted() {
       this.getCsInfo()
+      this.getGifts()
+      this.getLabels()
     },
     methods: {
       // 获取客服信息
       async getCsInfo() {
-        const cuSerId = '123'
+        const cuSerId = '123456789'
         const res = await getCsInfo(cuSerId)
         if (res) {
           this.cuSerInfo = res.data
@@ -101,6 +104,31 @@
         const res = await getImgUrl(url)
         if (res) {
           this.personalDisplay.push(res)
+        }
+      },
+
+      // 礼物查询
+      async getGifts() {
+        const page = 0
+        const pageSize = -1
+        const csId = '123456789'
+
+        const res = await viewGifts(page, pageSize, csId)
+        if (res) {
+          console.log(JSON.stringify(res.data))
+        }
+      },
+
+      // 标签信息查询
+      async getLabels() {
+        const csId = this.cuSerInfo.id
+        // const csId = '123456789'
+        const page = 0
+        const pageSize = -1
+        const res = await viewLabels(page, pageSize, csId)
+
+        if (res) {
+          console.log(JSON.stringify(res.data))
         }
       }
     }
