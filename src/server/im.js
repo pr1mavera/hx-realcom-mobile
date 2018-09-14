@@ -1,4 +1,5 @@
-import webim from 'webim'
+// import webim from 'webim'
+/* eslint-disable */
 
 const IM = (() => {
   function login(loginInfo, listeners, succ, fail) {

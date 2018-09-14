@@ -1,13 +1,13 @@
 import { mapGetters, mapMutations, mapActions } from 'vuex'
 import WebRTCRoom from '@/server/webRTCRoom'
 import IM from '@/server/im'
-import WebRTCAPI from 'webRTCAPI'
-import { ERR_OK, getUserInfoByOpenID, getLoginInfo, pushUserMsg, sendMsgToBot } from '@/server/index.js'
+// import WebRTCAPI from 'webRTCAPI'
+import { ERR_OK, getUserInfoByOpenID, getLoginInfo, createSession, pushUserMsg, sendMsgToBot } from '@/server/index.js'
 import { shallowCopy } from '@/common/js/util'
 import { formatDate } from '@/common/js/dateConfig.js'
 import { msgStatus, msgTypes } from '@/common/js/status'
 
-export const setUserInfoMixin = {
+export const loginMixin = {
   data() {
     return {
       userId: '',
@@ -21,34 +21,47 @@ export const setUserInfoMixin = {
     ])
   },
   methods: {
-    async setUserBaseProfile(openID, ...Func) {
+    async loginByOpenID(openID) {
       const res = await getUserInfoByOpenID(openID)
       if (res.result.code === ERR_OK) {
-        console.log('============================= 我现在来请求 UserInfoByOpenID 辣 =============================')
-        await this.setUserInfo(res.data.userInfo)
-        // await sleep(2000)
-        Func && Func.forEach(async(fn) => {
-          fn()
+        console.log('============================= 我现在来请求 loginByOpenID 辣 =============================')
+        return new Promise((resolve) => {
+          // 存vuex userInfo
+          this.setUserInfo(res.data.userInfo)
+          resolve()
         })
       } else {
         console.log('error in getUserInfoByOpenID')
       }
     },
-    async getUserInfo(data, query, ...Func) {
-      const res = await getLoginInfo(data)
+    async getUserInfo() {
+      const res = await getLoginInfo(this.userInfo.userId)
       if (res.result.code === ERR_OK) {
-        console.log('getUserInfo成功')
-        const info = shallowCopy(this.userInfo)
-        info.accountType = res.data.accountType
-        info.sdkAppID = res.data.sdkAppId
-        info.userSig = res.data.userSig
-        this.setUserInfo(info)
-        // 执行回调
-        Func && Func.forEach((fn) => {
-          fn(query)
+        console.log('============================= 我现在来请求 getUserInfo 辣 =============================')
+        return new Promise((resolve) => {
+          const info = shallowCopy(this.userInfo)
+          info.accountType = res.data.accountType
+          info.sdkAppID = res.data.sdkAppId
+          info.userSig = res.data.userSig
+          // 存vuex userInfo
+          this.setUserInfo(info)
+          resolve()
         })
       } else {
-        console.log('error in getUserProfile')
+        console.log('error in getLoginInfo')
+      }
+    },
+    async initSession() {
+      const res = await createSession(this.userInfo.userId, this.userInfo.userName, this.userInfo.userPhone)
+      if (res.result.code === ERR_OK) {
+        console.log('============================= 会话创建成功 辣 =============================')
+        return new Promise((resolve) => {
+          // 存vuex roomId
+          this.setRoomId(res.data.id)
+          resolve()
+        })
+      } else {
+        console.log('============================= 会话创建失败 辣 =============================')
       }
     },
     setUserInfoToEnterRoom(query, ...Func) {
@@ -64,7 +77,7 @@ export const setUserInfoMixin = {
           this.setRoomId(query.roomID)
         }
       }
-      this.getUserInfo(this.userInfo.userId, query, ...Func)
+      // this.getUserInfo(this.userInfo.userId, query, ...Func)
       // WebRTCRoom.getLoginInfo(
       //   this.userId,
       //   (res) => {
@@ -275,7 +288,7 @@ export const IMMixin = {
     }
   },
   methods: {
-    initIM(query) {
+    initIM() {
       const self = this
       self.onMsgNotify.bind(this)
       const loginInfo = {
@@ -287,20 +300,23 @@ export const IMMixin = {
         userSig: self.userInfo.userSig
       }
       console.debug('initIM', loginInfo)
-      IM.login(
-        loginInfo,
-        {
-          'onBigGroupMsgNotify': self.onBigGroupMsgNotify,
-          'onMsgNotify': self.onMsgNotify
-        },
-        () => {
-          console.log('===============================> initIM success <===============================')
-          IM.joinGroup('12345678', self.userInfo.userId)
-        },
-        (err) => {
-          alert(err.ErrorInfo)
-        }
-      )
+      return new Promise((resolve) => {
+        IM.login(
+          loginInfo,
+          {
+            'onBigGroupMsgNotify': self.onBigGroupMsgNotify,
+            'onMsgNotify': self.onMsgNotify
+          },
+          () => {
+            console.log('===============================> initIM success <===============================')
+            // IM.joinGroup('12345678', self.userInfo.userId)
+            resolve()
+          },
+          (err) => {
+            alert(err.ErrorInfo)
+          }
+        )
+      })
     },
     onBigGroupMsgNotify(newMsgList) {
       if (newMsgList && newMsgList.length > 0) {

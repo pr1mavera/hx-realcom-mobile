@@ -20,6 +20,7 @@ import { mapGetters, mapActions } from 'vuex'
 // import { queueStatus } from '@/common/js/status'
 import { debounce } from '@/common/js/util'
 import { RTCSystemMsgMixin } from '@/common/js/mixin'
+import { ERR_OK, videoQueue } from '@/server/index.js'
 
 export default {
   mixins: [
@@ -31,7 +32,7 @@ export default {
   },
   computed: {
     ...mapGetters([
-      // 'queueMode'
+      'userInfo'
     ])
   },
   data() {
@@ -52,11 +53,21 @@ export default {
   },
   mounted() {
     const self = this
-    debounce(() => {
-      self.connectComplete()
-    }, 1000)()
+    this.initQueue()
+    // debounce(() => {
+    //   self.connectComplete()
+    // }, 1000)()
   },
   methods: {
+    async initQueue() {
+      const res = await videoQueue(this.userInfo.userId, '123456789', 1)
+      if (res.result.code === ERR_OK) {
+        console.log('===============================> 排队啊 排队啊 排队啊 <===============================')
+        this.num = res.data.queueNum
+      } else {
+        console.log('error in videoQueue')
+      }
+    },
     connectComplete() {
       const systemMsg = {
         userId: 'cs-test',

@@ -72,11 +72,11 @@
 <script type="text/ecmascript-6">
 import { mapGetters, mapMutations } from 'vuex'
 import { queueStatus } from '@/common/js/status'
-import { setUserInfoMixin, RTCRoomMixin, IMMixin } from '@/common/js/mixin'
+import { loginMixin, RTCRoomMixin, IMMixin } from '@/common/js/mixin'
 
 export default {
   mixins: [
-    setUserInfoMixin,
+    loginMixin,
     RTCRoomMixin,
     IMMixin
   ],

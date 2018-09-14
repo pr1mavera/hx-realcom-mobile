@@ -26,6 +26,11 @@ export const pushUserMsg = msgBody => http.post('RTCRoom', '/pushMsg', msgBody)
 export const syncGroupC2CMsg = data => http.post('RTCRoom', '/syncGroupC2CMsg', data)
 
 /**
+ * [videoQueue 客户端视频排队]
+ */
+export const videoQueue = (userId, csId, priority) => http.post('RTCRoom', '/video/user/queue', { userId, csId, priority })
+
+/**
  ************************************ public ************************************
  */
 
