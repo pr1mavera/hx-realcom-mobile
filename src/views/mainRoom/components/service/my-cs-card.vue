@@ -28,6 +28,7 @@
   import { XButton } from 'vux'
   import { beforeEnterVideo } from '@/common/js/beforeEnterVideo'
   import {removeCs} from '@/server/index.js'
+  import {mapGetters} from 'vuex'
   export default {
     // name: "my-cs-card"
     components: {
@@ -50,12 +51,17 @@
         type: Number
       }
     },
+    computed: {
+      ...mapGetters([
+        'userInfo'
+      ])
+    },
     methods: {
       async removeCusSer() {
-        const userId = '123'
-        const cusSerId = this.cusSerId
         // const userId = '123'
-        // const cusSerId = this.cusSerId
+        const userId = this.userInfo.userId
+        const cusSerId = this.cusSerId
+
         console.log('userId: ' + userId + ' ' + 'cusSerId:' + cusSerId)
         const res = await removeCs(userId, cusSerId)
         if (res) {
