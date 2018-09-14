@@ -541,9 +541,9 @@ export default {
     },
     confirmToLineUp() {
       this.lineUpAlert = false
-      const query = this.$route.query
+      // const query = this.$route.query
       this.setModeToMenChat(roomStatus.videoChat)
-      this.getUserInfo(this.userInfo.userId, query, this.initIM)
+      // this.getUserInfo(this.userInfo.userId, query, this.initIM)
     },
     // _reloadChatContentHeight() {
     //   const self = this

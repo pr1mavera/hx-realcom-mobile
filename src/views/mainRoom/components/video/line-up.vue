@@ -18,7 +18,6 @@
 <script type="text/ecmascript-6">
 import { mapGetters, mapActions } from 'vuex'
 // import { queueStatus } from '@/common/js/status'
-import { debounce } from '@/common/js/util'
 import { RTCSystemMsgMixin } from '@/common/js/mixin'
 import { ERR_OK, videoQueue } from '@/server/index.js'
 
@@ -52,7 +51,6 @@ export default {
     }
   },
   mounted() {
-    const self = this
     this.initQueue()
     // debounce(() => {
     //   self.connectComplete()
@@ -63,7 +61,10 @@ export default {
       const res = await videoQueue(this.userInfo.userId, '123456789', 1)
       if (res.result.code === ERR_OK) {
         console.log('===============================> 排队啊 排队啊 排队啊 <===============================')
-        this.num = res.data.queueNum
+        return new Promise((resolve) => {
+          this.num = res.data.queueNum
+          resolve()
+        })
       } else {
         console.log('error in videoQueue')
       }

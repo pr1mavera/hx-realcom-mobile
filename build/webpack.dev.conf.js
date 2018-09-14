@@ -10,6 +10,8 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 const FriendlyErrorsPlugin = require('friendly-errors-webpack-plugin')
 const portfinder = require('portfinder')
 
+const optimizeCss = require('optimize-css-assets-webpack-plugin');
+
 const HOST = process.env.HOST
 const PORT = process.env.PORT && Number(process.env.PORT)
 
@@ -64,7 +66,14 @@ const devWebpackConfig = merge(baseWebpackConfig, {
         to: config.dev.assetsSubDirectory,
         ignore: ['.*']
       }
-    ])
+    ]),
+    new optimizeCss({
+      cssProcessor: require('cssnano'), // 引入cssnano配置压缩选项
+      cssProcessorOptions: {
+      	discardComments: { removeAll: true }
+      },
+      canPrint: true // 是否将插件信息打印到控制台
+    })
   ]
 })
 
