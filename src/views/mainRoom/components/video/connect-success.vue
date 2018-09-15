@@ -8,7 +8,7 @@
              @on-hide="onHide">
       <div class="avatar"><img src="/static/img/avatar.png"></div>
       <p class="confirm-bd-tit" style="">
-             <icon type="success"></icon> 转接成功！
+          <icon type="success"></icon> 转接成功！
       </p>
       <p class="confirm-bd-subtit">本次视频由客服{{name}}为您服务</p>
       <!--<p class="confirm-tips">{{name}}{{num ? `已经为您服务过${num}次`: '首次为您服务'}}</p>-->
@@ -20,6 +20,7 @@
 </template>
 
 <script type="text/ecmascript-6">
+  import { mapGetters } from 'vuex'
   import { Confirm, Icon } from 'vux'
 
   export default {
@@ -27,9 +28,14 @@
       Confirm,
       Icon
     },
+    computed: {
+      ...mapGetters([
+        'queueMode'
+      ])
+    },
     data() {
       return {
-        show: false,
+        show: true,
         name: '丽丽',
         num: 2
       }

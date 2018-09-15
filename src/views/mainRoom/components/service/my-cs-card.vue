@@ -27,8 +27,10 @@
 <script>
   import { XButton } from 'vux'
   import { beforeEnterVideo } from '@/common/js/beforeEnterVideo'
-  import {removeCs} from '@/server/index.js'
-  import {mapGetters} from 'vuex'
+  import { removeCs } from '@/server/index.js'
+  import { mapGetters, mapMutations } from 'vuex'
+  import { queueStatus } from '@/common/js/status'
+
   export default {
     // name: "my-cs-card"
     components: {
@@ -75,7 +77,14 @@
       },
       enterVideoLineUp() {
         beforeEnterVideo()
-      }
+        this.setQueueMode(queueStatus.queuing)
+        this.$router.push({
+          path: '/room/chat'
+        })
+      },
+      ...mapMutations({
+        setQueueMode: 'SET_QUEUE_MODE'
+      })
     }
   }
 </script>

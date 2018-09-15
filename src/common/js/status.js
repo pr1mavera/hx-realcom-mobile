@@ -13,8 +13,15 @@ export const roomStatus = { // 房间聊天状态
 export const queueStatus = { // 排队状态
   noneQueue: 0, // 未排队
   queuing: 1, // 排队中
-  queueOver: 2, // 排队成功
-  canselQueue: 3 // 取消排队
+  queueSuccess: 2, // 排队成功
+  queueOver: 3, // 排队结束
+  canselQueue: 4 // 取消排队
+}
+
+export const systemMsgStatus = {
+  queuesReduce: 0, // 人数减少
+  queuesSuccess: 1, // 客户端排队成功
+  requestCsEntance: 2 // 座席端视频接入请求
 }
 
 export const msgStatus = {

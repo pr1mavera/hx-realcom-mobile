@@ -21,9 +21,9 @@
 </template>
 
 <script type="text/ecmascript-6">
-  import {XButton} from 'vux'
-  import {mapGetters} from 'vuex'
-  import {queryCsInfo} from '@/server/index.js'
+  import { XButton } from 'vux'
+  import { mapGetters } from 'vuex'
+  import { ERR_OK, queryCsInfo } from '@/server/index.js'
 
 export default {
   components: {
@@ -66,9 +66,11 @@ export default {
       const userId = this.userInfo.userId // 获取用户的ID
       const listType = '1'
       const res = await queryCsInfo(page, pageSize, userId, listType)
-      if (res) {
-        // alert(JSON.stringify(res))
+      if (res.result.code === ERR_OK) {
+        console.log('============================= 我现在来请求 专属客服 辣 =============================')
         this.myCsList = res.data.csList
+      } else {
+        console.log('error in queryCsInfo')
       }
     },
     addCs() {

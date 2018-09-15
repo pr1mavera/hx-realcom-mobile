@@ -39,10 +39,10 @@ let webpackConfig = {
       '@': resolve('/src'),
     }
   },
-  externals: {
-    webim: 'webim',
-    webRTCAPI: 'WebRTCAPI',
-  },
+  // externals: {
+  //   webim: 'webim',
+  //   webRTCAPI: 'WebRTCAPI',
+  // },
   module: {
     rules: [
       ...(config.dev.useEslint ? [createLintingRule()] : []),

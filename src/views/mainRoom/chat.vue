@@ -78,18 +78,18 @@ import BScroll from 'better-scroll'
 import InputBar from '@/views/mainRoom/components/chat/input-bar'
 import { timeTipFormat } from '@/common/js/dateConfig'
 import { debounce, shallowCopy } from '@/common/js/util'
-import { setUserInfoMixin, IMMixin, sendMsgsMixin } from '@/common/js/mixin'
+import { loginMixin, IMMixin, sendMsgsMixin } from '@/common/js/mixin'
 import { roomStatus, toggleBarStatus, msgStatus, msgTypes, tipTypes, dialogTypes, cardTypes } from '@/common/js/status'
 // 调用拉取漫游信息的接口
 // import WebRTCRoom from '@/server/webRTCRoom'
-import { ERR_OK, getImgUrl, getBotInfo, createSession, syncGroupC2CMsg } from '@/server/index.js'
+import { ERR_OK, getImgUrl, getBotInfo, syncGroupC2CMsg } from '@/server/index.js'
 
 export default {
   directives: {
     TransferDom
   },
   mixins: [
-    setUserInfoMixin,
+    loginMixin,
     IMMixin,
     sendMsgsMixin
   ],
@@ -285,11 +285,7 @@ export default {
     // 初始化滚动
     this.$nextTick(() => {
       this.inputEle = this.$refs.inputBar.$refs.inputContent
-      this.setUserBaseProfile(
-        'oKXX7wABsIulcFpdlbwUyMKGisjQ', // 传入openID
-        this._initSession, // 成功后创建机器人会话
-        this._setBotBaseInfo // 成功后设置机器人基本信息
-      )
+      this.login()
       this._initScroll()
     })
     // 拉取历史消息
@@ -298,61 +294,61 @@ export default {
     // this.getRoamMessage()
   },
   methods: {
+    async login() {
+      await this.loginByOpenID('oKXX7wABsIulcFpdlbwUyMKGisjQ')
+      await this.getUserInfo()
+      await this.initSession()
+      await this._setBotBaseInfo()
+      await this.initIM()
+    },
     async _setBotBaseInfo() {
       const res = await getBotInfo()
       if (res.result.code === ERR_OK) {
         console.log('============================= 我现在来请求 BotInfo 辣 =============================')
-        const info = {
-          avatarUrl: getImgUrl(res.data.headUrl),
-          name: res.data.name
-        }
-        this.setBotInfo(info)
-        const botCard = {
-          msgStatus: msgStatus.card,
-          msgType: cardTypes.bot_card,
-          cardInfo: {
-            avatar: this.botInfo.avatarUrl,
-            nickName: this.botInfo.name
+        return new Promise((resolve) => {
+          const info = {
+            avatarUrl: getImgUrl(res.data.headUrl),
+            name: res.data.name
           }
-        }
-        const botWelcomeMsg = {
-          nickName: res.data.name,
-          content: res.data.welcomeTip,
-          isSelfSend: false,
-          msgStatus: msgStatus.msg,
-          msgType: msgTypes.msg_normal
-        }
-        const botHotMsg = {
-          content: res.data.hotspotDoc,
-          nickName: res.data.name,
-          isSelfSend: false,
-          msgStatus: msgStatus.msg,
-          msgType: msgTypes.msg_hot,
-          msgExtend: res.data.hotspotQuestions.map((item) => {
-            return item.name
+          this.setBotInfo(info)
+          const botCard = {
+            msgStatus: msgStatus.card,
+            msgType: cardTypes.bot_card,
+            cardInfo: {
+              avatar: this.botInfo.avatarUrl,
+              nickName: this.botInfo.name
+            }
+          }
+          const botWelcomeMsg = {
+            nickName: res.data.name,
+            content: res.data.welcomeTip,
+            isSelfSend: false,
+            msgStatus: msgStatus.msg,
+            msgType: msgTypes.msg_normal
+          }
+          const botHotMsg = {
+            content: res.data.hotspotDoc,
+            nickName: res.data.name,
+            isSelfSend: false,
+            msgStatus: msgStatus.msg,
+            msgType: msgTypes.msg_hot,
+            msgExtend: res.data.hotspotQuestions.map((item) => {
+              return item.name
+            })
+          }
+          this.sendMsgs({
+            msgs: [
+              botCard,
+              botWelcomeMsg,
+              botHotMsg
+            ],
+            scrollObj: this.chatScroll,
+            endObj: this.$refs.chatContentEnd
           })
-        }
-        this.sendMsgs({
-          msgs: [
-            botCard,
-            botWelcomeMsg,
-            botHotMsg
-          ],
-          scrollObj: this.chatScroll,
-          endObj: this.$refs.chatContentEnd
+          resolve()
         })
       } else {
-        console.log('error in getUserInfoByOpenID')
-      }
-    },
-    async _initSession() {
-      const res = await createSession(this.userInfo.userId, this.userInfo.userName, this.userInfo.userPhone)
-      if (res.result.code === ERR_OK) {
-        console.log('============================= 我现在来请求 createSession 辣 =============================')
-        console.log('会话创建成功')
-        this.setRoomId(res.data.id)
-      } else {
-        console.log('会话创建失败')
+        console.log('============================= getBotInfo error =============================')
       }
     },
     _initChatMsgList() {
@@ -545,10 +541,10 @@ export default {
     },
     confirmToLineUp() {
       this.lineUpAlert = false
-      const self = this
-      debounce(() => {
-        self.enterToLineUp()
-      }, 1000)()
+      // const query = this.$route.query
+      this.setModeToMenChat(roomStatus.videoChat)
+      this.$router.push('/room/cusServ/list')
+      // this.getUserInfo(this.userInfo.userId, query, this.initIM)
     },
     // _reloadChatContentHeight() {
     //   const self = this
