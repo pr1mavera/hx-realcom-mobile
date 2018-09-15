@@ -49,7 +49,8 @@ export default {
           icon: 'caomeidangao',
           text: '草莓蛋糕'
         }
-      ]
+      ],
+      myGifts: []
     }
   },
   mounted() {
@@ -63,8 +64,16 @@ export default {
     getGiftsInfo() {
       // 个人中心获取的礼物的展示
       if (this.giftsInfo !== undefined) {
-        this.giftItems = this.giftsInfo
+        // this.giftItems = this.giftsInfo
         console.log('================ 收到的礼物列表在此：' + JSON.stringify(this.giftsInfo))
+        const giftsInfo = this.giftsInfo
+        for (var i in giftsInfo) {
+          const text = (giftsInfo[i].giftName + ' ' + giftsInfo[i].giftCount)
+          console.log('====================  text:' + text)
+          this.giftItems = this.myGifts.push({icon: 'caomeidangao', text: text})
+          // this.giftItems = myGetGifts
+          console.log('====================  我的礼物列表：' + JSON.stringify({icon: 'caomeidangao', text: text}))
+        }
       }
     }
   }

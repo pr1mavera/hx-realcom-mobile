@@ -113,7 +113,7 @@
             this.getPic(cuSerPic[i].url)
           }
         } else {
-          console.log('error')
+          console.log('======================= error about get cuSerInfo')
         }
       },
 
@@ -123,7 +123,7 @@
         if (res) {
           this.personalDisplay.push(res)
         } else {
-          console.log('error:')
+          console.log('======================= error about get url of img')
         }
       },
 
@@ -137,7 +137,7 @@
         if (res.result.code === ERR_OK) {
           this.giftsInfo = res.data.gifts
         } else {
-          console.log('error')
+          console.log('======================= error about query gifts')
         }
       },
 
@@ -149,9 +149,11 @@
         const pageSize = -1
         const res = await viewLabels(page, pageSize, csId)
 
-        if (res) {
+        if (res.result.code === ERR_OK) {
           console.log(JSON.stringify(res.data))
           this.labelsInfo = res.data.labels
+        } else {
+          console.log('======================= error about query labels')
         }
       }
     }

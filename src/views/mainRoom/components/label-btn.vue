@@ -41,7 +41,7 @@
         // 个人中心=> '认识我'模块中label信息的显示
         if (this.labelsInfo !== undefined) {
           this.btnList = this.labelsInfo
-          console.log('===========获取的label列表为：' + JSON.stringify(this.btnList))
+          console.log('===========获取的label列表为' + JSON.stringify(this.btnList))
         }
       }
     }
