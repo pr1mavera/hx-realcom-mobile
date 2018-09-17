@@ -26,13 +26,14 @@
       </div>
       <div class="flex-box-item">
         <p><span>{{ cuSerInfo.servTimes }}</span>人</p>
-        <p class="tips">服务人数</p>
+        <p class="tips">总服务数</p>
       </div>
       <div class="flex-box-item">
         <p><span>{{ cuSerInfo.servTimes }}</span>次</p>
-        <p class="tips">为我服务</p>
+        <p class="tips">总服务数</p>
       </div>
     </div>
+    <!-- about me -->
     <div class="container-item about-me">
       <p class="container-item-tit">关于我</p>
       <div class="container-item-con ">
@@ -41,24 +42,31 @@
         <div class="about-me-item"><div class="tit">爱好</div>{{cuSerInfo.hobby}}</div>
       </div>
     </div>
+    <!-- labels  -->
     <div class="container-item">
       <p class="container-item-tit">认识我</p>
       <div class="container-item-con">
         <!--<x-button mini style="margin-right: 1.5rem">温柔1</x-button>-->
-        <label-btn></label-btn>
+        <label-btn
+          :labelsInfo=labelsInfo
+        ></label-btn>
       </div>
     </div>
+    <!-- the gifts which send to me -->
     <div class="container-item">
       <p class="container-item-tit">我的小幸福</p>
-      <send-gift></send-gift>
+      <send-gift
+        :giftsInfo=giftsInfo
+      ></send-gift>
     </div>
     <a class="btn-back" @click="history.go(-1)">返 回</a>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
+  import {mapGetters} from 'vuex'
   import { Swiper, SwiperItem, XButton, XCircle } from 'vux'
-  import { getCsInfo, getImgUrl, viewGifts, viewLabels } from '@/server/index.js'
+  import { ERR_OK, getCsInfo, getImgUrl, viewGifts, viewLabels } from '@/server/index.js'
 
   // 顶部轮播图的列表
   // const displayList = []
@@ -76,8 +84,14 @@
      return {
        personalDisplay: [],
        cuSerInfo: [],
-       giftsInfo: []
+       giftsInfo: [],
+       labelsInfo: []
      }
+    },
+    computed: {
+      ...mapGetters([
+        'csInfo'
+      ])
     },
     mounted() {
       this.getCsInfo()
@@ -88,14 +102,18 @@
       // 获取客服信息
       async getCsInfo() {
         const cuSerId = '123456789'
+        // const cuSerId = this.csInfo.csId
+        // console.log('=================================' + JSON.stringify(this.csInfo))
         const res = await getCsInfo(cuSerId)
-        if (res) {
+        if (res.result.code === ERR_OK) {
           this.cuSerInfo = res.data
           const cuSerPic = res.data.photos
 
           for (var i in cuSerPic) {
             this.getPic(cuSerPic[i].url)
           }
+        } else {
+          console.log('error')
         }
       },
 
@@ -104,6 +122,8 @@
         const res = await getImgUrl(url)
         if (res) {
           this.personalDisplay.push(res)
+        } else {
+          console.log('error:')
         }
       },
 
@@ -111,24 +131,27 @@
       async getGifts() {
         const page = 0
         const pageSize = -1
-        const csId = '123456789'
+        const csId = '1'
 
         const res = await viewGifts(page, pageSize, csId)
-        if (res) {
-          console.log(JSON.stringify(res.data))
+        if (res.result.code === ERR_OK) {
+          this.giftsInfo = res.data.gifts
+        } else {
+          console.log('error')
         }
       },
 
       // 标签信息查询
       async getLabels() {
-        const csId = this.cuSerInfo.id
-        // const csId = '123456789'
+        // const csId = this.cuSerInfo.id
+        const csId = '123'
         const page = 0
         const pageSize = -1
         const res = await viewLabels(page, pageSize, csId)
 
         if (res) {
           console.log(JSON.stringify(res.data))
+          this.labelsInfo = res.data.labels
         }
       }
     }
