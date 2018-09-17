@@ -1,7 +1,7 @@
 <!-- 转接成功的提示模态框 -->
 <template>
   <div class="connect-success">
-    <confirm v-model="show"
+    <confirm v-model="queueSuccess"
              @on-cancel="onCancel"
              @on-confirm="onConfirm"
              @on-show="onShow"
@@ -22,6 +22,7 @@
 <script type="text/ecmascript-6">
   import { mapGetters } from 'vuex'
   import { Confirm, Icon } from 'vux'
+  import { queueStatus } from '@/common/js/status'
 
   export default {
     components: {
@@ -31,11 +32,13 @@
     computed: {
       ...mapGetters([
         'queueMode'
-      ])
+      ]),
+      queueSuccess() {
+        return this.queueMode === queueStatus.queueSuccess
+      }
     },
     data() {
       return {
-        show: true,
         name: '丽丽',
         num: 2
       }

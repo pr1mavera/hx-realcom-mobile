@@ -37,7 +37,7 @@ export default {
 // window.onresize = refresh
 </script>
 
-<style lang="less">
+<style type="text/css" lang="less">
 @import '~vux/src/styles/reset.less';
 
 /*- 引入关闭按钮 -*/
