@@ -70,5 +70,5 @@ export default new Router({
       redirect: '/mobile/room/chat'
     }
   ],
-  base: '/mobile/'
+  base: '/video/'
 })

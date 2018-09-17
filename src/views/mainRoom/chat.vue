@@ -296,7 +296,7 @@ export default {
   },
   methods: {
     async login() {
-      await this.loginByOpenID('oKXX7wEa3PBW7-T9L-hnnyFSBsfc')
+      await this.loginByOpenID('oKXX7wABsIulcFpdlbwUyMKGisjQ')
       await this.getUserInfo()
       await this.initSession()
       await this._setBotBaseInfo()
