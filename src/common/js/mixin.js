@@ -361,7 +361,7 @@ export const IMMixin = {
                   csId: msgsObj.csId,
                   userId: this.userInfo.userId,
                   userName: this.userInfo.userName,
-                  openId: 'oKXX7wEa3PBW7-T9L-hnnyFSBsfc'
+                  openId: 'oKXX7wABsIulcFpdlbwUyMKGisjQ'
                 },
                 desc: `${this.userInfo.userName}排队成功辣`,
                 ext: ''
