@@ -10,7 +10,7 @@
         <p class="tips-bottom">预计需要等待{{times}}分钟</p>
       </div>
       <a type="reset" class="btn-cancel">取 消</a>
-      <connect-success ref="connectSuccess" v-show="queueSuccess" @confirmToVideo="confirmToVideo"></connect-success>
+      <connect-success ref="connectSuccess" @confirmToVideo="confirmToVideo"></connect-success>
     </main>
   </section>
 </template>
@@ -18,7 +18,7 @@
 <script type="text/ecmascript-6">
 import { mapGetters, mapActions } from 'vuex'
 import { ERR_OK, videoQueue } from '@/server/index.js'
-import { queueStatus } from '@/common/js/status'
+
 
 export default {
   components: {
@@ -27,12 +27,8 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'userInfo',
-      'queueMode'
-    ]),
-    queueSuccess() {
-      return this.queueMode === queueStatus.queueSuccess
-    }
+      'userInfo'
+    ])
   },
   data() {
     return {

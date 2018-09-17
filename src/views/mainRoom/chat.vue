@@ -79,6 +79,7 @@ import InputBar from '@/views/mainRoom/components/chat/input-bar'
 import { timeTipFormat } from '@/common/js/dateConfig'
 import { debounce, shallowCopy } from '@/common/js/util'
 import { loginMixin, IMMixin, sendMsgsMixin } from '@/common/js/mixin'
+// eslint-disable-next-line
 import { roomStatus, toggleBarStatus, msgStatus, msgTypes, tipTypes, dialogTypes, cardTypes } from '@/common/js/status'
 // 调用拉取漫游信息的接口
 // import WebRTCRoom from '@/server/webRTCRoom'
@@ -295,7 +296,7 @@ export default {
   },
   methods: {
     async login() {
-      await this.loginByOpenID('oKXX7wABsIulcFpdlbwUyMKGisjQ')
+      await this.loginByOpenID('oKXX7wEa3PBW7-T9L-hnnyFSBsfc')
       await this.getUserInfo()
       await this.initSession()
       await this._setBotBaseInfo()

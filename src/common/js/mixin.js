@@ -123,7 +123,6 @@ export const RTCRoomMixin = {
         'userSig': self.userInfo.userSig,
         'accountType': self.userInfo.accountType
       }, () => {
-        debugger
         this.RTC.createRoom({
           roomid: room,
           role: 'miniwhite'
@@ -339,6 +338,7 @@ export const IMMixin = {
     },
     onMsgNotify(msgs) {
       if (msgs && msgs.length > 0) {
+        // debugger
         const msgsObj = IM.parseMsgsInSystem(msgs).textMsgs[0]
         switch (msgsObj.code) {
           case systemMsgStatus.queuesReduce: // 人数减少
@@ -354,14 +354,14 @@ export const IMMixin = {
             // this.setFullScreen(true)
             // 发送系统消息，通知座席端视频接入
             const systemMsg = {
-              userId: this.userInfo.userId,
+              userId: msgsObj.csId,
               msgBody: {
                 data: {
                   code: systemMsgStatus.requestCsEntance,
                   csId: msgsObj.csId,
                   userId: this.userInfo.userId,
                   userName: this.userInfo.userName,
-                  openId: 'oKXX7wABsIulcFpdlbwUyMKGisjQ'
+                  openId: 'oKXX7wEa3PBW7-T9L-hnnyFSBsfc'
                 },
                 desc: `${this.userInfo.userName}排队成功辣`,
                 ext: ''
@@ -529,7 +529,7 @@ export const sendMsgsMixin = {
 const RTCSystemMsg = {
   async systemMsg(systemMsg) {
     const res = await pushSystemMsg(systemMsg)
-    if (res.code === ERR_OK) {
+    if (res.result.code === ERR_OK) {
       console.log('排队完成，推送系统消息成功')
     } else {
       console.log('推送系统消息失败')
