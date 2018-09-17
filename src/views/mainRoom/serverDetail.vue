@@ -110,22 +110,23 @@
           const cuSerPic = res.data.photos
 
           for (var i in cuSerPic) {
-            this.getPic(cuSerPic[i].url)
+            // this.getPic(cuSerPic[i].url)
+            this.personalDisplay.push(getImgUrl(cuSerPic[i].url))
           }
         } else {
-          console.log('error')
+          console.log('======================= error about get cuSerInfo')
         }
       },
 
       // 获取客服生活照的图片流
-      async getPic(url) {
-        const res = await getImgUrl(url)
-        if (res) {
-          this.personalDisplay.push(res)
-        } else {
-          console.log('error:')
-        }
-      },
+      // async getPic(url) {
+      //   const res = await getImgUrl(url)
+      //   if (res) {
+      //     this.personalDisplay.push(res)
+      //   } else {
+      //     console.log('======================= error about get url of img')
+      //   }
+      // },
 
       // 礼物查询
       async getGifts() {
@@ -137,7 +138,7 @@
         if (res.result.code === ERR_OK) {
           this.giftsInfo = res.data.gifts
         } else {
-          console.log('error')
+          console.log('======================= error about query gifts')
         }
       },
 
@@ -149,9 +150,11 @@
         const pageSize = -1
         const res = await viewLabels(page, pageSize, csId)
 
-        if (res) {
+        if (res.result.code === ERR_OK) {
           console.log(JSON.stringify(res.data))
           this.labelsInfo = res.data.labels
+        } else {
+          console.log('======================= error about query labels')
         }
       }
     }

@@ -12,6 +12,7 @@
 </template>
 
 <script type="text/ecmascript-6">
+  import {getImgUrl} from '@/server/index.js'
 export default {
   components: {
     'SendExtendItem': () => import('@/views/mainRoom/components/chat/send-extend-item')
@@ -49,7 +50,8 @@ export default {
           icon: 'caomeidangao',
           text: '草莓蛋糕'
         }
-      ]
+      ],
+      myGifts: []
     }
   },
   mounted() {
@@ -63,8 +65,17 @@ export default {
     getGiftsInfo() {
       // 个人中心获取的礼物的展示
       if (this.giftsInfo !== undefined) {
-        this.giftItems = this.giftsInfo
+        // this.giftItems = this.giftsInfo
         console.log('================ 收到的礼物列表在此：' + JSON.stringify(this.giftsInfo))
+        const giftsInfo = this.giftsInfo
+        for (var i in giftsInfo) {
+          const text = (giftsInfo[i].giftName + ' ' + giftsInfo[i].giftCount)
+          const giftPic = getImgUrl(giftsInfo[i].giftUrl)
+
+          this.giftItems = this.myGifts.push({icon: 'caomeidangao', text: text})
+          // this.giftItems = myGetGifts
+          console.log('====================  我的礼物列表：' + JSON.stringify({icon: giftPic, text: text}))
+        }
       }
     }
   }
