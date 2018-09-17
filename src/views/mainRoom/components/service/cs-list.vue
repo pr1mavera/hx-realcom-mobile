@@ -70,7 +70,7 @@ export default {
         console.log('============================= 我现在来请求 专属客服 辣 =============================')
         this.myCsList = res.data.csList
       } else {
-        console.log('error in queryCsInfo')
+        console.log('error in queryCsInfo' + JSON.stringify(res))
       }
     },
     addCs() {

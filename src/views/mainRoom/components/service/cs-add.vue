@@ -15,7 +15,7 @@
                 <img width=100% class="header-img" src="/static/img/chat/csAddBg.png">
                 <div class="header-msg">
                   <div class="avatar">
-                    <img width=100% height=100% src="/static/img/avatar.png">
+                    <img width=100% height=100% :src=avatarImg>
                   </div>
                   <div class="nickname">{{curLabelInfo.nickName}}</div>
                 </div>
@@ -95,7 +95,7 @@
 import { sleep } from '@/common/js/util'
 import { Badge } from 'vux'
 import anime from 'animejs'
-import { addCs, queryCsInfo } from '@/server/index.js'
+import { ERR_OK, addCs, queryCsInfo, getImgUrl } from '@/server/index.js'
 import {mapGetters} from 'vuex'
 
 export default {
@@ -136,7 +136,8 @@ export default {
       ],
       m_cslist: [], // 已添加的专属客服
       floadTipLeftAnimeCache: null,
-      floadTipRightAnimeCache: null
+      floadTipRightAnimeCache: null,
+      avatarImg: ''
     }
   },
   computed: {
@@ -195,6 +196,7 @@ export default {
         }
       }
     },
+
     // 将当前客服添加为专属客服
     async addCS() {
       // const userId = '123'
@@ -206,8 +208,10 @@ export default {
       this.curLabelInfo = this.cslist[0]
 
       const res = await addCs(userId, cuSerId)
-      if (res) {
+      if (res.result.code === ERR_OK) {
         console.log(JSON.stringify(res))
+      } else {
+        console.log('error about add the cS' + JSON.stringify(res))
       }
     },
     switchCS() {
@@ -215,6 +219,7 @@ export default {
       this.cslist.splice(0, 1)
       this.cslist.push(temp)
       this.curLabelInfo = this.cslist[0]
+      this.avatarImg = getImgUrl(this.curLabelInfo.resultUrl)
     },
     resetAngle() {
       this.curLabelInfo = null
@@ -263,22 +268,39 @@ export default {
       })
     },
 
-    // 分页获取客服列表(当前接口只能一次查询）
+    // 分页获取客服列表(当前接口只能一次查询所有客服）
     async getCsList() {
       const page = 1
       const pageSize = -1
-      const userId = '123'
+      // const userId = '123'
+      const userId = this.userInfo.userId
       const listType = '2'
       const res = await queryCsInfo(page, pageSize, userId, listType)
-      if (res) {
+      if (res.result.code === ERR_OK) {
         console.log('所有客服列表' + JSON.stringify(res.data.csList))
         // const totalPage = res.data.totalCount
         // (if totalPage === -1) {不计算}else{pages = Math.flower(total / 5)}
         this.cslist = res.data.csList
+
         this.curLabelInfo = this.cslist[0]
-        console.log('===========' + JSON.stringify(this.cslist) + '========')
+        this.avatarImg = getImgUrl(this.curLabelInfo.resultUrl)
+        console.log('===========客服列表:' + JSON.stringify(this.cslist))
+      } else {
+        console.log('error about query csInfo')
       }
     }
+
+    // 获取客服头图片像流
+    // async getPic(url) {
+    //   const res = await getImgUrl(url)
+    //   if (res) {
+    //     // this.avatar.push(res)
+    //     this.avatarImg = res
+    //     console.log('===============当前图片的地址为：' + res)
+    //   } else {
+    //     console.log('======================= error about get url of img')
+    //   }
+    // }
   }
 }
 </script>

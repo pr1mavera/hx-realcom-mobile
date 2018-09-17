@@ -12,6 +12,7 @@
 </template>
 
 <script type="text/ecmascript-6">
+  import {getImgUrl} from '@/server/index.js'
 export default {
   components: {
     'SendExtendItem': () => import('@/views/mainRoom/components/chat/send-extend-item')
@@ -69,10 +70,11 @@ export default {
         const giftsInfo = this.giftsInfo
         for (var i in giftsInfo) {
           const text = (giftsInfo[i].giftName + ' ' + giftsInfo[i].giftCount)
-          console.log('====================  text:' + text)
+          const giftPic = getImgUrl(giftsInfo[i].giftUrl)
+
           this.giftItems = this.myGifts.push({icon: 'caomeidangao', text: text})
           // this.giftItems = myGetGifts
-          console.log('====================  我的礼物列表：' + JSON.stringify({icon: 'caomeidangao', text: text}))
+          console.log('====================  我的礼物列表：' + JSON.stringify({icon: giftPic, text: text}))
         }
       }
     }

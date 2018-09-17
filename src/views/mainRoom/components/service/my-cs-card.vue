@@ -8,7 +8,7 @@
     </span>
     <div class="container-main">
       <a @click="enterSerCenter" class="avatar">
-        <img :src="avatarSrc">
+        <img :src='avatarUrl'>
       </a>
       <div class="info">
         <p class="name">{{this.name}}</p>
@@ -27,9 +27,10 @@
 <script>
   import { XButton } from 'vux'
   import { beforeEnterVideo } from '@/common/js/beforeEnterVideo'
-  import { removeCs } from '@/server/index.js'
+  import { ERR_OK, removeCs, getImgUrl } from '@/server/index.js'
   import { mapGetters, mapMutations } from 'vuex'
   import { queueStatus } from '@/common/js/status'
+  // import {} from '@/server/index.js'
 
   export default {
     // name: "my-cs-card"
@@ -53,12 +54,18 @@
         type: Number
       }
     },
+    data() {
+      return {
+        avatarUrl: getImgUrl(this.avatarSrc)
+      }
+    },
     computed: {
       ...mapGetters([
         'userInfo'
       ])
     },
     methods: {
+      // 删除客服
       async removeCusSer() {
         // const userId = '123'
         const userId = this.userInfo.userId
@@ -66,10 +73,13 @@
 
         console.log('userId: ' + userId + ' ' + 'cusSerId:' + cusSerId)
         const res = await removeCs(userId, cusSerId)
-        if (res) {
+        if (res.result.code === ERR_OK) {
           console.log(JSON.stringify(res))
+        } else {
+          console.log('error of remove the cusSer:' + JSON.stringify(res))
         }
       },
+
       enterSerCenter() {
         this.$router.push({
           path: '/room/serverDetail'
