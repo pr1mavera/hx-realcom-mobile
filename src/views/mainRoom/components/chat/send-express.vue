@@ -194,7 +194,7 @@ export default {
                 width: 2.4rem;
                 height: 2.4rem;
                 margin: 1.1rem;
-                .bg-image('~/static/img/chat/xiaohua');
+                .bg-image('@{imgPath}/chat/xiaohua');
               }
               .icon {
                 display: block;

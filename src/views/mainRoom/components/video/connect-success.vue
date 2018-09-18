@@ -33,8 +33,13 @@
       ...mapGetters([
         'queueMode'
       ]),
-      queueSuccess() {
-        return this.queueMode === queueStatus.queueSuccess
+      queueSuccess: {
+        set() {
+
+        },
+        get() {
+          return this.queueMode === queueStatus.queueSuccess
+        }
       }
     },
     data() {

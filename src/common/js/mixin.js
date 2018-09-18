@@ -1,6 +1,7 @@
 import { mapGetters, mapMutations, mapActions } from 'vuex'
-import WebRTCRoom from '@/server/webRTCRoom'
+// import WebRTCRoom from '@/server/webRTCRoom'
 import IM from '@/server/im'
+// import webim from '@/common/js/webim'
 // import WebRTCAPI from 'webRTCAPI'
 import { ERR_OK, getUserInfoByOpenID, getLoginInfo, createSession, pushSystemMsg, sendMsgToBot } from '@/server/index.js'
 import { shallowCopy } from '@/common/js/util'
@@ -117,6 +118,7 @@ export const RTCRoomMixin = {
   methods: {
     initRTC(room) {
       const self = this
+      // eslint-disable-next-line
       this.RTC = new WebRTCAPI({
         'sdkAppId': self.userInfo.sdkAppID,
         'userId': self.userInfo.userId,
@@ -320,11 +322,12 @@ export const IMMixin = {
         )
       })
     },
-    onBigGroupMsgNotify(newMsgList) {
-      if (newMsgList && newMsgList.length > 0) {
+    onBigGroupMsgNotify(msgs) {
+      debugger
+      if (msgs && msgs.length > 0) {
         // alert('onBigGroupMsgNotify')
-        // console.log(newMsgList)
-        const msgsObj = IM.parseMsgs(newMsgList)
+        // console.log(msgs)
+        const msgsObj = IM.parseMsgs(msgs)
         // 给图片信息配置时间
         if (msgsObj.textMsgs[0].time === '') {
           msgsObj.textMsgs[0].time = formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss')
@@ -337,45 +340,66 @@ export const IMMixin = {
       }
     },
     onMsgNotify(msgs) {
+      debugger
       if (msgs && msgs.length > 0) {
-        // debugger
-        const msgsObj = IM.parseMsgsInSystem(msgs).textMsgs[0]
-        switch (msgsObj.code) {
-          case systemMsgStatus.queuesReduce: // 人数减少
-
-            break
-          case systemMsgStatus.queuesSuccess: // 客户端排队成功
-            // 存vuex csInfo / roomId / fullScreen
-            const info = {
-              csId: msgsObj.csId
-            }
-            this.setCsInfo(info)
-            this.setRoomId(msgsObj.csId)
-            // this.setFullScreen(true)
-            // 发送系统消息，通知座席端视频接入
-            const systemMsg = {
-              userId: msgsObj.csId,
-              msgBody: {
-                data: {
-                  code: systemMsgStatus.requestCsEntance,
-                  csId: msgsObj.csId,
-                  userId: this.userInfo.userId,
-                  userName: this.userInfo.userName,
-                  openId: 'oKXX7wABsIulcFpdlbwUyMKGisjQ'
-                },
-                desc: `${this.userInfo.userName}排队成功辣`,
-                ext: ''
-              }
-            }
-            RTCSystemMsg.systemMsg(systemMsg)
-            // 设置排队状态
-            this.setQueueMode(queueStatus.queueSuccess)
-            break
-          case systemMsgStatus.requestCsEntance: // 座席端视频接入请求
-
-            break
+        if (msgs[0].fromAccount === 'administrator') {
+          // 系统消息
+          this.receiveSystemMsgs(msgs)
+        } else {
+          // 自定义消息
+          this.receiveCustomMsgs(msgs)
         }
       }
+    },
+    receiveSystemMsgs(msgs) {
+      const msgsObj = IM.parseMsgsInSystem(msgs).textMsgs[0]
+      switch (msgsObj.code) {
+        case systemMsgStatus.queuesReduce: // 人数减少
+
+          break
+        case systemMsgStatus.queuesSuccess: // 客户端排队成功
+          // 存vuex csInfo / roomId / fullScreen
+          const info = {
+            csId: msgsObj.csId
+          }
+          this.setCsInfo(info)
+          this.setRoomId(msgsObj.csId)
+          // this.setFullScreen(true)
+          // 发送系统消息，通知座席端视频接入
+          const systemMsg = {
+            userId: msgsObj.csId,
+            msgBody: {
+              data: {
+                code: systemMsgStatus.requestCsEntance,
+                csId: msgsObj.csId,
+                userId: this.userInfo.userId,
+                userName: this.userInfo.userName,
+                openId: 'oKXX7wABsIulcFpdlbwUyMKGisjQ'
+              },
+              desc: `${this.userInfo.userName}排队成功辣`,
+              ext: ''
+            }
+          }
+          RTCSystemMsg.systemMsg(systemMsg)
+          // 设置排队状态
+          this.setQueueMode(queueStatus.queueSuccess)
+          break
+        case systemMsgStatus.requestCsEntance: // 座席端视频接入请求
+
+          break
+      }
+    },
+    receiveCustomMsgs(msgs) {
+      const msgsObj = IM.parseMsgs(msgs).textMsgs[0]
+      // 给图片信息配置时间
+      if (msgsObj.time === '') {
+        msgsObj.time = formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss')
+      }
+      this.sendMsgs({
+        msgs: msgsObj,
+        scrollObj: this.chatScroll,
+        endObj: this.$refs.chatContentEnd
+      })
     },
     ...mapMutations({
       setQueueMode: 'SET_QUEUE_MODE',
@@ -488,8 +512,33 @@ export const sendMsgsMixin = {
       }
       return msg
     },
+    sendC2CMsgs(text) {
+      IM.sendNormalMsg(
+        this.userInfo.userId,
+        '00f29791-f5f1-4c21-b486-8b553d9e5e99',
+        {
+          msg: text,
+          time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+          nickName: this.userInfo.selfName,
+          identifier: this.userInfo.userId,
+          msgStatus: msgStatus.msg,
+          msgType: msgTypes.msg_normal
+        })
+      // const option = {
+      //   'Peer_Account': '00f29791-f5f1-4c21-b486-8b553d9e5e99',
+      //   'MaxCnt': 1,
+      //   'LastMsgTime': 0,
+      //   'MsgKey': ''
+      // }
+      // webim.getC2CHistoryMsgs(
+      //   option,
+      //   (resp) => {
+      //       console.log(resp)
+      //   }
+      // )
+    },
     sendTextMsg(text) {
-      IM.sendRoomTextMsg({
+      IM.sendNoticeMsg({
         groupId: '12345678',
         msg: text,
         time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
@@ -500,7 +549,7 @@ export const sendMsgsMixin = {
       })
     },
     sendGiftMsg(type) {
-      IM.sendRoomTextMsg({
+      IM.sendNoticeMsg({
         groupId: '12345678',
         msg: '给你送了一个礼物',
         time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
@@ -526,7 +575,7 @@ export const sendMsgsMixin = {
   }
 }
 
-const RTCSystemMsg = {
+export const RTCSystemMsg = {
   async systemMsg(systemMsg) {
     const res = await pushSystemMsg(systemMsg)
     if (res.result.code === ERR_OK) {

@@ -2,7 +2,7 @@
   <div class="msgs-item" :class="[{'item-padding-left': isSelf, 'item-padding-right': !isSelf}]">
     <div class="avatar" v-if="!isSelf">
       <div class="bot-avatar bg-image">
-        <img width=100% height=100% src="/static/img/chat/xiaohua@2x.png">
+        <img width=100% height=100% :src="avatarImg">
       </div>
       <svg class="icon extend-click" aria-hidden="true">
         <use xlink:href="#icon-wode"></use>
@@ -41,7 +41,7 @@
         <!-- 礼物消息 -->
         <span class="text" v-if="this.types === msgTypes.msg_gift">
           我送了一个草莓蛋糕
-          <img class="text-gift" :src="`/static/img/caomeidangao@2x.png`">
+          <img class="text-gift" :src="`../static/img/caomeidangao@2x.png`">
         </span>
         <!-- 留言 -->
         <span class="text" v-if="this.types === msgTypes.msg_leave">客服暂时不在，请<span class="button">点击留言</span>~</span>
@@ -65,7 +65,7 @@
 </template>
 
 <script type="text/ecmascript-6">
-import { msgTypes } from '@/common/js/status'
+import { imgPath, msgTypes } from '@/common/js/status'
 
 export default {
   props: {
@@ -94,6 +94,11 @@ export default {
   data() {
     return {
       msgTypes: msgTypes
+    }
+  },
+  computed: {
+    avatarImg() {
+      return `${imgPath}/chat/xiaohua@2x.png`
     }
   },
   mounted() {

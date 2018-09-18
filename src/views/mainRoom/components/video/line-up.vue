@@ -19,7 +19,6 @@
 import { mapGetters, mapActions } from 'vuex'
 import { ERR_OK, videoQueue } from '@/server/index.js'
 
-
 export default {
   components: {
     // ConnectSuccess,
