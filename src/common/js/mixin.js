@@ -321,6 +321,7 @@ export const IMMixin = {
       })
     },
     onBigGroupMsgNotify(newMsgList) {
+      debugger
       if (newMsgList && newMsgList.length > 0) {
         // alert('onBigGroupMsgNotify')
         // console.log(newMsgList)
@@ -337,6 +338,7 @@ export const IMMixin = {
       }
     },
     onMsgNotify(msgs) {
+      debugger
       if (msgs && msgs.length > 0) {
         // debugger
         const msgsObj = IM.parseMsgsInSystem(msgs).textMsgs[0]

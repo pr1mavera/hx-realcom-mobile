@@ -12,9 +12,11 @@ const production = {
 }
 
 const development = {
-  publicPath: 'http://192.168.8.102:8080/api/v1',
-  webRTCRoomPath: 'http://192.168.8.102:8082/api/v1'
+  // publicPath: 'http://192.168.8.102:8080/api/v1',
+  // webRTCRoomPath: 'http://192.168.8.102:8082/api/v1'
   // webRTCRoomPath: 'http://112.74.229.22:8085/api/v1'
+  publicPath: 'http://video-servertest.ihxlife.com:8083/api/v1',
+  webRTCRoomPath: 'http://room-servertest.ihxlife.com:8085/api/v1'
 }
 
 const location = env === 'production' ? production : development
