@@ -1,6 +1,6 @@
 // import webim from 'webim'
 /* eslint-disable */
-
+// import webim from '@/common/js/webim'
 const IM = (() => {
   function login(loginInfo, listeners, succ, fail) {
     webim.login(
@@ -194,40 +194,54 @@ const IM = (() => {
     }
   }
 
-  function sendMsg(identifier, groupId, msgContent) {
-    // eslint-disable-next-line
-    var self = this
-    msgContent = msgContent.trim()
-    if (!msgContent) {
+  function sendMsg(from_id, to_id, msgInfo, callback) {
+    if (!from_id) {
+      console.error("您还没有登录，暂不能聊天")
+      return
+    } else if (!to_id) {
+      console.error("您还没有选择聊天对象，暂不能聊天")
       return
     }
-    var selType = webim.SESSION_TYPE.GROUP // 当前聊天类型
-    var selToID = String(groupId) // 当前选中聊天id（当聊天类型为私聊时，该值为好友帐号，否则为群号）
-    var selSess = null // 当前聊天会话对象
-    // eslint-disable-next-line
-    var recentSessMap = {} // 保存最近会话列表
-    if (!selSess) {
-      selSess = new webim.Session(selType, selToID, selToID, null, Math.round(new Date().getTime() / 1000))
+    var data = msgInfo.data || ''
+    var desc = msgInfo.desc || ''
+    var ext = msgInfo.ext || ''
+
+    var msgLen = webim.Tool.getStrBytes(data)
+    if (data.length < 1) {
+      alert("发送的消息不能为空!")
+      return
     }
-    var isSend = true // 是否为自己发送
-    var seq = -1 // 消息序列，-1表示sdk自动生成，用于去重
-    var random = Math.round(Math.random() * 4294967296) // 消息随机数，用于去重
-    var msgTime = Math.round(new Date().getTime() / 1000) // 消息时间戳
+
+    var selType = webim.SESSION_TYPE.C2C // 当前聊天类型
+    var selToID = to_id // 当前选中聊天id（当聊天类型为私聊时，该值为好友帐号，否则为群号）
+
+    var selSess = new webim.Session(selType, selToID, selToID, null, Math.round(new Date().getTime() / 1000))
+    var isSend = true //是否为自己发送
+    var seq = -1 //消息序列，-1表示sdk自动生成，用于去重
+    var random = Math.round(Math.random() * 4294967296) //消息随机数，用于去重
+    var msgTime = Math.round(new Date().getTime() / 1000) //消息时间戳
     var subType = webim.GROUP_MSG_SUB_TYPE.COMMON
-    var msg = new webim.Msg(selSess, isSend, seq, random, msgTime, identifier, subType, null)
-    msg.addText(new webim.Msg.Elem.Text(msgContent))
-    msg.originContent = msgContent
-    // eslint-disable-next-line
-    webim.sendMsg(msg, function(resp) {}, function(err) {})
+    var msg = new webim.Msg(selSess, isSend, seq, random, msgTime, from_id, subType, null)
+    var custom_obj = new webim.Msg.Elem.Custom(data, desc, ext)
+    msg.addCustom(custom_obj)
+
+    webim.sendMsg(msg, (resp) => {
+      webim.Log.info("发自定义消息成功");
+      console.log('发自定义消息成功');
+      callback && callback();
+    }, function (err) {
+      webim.Log.info(err.ErrorInfo);
+      console.log('发自定义消息失败:', err);
+    });
   }
 
-  // 发送普通消息
-  function sendRoomTextMsg(options, success, fail) {
+  // 发送提示消息（点赞，礼物）
+  function sendNoticeMsg(options, success, fail) {
     if (!options || !options.msg || !options.msg.trim()) {
-      console.log('sendRoomTextMsg参数错误', options)
+      console.log('sendNoticeMsg参数错误', options)
       fail && fail({
         errCode: -9,
-        errMsg: 'sendRoomTextMsg参数错误'
+        errMsg: 'sendNoticeMsg参数错误'
       })
       return
     }
@@ -243,21 +257,20 @@ const IM = (() => {
     })
   }
 
-  // 发送白板消息
-  function sendBoardMsg(options, success, fail) {
+// 发送文本消息（保存进历史消息）
+  function sendNormalMsg(from_id, to_id, options, success, fail) {
     if (!options || !options.msg || !options.msg.trim()) {
-      console.log('sendRoomTextMsg参数错误', options)
+      console.log('sendNormalMsg参数错误', options)
       fail && fail({
         errCode: -9,
-        errMsg: 'sendRoomTextMsg参数错误'
+        errMsg: 'sendNormalMsg参数错误'
       })
       return
     }
-    sendCustomMsg({
-      groupId: options.groupId,
+    sendMsg(from_id, to_id, {
       data: options.msg,
-      ext: 'TXWhiteBoardExt',
-      desc: '{"nickName":"' + options.nickName + '"}',
+      desc: `{"nickName":"${options.nickName}","msgType":"${options.msgType}","time":"${options.time}","msgStatus":"${options.msgStatus}"}`,
+      ext: `{"giftType":"${options.giftType}"}`,
       identifier: options.identifier,
       nickName: options.nickName
     }, function() {
@@ -386,7 +399,8 @@ const IM = (() => {
   return {
     login,
     logout,
-    sendRoomTextMsg,
+    sendNoticeMsg,
+    sendNormalMsg,
     createGroup,
     joinGroup,
     parseMsg,
@@ -394,7 +408,6 @@ const IM = (() => {
     parseMsgInSystem,
     parseMsgsInSystem,
     sendMsg,
-    sendBoardMsg,
     uploadPic,
     sendPic
   }

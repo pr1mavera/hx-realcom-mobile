@@ -296,7 +296,7 @@ export default {
   },
   methods: {
     async login() {
-      await this.loginByOpenID('oKXX7wEa3PBW7-T9L-hnnyFSBsfc')
+      await this.loginByOpenID('oKXX7wABsIulcFpdlbwUyMKGisjQ')
       await this.getUserInfo()
       await this.initSession()
       await this._setBotBaseInfo()
@@ -459,7 +459,8 @@ export default {
       this.inputEle.innerText = ''
       switch (this.roomMode) {
         case roomStatus.AIChat:
-          this.sendTextMsgToBot(text)
+          // this.sendTextMsgToBot(text)
+          this.sendC2CMsgs(text)
           break
         case roomStatus.menChat:
           this.sendTextMsg(text)
@@ -644,7 +645,7 @@ export default {
 </script>
 
 <style scoped lang="less">
-@import '../../common/style/mixin.less';
+@import '~@/common/style/mixin.less';
 @import '~@/common/style/theme.less';
 
 .chat {
@@ -679,7 +680,7 @@ export default {
       overflow: hidden;
       // background-color: @bg-normal;
       flex: 1;
-      background-image: url('~/static/img/chat/chatBG.png');
+      background-image: url('@{imgPath}/chat/chatBG.png');
       background-size: cover;
       // flex-basis: auto;
       // flex-shrink: 1;

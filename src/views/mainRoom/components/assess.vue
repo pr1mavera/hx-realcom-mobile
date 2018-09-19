@@ -3,7 +3,9 @@
   <div v-transfer-dom>
     <popup v-model="showAssess" is-transparent>
       <div class="popup-main" style="">
-       <div class="avatar"><img src="/static/img/avatar.png"></div>
+       <div class="avatar">
+         <img :src="avatarImg">
+       </div>
         <x-icon type="ios-close" @click.native="cancelAssess" size="30"></x-icon>
         <div class="eva-part">
           <p>请对{{name}}本次的服务进行评价</p>
@@ -48,6 +50,7 @@
 
 <script>
   import { TransferDom, Popup, Rater, XButton, Flexbox, FlexboxItem, Swiper, SwiperItem } from 'vux'
+  import { imgPath } from '@/common/js/status'
 
   const btnList = [
     ''
@@ -75,6 +78,9 @@
       }
     },
     computed: {
+      avatarImg() {
+        return `${imgPath}/avatar.png`
+      }
     },
     mounted() {
     },

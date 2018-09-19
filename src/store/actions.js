@@ -3,7 +3,6 @@ import { sleep } from '@/common/js/util'
 import { timeTipFormat } from '@/common/js/dateConfig.js'
 import { toggleBarStatus, roomStatus, queueStatus, msgStatus, tipTypes } from '@/common/js/status'
 
-// eslint-disable-next-line
 export const closeBarBuffer = function({ commit }, { mutationType, delay }) {
   return (async function() {
     commit(mutationType, false)
