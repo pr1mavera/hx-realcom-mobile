@@ -16,6 +16,21 @@
         <div class="chat-content" ref="chatContent">
           <ul>
             <li class="chat-content-block chat-content-start" ref="chatContentStart"></li>
+            <li class="chat-content-li" v-for="(item, i) in this.history" :key="`history-${i}`" :class="{'text-center': item.msgStatus === msgStatus.tip}">
+              <component
+                :is="_showItemByType(item.msgStatus)"
+                :isSelf="item.isSelfSend"
+                :name="item.nickName"
+                :text="item.content"
+                :imgSrc="item.imgData"
+                :giftType="item.giftType"
+                :types="item.msgType"
+                :extend="item.msgExtend"
+                :cardInfo="item.cardInfo"
+                :dialogInfo="item.dialogInfo"
+                @enterToMenChat="enterToMenChat"
+              ></component>
+            </li>
             <li class="chat-content-li" v-for="(msg, index) in this.msgs" :key="index" :class="{'text-center': msg.msgStatus === msgStatus.tip}">
               <component
                 :is="_showItemByType(msg.msgStatus)"
@@ -30,11 +45,6 @@
                 :dialogInfo="msg.dialogInfo"
                 @enterToMenChat="enterToMenChat"
               ></component>
-              <!-- <content-msg
-                :isSelf="msg.isSelfSend"
-                :name="msg.who"
-                :text="msg.content"
-              ></content-msg> -->
             </li>
             <li class="chat-content-block chat-content-end" ref="chatContentEnd"></li>
           </ul>
@@ -147,6 +157,7 @@ export default {
       extendBarLaunchOpen: false,
       lineUpAlert: false,
       msgStatus: msgStatus,
+      history: [],
       // historyMsgs: [
       //   {
       //     content: '',
@@ -285,7 +296,7 @@ export default {
       translateX: 0,
       iosGuide: false,
       lowVersion: false,
-      // pull-up-load
+      /* pull-down-load */
       beforePullDown: true,
       isRebounding: false,
       isPullingDown: false,
@@ -425,6 +436,10 @@ export default {
           threshold: 80,
           stop: 50
         }
+        // scrollbar: {
+        //   fade: true,
+        //   interactive: false // 1.8.0 新增
+        // }
       })
       // this.chatScroll.on('scroll', (pos) => {
       //   this.scrollY = Math.abs(Math.round(pos.y))
@@ -465,17 +480,34 @@ export default {
           this.bubbleY = 0
         }
         if (this.isRebounding) {
-          this.pullDownStyle = `transform: translateY(${10 - (this.pullDownRefresh.stop - pos.y)}px)`
+          this.pullDownStyle = `transform: translateY(${10 - (this.chatScroll.options.pullDownRefresh.stop - pos.y)}px)`
         }
         this.scrollY = Math.abs(Math.round(pos.y))
         console.log(this.scrollY)
       })
     },
     pullingDown() {
+      const localStorage = window.localStorage
+      // const map = {
+      //   total: 5,
+      //   cur: 5
+      // }
+      // localStorage.setItem('msgsQueueMap', JSON.stringify(map))
+      const msgsQueueMap = JSON.parse(localStorage.getItem('msgsQueueMap'))
+      switch (true) {
+        case msgsQueueMap:
+          // 请求历史消息
+          break
+        case msgsQueueMap.total:
+          // 当前已缓存漫游消息，直接拉取
+          break
+        default:
+          // 按sessionList请求漫游消息
+      }
       const option = {
         'Peer_Account': '00f29791-f5f1-4c21-b486-8b553d9e5e99',
         'MaxCnt': 5,
-        'LastMsgTime': Math.round(new Date('2018-09-18 14:20:05').getTime() / 1000),
+        'LastMsgTime': Math.round(new Date('2018/09/18 14:20:05').getTime() / 1000),
         'MsgKey': ''
       }
       const self = this
@@ -488,8 +520,16 @@ export default {
             resp.MsgList.forEach((item) => {
               msgsObj.push(IM.parseMsg(item))
             })
-            let msgsList = self.msgs.concat()
-            self.setMsgs(msgsObj.concat(msgsList))
+            if (!self.history.length) {
+              const tip = {
+                content: '以上为历史消息',
+                time: '2018-03-28 15:23:14',
+                msgStatus: msgStatus.tip,
+                msgType: tipTypes.tip_normal
+              }
+              self.history.push(tip)
+            }
+            self.history = msgsObj.concat(self.history)
             console.log(msgsObj)
             resolve()
           }
@@ -554,6 +594,11 @@ export default {
       console.log(text)
     },
     chatInputCommit(text) {
+      const localStorage = window.localStorage
+      if (!localStorage.getItem('msgsDateCache')) {
+        const date = new Date()
+        localStorage.setItem('msgsDateCache', date.getDate())
+      }
       this.inputEle.innerText = ''
       switch (this.roomMode) {
         case roomStatus.AIChat:
@@ -778,7 +823,7 @@ export default {
       overflow: hidden;
       // background-color: @bg-normal;
       flex: 1;
-      background-image: url('@{imgPath}/chat/chatBG.png');
+      background-image: url('/video/static/img/chat/chatBG.png');
       background-size: cover;
       // flex-basis: auto;
       // flex-shrink: 1;
@@ -790,7 +835,7 @@ export default {
           .chat-content-block {
             width: 100%;
             &.chat-content-start {
-              height: 3.6rem;
+              height: 2rem;
             }
             &.chat-content-end {
               height: 0;

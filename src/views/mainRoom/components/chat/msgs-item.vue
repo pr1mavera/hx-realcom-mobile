@@ -41,7 +41,7 @@
         <!-- 礼物消息 -->
         <span class="text" v-if="this.types === msgTypes.msg_gift">
           我送了一个草莓蛋糕
-          <img class="text-gift" :src="`../static/img/caomeidangao@2x.png`">
+          <img class="text-gift" src="/video/static/img/caomeidangao@2x.png">
         </span>
         <!-- 留言 -->
         <span class="text" v-if="this.types === msgTypes.msg_leave">客服暂时不在，请<span class="button">点击留言</span>~</span>

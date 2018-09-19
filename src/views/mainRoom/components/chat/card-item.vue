@@ -46,6 +46,7 @@ export default {
 .card-item {
   width: 100%;
   margin-bottom: 1.4rem;
+  margin-top: 2rem;
   .card-container {
     text-align: center;
     .card {

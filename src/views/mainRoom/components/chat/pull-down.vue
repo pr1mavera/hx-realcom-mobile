@@ -6,7 +6,7 @@
     <div class="after-trigger" v-else>
       <div v-if="isPullingDown" class="loading">
         <div class="mf-loading-container">
-          <img src="/static/img/loading.gif">
+          <img src="/video/static/img/loading.gif">
         </div>
       </div>
       <div v-else><span>加载历史消息成功</span></div>
