@@ -116,7 +116,7 @@ const IM = (() => {
     var time = ''
     var giftType = ''
     if (type === 'TIMCustomElem') {
-      debugger
+      // debugger
       var content = msgItem.getContent() // 获取元素对象
       var desc = JSON.parse(content.getDesc())
       msgType = desc.msgType

@@ -6,6 +6,13 @@
       ref="chatRoom"
       :class="[{'extend-bar-open': this.extendBarOpen, 'extend-bar-launch-open': extendBarLaunchOpen}]">
       <div class="chat-wrapper" ref="chatScroll">
+        <pull-down
+          :pullDownStyle="pullDownStyle"
+          :isRebounding="isRebounding"
+          :beforePullDown="beforePullDown"
+          :isPullingDown="isPullingDown"
+          :bubbleY="bubbleY"
+        ></pull-down>
         <div class="chat-content" ref="chatContent">
           <ul>
             <li class="chat-content-block chat-content-start" ref="chatContentStart"></li>
@@ -77,12 +84,12 @@ import BScroll from 'better-scroll'
 // import HeaderBar from '@/views/mainRoom/components/chat/header-bar'
 import InputBar from '@/views/mainRoom/components/chat/input-bar'
 import { timeTipFormat } from '@/common/js/dateConfig'
-import { debounce, shallowCopy } from '@/common/js/util'
+import { debounce, shallowCopy, getRect } from '@/common/js/util'
 import { loginMixin, IMMixin, sendMsgsMixin } from '@/common/js/mixin'
 // eslint-disable-next-line
 import { roomStatus, toggleBarStatus, msgStatus, msgTypes, tipTypes, dialogTypes, cardTypes } from '@/common/js/status'
 // 调用拉取漫游信息的接口
-// import WebRTCRoom from '@/server/webRTCRoom'
+import IM from '@/server/im'
 import { ERR_OK, getImgUrl, getBotInfo, syncGroupC2CMsg } from '@/server/index.js'
 
 export default {
@@ -111,7 +118,8 @@ export default {
     // 'SendExpress': () => import('@/views/mainRoom/components/chat/send-express'),
     // 'SendGift': () => import('@/views/mainRoom/components/chat/send-gift'),
     'IosGuide': () => import('@/views/mainRoom/components/video/ios-guide'),
-    'LowVersion': () => import('@/views/mainRoom/components/video/low-version')
+    'LowVersion': () => import('@/views/mainRoom/components/video/low-version'),
+    'PullDown': () => import('@/views/mainRoom/components/chat/pull-down')
   },
   computed: {
     ...mapGetters([
@@ -276,8 +284,17 @@ export default {
       // ],
       translateX: 0,
       iosGuide: false,
-      lowVersion: false
+      lowVersion: false,
+      // pull-up-load
+      beforePullDown: true,
+      isRebounding: false,
+      isPullingDown: false,
+      pullDownStyle: '',
+      bubbleY: 0
     }
+  },
+  created() {
+    this.pullDownInitTop = -50
   },
   mounted() {
     // 初始化聊天信息
@@ -288,6 +305,7 @@ export default {
       this.inputEle = this.$refs.inputBar.$refs.inputContent
       this.login()
       this._initScroll()
+      this._initPullDownRefresh()
     })
     // 拉取历史消息
     // this.setMsgs(this.historyMsgs)
@@ -393,18 +411,25 @@ export default {
       // return type === 'text_msg' ? 'ContentItem' : type === 'time_msg' ? 'TimeItem' : ''
     },
     _initScroll() {
+      if (this.$refs.chatContent) {
+        this.$refs.chatContent.style.minHeight = `${getRect(this.$refs.chatScroll).height + 1}px`
+      }
       this.chatScroll = new BScroll(this.$refs.chatScroll, {
         click: true,
         // autoBlur: false,
         probeType: 3,
         swipeBounceTime: 200,
         bounceTime: 400,
-        bindToWrapper: true
+        bindToWrapper: true,
+        pullDownRefresh: {
+          threshold: 80,
+          stop: 50
+        }
       })
-      this.chatScroll.on('scroll', (pos) => {
-        this.scrollY = Math.abs(Math.round(pos.y))
-        console.log(this.scrollY)
-      })
+      // this.chatScroll.on('scroll', (pos) => {
+      //   this.scrollY = Math.abs(Math.round(pos.y))
+      //   console.log(this.scrollY)
+      // })
       this.chatScroll.on('touchEnd', () => {
         if (this.inputBarOpen) {
           this.setInputBar(false)
@@ -415,6 +440,79 @@ export default {
           // this.toggleExtendBar()
         }
       }, this)
+    },
+    forceUpdate() {
+      if (this.isPullingDown) {
+        this.isPullingDown = false
+        this._reboundPullDown().then(() => {
+          this._afterPullDown()
+        })
+      }
+    },
+    _initPullDownRefresh() {
+      this.chatScroll.on('pullingDown', async () => {
+        this.beforePullDown = false
+        this.isPullingDown = true
+        // this.$emit('pullingDown')
+        await this.pullingDown()
+        this.forceUpdate()
+      })
+      this.chatScroll.on('scroll', (pos) => {
+        if (this.beforePullDown) {
+          this.bubbleY = Math.max(0, pos.y + this.pullDownInitTop)
+          this.pullDownStyle = `transform: translateY(${Math.min(pos.y + this.pullDownInitTop, 10)}px)`
+        } else {
+          this.bubbleY = 0
+        }
+        if (this.isRebounding) {
+          this.pullDownStyle = `transform: translateY(${10 - (this.pullDownRefresh.stop - pos.y)}px)`
+        }
+        this.scrollY = Math.abs(Math.round(pos.y))
+        console.log(this.scrollY)
+      })
+    },
+    pullingDown() {
+      const option = {
+        'Peer_Account': '00f29791-f5f1-4c21-b486-8b553d9e5e99',
+        'MaxCnt': 5,
+        'LastMsgTime': Math.round(new Date('2018-09-18 14:20:05').getTime() / 1000),
+        'MsgKey': ''
+      }
+      const self = this
+      return new Promise((resolve) => {
+        // eslint-disable-next-line
+        webim.getC2CHistoryMsgs(
+          option,
+          (resp) => {
+            let msgsObj = []
+            resp.MsgList.forEach((item) => {
+              msgsObj.push(IM.parseMsg(item))
+            })
+            let msgsList = self.msgs.concat()
+            self.setMsgs(msgsObj.concat(msgsList))
+            console.log(msgsObj)
+            resolve()
+          }
+        )
+      })
+    },
+    _reboundPullDown() {
+      const {stopTime = 600} = true
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          this.isRebounding = true
+          this.chatScroll.finishPullDown()
+          resolve()
+        }, stopTime)
+      })
+    },
+    _afterPullDown() {
+      setTimeout(() => {
+        this.pullDownStyle = `top:${this.pullDownInitTop}px`
+        this.beforePullDown = true
+        this.isRebounding = false
+        this.chatScroll.refresh()
+      }, this.chatScroll.options.bounceTime)
     },
     targetInputBuffer() {
       if (this.inputBarOpen) {
@@ -606,7 +704,7 @@ export default {
     ...mapMutations({
       setBotInfo: 'SET_BOT_INFO',
       setModeToMenChat: 'SET_ROOM_MODE',
-      // setMsgs: 'SET_MSGS',
+      setMsgs: 'SET_MSGS',
       setInputBar: 'SET_INPUT_BAR',
       setExtendBar: 'SET_EXTEND_BAR'
     }),
@@ -686,6 +784,7 @@ export default {
       // flex-shrink: 1;
       .chat-content {
         width: 100%;
+        // min-height: 101%;
         // background-color: @bg-normal;
         ul {
           .chat-content-block {
