@@ -22,37 +22,37 @@ export default new Router({
   // mode: 'history',
   routes: [
     {
-      path: '/video/room',
+      path: '/room',
       name: 'room',
       component: room,
       children: [
         {
-          path: '/video/room/chat',
+          path: '/room/chat',
           name: 'chat',
           component: chat
         },
         {
-          path: '/video/room/serverDetail',
+          path: '/room/serverDetail',
           name: 'serverDetail',
           component: serverDetail
         },
         {
-          path: '/video/room/leaveMessage',
+          path: '/room/leaveMessage',
           name: 'leaveMessage',
           component: leaveMessage
         },
         {
-          path: '/video/room/cusServ',
+          path: '/room/cusServ',
           name: 'cusServ',
           component: cusServ,
           children: [
             {
-              path: '/video/room/cusServ/list',
+              path: '/room/cusServ/list',
               name: 'cusServList',
               component: csList
             },
             {
-              path: '/video/room/cusServ/add',
+              path: '/room/cusServ/add',
               name: 'cusServAdd',
               component: csAdd
             }
@@ -61,14 +61,15 @@ export default new Router({
       ]
     },
     {
-      path: '/video/share',
+      path: '/share',
       name: 'share',
       component: share
     },
     {
       path: '/',
-      redirect: '/video/room/chat'
+      // redirect: '/video/room/chat'
+      redirect: '/room/chat'
     }
-  ],
-  base: '/video/'
+  ]
+  // base: '/video/'
 })

@@ -629,7 +629,7 @@ export default {
           msgNum: ReqMsgNumber
         }
         const res = await syncGroupC2CMsg(data)
-        debugger
+        // debugger
         if (res.code === ERR_OK) {
           const roamMsgList = res.data.RspMsgList
           for (var i in roamMsgList) {
