@@ -323,7 +323,7 @@ export const IMMixin = {
       })
     },
     onBigGroupMsgNotify(msgs) {
-      debugger
+      // debugger
       if (msgs && msgs.length > 0) {
         // alert('onBigGroupMsgNotify')
         // console.log(msgs)
@@ -340,7 +340,7 @@ export const IMMixin = {
       }
     },
     onMsgNotify(msgs) {
-      debugger
+      // debugger
       if (msgs && msgs.length > 0) {
         if (msgs[0].fromAccount === 'administrator') {
           // 系统消息
