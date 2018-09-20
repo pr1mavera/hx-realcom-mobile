@@ -19,7 +19,7 @@ const csAdd = () => import('@/views/mainRoom/components/service/cs-add')
 Vue.use(Router)
 
 export default new Router({
-  // mode: 'history',
+  mode: 'history',
   routes: [
     {
       path: '/room',
@@ -67,9 +67,8 @@ export default new Router({
     },
     {
       path: '/',
-      // redirect: '/video/room/chat'
       redirect: '/room/chat'
     }
-  ]
-  // base: '/video/'
+  ],
+  base: '/video/'
 })

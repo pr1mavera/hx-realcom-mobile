@@ -395,6 +395,7 @@ export const IMMixin = {
       if (msgsObj.time === '') {
         msgsObj.time = formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss')
       }
+      debugger
       this.sendMsgs({
         msgs: msgsObj,
         scrollObj: this.chatScroll,
@@ -524,18 +525,6 @@ export const sendMsgsMixin = {
           msgStatus: msgStatus.msg,
           msgType: msgTypes.msg_normal
         })
-      // const option = {
-      //   'Peer_Account': '00f29791-f5f1-4c21-b486-8b553d9e5e99',
-      //   'MaxCnt': 1,
-      //   'LastMsgTime': 0,
-      //   'MsgKey': ''
-      // }
-      // webim.getC2CHistoryMsgs(
-      //   option,
-      //   (resp) => {
-      //       console.log(resp)
-      //   }
-      // )
     },
     sendTextMsg(text) {
       IM.sendNoticeMsg({
