@@ -301,7 +301,9 @@ export default {
       isRebounding: false,
       isPullingDown: false,
       pullDownStyle: '',
-      bubbleY: 0
+      bubbleY: 0,
+      /* pull-down-load  over */
+      sessionList: []
     }
   },
   created() {
@@ -379,6 +381,18 @@ export default {
         })
       } else {
         console.log('============================= getBotInfo error =============================')
+      }
+    },
+    async requestSessionList() {
+      // 请求sessionList
+      // const res =
+      const localStorage = window.localStorage
+      if (!sessionList) {
+        // 当天无漫游消息，清空localStotage, 稍后拉取直接上历史消息
+        localStorage.removeItem('msgsQueue')
+        localStorage.removeItem('msgsQueueMap')
+      } else {
+        // 判断本地缓存新鲜度
       }
     },
     _initChatMsgList() {
@@ -495,7 +509,7 @@ export default {
       // localStorage.setItem('msgsQueueMap', JSON.stringify(map))
       const msgsQueueMap = JSON.parse(localStorage.getItem('msgsQueueMap'))
       switch (true) {
-        case msgsQueueMap:
+        case !msgsQueueMap:
           // 请求历史消息
           break
         case msgsQueueMap.total:
@@ -572,6 +586,7 @@ export default {
         })
       }
     },
+
     _inputFocus() {
       console.log('键盘弹出辣=========================')
       // this.$refs.inputBar.setInputEditState('true')

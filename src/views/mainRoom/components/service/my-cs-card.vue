@@ -87,6 +87,7 @@
       },
       enterVideoLineUp() {
         beforeEnterVideo()
+        debugger
         this.setQueueMode(queueStatus.queuing)
         this.$router.push({
           path: '/room/chat'
