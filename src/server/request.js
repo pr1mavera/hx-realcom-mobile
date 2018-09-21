@@ -16,10 +16,12 @@ Vue.use(ToastPlugin)
 
 const hostFilter = hostType => {
   switch (hostType) {
-    case 'public':
-      return conf.publicPath
+    case 'video':
+      return conf.videoPath
     case 'RTCRoom':
       return conf.webRTCRoomPath
+    case 'chat':
+      return conf.chatPath
   }
 }
 

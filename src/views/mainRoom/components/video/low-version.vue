@@ -7,7 +7,7 @@
         <p>请把手机系统升级为11.0版本或以上</p>
       </div>
       <p class="update">升级方案：<label>xxxxxxx</label> </p>
-      <x-button :gradients="['#FF8C6A', '#FF80A0']" style="width: 12rem; margin-top: 6rem;">取 消</x-button>
+      <x-button :gradients="['#FF8C6A', '#FF80A0']" style="width: 12rem; margin-top: 6rem;" @click="goBack">取 消</x-button>
     </main>
   </section>
 </template>
@@ -18,6 +18,11 @@
     // name: "low-version"
     components: {
       XButton
+    },
+    methods: {
+      goBack() {
+        this.$emit('close')
+      }
     }
   }
 </script>

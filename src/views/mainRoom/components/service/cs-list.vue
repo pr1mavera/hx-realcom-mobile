@@ -69,6 +69,7 @@ export default {
       if (res.result.code === ERR_OK) {
         console.log('============================= 我现在来请求 专属客服 辣 =============================')
         this.myCsList = res.data.csList
+        debugger
       } else {
         console.log('error in queryCsInfo' + JSON.stringify(res))
       }

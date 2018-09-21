@@ -3,7 +3,7 @@ import { mapGetters, mapMutations, mapActions } from 'vuex'
 import IM from '@/server/im'
 // import webim from '@/common/js/webim'
 // import WebRTCAPI from 'webRTCAPI'
-import { ERR_OK, getUserInfoByOpenID, getLoginInfo, createSession, pushSystemMsg, sendMsgToBot } from '@/server/index.js'
+import { ERR_OK, getUserInfoByOpenID, getLoginInfo, createSession, pushSystemMsg, sendMsgToBot, getHistoryMsgs } from '@/server/index.js'
 import { shallowCopy } from '@/common/js/util'
 import { formatDate } from '@/common/js/dateConfig.js'
 import { queueStatus, systemMsgStatus, msgStatus, msgTypes } from '@/common/js/status'
@@ -53,7 +53,9 @@ export const loginMixin = {
       }
     },
     async initSession() {
-      const res = await createSession(this.userInfo.userId, this.userInfo.userName, this.userInfo.userPhone)
+      const chatType = 1
+      const res = await createSession(this.userInfo.userId, this.userInfo.userName, this.userInfo.userPhone, chatType)
+      // const res = await createSession(this.userInfo.userId, this.userInfo.userName, this.userInfo.userPhone)
       if (res.result.code === ERR_OK) {
         console.log('============================= 会话创建成功 辣 =============================')
         return new Promise((resolve) => {
@@ -571,6 +573,48 @@ export const RTCSystemMsg = {
       console.log('排队完成，推送系统消息成功')
     } else {
       console.log('推送系统消息失败')
+    }
+  }
+}
+
+export const getMsgsMixin = {
+  data() {
+    return {
+      historyMsgs: [],
+      historyPage: 1,
+      historyPageSize: 2,
+      pulldownResult: '加载历史消息成功'
+    }
+  },
+  methods: {
+    async requestHistoryMsgs() {
+      const res = await getHistoryMsgs(this.userInfo.userId, this.historyPage, this.historyPageSize)
+      if (res.result.code === ERR_OK) {
+        console.log('============================= 我现在来请求 历史消息 辣 =============================')
+        return new Promise((resolve) => {
+          const list = res.data.msgList
+          if (list.length) {
+            list.forEach((item) => {
+              const msgs = {
+                nickName: item.sendUserName,
+                content: item.msgContent,
+                isSelfSend: item.sendUserId === this.userInfo.userId,
+                time: item.msgTime,
+                msgStatus: msgStatus.msg,
+                msgType: msgTypes.msg_normal
+              }
+              this.historyMsgs.unshift(msgs)
+            })
+            this.historyPage += 1
+          } else {
+            // 没有更多数据
+            this.pulldownResult = '别拉了，没有更多消息了！！！'
+          }
+          resolve()
+        })
+      } else {
+        console.log('error in getHistoryMsgs')
+      }
     }
   }
 }

@@ -88,9 +88,32 @@
       enterVideoLineUp() {
         beforeEnterVideo()
         debugger
-        this.setQueueMode(queueStatus.queuing)
+        const cmd = sessionStorage.getItem('enterVideoStatus')
+        let query = {}
+        switch (cmd) {
+          case 'enter-video-line-up':
+            query = {
+              cmd,
+              csId: this.cusSerId
+            }
+            this.setQueueMode(queueStatus.queuing)
+            break
+          case 'ios-guide':
+            query = {
+              openId: 'oKXX7wABsIulcFpdlbwUyMKGisjQ',
+              cmd,
+              csId: this.cusSerId
+            }
+            break
+          case 'low-version':
+            query = {
+              cmd
+            }
+            break
+        }
         this.$router.push({
-          path: '/room/chat'
+          path: '/room/chat',
+          query
         })
       },
       ...mapMutations({

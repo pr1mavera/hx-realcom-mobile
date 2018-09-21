@@ -12,11 +12,12 @@
           :beforePullDown="beforePullDown"
           :isPullingDown="isPullingDown"
           :bubbleY="bubbleY"
+          :pulldownResult="pulldownResult"
         ></pull-down>
         <div class="chat-content" ref="chatContent">
           <ul>
             <li class="chat-content-block chat-content-start" ref="chatContentStart"></li>
-            <li class="chat-content-li" v-for="(item, i) in this.history" :key="`history-${i}`" :class="{'text-center': item.msgStatus === msgStatus.tip}">
+            <li class="chat-content-li" v-for="(item, i) in this.historyMsgs" :key="`history-${i}`" :class="{'text-center': item.msgStatus === msgStatus.tip}">
               <component
                 :is="_showItemByType(item.msgStatus)"
                 :isSelf="item.isSelfSend"
@@ -52,8 +53,6 @@
         <fload-button
           :barStatus="this.inputBarOpen || this.extendBarOpen"
           @enterVideoLineUp="lineUpAlert = true"
-          @ios-guide="showGuide"
-          @low-version="tipsUpgrade"
         ></fload-button>
       </div>
       <input-bar
@@ -81,8 +80,8 @@
         @on-confirm="confirmToLineUp"
       ></confirm>
     </div>
-    <!--<ios-guide v-if="iosGuide"></ios-guide>-->
-    <!--<low-version v-if="lowVersion"></low-version>-->
+    <ios-guide v-if="iosGuide" @click.native="showGuide(false)"></ios-guide>
+    <low-version v-if="lowVersion" @close="tipsUpgrade(false)"></low-version>
   </div>
 </template>
 
@@ -95,11 +94,11 @@ import BScroll from 'better-scroll'
 import InputBar from '@/views/mainRoom/components/chat/input-bar'
 import { timeTipFormat } from '@/common/js/dateConfig'
 import { debounce, shallowCopy, getRect } from '@/common/js/util'
-import { loginMixin, IMMixin, sendMsgsMixin } from '@/common/js/mixin'
+import { loginMixin, IMMixin, sendMsgsMixin, getMsgsMixin } from '@/common/js/mixin'
 // eslint-disable-next-line
-import { roomStatus, toggleBarStatus, msgStatus, msgTypes, tipTypes, dialogTypes, cardTypes } from '@/common/js/status'
+import { roomStatus, queueStatus, toggleBarStatus, msgStatus, msgTypes, tipTypes, dialogTypes, cardTypes } from '@/common/js/status'
 // 调用拉取漫游信息的接口
-import IM from '@/server/im'
+// import IM from '@/server/im'
 import { ERR_OK, getImgUrl, getBotInfo, syncGroupC2CMsg } from '@/server/index.js'
 
 export default {
@@ -109,7 +108,8 @@ export default {
   mixins: [
     loginMixin,
     IMMixin,
-    sendMsgsMixin
+    sendMsgsMixin,
+    getMsgsMixin
   ],
   components: {
     /**
@@ -157,7 +157,7 @@ export default {
       extendBarLaunchOpen: false,
       lineUpAlert: false,
       msgStatus: msgStatus,
-      history: [],
+      // historyMsgs: [],
       // historyMsgs: [
       //   {
       //     content: '',
@@ -324,6 +324,12 @@ export default {
     // this.setMsgs(this.historyMsgs)
     // 获取漫游消息
     // this.getRoamMessage()
+    // 判断是否需要直接进入排队
+    const query = this.$route.query
+    if (query.cmd === 'ios-guide') {
+      // 直接进入排队
+      this.setQueueMode(queueStatus.queuing)
+    }
   },
   methods: {
     async login() {
@@ -383,18 +389,18 @@ export default {
         console.log('============================= getBotInfo error =============================')
       }
     },
-    async requestSessionList() {
-      // 请求sessionList
-      // const res =
-      const localStorage = window.localStorage
-      if (!sessionList) {
-        // 当天无漫游消息，清空localStotage, 稍后拉取直接上历史消息
-        localStorage.removeItem('msgsQueue')
-        localStorage.removeItem('msgsQueueMap')
-      } else {
-        // 判断本地缓存新鲜度
-      }
-    },
+    // async requestSessionList() {
+    //   // 请求sessionList
+    //   // const res =
+    //   const localStorage = window.localStorage
+    //   if (!sessionList) {
+    //     // 当天无漫游消息，清空localStotage, 稍后拉取直接上历史消息
+    //     localStorage.removeItem('msgsQueue')
+    //     localStorage.removeItem('msgsQueueMap')
+    //   } else {
+    //     // 判断本地缓存新鲜度
+    //   }
+    // },
     _initChatMsgList() {
       let map = []
       let timeCache = this.historyMsgs[0].time
@@ -435,6 +441,7 @@ export default {
       return component
       // return type === 'text_msg' ? 'ContentItem' : type === 'time_msg' ? 'TimeItem' : ''
     },
+    /* *********************************** better scroll *********************************** */
     _initScroll() {
       if (this.$refs.chatContent) {
         this.$refs.chatContent.style.minHeight = `${getRect(this.$refs.chatScroll).height + 1}px`
@@ -479,12 +486,13 @@ export default {
       }
     },
     _initPullDownRefresh() {
-      this.chatScroll.on('pullingDown', async () => {
+      this.chatScroll.on('pullingDown', async() => {
         this.beforePullDown = false
         this.isPullingDown = true
         // this.$emit('pullingDown')
         await this.pullingDown()
         this.forceUpdate()
+        // this._afterPullDown()
       })
       this.chatScroll.on('scroll', (pos) => {
         if (this.beforePullDown) {
@@ -501,54 +509,58 @@ export default {
       })
     },
     pullingDown() {
-      const localStorage = window.localStorage
-      // const map = {
-      //   total: 5,
-      //   cur: 5
-      // }
-      // localStorage.setItem('msgsQueueMap', JSON.stringify(map))
-      const msgsQueueMap = JSON.parse(localStorage.getItem('msgsQueueMap'))
-      switch (true) {
-        case !msgsQueueMap:
-          // 请求历史消息
-          break
-        case msgsQueueMap.total:
-          // 当前已缓存漫游消息，直接拉取
-          break
-        default:
-          // 按sessionList请求漫游消息
-      }
-      const option = {
-        'Peer_Account': '00f29791-f5f1-4c21-b486-8b553d9e5e99',
-        'MaxCnt': 5,
-        'LastMsgTime': Math.round(new Date('2018/09/18 14:20:05').getTime() / 1000),
-        'MsgKey': ''
-      }
-      const self = this
       return new Promise((resolve) => {
-        // eslint-disable-next-line
-        webim.getC2CHistoryMsgs(
-          option,
-          (resp) => {
-            let msgsObj = []
-            resp.MsgList.forEach((item) => {
-              msgsObj.push(IM.parseMsg(item))
-            })
-            if (!self.history.length) {
-              const tip = {
-                content: '以上为历史消息',
-                time: '2018-03-28 15:23:14',
-                msgStatus: msgStatus.tip,
-                msgType: tipTypes.tip_normal
-              }
-              self.history.push(tip)
-            }
-            self.history = msgsObj.concat(self.history)
-            console.log(msgsObj)
-            resolve()
+        const localStorage = window.localStorage
+        // const map = {
+        //   total: 5,
+        //   cur: 5
+        // }
+        // localStorage.setItem('msgsQueueMap', JSON.stringify(map))
+        if (!this.historyMsgs.length) {
+          const tip = {
+            content: '以上为历史消息',
+            time: '2018-03-28 15:23:14',
+            msgStatus: msgStatus.tip,
+            msgType: tipTypes.tip_normal
           }
-        )
+          this.historyMsgs.push(tip)
+        }
+        const msgsQueueMap = JSON.parse(localStorage.getItem('msgsQueueMap'))
+        switch (true) {
+          case !msgsQueueMap:
+            // 请求历史消息
+            this.requestHistoryMsgs()
+            break
+          case msgsQueueMap.total:
+            // 当前已缓存漫游消息，直接拉取
+            break
+          default:
+            // 按sessionList请求漫游消息
+        }
+        resolve()
       })
+      // const option = {
+      //   'Peer_Account': '00f29791-f5f1-4c21-b486-8b553d9e5e99',
+      //   'MaxCnt': 5,
+      //   'LastMsgTime': Math.round(new Date('2018/09/18 14:20:05').getTime() / 1000),
+      //   'MsgKey': ''
+      // }
+      // const self = this
+      // return new Promise((resolve) => {
+      //   // eslint-disable-next-line
+      //   webim.getC2CHistoryMsgs(
+      //     option,
+      //     (resp) => {
+      //       let msgsObj = []
+      //       resp.MsgList.forEach((item) => {
+      //         msgsObj.push(IM.parseMsg(item))
+      //       })
+      //       self.history = msgsObj.concat(self.history)
+      //       console.log(msgsObj)
+      //       resolve()
+      //     }
+      //   )
+      // })
     },
     _reboundPullDown() {
       const {stopTime = 600} = true
@@ -562,12 +574,13 @@ export default {
     },
     _afterPullDown() {
       setTimeout(() => {
-        this.pullDownStyle = `top:${this.pullDownInitTop}px`
+        this.pullDownStyle = `transform: translateY(${this.pullDownInitTop}px)`
         this.beforePullDown = true
         this.isRebounding = false
         this.chatScroll.refresh()
       }, this.chatScroll.options.bounceTime)
     },
+    /* *********************************** inputBar *********************************** */
     targetInputBuffer() {
       if (this.inputBarOpen) {
         // 软键盘收起
@@ -586,7 +599,6 @@ export default {
         })
       }
     },
-
     _inputFocus() {
       console.log('键盘弹出辣=========================')
       // this.$refs.inputBar.setInputEditState('true')
@@ -636,6 +648,7 @@ export default {
       this.$refs.extendBar.giftSectionShow = false
       this.$refs.extendBar.expressSectionShow = false
     },
+    /* *********************************** change chat mode *********************************** */
     enterToMenChat() {
       const self = this
       console.log('人工客服排队')
@@ -662,6 +675,7 @@ export default {
       this.setModeToMenChat(roomStatus.menChat)
       this.setUserInfoToEnterRoom(query, this.initIM)
     },
+    /* *********************************** entend bar *********************************** */
     sendImgMsgClick(file) {
       this.toggleExtendBar()
       this.sendImgMsg(file)
@@ -766,7 +780,8 @@ export default {
       setModeToMenChat: 'SET_ROOM_MODE',
       setMsgs: 'SET_MSGS',
       setInputBar: 'SET_INPUT_BAR',
-      setExtendBar: 'SET_EXTEND_BAR'
+      setExtendBar: 'SET_EXTEND_BAR',
+      setQueueMode: 'SET_QUEUE_MODE'
     }),
     ...mapActions([
       'enterToLineUp',
@@ -796,6 +811,18 @@ export default {
         } else {
           console.log('error:' + res)
         }
+      }
+    }
+  },
+  watch: {
+    $route(newVal) {
+      switch (newVal.query.cmd) {
+        case 'ios-guide':
+          this.showGuide(true)
+          break
+        case 'low-version':
+          this.tipsUpgrade(true)
+          break
       }
     }
   }
@@ -838,7 +865,8 @@ export default {
       overflow: hidden;
       // background-color: @bg-normal;
       flex: 1;
-      background-image: url('/video/static/img/chat/chatBG.png');
+      // background-image: url('/video/static/img/chat/chatBG.png');
+      background-image: url('/static/img/chat/chatBG.png');
       background-size: cover;
       // flex-basis: auto;
       // flex-shrink: 1;

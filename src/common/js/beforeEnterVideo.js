@@ -14,7 +14,7 @@ export function beforeEnterVideo() {
     const version = (ua.match(reg) + '').replace(/[^0-9|_.]/ig, '').replace(/_/ig, '.')
     console.log('该Android的系统版本为：' + version)
     // this.$emit('enterVideoLineUp') // 进入排队页面
-    sessionStorage.setItem('enterVideoStatus', 'enterVideoLineUp')
+    sessionStorage.setItem('enterVideoStatus', 'enter-video-line-up')
   } else if (device === 'iPhone') {
     //  若为ios设备，则需判断iOS的系统版本
     const ver = ua.match(/cpu iphone os (.*?) like mac os/)
@@ -37,18 +37,11 @@ export function beforeEnterVideo() {
       //   ] // 要显示的菜单项，只显示在浏览器中打开
       // })
       // 传参给query
-      this.$router.push({
-        // path : '/',
-        // name : 'chat',
-        query: {
-          groupId: '12345678'
-        }
-      })
     } else if (device === 'iPhone' && browser === 'safari') {
       alert('当前ios的版本为：' + version + '！')
       // 进入排队的页面
       // this.$emit('enterVideoLineUp')
-      sessionStorage.setItem('enterVideoStatus', 'enterVideoLineUp')
+      sessionStorage.setItem('enterVideoStatus', 'enter-video-line-up')
     }
   }
 }
