@@ -226,11 +226,9 @@ const IM = (() => {
     msg.addCustom(custom_obj)
 
     webim.sendMsg(msg, (resp) => {
-      webim.Log.info("发自定义消息成功");
       console.log('发自定义消息成功');
       callback && callback();
     }, function (err) {
-      webim.Log.info(err.ErrorInfo);
       console.log('发自定义消息失败:', err);
     });
   }
@@ -341,32 +339,33 @@ const IM = (() => {
       'businessType': businessType// 业务类型
     }
     // 上传图片
-    webim.uploadPic(
-      opt,
-      (resp) => {
-        // 上传成功发送图片
-        sendPic(resp, extInfo)
-        console.log('上传成功发送图片')
-      },
-      (err) => {
-        alert(err.ErrorInfo)
-      }
-    )
+    return new Promise((resolve) => {
+      webim.uploadPic(
+        opt,
+        (resp) => {
+          console.log('上传成功发送图片')
+          resolve(resp)
+        },
+        (err) => {
+          alert(err.ErrorInfo)
+        }
+      )
+    })
   }
 
   // 发送图片
-  function sendPic(images, msgInfo, callback) {
-      if (!msgInfo.groupId) {
-        console.error('您还没有进入房间，暂不能聊天')
+  function sendPic(images, msgInfo) {
+      if (!msgInfo.from_id) {
+        console.error('您还没有登录！！')
         return
       }
-      var selSess = new webim.Session(webim.SESSION_TYPE.GROUP, msgInfo.groupId, msgInfo.groupId, null, Math.round(new Date().getTime() / 1000))
+      var selSess = new webim.Session(webim.SESSION_TYPE.C2C, msgInfo.to_id, msgInfo.to_id, null, Math.round(new Date().getTime() / 1000))
       var isSend = true // 是否为自己发送
       var seq = -1 // 消息序列，-1表示sdk自动生成，用于去重
       var random = Math.round(Math.random() * 4294967296) // 消息随机数，用于去重
       var msgTime = Math.round(new Date().getTime() / 1000) // 消息时间戳
       var subType = webim.GROUP_MSG_SUB_TYPE.COMMON
-      var msg = new webim.Msg(selSess, isSend, seq, random, msgTime, msgInfo.identifier, subType, msgInfo.nickName)
+      var msg = new webim.Msg(selSess, isSend, seq, random, msgTime, msgInfo.identifier, subType, null)
       var imagesObj = new webim.Msg.Elem.Images(images.File_UUID)
       for (var i in images.URL_INFO) {
           var img = images.URL_INFO[i]
@@ -389,10 +388,13 @@ const IM = (() => {
       msg.addImage(imagesObj)
 
       // 调用发送图片接口
-      webim.sendMsg(msg, function(resp) {
-          console.log('发送图片成功')
-      }, function(err) {
-          alert(err.ErrorInfo)
+      return new Promise((resolve) => {
+        webim.sendMsg(msg, function(resp) {
+            console.log('发送图片成功')
+            resolve()
+        }, function(err) {
+            alert(err.ErrorInfo)
+        })
       })
   }
 

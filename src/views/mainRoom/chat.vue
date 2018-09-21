@@ -636,7 +636,8 @@ export default {
           this.sendTextMsg(text)
           break
         case roomStatus.videoChat:
-          this.sendTextMsg(text)
+          // this.sendTextMsg(text)
+          this.sendC2CMsgs(text)
           break
       }
       this.setInputBar(false)

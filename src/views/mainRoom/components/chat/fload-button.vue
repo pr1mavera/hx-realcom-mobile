@@ -31,7 +31,7 @@
       :disabled="barStatus"
       :class="[{'visible-when-input': barStatus, 'item-4': !barStatus}]">
       <svg class="icon" aria-hidden="true">
-        <use xlink:href="#icon-pinglun"></use>
+        <use xlink:href="#icon-pingjiashouye"></use>
       </svg>
     </button>
   </div>

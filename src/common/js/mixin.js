@@ -342,7 +342,6 @@ export const IMMixin = {
       }
     },
     onMsgNotify(msgs) {
-      // debugger
       if (msgs && msgs.length > 0) {
         if (msgs[0].fromAccount === 'administrator') {
           // 系统消息
@@ -397,9 +396,10 @@ export const IMMixin = {
       if (msgsObj.time === '') {
         msgsObj.time = formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss')
       }
-      debugger
       this.sendMsgs({
-        msgs: msgsObj,
+        msgs: [
+          msgsObj
+        ],
         scrollObj: this.chatScroll,
         endObj: this.$refs.chatContentEnd
       })
@@ -518,7 +518,7 @@ export const sendMsgsMixin = {
     sendC2CMsgs(text) {
       IM.sendNormalMsg(
         this.userInfo.userId,
-        '00f29791-f5f1-4c21-b486-8b553d9e5e99',
+        this.csInfo.csId,
         {
           msg: text,
           time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
@@ -527,6 +527,7 @@ export const sendMsgsMixin = {
           msgStatus: msgStatus.msg,
           msgType: msgTypes.msg_normal
         })
+        this.afterSendC2CTextMsgs(text)
     },
     sendTextMsg(text) {
       IM.sendNoticeMsg({
@@ -551,14 +552,66 @@ export const sendMsgsMixin = {
         giftType: type
       })
     },
-    sendImgMsg(img) {
+    async sendImgMsg(img) {
       const info = {
-        from_id: 'cust-test',
-        to_id: 'cs-test',
-        groupId: '12345678',
-        identifier: ''
+        from_id: this.userInfo.userId,
+        to_id: this.csInfo.csId,
+        identifier: this.userInfo.userId
       }
-      IM.uploadPic(img, info)
+      // 上传图片
+      const resp = await IM.uploadPic(img, info)
+      // 发送图片
+      await IM.sendPic(resp, info)
+      // 配置图片本地显示
+      const imgData = {
+        big: '',
+        small: ''
+      }
+      resp.URL_INFO.forEach((item) => {
+        switch (item.PIC_TYPE) {
+          case 1: // 原图
+              imgData.big = item.DownUrl // 原图
+              break
+          case 2:// 小图（缩略图）
+              imgData.small = item.DownUrl // 小图
+              break
+        }
+      })
+      this.afterSendC2CImgMsgs(imgData)
+    },
+    afterSendC2CTextMsgs(text) {
+      const msg = {
+        nickName: this.userInfo.userName,
+        content: text,
+        isSelfSend: true,
+        time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+        msgStatus: msgStatus.msg,
+        msgType: msgTypes.msg_normal
+      }
+      this.sendMsgs({
+        msgs: [
+          msg
+        ],
+        scrollObj: this.chatScroll,
+        endObj: this.$refs.chatContentEnd
+      })
+    },
+    afterSendC2CImgMsgs(imgData) {
+      const msg = {
+        nickName: this.userInfo.userName,
+        isSelfSend: true,
+        time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+        msgStatus: msgStatus.msg,
+        msgType: msgTypes.msg_img,
+        imgData
+      }
+      this.sendMsgs({
+        msgs: [
+          msg
+        ],
+        scrollObj: this.chatScroll,
+        endObj: this.$refs.chatContentEnd
+      })
     },
     ...mapActions([
       'sendMsgs'
