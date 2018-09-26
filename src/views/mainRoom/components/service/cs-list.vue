@@ -8,6 +8,7 @@
       :name="item.nickName"
       :num="item.servTimes"
       :gifts="item.giftCount"
+      @toLineUp="toLineUp"
     ></my-cs-card>
     <p class="tips">您还可以添加 <span>{{3 - myCsList.length}}</span> 名专属客服</p>
     <x-button :gradients="['#FF8C6A', '#FF80A0']" @click.native="addCs"
@@ -59,7 +60,6 @@ export default {
   },
   methods: {
     async getCsList() {
-      // debugger
       console.log('获取用户信息=>' + this.userInfo.userId)
       const page = 1
       const pageSize = -1
@@ -69,7 +69,6 @@ export default {
       if (res.result.code === ERR_OK) {
         console.log('============================= 我现在来请求 专属客服 辣 =============================')
         this.myCsList = res.data.csList
-        debugger
       } else {
         console.log('error in queryCsInfo' + JSON.stringify(res))
       }
@@ -77,6 +76,10 @@ export default {
     addCs() {
       console.log('添加专属客服')
       this.$router.push('/room/cusServ/add')
+    },
+    toLineUp(csId) {
+      // this.$router.push({path: `/room/line-up/${this.userInfo.userId}/${this.cusSerId}`})
+      this.$router.push({path: `/room/line-up`})
     }
   }
 }

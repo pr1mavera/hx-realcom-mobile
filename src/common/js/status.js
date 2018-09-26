@@ -25,10 +25,18 @@ export const queueStatus = { // 排队状态
   canselQueue: 4 // 取消排队
 }
 
+export const sessionStatus = {
+  robot: 1, // 机器人
+  video: 2, // 视频
+  onLine: 3, // 在线
+  website: 4 // 官网
+}
+
 export const systemMsgStatus = {
   queuesReduce: 0, // 人数减少
   queuesSuccess: 1, // 客户端排队成功
-  requestCsEntance: 2 // 座席端视频接入请求
+  requestCsEntance: 2, // 座席端视频接入请求
+  transSessionId: 3 // 座席端创建会话传递
 }
 
 export const msgStatus = {

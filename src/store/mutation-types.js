@@ -6,6 +6,8 @@ export const SET_CS_INFO = 'SET_CS_INFO'
 
 export const SET_ROOM_ID = 'SET_ROOM_ID'
 
+export const SET_SESSION_ID = 'SET_SESSION_ID'
+
 export const SET_MSGS = 'SET_MSGS'
 
 export const SET_EXTEND_BAR = 'SET_EXTEND_BAR'

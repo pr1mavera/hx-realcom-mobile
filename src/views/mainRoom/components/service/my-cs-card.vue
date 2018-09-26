@@ -17,7 +17,7 @@
       </div>
     </div>
     <div class="btn-box" style="text-align: center">
-      <x-button mini @click.native="enterVideoLineUp" style="color: #FF959C;background: #fff;">
+      <x-button mini @click.native="clickToLineUp" style="color: #FF959C;background: #fff;">
         视频咨询
       </x-button>
     </div>
@@ -26,10 +26,9 @@
 
 <script>
   import { XButton } from 'vux'
-  import { beforeEnterVideo } from '@/common/js/beforeEnterVideo'
   import { ERR_OK, removeCs, getImgUrl } from '@/server/index.js'
   import { mapGetters, mapMutations } from 'vuex'
-  import { queueStatus } from '@/common/js/status'
+  // import { queueStatus } from '@/common/js/status'
   // import {} from '@/server/index.js'
 
   export default {
@@ -85,36 +84,8 @@
           path: '/room/serverDetail'
         })
       },
-      enterVideoLineUp() {
-        beforeEnterVideo()
-        debugger
-        const cmd = sessionStorage.getItem('enterVideoStatus')
-        let query = {}
-        switch (cmd) {
-          case 'enter-video-line-up':
-            query = {
-              cmd,
-              csId: this.cusSerId
-            }
-            this.setQueueMode(queueStatus.queuing)
-            break
-          case 'ios-guide':
-            query = {
-              openId: 'oKXX7wABsIulcFpdlbwUyMKGisjQ',
-              cmd,
-              csId: this.cusSerId
-            }
-            break
-          case 'low-version':
-            query = {
-              cmd
-            }
-            break
-        }
-        this.$router.push({
-          path: '/room/chat',
-          query
-        })
+      clickToLineUp() {
+        this.$emit('toLineUp', this.cusSerId)
       },
       ...mapMutations({
         setQueueMode: 'SET_QUEUE_MODE'

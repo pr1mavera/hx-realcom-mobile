@@ -16,10 +16,16 @@
 </template>
 
 <script type="text/ecmascript-6">
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters, mapMutations, mapActions } from 'vuex'
+import { loginMixin, IMMixin } from '@/common/js/mixin'
 import { ERR_OK, videoQueue } from '@/server/index.js'
+import { queueStatus } from '@/common/js/status'
 
 export default {
+  mixins: [
+    loginMixin,
+    IMMixin
+  ],
   components: {
     // ConnectSuccess,
     'ConnectSuccess': () => import('@/views/mainRoom/components/video/connect-success')
@@ -46,11 +52,25 @@ export default {
     }
   },
   mounted() {
+    this.setQueueMode(queueStatus.queuing)
+    if (!this.userInfo.sdkAppID) {
+      this.login()
+    }
     this.initQueue()
   },
   methods: {
+    async login() {
+      const params = this.$route.params
+      const info = {
+        userId: params.userId,
+        userName: '某用户'
+      }
+      this.setUserInfo(info)
+      await this.getUserInfo()
+      await this.initIM()
+    },
     async initQueue() {
-      const res = await videoQueue(this.userInfo.userId, '123456789', 1)
+      const res = await videoQueue(this.userInfo.userId, '00235530bcdd11e8bac9b72d08583918', 1)
       if (res.result.code === ERR_OK) {
         console.log('===============================> 排队啊 排队啊 排队啊 <===============================')
         return new Promise((resolve) => {
@@ -62,24 +82,14 @@ export default {
       }
     },
     confirmToVideo() {
-      // this.$router.push({
-      //   path: '/room/chat',
-      //   // query: {
-      //   //   cmd: 'enter',
-      //   //   roomID: 'cs-test',
-      //   //   userId: this.loginInfo.userId,
-      //   //   userName: this.loginInfo.userName
-      //   // }
-      //   query: {
-      //     cmd: 'create',
-      //     roomName: '12345678',
-      //     userId: this.loginInfo.userId,
-      //     userName: this.loginInfo.userName
-      //   }
-      // })
+      this.$router.push({path: `/room/chat/${this.userInfo.openId}`})
       this.readyToVideoChat()
-      this.$emit('ready')
+      // this.$emit('ready')
     },
+    ...mapMutations({
+      setUserInfo: 'SET_USER_INFO',
+      setQueueMode: 'SET_QUEUE_MODE'
+    }),
     ...mapActions([
       'readyToVideoChat'
     ])

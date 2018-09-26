@@ -52,7 +52,7 @@ export const readyToVideoChat = function({ commit, state }) {
   commit(types.SET_ROOM_MODE, roomStatus.videoChat)
 }
 
-export const sendMsgs = async function({ commit, state }, {msgs, scrollObj, endObj}) {
+export const sendMsgs = async function({ commit, state }, msgs) {
   if (msgs[0].msgStatus === msgStatus.msg) {
     let lastT = null
     // 缓存最后一条信息的时间
@@ -75,6 +75,4 @@ export const sendMsgs = async function({ commit, state }, {msgs, scrollObj, endO
     }
   }
   await commit(types.SET_MSGS, state.msgs.concat(msgs))
-  await scrollObj.refresh()
-  await scrollObj.scrollToElement(endObj, 400)
 }

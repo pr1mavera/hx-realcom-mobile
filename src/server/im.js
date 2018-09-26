@@ -110,18 +110,18 @@ const IM = (() => {
   function parseMsg(newMsg) {
     var msgItem = newMsg.getElems()[0]
     var type = msgItem.getType()
-    var nickName = newMsg.getFromAccountNick()
+    var nickName = ''
     var msgStatus = ''
     var msgType = ''
     var time = ''
     var giftType = ''
     if (type === 'TIMCustomElem') {
-      // debugger
       var content = msgItem.getContent() // 获取元素对象
       var desc = JSON.parse(content.getDesc())
       msgType = desc.msgType
       msgStatus = desc.msgStatus
       time = desc.time
+      nickName = desc.nickName
       var ext = JSON.parse(content.getExt())
       if (ext.giftType) {
         giftType = ext.giftType
@@ -183,6 +183,9 @@ const IM = (() => {
       var csId = data.csId
       var openId = data.openId
       var userName = data.userName
+      var csName = data.csName
+      var userPhone = data.userPhone
+      var sessionId = data.sessionId
     }
     return {
       code,
@@ -190,6 +193,9 @@ const IM = (() => {
       csId,
       openId,
       userName,
+      csName,
+      userPhone,
+      sessionId,
       desc
     }
   }
@@ -221,7 +227,7 @@ const IM = (() => {
     var random = Math.round(Math.random() * 4294967296) //消息随机数，用于去重
     var msgTime = Math.round(new Date().getTime() / 1000) //消息时间戳
     var subType = webim.GROUP_MSG_SUB_TYPE.COMMON
-    var msg = new webim.Msg(selSess, isSend, seq, random, msgTime, from_id, subType, null)
+    var msg = new webim.Msg(selSess, isSend, seq, random, msgTime, from_id, subType, msgInfo.nickName)
     var custom_obj = new webim.Msg.Elem.Custom(data, desc, ext)
     msg.addCustom(custom_obj)
 
@@ -246,7 +252,18 @@ const IM = (() => {
     sendCustomMsg({
       groupId: options.groupId,
       data: options.msg,
-      desc: `{"nickName":"${options.nickName}","msgType":"${options.msgType}","time":"${options.time}","msgStatus":"${options.msgStatus}"}`,
+      desc: `{
+        "sessionId":"${options.sessionId}",
+        "sendUserId":"${options.identifier}",
+        "sendUserType":"1",
+        "toUserId":"${options.toUserId}",
+        "toUserName":"${options.toUserName}",
+        "toUserType":"2",
+        "nickName":"${options.nickName}",
+        "msgType":"${options.msgType}",
+        "time":"${options.time}",
+        "msgStatus":"${options.msgStatus}"
+      }`,
       ext: `{"giftType":"${options.giftType}"}`,
       identifier: options.identifier,
       nickName: options.nickName
@@ -267,7 +284,18 @@ const IM = (() => {
     }
     sendMsg(from_id, to_id, {
       data: options.msg,
-      desc: `{"nickName":"${options.nickName}","msgType":"${options.msgType}","time":"${options.time}","msgStatus":"${options.msgStatus}"}`,
+      desc: `{
+        "sessionId":"${options.sessionId}",
+        "sendUserId":"${from_id}",
+        "sendUserType":"1",
+        "toUserId":"${to_id}",
+        "toUserName":"${options.toUserName}",
+        "toUserType":"2",
+        "nickName":"${options.nickName}",
+        "msgType":"${options.msgType}",
+        "time":"${options.time}",
+        "msgStatus":"${options.msgStatus}"
+      }`,
       ext: `{"giftType":"${options.giftType}"}`,
       identifier: options.identifier,
       nickName: options.nickName
@@ -416,3 +444,12 @@ const IM = (() => {
 })()
 
 export default IM
+
+// sessionId: desc.sessionId,
+// sendUserId: desc.identifier,
+// sendUserName: desc.nickName,
+// sendUserType: desc.sendUserType,
+// toUserId: desc.toUserId,
+// toUserName: desc.toUserName,
+// toUserType: desc.toUserType,
+// msgType: desc.msgType,

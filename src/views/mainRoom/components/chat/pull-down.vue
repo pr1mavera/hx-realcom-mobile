@@ -50,6 +50,7 @@ export default {
   position: absolute;
   width: 100%;
   left: 0;
+  transform: translateY(-50px);
   display: flex;
   justify-content: center;
   align-items: center;

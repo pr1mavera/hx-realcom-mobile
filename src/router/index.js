@@ -9,6 +9,7 @@ import Router from 'vue-router'
 */
 const room = () => import('@/views/mainRoom')
 const chat = () => import('@/views/mainRoom/chat')
+const lineUp = () => import('@/views/mainRoom/line-up')
 const serverDetail = () => import('@/views/mainRoom/serverDetail')
 const share = () => import('@/views/share')
 const leaveMessage = () => import('@/views/mainRoom/leave-message')
@@ -27,9 +28,14 @@ export default new Router({
       component: room,
       children: [
         {
-          path: '/room/chat',
+          path: '/room/chat/:openId',
           name: 'chat',
           component: chat
+        },
+        {
+          path: '/room/line-up',
+          name: 'line-up',
+          component: lineUp
         },
         {
           path: '/room/serverDetail',

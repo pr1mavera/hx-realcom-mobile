@@ -80,8 +80,8 @@
         @on-confirm="confirmToLineUp"
       ></confirm>
     </div>
-    <ios-guide v-if="iosGuide" @click.native="showGuide(false)"></ios-guide>
-    <low-version v-if="lowVersion" @close="tipsUpgrade(false)"></low-version>
+    <ios-guide v-if="iosGuide" @click.native="toggleGuide(false)"></ios-guide>
+    <low-version v-if="lowVersion" @close="toggleUpgrade(false)"></low-version>
   </div>
 </template>
 
@@ -95,6 +95,7 @@ import InputBar from '@/views/mainRoom/components/chat/input-bar'
 import { timeTipFormat } from '@/common/js/dateConfig'
 import { debounce, shallowCopy, getRect } from '@/common/js/util'
 import { loginMixin, IMMixin, sendMsgsMixin, getMsgsMixin } from '@/common/js/mixin'
+import { beforeEnterVideo } from '@/common/js/beforeEnterVideo'
 // eslint-disable-next-line
 import { roomStatus, queueStatus, toggleBarStatus, msgStatus, msgTypes, tipTypes, dialogTypes, cardTypes } from '@/common/js/status'
 // 调用拉取漫游信息的接口
@@ -124,11 +125,11 @@ export default {
     'CardItem': () => import('@/views/mainRoom/components/chat/card-item'),
     'FloadButton': () => import('@/views/mainRoom/components/chat/fload-button'),
     'extendBar': () => import('@/views/mainRoom/components/chat/extend-bar'),
+    'IosGuide': () => import('@/views/mainRoom/components/video/ios-guide'),
+    'LowVersion': () => import('@/views/mainRoom/components/video/low-version'),
     // 'SendFile': () => import('@/views/mainRoom/components/chat/send-file'),
     // 'SendExpress': () => import('@/views/mainRoom/components/chat/send-express'),
     // 'SendGift': () => import('@/views/mainRoom/components/chat/send-gift'),
-    'IosGuide': () => import('@/views/mainRoom/components/video/ios-guide'),
-    'LowVersion': () => import('@/views/mainRoom/components/video/low-version'),
     'PullDown': () => import('@/views/mainRoom/components/chat/pull-down')
   },
   computed: {
@@ -297,6 +298,7 @@ export default {
       iosGuide: false,
       lowVersion: false,
       /* pull-down-load */
+      pullDownInitTop: -50,
       beforePullDown: true,
       isRebounding: false,
       isPullingDown: false,
@@ -305,9 +307,6 @@ export default {
       /* pull-down-load  over */
       sessionList: []
     }
-  },
-  created() {
-    this.pullDownInitTop = -50
   },
   mounted() {
     // 初始化聊天信息
@@ -324,20 +323,19 @@ export default {
     // this.setMsgs(this.historyMsgs)
     // 获取漫游消息
     // this.getRoamMessage()
-    // 判断是否需要直接进入排队
-    const query = this.$route.query
-    if (query.cmd === 'ios-guide') {
-      // 直接进入排队
-      this.setQueueMode(queueStatus.queuing)
-    }
+
+    // const params = this.$route.params
+    // params.openId = 'oKXX7wABsIulcFpdlbwUyMKGisjQ'
   },
   methods: {
     async login() {
-      await this.loginByOpenID('oKXX7wABsIulcFpdlbwUyMKGisjQ')
+      const params = this.$route.params
+      await this.loginByOpenID(params.openId)
       await this.getUserInfo()
       await this.initSession()
       await this._setBotBaseInfo()
       await this.initIM()
+      beforeEnterVideo()
     },
     async _setBotBaseInfo() {
       const res = await getBotInfo()
@@ -374,15 +372,11 @@ export default {
               return item.name
             })
           }
-          this.sendMsgs({
-            msgs: [
-              botCard,
-              botWelcomeMsg,
-              botHotMsg
-            ],
-            scrollObj: this.chatScroll,
-            endObj: this.$refs.chatContentEnd
-          })
+          this.sendMsgs([
+            botCard,
+            botWelcomeMsg,
+            botHotMsg
+          ])
           resolve()
         })
       } else {
@@ -491,18 +485,21 @@ export default {
         this.isPullingDown = true
         // this.$emit('pullingDown')
         await this.pullingDown()
-        this.forceUpdate()
-        // this._afterPullDown()
+        await this._reboundPullDown()
+        this._afterPullDown()
+        // this.forceUpdate()
       })
       this.chatScroll.on('scroll', (pos) => {
         if (this.beforePullDown) {
           this.bubbleY = Math.max(0, pos.y + this.pullDownInitTop)
           this.pullDownStyle = `transform: translateY(${Math.min(pos.y + this.pullDownInitTop, 10)}px)`
+          // this.pullDownStyle = `top: ${Math.min(pos.y + this.pullDownInitTop, 10)}px`
         } else {
           this.bubbleY = 0
         }
         if (this.isRebounding) {
           this.pullDownStyle = `transform: translateY(${10 - (this.chatScroll.options.pullDownRefresh.stop - pos.y)}px)`
+          // this.pullDownStyle = `top: ${10 - (this.chatScroll.options.pullDownRefresh.stop - pos.y)}px`
         }
         this.scrollY = Math.abs(Math.round(pos.y))
         console.log(this.scrollY)
@@ -563,11 +560,11 @@ export default {
       // })
     },
     _reboundPullDown() {
-      const {stopTime = 600} = true
+      const stopTime = 600
       return new Promise((resolve) => {
         setTimeout(() => {
           this.isRebounding = true
-          this.chatScroll.finishPullDown()
+          this.isPullingDown = false
           resolve()
         }, stopTime)
       })
@@ -575,8 +572,10 @@ export default {
     _afterPullDown() {
       setTimeout(() => {
         this.pullDownStyle = `transform: translateY(${this.pullDownInitTop}px)`
+        // this.pullDownStyle = `top: ${this.pullDownInitTop}px`
         this.beforePullDown = true
         this.isRebounding = false
+        this.chatScroll.finishPullDown()
         this.chatScroll.refresh()
       }, this.chatScroll.options.bounceTime)
     },
@@ -620,7 +619,7 @@ export default {
     chatInputChange(text) {
       console.log(text)
     },
-    chatInputCommit(text) {
+    async chatInputCommit(text) {
       const localStorage = window.localStorage
       if (!localStorage.getItem('msgsDateCache')) {
         const date = new Date()
@@ -630,14 +629,14 @@ export default {
       switch (this.roomMode) {
         case roomStatus.AIChat:
           // this.sendTextMsgToBot(text)
-          this.sendC2CMsgs(text)
+          await this.sendC2CMsgs(text)
           break
         case roomStatus.menChat:
-          this.sendTextMsg(text)
+          await this.sendTextMsg(text)
           break
         case roomStatus.videoChat:
           // this.sendTextMsg(text)
-          this.sendC2CMsgs(text)
+          await this.sendC2CMsgs(text)
           break
       }
       this.setInputBar(false)
@@ -676,14 +675,20 @@ export default {
       this.setModeToMenChat(roomStatus.menChat)
       this.setUserInfoToEnterRoom(query, this.initIM)
     },
-    /* *********************************** entend bar *********************************** */
-    sendImgMsgClick(file) {
-      this.toggleExtendBar()
-      this.sendImgMsg(file)
+    toggleGuide(data) {
+      this.iosGuide = data
     },
-    sendGiftMsgClick(type) {
+    toggleUpgrade(data) {
+      this.lowVersion = data
+    },
+    /* *********************************** entend bar *********************************** */
+    async sendImgMsgClick(file) {
       this.toggleExtendBar()
-      this.sendGiftMsg(type)
+      await this.sendImgMsg(file)
+    },
+    async sendGiftMsgClick(type) {
+      this.toggleExtendBar()
+      await this.sendGiftMsg(type)
     },
     toggleExtendBar() {
       if (this.extendBarOpen) {
@@ -716,10 +721,21 @@ export default {
     },
     confirmToLineUp() {
       this.lineUpAlert = false
-      // const query = this.$route.query
-      this.setModeToMenChat(roomStatus.videoChat)
-      this.$router.push('/room/cusServ/list')
-      // this.getUserInfo(this.userInfo.userId, query, this.initIM)
+      const enterVideoStatus = window.sessionStorage.getItem('enterVideoStatus')
+      switch (enterVideoStatus) {
+        case 'enter-video-line-up':
+          // 正常进入专属客服
+          this.$router.push('/room/cusServ/list')
+          break
+        case 'ios-guide':
+          // 当前为iOS的微信环境，需跳转至Safari
+          this.toggleGuide(true)
+          break
+        case 'low-version':
+          // 当前系统版本过低
+          this.toggleUpgrade(true)
+          break
+      }
     },
     // _reloadChatContentHeight() {
     //   const self = this
@@ -769,13 +785,6 @@ export default {
         window.onresize = null
       }
     },
-    showGuide(data) {
-      this.iosGuide = data
-      // console.log(data)
-    },
-    tipsUpgrade(data) {
-      this.lowVersion = data
-    },
     ...mapMutations({
       setBotInfo: 'SET_BOT_INFO',
       setModeToMenChat: 'SET_ROOM_MODE',
@@ -814,19 +823,19 @@ export default {
         }
       }
     }
-  },
-  watch: {
-    $route(newVal) {
-      switch (newVal.query.cmd) {
-        case 'ios-guide':
-          this.showGuide(true)
-          break
-        case 'low-version':
-          this.tipsUpgrade(true)
-          break
-      }
-    }
   }
+  // watch: {
+  //   $route(newVal) {
+  //     switch (newVal.query.cmd) {
+  //       case 'ios-guide':
+  //         this.showGuide(true)
+  //         break
+  //       case 'low-version':
+  //         this.tipsUpgrade(true)
+  //         break
+  //     }
+  //   }
+  // }
 }
 </script>
 
