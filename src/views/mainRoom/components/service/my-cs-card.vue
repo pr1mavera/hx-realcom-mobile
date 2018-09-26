@@ -1,27 +1,25 @@
 <template>
-  <div class="my-cs-card">
-    <div class="container">
-      <!-- 关闭按钮 -->
-      <span class="close" @click="removeCusSer">
+  <div class="container my-cs-card">
+    <!-- 关闭按钮 -->
+    <span class="close" @click="removeCusSer">
       <svg class="icon" aria-hidden="true" style="width: 1.1rem;height: 1.1rem;fill: #D6D7DC;">
         <use xlink:href="#icon-chahao"></use>
       </svg>
     </span>
-      <div class="container-main">
-        <a @click="enterSerCenter" class="avatar">
-          <img :src='avatarUrl'>
-        </a>
-        <div class="info">
-          <p class="name">{{this.name}}</p>
-          <p>服务总量 {{this.num}}次</p>
-          <p>收到礼物 {{this.gifts}}份</p>
-        </div>
+    <div class="container-main">
+      <a @click="enterSerCenter" class="avatar">
+        <img :src='avatarUrl'>
+      </a>
+      <div class="info">
+        <p class="name">{{this.name}}</p>
+        <p>服务总量 {{this.num}}次</p>
+        <p>收到礼物 {{this.gifts}}份</p>
       </div>
-      <div class="btn-box" style="text-align: center">
-        <x-button mini @click.native="enterVideoLineUp" style="color: #FF959C;background: #fff;">
-          视频咨询
-        </x-button>
-      </div>
+    </div>
+    <div class="btn-box" style="text-align: center">
+      <x-button mini @click.native="enterVideoLineUp" style="color: #FF959C;background: #fff;">
+        视频咨询
+      </x-button>
     </div>
   </div>
 </template>
@@ -30,8 +28,8 @@
   import { XButton } from 'vux'
   import { beforeEnterVideo } from '@/common/js/beforeEnterVideo'
   import { ERR_OK, removeCs, getImgUrl } from '@/server/index.js'
-  import { mapGetters } from 'vuex'
-  // import { queueStatus } from '@/common/js/status'
+  import { mapGetters, mapMutations } from 'vuex'
+  import { queueStatus } from '@/common/js/status'
   // import {} from '@/server/index.js'
 
   export default {
@@ -58,8 +56,7 @@
     },
     data() {
       return {
-        avatarUrl: getImgUrl(this.avatarSrc),
-        iosGuide: false
+        avatarUrl: getImgUrl(this.avatarSrc)
       }
     },
     computed: {
@@ -88,24 +85,40 @@
           path: '/room/serverDetail'
         })
       },
-
       enterVideoLineUp() {
         beforeEnterVideo()
-
-        // this.setQueueMode(queueStatus.queuing)
-        // this.$router.push({
-        //   path: '/room/chat'
-        // })
-
-        // 获取sessionStorage中的值判断，将该值传递给其父组件，
-        const nextStatus = sessionStorage.getItem('enterVideoStatus')
-        // debugger
-        this.$emit('nextStatus', nextStatus)
-        sessionStorage.removeItem('enterVideoStatus')
-      }
-      // ...mapMutations({
-      //   setQueueMode: 'SET_QUEUE_MODE'
-      // })
+        debugger
+        const cmd = sessionStorage.getItem('enterVideoStatus')
+        let query = {}
+        switch (cmd) {
+          case 'enter-video-line-up':
+            query = {
+              cmd,
+              csId: this.cusSerId
+            }
+            this.setQueueMode(queueStatus.queuing)
+            break
+          case 'ios-guide':
+            query = {
+              openId: 'oKXX7wABsIulcFpdlbwUyMKGisjQ',
+              cmd,
+              csId: this.cusSerId
+            }
+            break
+          case 'low-version':
+            query = {
+              cmd
+            }
+            break
+        }
+        this.$router.push({
+          path: '/room/chat',
+          query
+        })
+      },
+      ...mapMutations({
+        setQueueMode: 'SET_QUEUE_MODE'
+      })
     }
   }
 </script>

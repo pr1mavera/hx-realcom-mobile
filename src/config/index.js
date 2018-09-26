@@ -7,13 +7,15 @@
 // import ENV from './env';
 const env = process.env.NODE_ENV
 const production = {
-  publicPath: '/video-servertest/api/v1',
-  webRTCRoomPath: '/room-servertest/api/v1'
+  videoPath: '/video-servertest/api/v1',
+  webRTCRoomPath: '/room-servertest/api/v1',
+  chatPath: '/chat-servertest/api/v1'
 }
 
 const development = {
-  publicPath: 'http://video-servertest.ihxlife.com:8083/api/v1',
-  webRTCRoomPath: 'http://room-servertest.ihxlife.com:8085/api/v1'
+  videoPath: 'http://video-servertest.ihxlife.com:8083/api/v1',
+  webRTCRoomPath: 'http://room-servertest.ihxlife.com:8085/api/v1',
+  chatPath: 'http://chat-servertest.ihxlife.com/api/v1'
 }
 
 const location = env === 'production' ? production : development
