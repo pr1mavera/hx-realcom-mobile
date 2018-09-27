@@ -79,7 +79,7 @@ export default {
     },
     toLineUp(csId) {
       // this.$router.push({path: `/room/line-up/${this.userInfo.userId}/${this.cusSerId}`})
-      this.$router.push({path: `/room/line-up`})
+      this.$router.push({path: `/room/line-up/${csId}`})
     }
   }
 }

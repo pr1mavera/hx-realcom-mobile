@@ -11,7 +11,7 @@
           </span>
           <span class="text">{{item.text}}</span>
           <i v-if="item.gift" class="gift-area">
-            <img width=100% height=100% :src="`/static/img/${item.gift}@2x.png`">
+            <img width=100% height=100% :src="`/video/static/img/${item.gift}@2x.png`">
           </i>
         </div>
       </li>

@@ -1,7 +1,7 @@
 <template>
   <section class="section">
     <main class="main">
-      <div class="img-box"><img src="/static/img/systemUpgrade.png"></div>
+      <div class="img-box"><img src="/video/static/img/systemUpgrade.png"></div>
       <div class="tips">
         <p>非常抱歉，当前版本过低，无法接入视频客服</p>
         <p>请把手机系统升级为11.0版本或以上</p>

@@ -10,7 +10,7 @@
     <div class="full-screen-container" v-show="fullScreen">
       <div class="video-header">
         <div class="avatar">
-          <img src="/static/img/avatar@2x.png">
+          <img src="/video/static/img/avatar@2x.png">
         </div>
         <div class="name">丽丽</div>
       </div>

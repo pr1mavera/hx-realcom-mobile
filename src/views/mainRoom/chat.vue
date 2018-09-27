@@ -683,12 +683,12 @@ export default {
     },
     /* *********************************** entend bar *********************************** */
     async sendImgMsgClick(file) {
-      this.toggleExtendBar()
       await this.sendImgMsg(file)
+      this.toggleExtendBar()
     },
     async sendGiftMsgClick(type) {
-      this.toggleExtendBar()
       await this.sendGiftMsg(type)
+      this.toggleExtendBar()
     },
     toggleExtendBar() {
       if (this.extendBarOpen) {
@@ -699,11 +699,11 @@ export default {
         return new Promise((resolve) => {
           self.setInputBar(false)
           // self.$refs.inputBar.setInputEditState('false')
-          self._inputBlur()
           debounce(() => {
             resolve()
           }, 300)()
         }).then(() => {
+          self._inputBlur()
           self.toggleBar(toggleBarStatus.extendBar)
         })
       } else {
@@ -876,7 +876,7 @@ export default {
       // background-color: @bg-normal;
       flex: 1;
       // background-image: url('/video/static/img/chat/chatBG.png');
-      background-image: url('/static/img/chat/chatBG.png');
+      background-image: url('/video/static/img/chat/chatBG.png');
       background-size: cover;
       // flex-basis: auto;
       // flex-shrink: 1;

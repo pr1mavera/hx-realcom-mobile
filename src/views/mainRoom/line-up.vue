@@ -3,7 +3,7 @@
     <!--<div class="top"></div>-->
     <main class="main">
       <div class="img-box">
-          <img src="/static/img/lineing.png">
+          <img src="/video/static/img/lineing.png">
         </div>
       <div class="tips">
         <p class="tips-top">当前还有<label class="num">{{num}}</label>人排队.</p>
@@ -70,7 +70,7 @@ export default {
       await this.initIM()
     },
     async initQueue() {
-      const res = await videoQueue(this.userInfo.userId, '00235530bcdd11e8bac9b72d08583918', 1)
+      const res = await videoQueue(this.userInfo.userId, this.$route.params.csId, 1)
       if (res.result.code === ERR_OK) {
         console.log('===============================> 排队啊 排队啊 排队啊 <===============================')
         return new Promise((resolve) => {

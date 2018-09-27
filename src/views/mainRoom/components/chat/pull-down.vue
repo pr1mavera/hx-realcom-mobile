@@ -7,7 +7,7 @@
       <div v-if="isPullingDown" class="loading">
         <div class="mf-loading-container">
           <!-- <img src="/video/static/img/loading.gif"> -->
-          <img src="/static/img/loading.gif">
+          <img src="/video/static/img/loading.gif">
         </div>
       </div>
       <div v-else><span>{{pulldownResult}}</span></div>
