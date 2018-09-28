@@ -20,3 +20,5 @@ export const fullScreen = state => state.fullScreen
 export const roomMode = state => state.roomMode
 // 当前排队状态
 export const queueMode = state => state.queueMode
+// 排队人数
+export const queueNum = state => state.queueNum

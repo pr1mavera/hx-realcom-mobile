@@ -329,8 +329,8 @@ export default {
   },
   methods: {
     async login() {
-      const params = this.$route.params
-      await this.loginByOpenID(params.openId)
+      const query = this.$route.query
+      await this.loginByOpenID(query.openId)
       await this.getUserInfo()
       await this.initSession()
       await this._setBotBaseInfo()

@@ -18,6 +18,16 @@ Vue.use(ToastPlugin)
 Vue.use(ConfirmPlugin)
 Vue.use(LoadingPlugin)
 
+Vue.prototype.$setgoindex = () => {
+  if (window.history.length <= 1) {
+    if (location.href.indexOf('?') === -1) {
+      window.location.href = location.href + '?goindex=true'
+    } else if (location.href.indexOf('?') !== -1 && location.href.indexOf('goindex') === -1) {
+      window.location.href = location.href + '&goindex=true'
+    }
+  }
+}
+
 // FastClick.attach(document.body) // 移动端消除300ms
 
 Vue.config.productionTip = false

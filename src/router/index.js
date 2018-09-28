@@ -28,7 +28,7 @@ export default new Router({
       component: room,
       children: [
         {
-          path: '/room/chat/:openId',
+          path: '/room/chat',
           name: 'chat',
           component: chat
         },

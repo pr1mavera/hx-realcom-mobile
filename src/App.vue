@@ -21,6 +21,9 @@ export default {
   created() {
     deviceConfig()
     // wxConfig()
+  },
+  activated() {
+    this.$setgoindex()
   }
   // watch: {
   //   $route() {

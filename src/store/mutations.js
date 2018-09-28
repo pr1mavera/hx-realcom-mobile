@@ -33,6 +33,9 @@ const mutations = {
   },
   [types.SET_QUEUE_MODE](state, mode) {
     state.queueMode = mode
+  },
+  [types.SET_QUEUE_NUM](state, num) {
+    state.queueNum = num
   }
 }
 

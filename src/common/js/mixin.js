@@ -28,7 +28,7 @@ export const loginMixin = {
         console.log('============================= 我现在来请求 loginByOpenID 辣 =============================')
         return new Promise((resolve) => {
           // 存vuex userInfo
-          res.data.userInfo.openId = this.$route.params.openId
+          res.data.userInfo.openId = this.$route.query.openId
           this.setUserInfo(res.data.userInfo)
           resolve()
         })
@@ -287,7 +287,8 @@ export const IMMixin = {
     ...mapGetters([
       'userInfo',
       'roomId',
-      'msgs'
+      'msgs',
+      'queueNum'
     ])
   },
   data() {
@@ -354,7 +355,7 @@ export const IMMixin = {
       const msgsObj = IM.parseMsgsInSystem(msgs).textMsgs[0]
       switch (msgsObj.code) {
         case systemMsgStatus.queuesReduce: // 人数减少
-
+          this.setQueueNum(this.queueNum - 1)
           break
         case systemMsgStatus.queuesSuccess: // 客户端排队成功
           // 存vuex csInfo / roomId / fullScreen
@@ -407,7 +408,8 @@ export const IMMixin = {
       setQueueMode: 'SET_QUEUE_MODE',
       setCsInfo: 'SET_CS_INFO',
       setRoomId: 'SET_ROOM_ID',
-      setSessionId: 'SET_SESSION_ID'
+      setSessionId: 'SET_SESSION_ID',
+      setQueueNum: 'SET_QUEUE_NUM'
       // setFullScreen: 'SET_FULL_SCREEN'
     }),
     ...mapActions([
@@ -518,8 +520,7 @@ export const sendMsgsMixin = {
         resolve()
         IM.sendNormalMsg(
           this.userInfo.userId,
-          // this.csInfo.csId,
-          '00235530bcdd11e8bac9b72d08583918',
+          this.csInfo.csId,
           {
             sessionId: this.sessionId,
             toUserName: this.csInfo.nickName,
@@ -581,8 +582,8 @@ export const sendMsgsMixin = {
         // IM 封装上传/发送图片
         const info = {
           from_id: this.userInfo.userId,
-          // to_id: this.csInfo.csId,
-          to_id: '00235530bcdd11e8bac9b72d08583918',
+          to_id: this.csInfo.csId,
+          // to_id: '00235530bcdd11e8bac9b72d08583918',
           identifier: this.userInfo.userId
         }
         // 上传图片
