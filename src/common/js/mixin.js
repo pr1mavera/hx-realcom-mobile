@@ -359,11 +359,11 @@ export const IMMixin = {
           break
         case systemMsgStatus.queuesSuccess: // 客户端排队成功
           // 存vuex csInfo / roomId / fullScreen
-          const info = {
+          const csInfoWithId = {
             csId: msgsObj.csId
           }
           // 获取客服基本信息
-          this.setCsInfo(info)
+          this.setCsInfo(csInfoWithId)
           this.setRoomId(msgsObj.csId)
           // this.setFullScreen(true)
           // 发送系统消息，通知座席端视频接入
@@ -390,6 +390,10 @@ export const IMMixin = {
 
           break
         case systemMsgStatus.transSessionId: // 座席端创建会话传递
+          // 存csName & sessionId
+          const csInfoWithName = shallowCopy(this.csInfo)
+          csInfoWithName.csName = msgsObj.csName
+          this.setCsInfo(csInfoWithName)
           this.setSessionId(msgsObj.sessionId)
           break
       }
@@ -581,15 +585,22 @@ export const sendMsgsMixin = {
         resolve()
         // IM 封装上传/发送图片
         const info = {
+          msg: '图片消息',
+          time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
           from_id: this.userInfo.userId,
+          nickName: this.userInfo.userName,
           to_id: this.csInfo.csId,
-          // to_id: '00235530bcdd11e8bac9b72d08583918',
-          identifier: this.userInfo.userId
+          toUserName: this.csInfo.csName,
+          sessionId: this.sessionId,
+          identifier: this.userInfo.userId,
+          msgStatus: msgStatus.msg,
+          msgType: msgTypes.msg_img
         }
         // 上传图片
         const resp = await IM.uploadPic(img, info)
         // 发送图片
-        await IM.sendPic(resp, info)
+        const customMsgInfo = IM.formatCustomMsgOption(info)
+        await IM.sendPic(resp, customMsgInfo)
       })
     },
     afterSendC2CTextMsgs(text) {

@@ -114,26 +114,22 @@ const IM = (() => {
     var msgStatus = ''
     var msgType = ''
     var time = ''
-    var giftType = ''
-    if (type === 'TIMCustomElem') {
-      var content = msgItem.getContent() // 获取元素对象
-      var desc = JSON.parse(content.getDesc())
-      msgType = desc.msgType
-      msgStatus = desc.msgStatus
-      time = desc.time
-      nickName = desc.nickName
-      var ext = JSON.parse(content.getExt())
-      if (ext.giftType) {
-        giftType = ext.giftType
-      }
-    } else if (type === 'TIMImageElem') {
+    debugger
+
+    var content = msgItem.getContent() // 获取元素对象
+    var desc = JSON.parse(content.getDesc())
+    msgType = desc.msgType
+    msgStatus = desc.msgStatus
+    time = desc.time
+    nickName = desc.nickName
+    var ext = JSON.parse(content.getExt())
+
+    if (msgItem.getContent().ImageInfoArray) {
       var imgList = msgItem.getContent().ImageInfoArray // 获取元素对象
       var imgData = {
         big: imgList[0].url,
         small: imgList[2].url
       }
-      msgType = '5'
-      msgStatus = '1'
     }
     return {
       nickName,
@@ -143,8 +139,7 @@ const IM = (() => {
       isSystem: newMsg.getFromAccount() === '@TIM#SYSTEM' || false,
       msgType,
       msgStatus,
-      time,
-      giftType
+      time
     }
   }
 
@@ -187,6 +182,9 @@ const IM = (() => {
       var userPhone = data.userPhone
       var sessionId = data.sessionId
     }
+    if (ext.giftType) {
+      giftType = ext.giftType
+    }
     return {
       code,
       userId,
@@ -196,7 +194,8 @@ const IM = (() => {
       csName,
       userPhone,
       sessionId,
-      desc
+      desc,
+      giftType
     }
   }
 
@@ -304,6 +303,27 @@ const IM = (() => {
     })
   }
 
+  function formatCustomMsgOption(options) {
+    return {
+      data: options.msg,
+      desc: `{
+        "sessionId":"${options.sessionId}",
+        "sendUserId":"${options.from_id}",
+        "sendUserType":"1",
+        "toUserId":"${options.to_id}",
+        "toUserName":"${options.toUserName}",
+        "toUserType":"2",
+        "nickName":"${options.nickName}",
+        "msgType":"${options.msgType}",
+        "time":"${options.time}",
+        "msgStatus":"${options.msgStatus}"
+      }`,
+      ext: `{"giftType":"${options.giftType}"}`,
+      identifier: options.identifier,
+      nickName: options.nickName
+    }
+  }
+
   // 发送自定义消息
   function sendCustomMsg(msgInfo, callback) {
     if (!msgInfo.groupId) {
@@ -387,6 +407,9 @@ const IM = (() => {
         console.error('您还没有登录！！')
         return
       }
+      var data = msgInfo.data || ''
+      var desc = msgInfo.desc || ''
+      var ext = msgInfo.ext || ''
       var selSess = new webim.Session(webim.SESSION_TYPE.C2C, msgInfo.to_id, msgInfo.to_id, null, Math.round(new Date().getTime() / 1000))
       var isSend = true // 是否为自己发送
       var seq = -1 // 消息序列，-1表示sdk自动生成，用于去重
@@ -415,6 +438,9 @@ const IM = (() => {
       }
       msg.addImage(imagesObj)
 
+      var custom_obj = new webim.Msg.Elem.Custom(data, desc, ext)
+      msg.addCustom(custom_obj)
+
       // 调用发送图片接口
       return new Promise((resolve) => {
         webim.sendMsg(msg, function(resp) {
@@ -431,6 +457,7 @@ const IM = (() => {
     logout,
     sendNoticeMsg,
     sendNormalMsg,
+    formatCustomMsgOption,
     createGroup,
     joinGroup,
     parseMsg,
