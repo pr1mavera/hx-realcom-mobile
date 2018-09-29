@@ -114,7 +114,6 @@ const IM = (() => {
     var msgStatus = ''
     var msgType = ''
     var time = ''
-    debugger
 
     var content = msgItem.getContent() // 获取元素对象
     var desc = JSON.parse(content.getDesc())
@@ -123,13 +122,8 @@ const IM = (() => {
     time = desc.time
     nickName = desc.nickName
     var ext = JSON.parse(content.getExt())
-
-    if (msgItem.getContent().ImageInfoArray) {
-      var imgList = msgItem.getContent().ImageInfoArray // 获取元素对象
-      var imgData = {
-        big: imgList[0].url,
-        small: imgList[2].url
-      }
+    if (ext.imgData) {
+      var imgData = ext.imgData
     }
     return {
       nickName,
@@ -182,9 +176,9 @@ const IM = (() => {
       var userPhone = data.userPhone
       var sessionId = data.sessionId
     }
-    if (ext.giftType) {
-      giftType = ext.giftType
-    }
+    // if (ext.giftType) {
+    //   giftType = ext.giftType
+    // }
     return {
       code,
       userId,
@@ -295,7 +289,9 @@ const IM = (() => {
         "time":"${options.time}",
         "msgStatus":"${options.msgStatus}"
       }`,
-      ext: `{"giftType":"${options.giftType}"}`,
+      ext: `{
+        "imgData":${options.imgData ? options.imgData : ''}
+      }`,
       identifier: options.identifier,
       nickName: options.nickName
     }, function() {
@@ -303,25 +299,23 @@ const IM = (() => {
     })
   }
 
-  function formatCustomMsgOption(options) {
-    return {
-      data: options.msg,
-      desc: `{
-        "sessionId":"${options.sessionId}",
-        "sendUserId":"${options.from_id}",
-        "sendUserType":"1",
-        "toUserId":"${options.to_id}",
-        "toUserName":"${options.toUserName}",
-        "toUserType":"2",
-        "nickName":"${options.nickName}",
-        "msgType":"${options.msgType}",
-        "time":"${options.time}",
-        "msgStatus":"${options.msgStatus}"
-      }`,
-      ext: `{"giftType":"${options.giftType}"}`,
-      identifier: options.identifier,
-      nickName: options.nickName
+  function formatCustomMsgOption(images, options) {
+    let big = ''
+    let small = ''
+    for (let i in images.URL_INFO) {
+      const img = images.URL_INFO[i]
+      switch (img.PIC_TYPE) {
+        case 1: // 原图
+          big = img.DownUrl
+          break
+        case 2:// 小图（缩略图）
+          small = img.DownUrl
+          break
+      }
     }
+    const imgData = { big, small }
+    options.imgData = JSON.stringify(imgData)
+    return options
   }
 
   // 发送自定义消息
@@ -377,13 +371,13 @@ const IM = (() => {
     // } else if (selType === SessionType.GROUP) { // 发群图片
     //     businessType = webim.UPLOAD_PIC_BUSSINESS_TYPE.GROUP_MSG
     // }
-    businessType = webim.UPLOAD_PIC_BUSSINESS_TYPE.GROUP_MSG
+    businessType = webim.UPLOAD_PIC_BUSSINESS_TYPE.C2C_MSG
     // 封装上传图片请求
     var opt = {
       'file': img, // 图片对象
       // 'onProgressCallBack': onProgress || (() => {}), // 上传图片进度条回调函数
-      'From_Account': extInfo.from_id, // 发送者帐号
-      'To_Account': extInfo.to_id, // 接收者
+      'From_Account': extInfo.sendUserId, // 发送者帐号
+      'To_Account': extInfo.toUserId, // 接收者
       'businessType': businessType// 业务类型
     }
     // 上传图片
@@ -403,20 +397,20 @@ const IM = (() => {
 
   // 发送图片
   function sendPic(images, msgInfo) {
-      if (!msgInfo.from_id) {
+      if (!msgInfo.sendUserId) {
         console.error('您还没有登录！！')
         return
       }
       var data = msgInfo.data || ''
       var desc = msgInfo.desc || ''
       var ext = msgInfo.ext || ''
-      var selSess = new webim.Session(webim.SESSION_TYPE.C2C, msgInfo.to_id, msgInfo.to_id, null, Math.round(new Date().getTime() / 1000))
+      var selSess = new webim.Session(webim.SESSION_TYPE.C2C, msgInfo.toUserId, msgInfo.toUserId, null, Math.round(new Date().getTime() / 1000))
       var isSend = true // 是否为自己发送
       var seq = -1 // 消息序列，-1表示sdk自动生成，用于去重
       var random = Math.round(Math.random() * 4294967296) // 消息随机数，用于去重
       var msgTime = Math.round(new Date().getTime() / 1000) // 消息时间戳
       var subType = webim.GROUP_MSG_SUB_TYPE.COMMON
-      var msg = new webim.Msg(selSess, isSend, seq, random, msgTime, msgInfo.identifier, subType, null)
+      var msg = new webim.Msg(selSess, isSend, seq, random, msgTime, msgInfo.sendUserId, subType, null)
       var imagesObj = new webim.Msg.Elem.Images(images.File_UUID)
       for (var i in images.URL_INFO) {
           var img = images.URL_INFO[i]
