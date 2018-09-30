@@ -125,9 +125,13 @@ const IM = (() => {
     if (ext.imgData) {
       var imgData = ext.imgData
     }
+    if (ext.proxyInfo) {
+      var proxyInfo = ext.proxyInfo
+    }
     return {
       nickName,
       imgData,
+      proxyInfo,
       content: newMsg.toHtml(),
       isSelfSend: newMsg.getIsSend(),
       isSystem: newMsg.getFromAccount() === '@TIM#SYSTEM' || false,
@@ -290,7 +294,8 @@ const IM = (() => {
         "msgStatus":"${options.msgStatus}"
       }`,
       ext: `{
-        "imgData":${options.imgData ? options.imgData : ''}
+        "imgData":{${options.imgData ? options.imgData : ''}},
+        "proxyInfo":{${options.proxyInfo ? options.proxyInfo : ''}}
       }`,
       identifier: options.identifier,
       nickName: options.nickName
@@ -314,7 +319,8 @@ const IM = (() => {
       }
     }
     const imgData = { big, small }
-    options.imgData = JSON.stringify(imgData)
+    const imgStr = JSON.stringify(imgData).replace(/\s+/g, "")
+    options.imgData = imgStr.substr(1, imgStr.length - 2)
     return options
   }
 

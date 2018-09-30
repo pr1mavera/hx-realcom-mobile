@@ -44,6 +44,7 @@
                 :extend="msg.msgExtend"
                 :cardInfo="msg.cardInfo"
                 :dialogInfo="msg.dialogInfo"
+                :proxyInfo="msg.proxyInfo"
                 @enterToMenChat="enterToMenChat"
               ></component>
             </li>
@@ -878,6 +879,7 @@ export default {
       // background-image: url('/video/static/img/chat/chatBG.png');
       background-image: url('/video/static/img/chat/chatBG.png');
       background-size: cover;
+      // background-color: #000;
       // flex-basis: auto;
       // flex-shrink: 1;
       .chat-content {

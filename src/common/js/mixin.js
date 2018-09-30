@@ -401,9 +401,9 @@ export const IMMixin = {
     receiveCustomMsgs(msgs) {
       const msgsObj = IM.parseMsgs(msgs).textMsgs[0]
       // 给图片信息配置时间
-      if (msgsObj.time === '') {
-        msgsObj.time = formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss')
-      }
+      // if (msgsObj.time === '') {
+      //   msgsObj.time = formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss')
+      // }
       this.sendMsgs([
         msgsObj
       ])
@@ -524,10 +524,11 @@ export const sendMsgsMixin = {
         resolve()
         IM.sendNormalMsg(
           this.userInfo.userId,
-          this.csInfo.csId,
+          // this.csInfo.csId,
+          '987654321',
           {
             sessionId: this.sessionId,
-            toUserName: this.csInfo.nickName,
+            toUserName: this.csInfo.csName,
             msg: text,
             time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
             nickName: this.userInfo.userName,
