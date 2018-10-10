@@ -110,30 +110,26 @@ const IM = (() => {
   function parseMsg(newMsg) {
     var msgItem = newMsg.getElems()[0]
     var type = msgItem.getType()
-    var nickName = newMsg.getFromAccountNick()
+    var nickName = ''
     var msgStatus = ''
     var msgType = ''
     var time = ''
-    var giftType = ''
-    if (type === 'TIMCustomElem') {
-      // debugger
-      var content = msgItem.getContent() // 获取元素对象
-      var desc = JSON.parse(content.getDesc())
-      msgType = desc.msgType
-      msgStatus = desc.msgStatus
-      time = desc.time
-      var ext = JSON.parse(content.getExt())
-      if (ext.giftType) {
-        giftType = ext.giftType
-      }
-    } else if (type === 'TIMImageElem') {
+    debugger
+
+    var content = msgItem.getContent() // 获取元素对象
+    var desc = JSON.parse(content.getDesc())
+    msgType = desc.msgType
+    msgStatus = desc.msgStatus
+    time = desc.time
+    nickName = desc.nickName
+    var ext = JSON.parse(content.getExt())
+
+    if (msgItem.getContent().ImageInfoArray) {
       var imgList = msgItem.getContent().ImageInfoArray // 获取元素对象
       var imgData = {
         big: imgList[0].url,
         small: imgList[2].url
       }
-      msgType = '5'
-      msgStatus = '1'
     }
     return {
       nickName,
@@ -143,8 +139,7 @@ const IM = (() => {
       isSystem: newMsg.getFromAccount() === '@TIM#SYSTEM' || false,
       msgType,
       msgStatus,
-      time,
-      giftType
+      time
     }
   }
 
@@ -183,6 +178,12 @@ const IM = (() => {
       var csId = data.csId
       var openId = data.openId
       var userName = data.userName
+      var csName = data.csName
+      var userPhone = data.userPhone
+      var sessionId = data.sessionId
+    }
+    if (ext.giftType) {
+      giftType = ext.giftType
     }
     return {
       code,
@@ -190,7 +191,11 @@ const IM = (() => {
       csId,
       openId,
       userName,
-      desc
+      csName,
+      userPhone,
+      sessionId,
+      desc,
+      giftType
     }
   }
 
@@ -221,7 +226,7 @@ const IM = (() => {
     var random = Math.round(Math.random() * 4294967296) //消息随机数，用于去重
     var msgTime = Math.round(new Date().getTime() / 1000) //消息时间戳
     var subType = webim.GROUP_MSG_SUB_TYPE.COMMON
-    var msg = new webim.Msg(selSess, isSend, seq, random, msgTime, from_id, subType, null)
+    var msg = new webim.Msg(selSess, isSend, seq, random, msgTime, from_id, subType, msgInfo.nickName)
     var custom_obj = new webim.Msg.Elem.Custom(data, desc, ext)
     msg.addCustom(custom_obj)
 
@@ -246,7 +251,18 @@ const IM = (() => {
     sendCustomMsg({
       groupId: options.groupId,
       data: options.msg,
-      desc: `{"nickName":"${options.nickName}","msgType":"${options.msgType}","time":"${options.time}","msgStatus":"${options.msgStatus}"}`,
+      desc: `{
+        "sessionId":"${options.sessionId}",
+        "sendUserId":"${options.identifier}",
+        "sendUserType":"1",
+        "toUserId":"${options.toUserId}",
+        "toUserName":"${options.toUserName}",
+        "toUserType":"2",
+        "nickName":"${options.nickName}",
+        "msgType":"${options.msgType}",
+        "time":"${options.time}",
+        "msgStatus":"${options.msgStatus}"
+      }`,
       ext: `{"giftType":"${options.giftType}"}`,
       identifier: options.identifier,
       nickName: options.nickName
@@ -267,13 +283,45 @@ const IM = (() => {
     }
     sendMsg(from_id, to_id, {
       data: options.msg,
-      desc: `{"nickName":"${options.nickName}","msgType":"${options.msgType}","time":"${options.time}","msgStatus":"${options.msgStatus}"}`,
+      desc: `{
+        "sessionId":"${options.sessionId}",
+        "sendUserId":"${from_id}",
+        "sendUserType":"1",
+        "toUserId":"${to_id}",
+        "toUserName":"${options.toUserName}",
+        "toUserType":"2",
+        "nickName":"${options.nickName}",
+        "msgType":"${options.msgType}",
+        "time":"${options.time}",
+        "msgStatus":"${options.msgStatus}"
+      }`,
       ext: `{"giftType":"${options.giftType}"}`,
       identifier: options.identifier,
       nickName: options.nickName
     }, function() {
       success && success()
     })
+  }
+
+  function formatCustomMsgOption(options) {
+    return {
+      data: options.msg,
+      desc: `{
+        "sessionId":"${options.sessionId}",
+        "sendUserId":"${options.from_id}",
+        "sendUserType":"1",
+        "toUserId":"${options.to_id}",
+        "toUserName":"${options.toUserName}",
+        "toUserType":"2",
+        "nickName":"${options.nickName}",
+        "msgType":"${options.msgType}",
+        "time":"${options.time}",
+        "msgStatus":"${options.msgStatus}"
+      }`,
+      ext: `{"giftType":"${options.giftType}"}`,
+      identifier: options.identifier,
+      nickName: options.nickName
+    }
   }
 
   // 发送自定义消息
@@ -359,6 +407,9 @@ const IM = (() => {
         console.error('您还没有登录！！')
         return
       }
+      var data = msgInfo.data || ''
+      var desc = msgInfo.desc || ''
+      var ext = msgInfo.ext || ''
       var selSess = new webim.Session(webim.SESSION_TYPE.C2C, msgInfo.to_id, msgInfo.to_id, null, Math.round(new Date().getTime() / 1000))
       var isSend = true // 是否为自己发送
       var seq = -1 // 消息序列，-1表示sdk自动生成，用于去重
@@ -387,6 +438,9 @@ const IM = (() => {
       }
       msg.addImage(imagesObj)
 
+      var custom_obj = new webim.Msg.Elem.Custom(data, desc, ext)
+      msg.addCustom(custom_obj)
+
       // 调用发送图片接口
       return new Promise((resolve) => {
         webim.sendMsg(msg, function(resp) {
@@ -403,6 +457,7 @@ const IM = (() => {
     logout,
     sendNoticeMsg,
     sendNormalMsg,
+    formatCustomMsgOption,
     createGroup,
     joinGroup,
     parseMsg,
@@ -416,3 +471,12 @@ const IM = (() => {
 })()
 
 export default IM
+
+// sessionId: desc.sessionId,
+// sendUserId: desc.identifier,
+// sendUserName: desc.nickName,
+// sendUserType: desc.sendUserType,
+// toUserId: desc.toUserId,
+// toUserName: desc.toUserName,
+// toUserType: desc.toUserType,
+// msgType: desc.msgType,

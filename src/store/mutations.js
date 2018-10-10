@@ -13,6 +13,9 @@ const mutations = {
   [types.SET_ROOM_ID](state, id) {
     state.roomId = id
   },
+  [types.SET_SESSION_ID](state, id) {
+    state.sessionId = id
+  },
   [types.SET_MSGS](state, msgs) {
     state.msgs = msgs
   },
@@ -30,6 +33,9 @@ const mutations = {
   },
   [types.SET_QUEUE_MODE](state, mode) {
     state.queueMode = mode
+  },
+  [types.SET_QUEUE_NUM](state, num) {
+    state.queueNum = num
   }
 }
 

@@ -12,7 +12,7 @@
             :style="setRotate"> <!-- 限制边框范围及显示阴影 -->
             <div class="container">
               <div class="header">
-                <img width=100% class="header-img" src="/static/img/chat/csAddBg.png">
+                <img width=100% class="header-img" src="/video/static/img/chat/csAddBg.png">
                 <div class="header-msg">
                   <div class="avatar">
                     <img width=100% height=100% :src=avatarImg>

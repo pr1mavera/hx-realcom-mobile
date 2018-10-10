@@ -31,6 +31,11 @@ export const syncGroupC2CMsg = data => http.post('RTCRoom', '/syncGroupC2CMsg', 
 export const videoQueue = (userId, csId, priority) => http.post('RTCRoom', '/video/user/queue', { userId, csId, priority })
 
 /**
+ * [videoQueueCancel 客户端视频取消排队]
+ */
+export const videoQueueCancel = (userId, csId) => http.post('RTCRoom', '/video/user/queue/cancel', { userId, csId })
+
+/**
  ************************************ video ************************************
  */
 

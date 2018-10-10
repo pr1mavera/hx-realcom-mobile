@@ -3,11 +3,13 @@
     <keep-alive>
       <router-view class="router-view"></router-view>
     </keep-alive>
-    <videoBar class="video-bar"></videoBar>
+    <videoBar class="video-bar" v-if="isVideoBarOpen"></videoBar>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
+import { mapGetters } from 'vuex'
+import { roomStatus } from '@/common/js/status'
 
 export default {
   components: {
@@ -17,6 +19,15 @@ export default {
     return {
 
     }
+  },
+  computed: {
+    isVideoBarOpen() {
+      // return this.queueMode === queueStatus.queuing || this.queueMode === queueStatus.queueSuccess || this.queueMode === queueStatus.queueOver
+      return this.roomMode === roomStatus.videoChat
+    },
+    ...mapGetters([
+      'roomMode'
+    ])
   },
   mounted() {
 

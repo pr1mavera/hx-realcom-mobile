@@ -8,7 +8,7 @@
       :name="item.nickName"
       :num="item.servTimes"
       :gifts="item.giftCount"
-      @nextStatus="nextStatus"
+      @toLineUp="toLineUp"
     ></my-cs-card>
     <p class="tips">您还可以添加 <span>{{3 - myCsList.length}}</span> 名专属客服</p>
     <x-button :gradients="['#FF8C6A', '#FF80A0']" @click.native="addCs"
@@ -18,25 +18,18 @@
       </svg>
       {{ myCsList.length === 3 ? '查看更多': '添加客服' }}
     </x-button>
-    <!-- 提示用户在浏览器中打开 -->
-    <ios-guide v-if="iosGuide"></ios-guide>
-    <!-- 提示用升级版本 -->
-    <low-version v-if="lowVersion"></low-version>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
   import { XButton } from 'vux'
-  import { mapGetters, mapMutations } from 'vuex'
+  import { mapGetters } from 'vuex'
   import { ERR_OK, queryCsInfo } from '@/server/index.js'
-  import {queueStatus} from '@/common/js/status'
 
 export default {
   components: {
     XButton,
-    'myCsCard': () => import('@/views/mainRoom/components/service/my-cs-card'),
-    'IosGuide': () => import('@/views/mainRoom/components/video/ios-guide'),
-    'LowVersion': () => import('@/views/mainRoom/components/video/low-version')
+    'myCsCard': () => import('@/views/mainRoom/components/service/my-cs-card')
   },
   computed: {
     ...mapGetters([
@@ -59,9 +52,7 @@ export default {
         //   giftCount: 9933
         // }
       ],
-      quota: 3,
-      iosGuide: false,
-      lowVersion: false
+      quota: 3
     }
   },
   mounted() {
@@ -69,7 +60,6 @@ export default {
   },
   methods: {
     async getCsList() {
-      // debugger
       console.log('获取用户信息=>' + this.userInfo.userId)
       const page = 1
       const pageSize = -1
@@ -79,7 +69,6 @@ export default {
       if (res.result.code === ERR_OK) {
         console.log('============================= 我现在来请求 专属客服 辣 =============================')
         this.myCsList = res.data.csList
-        debugger
       } else {
         console.log('error in queryCsInfo' + JSON.stringify(res))
       }
@@ -88,30 +77,10 @@ export default {
       console.log('添加专属客服')
       this.$router.push('/room/cusServ/add')
     },
-    // 判断进入视频聊天前的状态
-    nextStatus(data) {
-      switch (data) {
-        // ios 微信内置浏览器
-        case 'ios-guide':
-          this.iosGuide = true
-          break
-        // ios 版本过低
-        case 'low-version':
-          this.lowVersion = true
-          break
-        // 进入排队
-        case 'enterVideoLineUp':
-          this.setQueueMode(queueStatus.queuing)
-          this.$router.push({
-          path: '/room/chat'
-        })
-          break
-      }
-    },
-
-    ...mapMutations({
-      setQueueMode: 'SET_QUEUE_MODE'
-    })
+    toLineUp(csId) {
+      // this.$router.push({path: `/room/line-up/${this.userInfo.userId}/${this.cusSerId}`})
+      this.$router.push({path: `/room/line-up/${csId}`})
+    }
   }
 }
 </script>

@@ -1,16 +1,16 @@
 <template>
-  <div class="video-bar" v-if="isVideoBarOpen">
+  <div class="video-bar">
     <!-- 排队 -->
-    <line-up
+    <!-- <line-up
       class="line-up"
       v-show="isLineUpShow"
       @ready="readyToVideo"
-    ></line-up>
+    ></line-up> -->
     <!-- 最大化 -->
     <div class="full-screen-container" v-show="fullScreen">
       <div class="video-header">
         <div class="avatar">
-          <img src="/static/img/avatar@2x.png">
+          <img src="/video/static/img/avatar@2x.png">
         </div>
         <div class="name">丽丽</div>
       </div>
@@ -73,27 +73,28 @@
 import { mapGetters, mapMutations } from 'vuex'
 import { queueStatus } from '@/common/js/status'
 import { RTCRoomMixin } from '@/common/js/mixin'
-import IM from '@/server/im.js'
+// import IM from '@/server/im.js'
 
 export default {
   mixins: [
     RTCRoomMixin
   ],
   components: {
-    'LineUp': () => import('@/views/mainRoom/components/video/line-up'),
+    // 'LineUp': () => import('@/views/mainRoom/components/video/line-up'),
     'VideoFooter': () => import('@/views/mainRoom/components/video/video-footer'),
     'VideoMsgList': () => import('@/views/mainRoom/components/video/video-msg-list')
   },
   computed: {
-    isVideoBarOpen() {
-      return this.queueMode === queueStatus.queuing || this.queueMode === queueStatus.queueSuccess || this.queueMode === queueStatus.queueOver
-    },
+    // isVideoBarOpen() {
+    //   // return this.queueMode === queueStatus.queuing || this.queueMode === queueStatus.queueSuccess || this.queueMode === queueStatus.queueOver
+    //   return this.roomMode === roomStatus.videoChat
+    // },
     isMiniBarOpen() {
       return !this.fullScreen && this.queueMode === queueStatus.queueOver
     },
-    isLineUpShow() {
-      return this.queueMode === queueStatus.queuing || this.queueMode === queueStatus.queueSuccess
-    },
+    // isLineUpShow() {
+    //   return this.queueMode === queueStatus.queuing || this.queueMode === queueStatus.queueSuccess
+    // },
     ...mapGetters([
       'fullScreen',
       'roomMode',
@@ -107,6 +108,9 @@ export default {
 
     }
   },
+  mounted() {
+    this.readyToVideo()
+  },
   methods: {
     openVideoBar() {
       this.setFullScreen(true)
@@ -115,7 +119,7 @@ export default {
       this.setFullScreen(false)
     },
     readyToVideo() {
-      IM.joinGroup(this.roomId, this.userInfo.userId)
+      // IM.joinGroup(this.roomId, this.userInfo.userId)
       this.initRTC(this.roomId)
       // const query = this.$route.query
       // this.setUserInfoToEnterRoom(query, this.initRTC, this.initIM)

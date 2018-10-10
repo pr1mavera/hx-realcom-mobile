@@ -3,36 +3,41 @@
     <!--<div class="top"></div>-->
     <main class="main">
       <div class="img-box">
-          <img src="/static/img/lineing.png">
+          <img src="/video/static/img/lineing.png">
         </div>
       <div class="tips">
-        <p class="tips-top">当前还有<label class="num">{{num}}</label>人排队.</p>
+        <p class="tips-top">当前还有<label class="num">{{this.queueNum}}</label>人排队.</p>
         <p class="tips-bottom">预计需要等待{{times}}分钟</p>
       </div>
-      <a type="reset" class="btn-cancel">取 消</a>
+      <a type="reset" class="btn-cancel" @click="clickToCancelLineUp">取 消</a>
       <connect-success ref="connectSuccess" @confirmToVideo="confirmToVideo"></connect-success>
     </main>
   </section>
 </template>
 
 <script type="text/ecmascript-6">
-import { mapGetters, mapActions } from 'vuex'
-import { ERR_OK, videoQueue } from '@/server/index.js'
+import { mapGetters, mapMutations, mapActions } from 'vuex'
+import { IMMixin } from '@/common/js/mixin'
+import { ERR_OK, videoQueue, videoQueueCancel } from '@/server/index.js'
+import { queueStatus } from '@/common/js/status'
 
 export default {
+  mixins: [
+    IMMixin
+  ],
   components: {
-    // ConnectSuccess,
     'ConnectSuccess': () => import('@/views/mainRoom/components/video/connect-success')
   },
   computed: {
     ...mapGetters([
-      'userInfo'
+      'userInfo',
+      'queueNum'
     ])
   },
   data() {
     return {
-      num: 3,
       times: 1,
+      videoQueueNum: 0,
       loginInfo: {
         // userId: `userid_web_${Date.now().toString()}`,
         userId: 'cust-test',
@@ -46,40 +51,50 @@ export default {
     }
   },
   mounted() {
+    this.setQueueMode(queueStatus.queuing)
     this.initQueue()
   },
   methods: {
     async initQueue() {
-      const res = await videoQueue(this.userInfo.userId, '123456789', 1)
+      const res = await videoQueue(this.userInfo.userId, this.$route.params.csId, 1)
       if (res.result.code === ERR_OK) {
         console.log('===============================> 排队啊 排队啊 排队啊 <===============================')
         return new Promise((resolve) => {
-          this.num = res.data.queueNum
+          this.setQueueNum(res.data.queueNum)
           resolve()
         })
       } else {
         console.log('error in videoQueue')
       }
     },
-    confirmToVideo() {
-      // this.$router.push({
-      //   path: '/room/chat',
-      //   // query: {
-      //   //   cmd: 'enter',
-      //   //   roomID: 'cs-test',
-      //   //   userId: this.loginInfo.userId,
-      //   //   userName: this.loginInfo.userName
-      //   // }
-      //   query: {
-      //     cmd: 'create',
-      //     roomName: '12345678',
-      //     userId: this.loginInfo.userId,
-      //     userName: this.loginInfo.userName
-      //   }
-      // })
-      this.readyToVideoChat()
-      this.$emit('ready')
+    async clickToCancelLineUp() {
+      const res = await videoQueueCancel(this.userInfo.userId, this.$route.params.csId)
+      if (res.result.code === ERR_OK) {
+        console.log('===============================> 取消排队 啊 取消排队 <===============================')
+        if (this.$route.query.goindex === 'true') {
+          debugger
+          this.$router.push('/')
+        } else {
+          this.$router.back(-1)
+        }
+      } else {
+        console.log('error in videoQueueCancel')
+      }
     },
+    queueListReduce() {
+      debugger
+      this.videoQueueNum -= 1
+    },
+    confirmToVideo() {
+      this.$router.push({path: `/room/chat?openId=${this.userInfo.openId}`})
+      this.readyToVideoChat()
+      // this.$emit('ready')
+    },
+    ...mapMutations({
+      setUserInfo: 'SET_USER_INFO',
+      setQueueMode: 'SET_QUEUE_MODE',
+      setQueueNum: 'SET_QUEUE_NUM'
+    }),
     ...mapActions([
       'readyToVideoChat'
     ])
