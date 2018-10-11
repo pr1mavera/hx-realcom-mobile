@@ -26,7 +26,7 @@
         type="text"
         @click="chatFocus"
         @keyup="chatInput($event, false)"
-        ></div>
+      ></div>
     </div>
     <div class="input-bar-item right-item">
       <transition
@@ -85,7 +85,7 @@ export default {
         this.text = e.currentTarget.textContent
         this.$emit('chatInputChange', this.text)
       } else {
-        this.$emit('chatInputCommit', this.text)
+        this.$emit('chatInputCommit', this.$refs.inputContent.innerHTML)
       }
     },
     getInputEditState() {

@@ -62,7 +62,8 @@ export const msgTypes = {
   msg_no_idea: '4', // 直接转人工(机器人)
   msg_img: '5', // 发送图片
   msg_gift: '6', // 礼物消息
-  msg_liked: '7' // 点赞消息
+  msg_liked: '7', // 点赞消息
+  msg_card: '8' // 名片消息
 }
 
 export const dialogTypes = {

@@ -401,9 +401,9 @@ export const IMMixin = {
     receiveCustomMsgs(msgs) {
       const msgsObj = IM.parseMsgs(msgs).textMsgs[0]
       // 给图片信息配置时间
-      if (msgsObj.time === '') {
-        msgsObj.time = formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss')
-      }
+      // if (msgsObj.time === '') {
+      //   msgsObj.time = formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss')
+      // }
       this.sendMsgs([
         msgsObj
       ])
@@ -524,10 +524,11 @@ export const sendMsgsMixin = {
         resolve()
         IM.sendNormalMsg(
           this.userInfo.userId,
-          this.csInfo.csId,
+          // this.csInfo.csId,
+          '987654321',
           {
             sessionId: this.sessionId,
-            toUserName: this.csInfo.nickName,
+            toUserName: this.csInfo.csName,
             msg: text,
             time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
             nickName: this.userInfo.userName,
@@ -587,9 +588,10 @@ export const sendMsgsMixin = {
         const info = {
           msg: '图片消息',
           time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
-          from_id: this.userInfo.userId,
           nickName: this.userInfo.userName,
-          to_id: this.csInfo.csId,
+          sendUserId: this.userInfo.userId,
+          // toUserId: this.csInfo.csId,
+          toUserId: '987654321',
           toUserName: this.csInfo.csName,
           sessionId: this.sessionId,
           identifier: this.userInfo.userId,
@@ -599,8 +601,12 @@ export const sendMsgsMixin = {
         // 上传图片
         const resp = await IM.uploadPic(img, info)
         // 发送图片
-        const customMsgInfo = IM.formatCustomMsgOption(info)
-        await IM.sendPic(resp, customMsgInfo)
+        const customMsgInfo = IM.formatCustomMsgOption(resp, info)
+        await IM.sendNormalMsg(
+          this.userInfo.userId,
+          // this.csInfo.csId,
+          '987654321',
+          customMsgInfo)
       })
     },
     afterSendC2CTextMsgs(text) {

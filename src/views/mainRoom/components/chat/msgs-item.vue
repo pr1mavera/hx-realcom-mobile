@@ -35,7 +35,7 @@
           </span>
         </span>
         <!-- 图片消息 -->
-        <span class="text" v-if="this.types === msgTypes.msg_img">
+        <span class="text text-img" v-if="this.types === msgTypes.msg_img">
           <img class="text-img" height=100% :src="this.imgSrc.small">
         </span>
         <!-- 礼物消息 -->
@@ -47,6 +47,36 @@
         <span class="text" v-if="this.types === msgTypes.msg_leave">客服暂时不在，请<span class="button">点击留言</span>~</span>
         <!-- 猜问题 -->
         <span class="text" v-if="this.types === msgTypes.msg_guess">我猜您想知道这些问题</span>
+        <!-- 名片消息 -->
+        <span class="text" v-if="this.types === msgTypes.msg_card">
+          <div class="text-card">
+            <div class="card-left">
+              <span class="name">{{this.proxyInfo.agentName}}</span>
+              <!-- <span class="sex">{{this.proxyInfo.agentSex}}</span> -->
+              <span class="sex">
+                <svg class="icon extend-click" aria-hidden="true">
+                  <use xlink:href="#icon-nan"></use>
+                </svg>
+              </span>
+            </div>
+            <div class="card-right">
+              <ul>
+                <li class="infoList">
+                  <span class="title">工号：</span>
+                  <span class="val">{{this.proxyInfo.agentId}}</span>
+                </li>
+                <li class="infoList">
+                  <span class="title">所属渠道：</span>
+                  <span class="val">个险</span>
+                </li>
+                <li class="infoList">
+                  <span class="title">电话：</span>
+                  <span class="val phone" @click="callPhone($event)">{{this.proxyInfo.agentPhone}}</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </span>
       </div>
       <!-- 猜问题 模块 -->
       <div class="content chat-content-shadow left-content-style content-extend" v-if="this.types === msgTypes.msg_guess">
@@ -89,6 +119,9 @@ export default {
     },
     giftType: {
       type: String
+    },
+    proxyInfo: {
+      type: Object
     }
   },
   data() {
@@ -105,6 +138,10 @@ export default {
     console.log('chat-content-item ===> 你个组件你被引用了哈哈哈')
   },
   methods: {
+    callPhone(event) {
+      const e = event || window.event
+      window.location.href = `tel:${e.currentTarget.innerText}`
+    },
     enterToMenChat() {
       this.$emit('enterToMenChat')
     }
@@ -257,6 +294,52 @@ export default {
             }
             &:last-child {
               margin-bottom: 0;
+            }
+          }
+        }
+        .text-card {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          width: 100%;
+          .card-left {
+            width: 5.6rem;
+            vertical-align: center;
+            // text-align: center;
+            margin-right: 1.2rem;
+            .name {
+              display: inline-block;
+              font-size: 1.5rem;
+              font-weight: 400;
+              color: @text-normal;
+              // line-height: 3.5rem;
+              margin-bottom: 1rem;
+            }
+            .sex {
+              width: 1.2rem;
+              height: 1.2rem;
+              display: block;
+              .icon {
+                width: 100%;
+                height: 100%;
+                fill: rgb(82, 144, 239);
+              }
+            }
+          }
+          .card-right {
+            font-size: 1.2rem;
+            ul {
+              .infoList {
+                .title {
+                  color: @text-lighter-a;
+                }
+                .val {
+                  color: @text-light;
+                  &.phone {
+                    color: rgb(82, 144, 239);
+                  }
+                }
+              }
             }
           }
         }
