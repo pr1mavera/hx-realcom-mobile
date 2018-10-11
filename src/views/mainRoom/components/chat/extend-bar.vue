@@ -30,7 +30,7 @@
       </div>
     </transition>
     <section class="extend-bar-section send-gift-section" v-show="giftSectionShow">
-      <send-gift @selectGift="selectGift"></send-gift>
+      <send-gift :theme="`light`" @selectGift="selectGift"></send-gift>
     </section>
     <section class="extend-bar-section send-express-section" v-show="expressSectionShow">
       <send-express @selectEmojiWithCode="selectEmojiWithCode" @deleteBtn="this.$emit('deleteBtn')"></send-express>
@@ -54,7 +54,6 @@ export default {
   },
   data() {
     return {
-      extendBarKeyframes: () => {},
       giftSectionShow: false,
       expressSectionShow: false
     }
@@ -204,10 +203,9 @@ export default {
       }
     }
     &.send-gift-section {
-      background-color: @bg-normal;
+      // background-color: @bg-normal;
       .send-gift {
         width: 100%;
-        height: 23rem;
         box-sizing: border-box;
       }
     }

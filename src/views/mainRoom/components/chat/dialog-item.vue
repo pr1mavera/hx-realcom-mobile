@@ -2,10 +2,10 @@
   <div class="dialog-item">
     <div class="fail-container" v-if="this.types === dialogTypes.dialog_disconnect">
       <div class="fail-con">
-        <img src="/video/static/img/chat/connect-fail@2x.png"
-             srcset="/video/static/img/chat/connect-fail.png 1x,
-                /video/static/img/chat/connect-fail@2x.png 2x,
-                /video/static/img/chat/connect-fail@3x.png 3x">
+        <img src="/static/img/chat/connect-fail@2x.png"
+             srcset="/static/img/chat/connect-fail.png 1x,
+                /static/img/chat/connect-fail@2x.png 2x,
+                /static/img/chat/connect-fail@3x.png 3x">
         <div class="fail-con-left">
           <p class="tit">连接已中断</p>
           <p class="text">您已经有{{this.dialogInfo.disconnectTime}}分钟没有回复信息，聊天自动中断！</p>
@@ -17,7 +17,7 @@
     </div>
     <div class="suc-con" v-if="this.types === dialogTypes.dialog_success">
      <div class="avatar">
-       <img src="/video/static/img/avatar@2x.png">
+       <img src="/static/img/avatar@2x.png">
        <p class="name">{{this.dialogInfo.csName}}</p>
      </div>
      <div class="suc-con-left">
@@ -25,7 +25,7 @@
        <div style="display: flex">
          <p class="text">人工客服切换成功！祝您沟通愉快！</p>
          <div class="diamond">
-           <img src="/video/static/img/chat/diamond.png">
+           <img src="/static/img/chat/diamond.png">
          </div>
        </div>
      </div>

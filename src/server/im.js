@@ -179,6 +179,7 @@ const IM = (() => {
       var csName = data.csName
       var userPhone = data.userPhone
       var sessionId = data.sessionId
+      var likesCount = data.likesCount
     }
     // if (ext.giftType) {
     //   giftType = ext.giftType
@@ -192,6 +193,7 @@ const IM = (() => {
       csName,
       userPhone,
       sessionId,
+      likesCount,
       desc,
       giftType
     }
@@ -279,6 +281,14 @@ const IM = (() => {
       })
       return
     }
+    let imgDataStr = `{}`
+    let proxyInfoStr = `{}`
+    if (options.imgData) {
+      imgDataStr = JSON.stringify(options.imgData)
+    }
+    if (options.proxyInfo) {
+      proxyInfoStr = JSON.stringify(options.proxyInfo)
+    }
     sendMsg(from_id, to_id, {
       data: options.msg,
       desc: `{
@@ -294,8 +304,8 @@ const IM = (() => {
         "msgStatus":"${options.msgStatus}"
       }`,
       ext: `{
-        "imgData":{${options.imgData ? options.imgData : ''}},
-        "proxyInfo":{${options.proxyInfo ? options.proxyInfo : ''}}
+        "imgData":${imgDataStr},
+        "proxyInfo":${proxyInfoStr}
       }`,
       identifier: options.identifier,
       nickName: options.nickName
@@ -319,8 +329,10 @@ const IM = (() => {
       }
     }
     const imgData = { big, small }
-    const imgStr = JSON.stringify(imgData).replace(/\s+/g, "")
-    options.imgData = imgStr.substr(1, imgStr.length - 2)
+    // const imgStr = JSON.stringify(imgData).replace(/\s+/g, "")
+    // debugger
+    // options.imgData = imgStr.substr(1, imgStr.length - 2)
+    options.imgData = imgData
     return options
   }
 

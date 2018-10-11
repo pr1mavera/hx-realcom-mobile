@@ -1,9 +1,9 @@
-const env = process.env.NODE_ENV
-const imgPathMode = {
-  production: '/video/static/img',
-  development: '/static/img'
-}
-export const imgPath = env === 'production' ? imgPathMode.production : imgPathMode.development
+// const env = process.env.NODE_ENV
+// const imgPathMode = {
+//   production: '/video/static/img',
+//   development: '/static/img'
+// }
+// export const imgPath = env === 'production' ? imgPathMode.production : imgPathMode.development
 
 export const toggleBarStatus = {
   allFold: 0,

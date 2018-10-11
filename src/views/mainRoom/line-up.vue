@@ -3,7 +3,7 @@
     <!--<div class="top"></div>-->
     <main class="main">
       <div class="img-box">
-          <img src="/video/static/img/lineing.png">
+          <img src="/static/img/lineing.png">
         </div>
       <div class="tips">
         <p class="tips-top">当前还有<label class="num">{{this.queueNum}}</label>人排队.</p>

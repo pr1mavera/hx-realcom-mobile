@@ -10,11 +10,15 @@
     <div class="full-screen-container" v-show="fullScreen">
       <div class="video-header">
         <div class="avatar">
-          <img src="/video/static/img/avatar@2x.png">
+          <img :src="csAvatarUrl">
         </div>
-        <div class="name">丽丽</div>
+        <div class="name">{{this.csInfo.csName}}</div>
       </div>
-      <video-footer @minimizeVideoBar="closeVideoBar"></video-footer>
+      <video-footer
+        @changeCamera="changeCamera"
+        @minimizeVideoBar="closeVideoBar"
+        @sendGift="giftSectionShow = true"
+      ></video-footer>
       <video-msg-list></video-msg-list>
       <div class="video-fload-btn">
         <div class="item">
@@ -23,18 +27,18 @@
               <use xlink:href="#icon-xin-hong"></use>
             </svg>
           </div>
-          <div class="text">300</div>
+          <div class="text">{{this.csInfo.likesCount}}</div>
         </div>
-        <div class="item">
+        <!-- <div class="item">
           <div class="item-icon icon-zhuanfa">
             <svg class="icon extend-click" aria-hidden="true">
               <use xlink:href="#icon-zhuanfa"></use>
             </svg>
           </div>
           <div class="text">100</div>
-        </div>
+        </div> -->
       </div>
-      <div class="server-video-window">
+      <div class="video-window" :class="customer">
         <video
           id="remoteVideo"
           autoplay
@@ -43,7 +47,7 @@
           poster="posterimage.jpg"
         ></video>
       </div>
-      <div class="customer-video-window">
+      <div class="video-window" :class="server">
         <video
           id="localVideo"
           muted
@@ -53,6 +57,9 @@
           poster="posterimage.jpg"
         ></video>
       </div>
+      <section class="send-gift-section" v-show="giftSectionShow" @click.stop="giftSectionShow = false">
+        <send-gift :theme="`dark`" @selectGift="selectGift"></send-gift>
+      </section>
     </div>
     <!-- 最小化 -->
     <div class="mini-container" v-show="isMiniBarOpen" @click="openVideoBar">
@@ -82,7 +89,8 @@ export default {
   components: {
     // 'LineUp': () => import('@/views/mainRoom/components/video/line-up'),
     'VideoFooter': () => import('@/views/mainRoom/components/video/video-footer'),
-    'VideoMsgList': () => import('@/views/mainRoom/components/video/video-msg-list')
+    'VideoMsgList': () => import('@/views/mainRoom/components/video/video-msg-list'),
+    'SendGift': () => import('@/views/mainRoom/components/chat/send-gift')
   },
   computed: {
     // isVideoBarOpen() {
@@ -95,17 +103,27 @@ export default {
     // isLineUpShow() {
     //   return this.queueMode === queueStatus.queuing || this.queueMode === queueStatus.queueSuccess
     // },
+    csAvatarUrl() {
+      return this.csInfo.csAvatar
+    },
+    customer() {
+      return this.isChangeCamera ? 'big' : 'small'
+    },
+    server() {
+      return this.isChangeCamera ? 'small' : 'big'
+    },
     ...mapGetters([
       'fullScreen',
       'roomMode',
-      'roomId',
       'queueMode',
-      'userInfo'
+      'userInfo',
+      'csInfo'
     ])
   },
   data() {
     return {
-
+      isChangeCamera: false,
+      giftSectionShow: false
     }
   },
   mounted() {
@@ -115,12 +133,18 @@ export default {
     openVideoBar() {
       this.setFullScreen(true)
     },
+    selectGift(type) {
+      console.log('发礼物辣：', type)
+    },
+    changeCamera() {
+      this.isChangeCamera = !this.isChangeCamera
+    },
     closeVideoBar() {
       this.setFullScreen(false)
     },
     readyToVideo() {
       // IM.joinGroup(this.roomId, this.userInfo.userId)
-      this.initRTC(this.roomId)
+      this.initRTC(this.csInfo.csId)
       // const query = this.$route.query
       // this.setUserInfoToEnterRoom(query, this.initRTC, this.initIM)
     },
@@ -164,10 +188,12 @@ export default {
         border-radius: 50%;
         background: linear-gradient(to right, #FF8C6A, #FF80A0);
         img {
-          width: 5.5rem;
-          height: 5.5rem;
+          width: 100%;
+          height: 100%;
           border-radius: 50%;
           padding: 0.25rem;
+          box-sizing: border-box;
+          object-fit: cover;
         }
       }
       .name {
@@ -249,36 +275,44 @@ export default {
         }
       }
     }
-    .server-video-window {
+    .video-window {
       position: fixed;
       top: 0;
       right: 0;
-      width: 100%;
-      height: 100%;
-      background-color: #666;
-      z-index: 0;
+      &.big {
+        width: 100%;
+        height: 100%;
+        background-color: #666;
+        z-index: 0;
+      }
+      &.small {
+        margin: .5rem .5rem 0 0;
+        width: 9rem;
+        height: 16.5rem;
+        border-radius: .4rem;
+        z-index: 200;
+        background-color: #222;
+        overflow: hidden;
+        z-index: 1;
+      }
       video {
         width: 100%;
         height: 100%;
         object-fit: cover;
       }
     }
-    .customer-video-window {
+    .send-gift-section {
       position: fixed;
-      top: 0;
+      left: 0;
       right: 0;
-      margin: .5rem .5rem 0 0;
-      width: 9rem;
-      height: 16.5rem;
-      border-radius: .4rem;
-      z-index: 200;
-      background-color: #222;
-      overflow: hidden;
-      z-index: 1;
-      video {
+      top: 0;
+      bottom: 0;
+      z-index: 999;
+      .send-gift {
+        position: absolute;
+        bottom: 0;
         width: 100%;
-        height: 100%;
-        object-fit: cover;
+        box-sizing: border-box;
       }
     }
   }
