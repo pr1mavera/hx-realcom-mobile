@@ -3,7 +3,7 @@
     <div class="card-container" v-if="this.types === cardTypes.bot_card">
       <div class="card">
         <div class="avatar">
-          <img width=100% height=100% :src="avatarImg">
+          <img width=100% height=100% src="/static/img/chat/xiaohua@2x.png">
         </div>
         <div class="text">
           <span class="name">{{this.cardInfo.nickName}}</span>
@@ -16,7 +16,7 @@
 </template>
 
 <script type="text/ecmascript-6">
-import { imgPath, cardTypes } from '@/common/js/status'
+import { cardTypes } from '@/common/js/status'
 
 export default {
   props: {
@@ -30,11 +30,6 @@ export default {
   data() {
     return {
       cardTypes: cardTypes
-    }
-  },
-  computed: {
-    avatarImg() {
-      return `${imgPath}/chat/xiaohua@2x.png`
     }
   }
 }

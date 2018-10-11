@@ -9,7 +9,7 @@
         </button>
       </div>
       <div class="menu">
-        <button class="footer-btn footer-btn-gift">
+        <button class="footer-btn footer-btn-gift" @click="$emit('sendGift')">
           <svg class="icon extend-click" aria-hidden="true">
             <use xlink:href="#icon-liwu"></use>
           </svg>
@@ -19,12 +19,12 @@
             <use xlink:href="#icon-pingjia"></use>
           </svg>
         </button>
-        <button class="footer-btn footer-btn-switch">
+        <button class="footer-btn footer-btn-switch" @click="$emit('changeCamera')">
           <svg class="icon extend-click" aria-hidden="true">
             <use xlink:href="#icon-qiehuanshexiangtou"></use>
           </svg>
         </button>
-        <button class="footer-btn footer-btn-screen" @click="minimizeVideoBar">
+        <button class="footer-btn footer-btn-screen" @click="$emit('minimizeVideoBar')">
           <svg class="icon extend-click" aria-hidden="true">
             <use xlink:href="#icon-suoxiao"></use>
           </svg>
@@ -37,9 +37,7 @@
 <script type="text/ecmascript-6">
 export default {
   methods: {
-    minimizeVideoBar() {
-      this.$emit('minimizeVideoBar')
-    }
+
   }
 }
 </script>

@@ -1,7 +1,7 @@
 <template>
   <div class="video-msg-list">
     <ul>
-      <li class="video-msg-item" v-for="(item, index) in v_msgs" :key="index">
+      <li class="video-msg-item" v-for="(item, index) in videoMsgs" :key="index">
         <div class="item-wrapper">
           <span class="level-label">
             <svg class="icon" aria-hidden="true">
@@ -9,9 +9,9 @@
             </svg>
             8
           </span>
-          <span class="text">{{item.text}}</span>
+          <span class="text">{{this.userInfo.userName}}送给客服一个草莓蛋糕</span>
           <i v-if="item.gift" class="gift-area">
-            <img width=100% height=100% :src="`/video/static/img/${item.gift}@2x.png`">
+            <img width=100% height=100% src="/static/img/caomeidangao@2x.png">
           </i>
         </div>
       </li>
@@ -20,7 +20,21 @@
 </template>
 
 <script type="text/ecmascript-6">
+import { mapGetters } from 'vuex'
+import { msgStatus, msgTypes } from '@/common/js/status'
+
 export default {
+  computed: {
+    videoMsgs() {
+      return this.msgs.filter(item => {
+        return item.msgStatus === msgStatus.msg && item.msgType === msgTypes.msg_gift
+      })
+    },
+    ...mapGetters([
+      'userInfo',
+      'msgs'
+    ])
+  },
   data() {
     return {
       v_msgs: [

@@ -50,7 +50,6 @@
 
 <script>
   import { TransferDom, Popup, Rater, XButton, Flexbox, FlexboxItem, Swiper, SwiperItem } from 'vux'
-  import { imgPath } from '@/common/js/status'
 
   const btnList = [
     ''
@@ -75,11 +74,6 @@
         stars: 0,
         next: true,
         btnBoxList: btnList
-      }
-    },
-    computed: {
-      avatarImg() {
-        return `${imgPath}/avatar.png`
       }
     },
     mounted() {

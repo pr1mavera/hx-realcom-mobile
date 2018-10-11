@@ -2,7 +2,7 @@
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
 import Vue from 'vue'
 import App from './App'
-// import FastClick from 'fastclick'
+import FastClick from 'fastclick'
 import { WechatPlugin, AlertPlugin, ToastPlugin, ConfirmPlugin, LoadingPlugin } from 'vux'
 import router from './router'
 import store from './store'
@@ -28,7 +28,7 @@ Vue.prototype.$setgoindex = () => {
   }
 }
 
-// FastClick.attach(document.body) // 移动端消除300ms
+FastClick.attach(document.body) // 移动端消除300ms
 
 Vue.config.productionTip = false
 

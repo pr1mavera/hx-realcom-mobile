@@ -18,15 +18,17 @@
         @keyup.enter="chatInput($event, true)">
         </br>
       </div> -->
-      <div class="input-content"
+      <div class="input-content needsclick"
         autofocus
         placeholder="请输入..."
+        contenteditable="true"
         id="input-content-hook"
         ref="inputContent"
         type="text"
         @click="chatFocus"
         @keyup="chatInput($event, false)"
       ></div>
+      <!-- <input v-model="inputText" type="text" ref="invisibleInput" v-show="false"> -->
     </div>
     <div class="input-bar-item right-item">
       <transition
@@ -48,6 +50,7 @@
 <script type="text/ecmascript-6">
 import { mapGetters } from 'vuex'
 import anime from 'animejs'
+import { utf16toEntities } from '@/common/js/util'
 // import { XTextarea, Group } from 'vux'
 
 export default {
@@ -69,7 +72,7 @@ export default {
   data() {
     return {
       status: false,
-      text: ''
+      inputText: ''
     }
   },
   methods: {
@@ -82,21 +85,22 @@ export default {
     chatInput(event, isEnter) {
       if (!isEnter) {
         const e = event || window.event
-        this.text = e.currentTarget.textContent
-        this.$emit('chatInputChange', this.text)
+        this.inputText = e.currentTarget.textContent
+        this.$emit('chatInputChange', this.inputText)
       } else {
-        this.$emit('chatInputCommit', this.$refs.inputContent.innerHTML)
+        const str = utf16toEntities(this.inputText)
+        this.$emit('chatInputCommit', str)
       }
     },
-    getInputEditState() {
-      return this.$refs.inputContent.getAttribute('contentEditable')
-    },
-    removeInputEditState() {
-      this.$refs.inputContent.removeAttribute('contentEditable')
-    },
-    setInputEditState(tag) {
-      this.$refs.inputContent.setAttribute('contentEditable', tag)
-    },
+    // getInputEditState() {
+    //   return this.$refs.inputContent.getAttribute('contentEditable')
+    // },
+    // removeInputEditState() {
+    //   this.$refs.inputContent.removeAttribute('contentEditable')
+    // },
+    // setInputEditState(tag) {
+    //   this.$refs.inputContent.setAttribute('contentEditable', tag)
+    // },
     getCursortPosition(element) {
       let caretOffset = 0
       const doc = element.ownerDocument || element.document

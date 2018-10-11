@@ -2,10 +2,10 @@
 <template>
   <div class="container share-guide" @click="hideShare">
     <div class="step-one">
-      <img src="/video/static/img/ios-guide1.png" style="width: 7.6rem">
+      <img src="/static/img/ios-guide1.png" style="width: 7.6rem">
     </div>
     <div class="step-two">
-      <img src="/video/static/img/shareGuide.png" style="width: 22.2rem;">
+      <img src="/static/img/shareGuide.png" style="width: 22.2rem;">
     </div>
   </div>
 </template>

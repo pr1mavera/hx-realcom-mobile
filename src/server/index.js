@@ -62,6 +62,9 @@ export const sendMsgToBot = data => http.post('video', `/robot/question/send`, d
 // 获取客服信息
 export const queryCsInfo = async(page, pageSize, userId, listType) => http.get('video', `/video/user/cs/query?page=${page}&pageSize=${pageSize}&userId=${userId}&listType=${listType}`)
 
+// 获取坐席头像
+export const getCsAvatar = csId => http.url('video', `/video/image/csHeader?id=${csId}`)
+
 // 专属客服添加
 export const addCs = async(userId, csId) => http.post('video', `/video/user/cs/create`, {userId, csId})
 

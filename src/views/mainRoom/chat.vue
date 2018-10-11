@@ -24,12 +24,10 @@
                 :name="item.nickName"
                 :text="item.content"
                 :imgSrc="item.imgData"
-                :giftType="item.giftType"
                 :types="item.msgType"
                 :extend="item.msgExtend"
                 :cardInfo="item.cardInfo"
-                :dialogInfo="item.dialogInfo"
-                @enterToMenChat="enterToMenChat"
+                :proxyInfo="item.proxyInfo"
               ></component>
             </li>
             <li class="chat-content-li" v-for="(msg, index) in this.msgs" :key="index" :class="{'text-center': msg.msgStatus === msgStatus.tip}">
@@ -588,14 +586,12 @@ export default {
         this._inputBlur()
       } else {
         // 软键盘弹出
-        const self = this
         this.resetExtendBar()
-        self.$refs.inputBar.setInputEditState('true')
 
         // this.toggleBar(toggleBarStatus.inputBar)
         // self._inputFocus()
         this.toggleBar(toggleBarStatus.inputBar).then(() => {
-          self._inputFocus()
+          this._inputFocus()
         })
       }
     },
@@ -603,7 +599,7 @@ export default {
       console.log('键盘弹出辣=========================')
       // this.$refs.inputBar.setInputEditState('true')
       // document.getElementById('input-content-hook').focus()
-
+      // this.$refs.inputBar.setInputEditState('true')
       this.inputEle.focus()
       // 聊天内容滚动到最底部
       this._resolveKeyboard()
@@ -613,7 +609,7 @@ export default {
       // this.inputFocPos = this.$refs.inputBar.getCursortPosition(this.inputEle)
       // console.log(this.inputFocPos)
       this.inputEle.blur()
-      this.$refs.inputBar.removeInputEditState()
+      // this.$refs.inputBar.removeInputEditState()
       this.chatScroll.refresh()
       this.chatScroll.scrollToElement(this.$refs.chatContentEnd, 400)
     },
@@ -716,9 +712,8 @@ export default {
       console.log('我想删点东西，比如说田老师红烧肉')
     },
     selectEmojiWithCode(code) {
-      let str = this.inputEle.innerText
-      str = `${str.substring(0, this.inputFocPos)}${code}${str.substring(this.inputFocPos, str.length)}`
-      this.inputEle.innerHTML = str
+      this.inputEle.innerHTML += code
+      this.$refs.inputBar.inputText += code
     },
     confirmToLineUp() {
       this.lineUpAlert = false
@@ -876,8 +871,7 @@ export default {
       overflow: hidden;
       // background-color: @bg-normal;
       flex: 1;
-      // background-image: url('/video/static/img/chat/chatBG.png');
-      background-image: url('/video/static/img/chat/chatBG.png');
+      background-image: url('/static/img/chat/chatBG.png');
       background-size: cover;
       // background-color: #000;
       // flex-basis: auto;

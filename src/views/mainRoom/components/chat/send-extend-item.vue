@@ -4,9 +4,6 @@
       <div class="item-icon-bg bg-image">
         <img width=100% height=100% class="giftImg" :src="imgUrl">
       </div>
-      <svg class="icon extend-click" aria-hidden="true">
-        <use xlink:href="#icon-wode"></use>
-      </svg>
     </div>
     <div class="text">{{this.text}}</div>
   </div>
@@ -64,7 +61,7 @@ export default {
     line-height: 2rem;
     font-size: 1.2rem;
     margin-top: 0.3rem;
-    color: @text-light;
+    // color: @text-light;
   }
 }
 </style>

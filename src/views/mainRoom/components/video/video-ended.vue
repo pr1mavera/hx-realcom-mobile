@@ -3,7 +3,7 @@
   <div class="video-ended">
     <div class="container">
       <div class="avatar">
-        <img src="/video/static/img/avatar@2x.png">
+        <img src="/static/img/avatar@2x.png">
       </div>
       <p>{{name}}</p>
       <p style="font-size: 2.4rem;margin-top: 5rem;">视频通话结束</p>

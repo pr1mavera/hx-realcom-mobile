@@ -3,7 +3,7 @@ import { mapGetters, mapMutations, mapActions } from 'vuex'
 import IM from '@/server/im'
 // import webim from '@/common/js/webim'
 // import WebRTCAPI from 'webRTCAPI'
-import { ERR_OK, getUserInfoByOpenID, getLoginInfo, createSession, pushSystemMsg, sendMsgToBot, getHistoryMsgs } from '@/server/index.js'
+import { ERR_OK, getUserInfoByOpenID, getLoginInfo, createSession, pushSystemMsg, sendMsgToBot, getHistoryMsgs, getCsAvatar } from '@/server/index.js'
 import { shallowCopy } from '@/common/js/util'
 import { formatDate } from '@/common/js/dateConfig.js'
 import { queueStatus, sessionStatus, systemMsgStatus, msgStatus, msgTypes } from '@/common/js/status'
@@ -392,7 +392,9 @@ export const IMMixin = {
         case systemMsgStatus.transSessionId: // 座席端创建会话传递
           // 存csName & sessionId
           const csInfoWithName = shallowCopy(this.csInfo)
+          csInfoWithName.csAvatar = getCsAvatar(this.csInfo.csId)
           csInfoWithName.csName = msgsObj.csName
+          csInfoWithName.likesCount = msgsObj.likesCount
           this.setCsInfo(csInfoWithName)
           this.setSessionId(msgsObj.sessionId)
           break
@@ -524,8 +526,8 @@ export const sendMsgsMixin = {
         resolve()
         IM.sendNormalMsg(
           this.userInfo.userId,
-          // this.csInfo.csId,
-          '987654321',
+          this.csInfo.csId,
+          // '987654321',
           {
             sessionId: this.sessionId,
             toUserName: this.csInfo.csName,
@@ -590,8 +592,8 @@ export const sendMsgsMixin = {
           time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
           nickName: this.userInfo.userName,
           sendUserId: this.userInfo.userId,
-          // toUserId: this.csInfo.csId,
-          toUserId: '987654321',
+          toUserId: this.csInfo.csId,
+          // toUserId: '987654321',
           toUserName: this.csInfo.csName,
           sessionId: this.sessionId,
           identifier: this.userInfo.userId,
@@ -604,8 +606,8 @@ export const sendMsgsMixin = {
         const customMsgInfo = IM.formatCustomMsgOption(resp, info)
         await IM.sendNormalMsg(
           this.userInfo.userId,
-          // this.csInfo.csId,
-          '987654321',
+          this.csInfo.csId,
+          // '987654321',
           customMsgInfo)
       })
     },
@@ -670,13 +672,22 @@ export const getMsgsMixin = {
           const list = res.data.msgList
           if (list.length) {
             list.forEach((item) => {
+              const msgsObj = JSON.parse(item.msgContent)[0].MsgContent
               const msgs = {
-                nickName: item.sendUserName,
-                content: item.msgContent,
-                isSelfSend: item.sendUserId === this.userInfo.userId,
-                time: item.msgTime,
-                msgStatus: msgStatus.msg,
-                msgType: msgTypes.msg_normal
+                nickName: msgsObj.Desc.nickName,
+                content: msgsObj.Data,
+                isSelfSend: msgsObj.Desc.sendUserId === this.userInfo.userId,
+                time: msgsObj.Desc.time,
+                msgStatus: msgsObj.Desc.msgStatus,
+                msgType: msgsObj.Desc.msgType
+              }
+              // 添加图片
+              if (msgs.msgType === msgTypes.msg_img) {
+                msgs.imgData = msgsObj.Ext.imgData
+              }
+              // 添加名片
+              if (msgs.msgType === msgTypes.msg_card) {
+                msgs.proxyInfo = msgsObj.Ext.proxyInfo
               }
               this.historyMsgs.unshift(msgs)
             })
