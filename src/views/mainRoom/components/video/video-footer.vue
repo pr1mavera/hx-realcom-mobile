@@ -52,9 +52,7 @@ export default {
   //   TransferDom
   // },
   methods: {
-    hangUpVideoWarning() {
-      
-    }
+    hangUpVideoWarning() {}
   }
 }
 </script>
