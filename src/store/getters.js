@@ -1,3 +1,4 @@
+import { msgStatus, msgTypes } from '@/common/js/status'
 // 用户基本信息
 export const userInfo = state => state.userInfo
 // 机器人基本信息
@@ -10,6 +11,12 @@ export const roomId = state => state.roomId
 export const sessionId = state => state.sessionId
 // 聊天信息队列
 export const msgs = state => state.msgs
+// 视频界面的信息队列
+export const videoMsgs = state => {
+  return state.msgs.filter(item => {
+    return item.msgStatus === msgStatus.msg && item.msgType === msgTypes.msg_gift
+  })
+}
 // 拓展输入打开状态
 export const extendBarOpen = state => state.extendBarOpen
 // 软键盘打开状态

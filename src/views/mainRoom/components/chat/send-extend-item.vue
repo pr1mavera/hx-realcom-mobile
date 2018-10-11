@@ -4,6 +4,9 @@
       <div class="item-icon-bg bg-image">
         <img width=100% height=100% class="giftImg" :src="imgUrl">
       </div>
+      <svg class="icon extend-click" aria-hidden="true">
+        <use xlink:href="#icon-wode"></use>
+      </svg>
     </div>
     <div class="text">{{this.text}}</div>
   </div>

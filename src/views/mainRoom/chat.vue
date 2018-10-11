@@ -37,7 +37,7 @@
                 :name="msg.nickName"
                 :text="msg.content"
                 :imgSrc="msg.imgData"
-                :giftType="msg.giftType"
+                :giftInfo="msg.giftInfo"
                 :types="msg.msgType"
                 :extend="msg.msgExtend"
                 :cardInfo="msg.cardInfo"
@@ -683,8 +683,8 @@ export default {
       await this.sendImgMsg(file)
       this.toggleExtendBar()
     },
-    async sendGiftMsgClick(type) {
-      await this.sendGiftMsg(type)
+    async sendGiftMsgClick(giftInfo) {
+      await this.sendGiftMsg(giftInfo)
       this.toggleExtendBar()
     },
     toggleExtendBar() {

@@ -79,12 +79,13 @@
 <script type="text/ecmascript-6">
 import { mapGetters, mapMutations } from 'vuex'
 import { queueStatus } from '@/common/js/status'
-import { RTCRoomMixin } from '@/common/js/mixin'
-// import IM from '@/server/im.js'
+import { RTCRoomMixin, sendMsgsMixin } from '@/common/js/mixin'
+import IM from '@/server/im.js'
 
 export default {
   mixins: [
-    RTCRoomMixin
+    RTCRoomMixin,
+    sendMsgsMixin
   ],
   components: {
     // 'LineUp': () => import('@/views/mainRoom/components/video/line-up'),
@@ -133,8 +134,9 @@ export default {
     openVideoBar() {
       this.setFullScreen(true)
     },
-    selectGift(type) {
-      console.log('发礼物辣：', type)
+    async selectGift(giftInfo) {
+      console.log('发礼物辣：', giftInfo)
+      await this.sendGiftMsg(giftInfo)
     },
     changeCamera() {
       this.isChangeCamera = !this.isChangeCamera
@@ -143,10 +145,8 @@ export default {
       this.setFullScreen(false)
     },
     readyToVideo() {
-      // IM.joinGroup(this.roomId, this.userInfo.userId)
-      this.initRTC(this.csInfo.csId)
-      // const query = this.$route.query
-      // this.setUserInfoToEnterRoom(query, this.initRTC, this.initIM)
+      IM.joinGroup(this.roomId, this.userInfo.userId)
+      this.initRTC(this.roomId)
     },
     ...mapMutations({
       setFullScreen: 'SET_FULL_SCREEN'
@@ -219,7 +219,7 @@ export default {
       bottom: 9.8rem;
       left: 2rem;
       right: 2rem;
-      height: 10rem;
+      height: 11rem;
       // background-color: #000;
       z-index: 10;
     }

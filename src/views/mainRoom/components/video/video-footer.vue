@@ -2,42 +2,59 @@
   <div class="video-footer">
     <div class="footer-bar">
       <div class="hang-up">
-        <button class="footer-btn footer-btn-hang-up">
-          <svg class="icon extend-click" aria-hidden="true">
+        <button class="footer-btn footer-btn-hang-up extend-click" @click="hangUpVideoWarning">
+          <svg class="icon" aria-hidden="true">
             <use xlink:href="#icon-guaduan"></use>
           </svg>
         </button>
       </div>
       <div class="menu">
-        <button class="footer-btn footer-btn-gift" @click="$emit('sendGift')">
-          <svg class="icon extend-click" aria-hidden="true">
+        <button class="footer-btn footer-btn-gift extend-click" @click="$emit('sendGift')">
+          <svg class="icon" aria-hidden="true">
             <use xlink:href="#icon-liwu"></use>
           </svg>
         </button>
-        <button class="footer-btn footer-btn-star">
-          <svg class="icon extend-click" aria-hidden="true">
+        <button class="footer-btn footer-btn-star extend-click">
+          <svg class="icon" aria-hidden="true">
             <use xlink:href="#icon-pingjia"></use>
           </svg>
         </button>
-        <button class="footer-btn footer-btn-switch" @click="$emit('changeCamera')">
-          <svg class="icon extend-click" aria-hidden="true">
+        <button class="footer-btn footer-btn-switch extend-click" @click="$emit('changeCamera')">
+          <svg class="icon" aria-hidden="true">
             <use xlink:href="#icon-qiehuanshexiangtou"></use>
           </svg>
         </button>
-        <button class="footer-btn footer-btn-screen" @click="$emit('minimizeVideoBar')">
-          <svg class="icon extend-click" aria-hidden="true">
+        <button class="footer-btn footer-btn-screen extend-click" @click="$emit('minimizeVideoBar')">
+          <svg class="icon" aria-hidden="true">
             <use xlink:href="#icon-suoxiao"></use>
           </svg>
         </button>
       </div>
     </div>
+    <!-- <div v-transfer-dom>
+      <confirm v-model="show"
+      :title="$t('Confirm deleting the item')"
+      @on-cancel="onCancel"
+      @on-confirm="onConfirm"
+      @on-show="onShow"
+      @on-hide="onHide">
+        <p style="text-align:center;">{{ $t('Are you sure?') }}</p>
+      </confirm>
+    </div> -->
   </div>
 </template>
 
 <script type="text/ecmascript-6">
-export default {
-  methods: {
+// import { Confirm, TransferDomDirective as TransferDom } from 'vux'
 
+export default {
+  // directives: {
+  //   TransferDom
+  // },
+  methods: {
+    hangUpVideoWarning() {
+      
+    }
   }
 }
 </script>

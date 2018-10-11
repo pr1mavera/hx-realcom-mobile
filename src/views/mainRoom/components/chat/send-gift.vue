@@ -3,12 +3,11 @@
     class="send-gift"
     :style="setTheme">
     <send-extend-item
-      v-for="(item, index) in giftItems"
+      v-for="(item, index) in giftMap"
       :key="index"
-      :mode="item.mode"
-      :icon="item.icon"
-      :text="item.text"
-      @click.native.prevent="$emit('selectGift', `${index + 1}`)"
+      :icon="item.url"
+      :text="item.name"
+      @click.native.prevent="$emit('selectGift', item)"
     ></send-extend-item>
   </div>
 </template>
@@ -54,10 +53,10 @@ export default {
           height: '18rem'
         }
       },
-      giftItems: [
+      giftMap: [
         {
-          icon: 'caomeidangao',
-          text: '草莓蛋糕'
+          url: 'caomeidangao',
+          name: '草莓蛋糕'
         },
         // {
         //   icon: 'caomeidangao',
@@ -68,16 +67,16 @@ export default {
         //   text: '草莓蛋糕'
         // },
         {
-          icon: 'caomeidangao',
-          text: '草莓蛋糕'
+          url: 'caomeidangao',
+          name: '草莓蛋糕'
         },
         {
-          icon: 'caomeidangao',
-          text: '草莓蛋糕'
+          url: 'caomeidangao',
+          name: '草莓蛋糕'
         },
         {
-          icon: 'caomeidangao',
-          text: '草莓蛋糕'
+          url: 'caomeidangao',
+          name: '草莓蛋糕'
         }
       ],
       myGifts: []
@@ -91,16 +90,16 @@ export default {
     getGiftsInfo() {
       // 个人中心获取的礼物的展示
       if (this.giftsInfo !== undefined) {
-        // this.giftItems = this.giftsInfo
+        // this.giftMap = this.giftsInfo
         console.log('================ 收到的礼物列表在此：' + JSON.stringify(this.giftsInfo))
         const giftsInfo = this.giftsInfo
         for (var i in giftsInfo) {
           const text = (giftsInfo[i].giftName + ' ' + giftsInfo[i].giftCount)
           const giftPic = getImgUrl(giftsInfo[i].giftUrl)
 
-          this.giftItems = this.myGifts.push({icon: 'caomeidangao', text: text})
-          // this.giftItems = myGetGifts
-          console.log('====================  我的礼物列表：' + JSON.stringify({icon: giftPic, text: text}))
+          this.giftMap = this.myGifts.push({url: 'caomeidangao', name: text})
+          // this.giftMap = myGetGifts
+          console.log('====================  我的礼物列表：' + JSON.stringify({url: giftPic, name: text}))
         }
       }
     }

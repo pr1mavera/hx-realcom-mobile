@@ -39,9 +39,9 @@
           <img class="text-img" height=100% :src="this.imgSrc.small">
         </span>
         <!-- 礼物消息 -->
-        <span class="text" v-if="this.types === msgTypes.msg_gift">
-          我送了一个草莓蛋糕
-          <img class="text-gift" src="/static/img/caomeidangao@2x.png">
+        <span class="text gift-item" v-if="this.types === msgTypes.msg_gift">
+          我送给{{this.csInfo.csName || '客服'}}一个{{this.giftInfo.name}} !
+          <img class="text-gift" :src="`/static/img/${this.giftInfo.url}@2x.png`">
         </span>
         <!-- 留言 -->
         <span class="text" v-if="this.types === msgTypes.msg_leave">客服暂时不在，请<span class="button">点击留言</span>~</span>
@@ -95,6 +95,7 @@
 </template>
 
 <script type="text/ecmascript-6">
+import { mapGetters } from 'vuex'
 import { msgTypes } from '@/common/js/status'
 
 export default {
@@ -117,8 +118,8 @@ export default {
     imgSrc: {
       type: Object
     },
-    giftType: {
-      type: String
+    giftInfo: {
+      type: Object
     },
     proxyInfo: {
       type: Object
@@ -128,6 +129,11 @@ export default {
     return {
       msgTypes: msgTypes
     }
+  },
+  computed: {
+    ...mapGetters([
+      'csInfo'
+    ])
   },
   mounted() {
     console.log('chat-content-item ===> 你个组件你被引用了哈哈哈')
@@ -253,12 +259,15 @@ export default {
         line-height: 2rem;
         max-width: 100%;
         word-wrap: break-word;
+        &.gift-item {
+          padding-left: 2rem;
+        }
         .text-gift {
           position: absolute;
           width: 5.8rem;
           top: 0;
           bottom: 0;
-          left: -6rem;
+          left: -4.5rem;
           margin: auto;
         }
         .text-img {

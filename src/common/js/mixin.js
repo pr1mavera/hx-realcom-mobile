@@ -1,6 +1,7 @@
 import { mapGetters, mapMutations, mapActions } from 'vuex'
 // import WebRTCRoom from '@/server/webRTCRoom'
 import IM from '@/server/im'
+import anime from 'animejs'
 // import webim from '@/common/js/webim'
 // import WebRTCAPI from 'webRTCAPI'
 import { ERR_OK, getUserInfoByOpenID, getLoginInfo, createSession, pushSystemMsg, sendMsgToBot, getHistoryMsgs, getCsAvatar } from '@/server/index.js'
@@ -288,6 +289,7 @@ export const IMMixin = {
       'userInfo',
       'roomId',
       'msgs',
+      'videoMsgs',
       'queueNum'
     ])
   },
@@ -318,7 +320,7 @@ export const IMMixin = {
           },
           () => {
             console.log('===============================> initIM success <===============================')
-            // IM.joinGroup('12345678', this.userInfo.userId)
+            // IM.joinGroup('987654321', this.userInfo.userId)
             resolve()
           },
           (err) => {
@@ -328,16 +330,29 @@ export const IMMixin = {
       })
     },
     onBigGroupMsgNotify(msgs) {
-      // debugger
       if (msgs && msgs.length > 0) {
         // alert('onBigGroupMsgNotify')
         // console.log(msgs)
+        // const msgsObj = IM.parseMsgs(msgs)
         const msgsObj = IM.parseMsgs(msgs)
-        // 给图片信息配置时间
-        if (msgsObj.textMsgs[0].time === '') {
-          msgsObj.textMsgs[0].time = formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss')
-        }
         this.sendMsgs(msgsObj.textMsgs)
+        this.$nextTick(() => {
+          const e = document.getElementById('video-msg-list-bottom-tag')
+          if (this.videoMsgs.length > 3) {
+            const scrollObj = {
+              scrollTop: e.scrollTop
+            }
+            anime({
+              targets: scrollObj,
+              scrollTop: e.scrollHeight - e.clientHeight,
+              easing: 'easeInOutQuad',
+              round: 1,
+              update: function() {
+                e.scrollTop = scrollObj.scrollTop
+              }
+            })
+          }
+        })
       }
     },
     onMsgNotify(msgs) {
@@ -364,7 +379,6 @@ export const IMMixin = {
           }
           // 获取客服基本信息
           this.setCsInfo(csInfoWithId)
-          this.setRoomId(msgsObj.csId)
           // this.setFullScreen(true)
           // 发送系统消息，通知座席端视频接入
           const systemMsg = {
@@ -395,7 +409,9 @@ export const IMMixin = {
           csInfoWithName.csAvatar = getCsAvatar(this.csInfo.csId)
           csInfoWithName.csName = msgsObj.csName
           csInfoWithName.likesCount = msgsObj.likesCount
+          csInfoWithName.csCode = msgsObj.csCode
           this.setCsInfo(csInfoWithName)
+          this.setRoomId(msgsObj.csCode)
           this.setSessionId(msgsObj.sessionId)
           break
       }
@@ -557,21 +573,19 @@ export const sendMsgsMixin = {
         })
       })
     },
-    sendGiftMsg(giftType) {
+    sendGiftMsg(giftInfo) {
       return new Promise(resolve => {
         resolve()
         IM.sendNoticeMsg({
-          sessionId: this.sessionId,
-          toUserId: this.csInfo.csId,
-          toUserName: this.csInfo.nickName,
           groupId: this.roomId,
-          msg: '给你送了一个礼物',
+          // groupId: '987654321',
+          msg: `${this.userInfo.userName}给你送了一个礼物`,
           time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
           nickName: this.userInfo.userName,
           identifier: this.userInfo.userId,
           msgStatus: msgStatus.msg,
           msgType: msgTypes.msg_gift,
-          giftType
+          giftInfo
         })
       })
     },
@@ -603,7 +617,7 @@ export const sendMsgsMixin = {
         // 上传图片
         const resp = await IM.uploadPic(img, info)
         // 发送图片
-        const customMsgInfo = IM.formatCustomMsgOption(resp, info)
+        const customMsgInfo = IM.formatImgMsgOption(resp, info)
         await IM.sendNormalMsg(
           this.userInfo.userId,
           this.csInfo.csId,

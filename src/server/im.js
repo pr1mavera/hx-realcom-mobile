@@ -110,28 +110,33 @@ const IM = (() => {
   function parseMsg(newMsg) {
     var msgItem = newMsg.getElems()[0]
     var type = msgItem.getType()
-    var nickName = ''
-    var msgStatus = ''
-    var msgType = ''
-    var time = ''
-
-    var content = msgItem.getContent() // 获取元素对象
-    var desc = JSON.parse(content.getDesc())
-    msgType = desc.msgType
-    msgStatus = desc.msgStatus
-    time = desc.time
-    nickName = desc.nickName
-    var ext = JSON.parse(content.getExt())
-    if (ext.imgData) {
-      var imgData = ext.imgData
-    }
-    if (ext.proxyInfo) {
-      var proxyInfo = ext.proxyInfo
+    if (type === 'TIMCustomElem') {
+      var nickName = ''
+      var msgStatus = ''
+      var msgType = ''
+      var time = ''
+      var content = msgItem.getContent() // 获取元素对象
+      var desc = JSON.parse(content.getDesc())
+      msgType = desc.msgType
+      msgStatus = desc.msgStatus
+      time = desc.time
+      nickName = desc.nickName
+      var ext = JSON.parse(content.getExt())
+      if (ext.imgData) {
+        var imgData = ext.imgData
+      }
+      if (ext.proxyInfo) {
+        var proxyInfo = ext.proxyInfo
+      }
+      if (ext.giftInfo) {
+        var giftInfo = ext.giftInfo
+      }
     }
     return {
       nickName,
       imgData,
       proxyInfo,
+      giftInfo,
       content: newMsg.toHtml(),
       isSelfSend: newMsg.getIsSend(),
       isSystem: newMsg.getFromAccount() === '@TIM#SYSTEM' || false,
@@ -165,7 +170,6 @@ const IM = (() => {
     var msgStatus = ''
     var msgType = ''
     var time = ''
-    var giftType = ''
     if (type === 'TIMCustomElem') {
       var content = msgItem.getContent() // 获取元素对象
       var data = JSON.parse(content.getData())
@@ -180,10 +184,8 @@ const IM = (() => {
       var userPhone = data.userPhone
       var sessionId = data.sessionId
       var likesCount = data.likesCount
+      var csCode = data.csCode
     }
-    // if (ext.giftType) {
-    //   giftType = ext.giftType
-    // }
     return {
       code,
       userId,
@@ -194,8 +196,8 @@ const IM = (() => {
       userPhone,
       sessionId,
       likesCount,
-      desc,
-      giftType
+      csCode,
+      desc
     }
   }
 
@@ -238,7 +240,7 @@ const IM = (() => {
     });
   }
 
-  // 发送提示消息（点赞，礼物）
+  // 发送提示消息（点赞、礼物，不保存进历史消息）
   function sendNoticeMsg(options, success, fail) {
     if (!options || !options.msg || !options.msg.trim()) {
       console.log('sendNoticeMsg参数错误', options)
@@ -248,22 +250,22 @@ const IM = (() => {
       })
       return
     }
+    let giftInfo = `{}`
+    if (options.giftInfo) {
+      giftInfo = JSON.stringify(options.giftInfo)
+    }
     sendCustomMsg({
       groupId: options.groupId,
       data: options.msg,
       desc: `{
-        "sessionId":"${options.sessionId}",
-        "sendUserId":"${options.identifier}",
-        "sendUserType":"1",
-        "toUserId":"${options.toUserId}",
-        "toUserName":"${options.toUserName}",
-        "toUserType":"2",
         "nickName":"${options.nickName}",
         "msgType":"${options.msgType}",
         "time":"${options.time}",
         "msgStatus":"${options.msgStatus}"
       }`,
-      ext: `{"giftType":"${options.giftType}"}`,
+      ext: `{
+        "giftInfo":${giftInfo}
+      }`,
       identifier: options.identifier,
       nickName: options.nickName
     }, function() {
@@ -314,7 +316,7 @@ const IM = (() => {
     })
   }
 
-  function formatCustomMsgOption(images, options) {
+  function formatImgMsgOption(images, options) {
     let big = ''
     let small = ''
     for (let i in images.URL_INFO) {
@@ -469,7 +471,7 @@ const IM = (() => {
     logout,
     sendNoticeMsg,
     sendNormalMsg,
-    formatCustomMsgOption,
+    formatImgMsgOption,
     createGroup,
     joinGroup,
     parseMsg,

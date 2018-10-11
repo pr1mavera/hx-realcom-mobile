@@ -74,10 +74,3 @@ export const dialogTypes = {
 export const cardTypes = {
   bot_card: '0' // 刚进入时机器人卡片
 }
-
-export const giftTypes = {
-  gift_1: '1',
-  gift_2: '2',
-  gift_3: '3',
-  gift_4: '4'
-}
