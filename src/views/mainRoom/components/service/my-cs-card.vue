@@ -8,7 +8,7 @@
     </span>
     <div class="container-main">
       <a @click="enterSerCenter" class="avatar">
-        <img :src='avatarUrl'>
+        <img :src='avatarImgSrc'>
       </a>
       <div class="info">
         <p class="name">{{this.name}}</p>
@@ -21,22 +21,39 @@
         视频咨询
       </x-button>
     </div>
+    <!-- 删除时弹框提示 :title="$t('Confirm deleting the item')"-->
+    <div v-transfer-dom>
+      <confirm v-model="showTips"
+               @on-cancel="onCancel"
+               @on-confirm="onConfirm"
+               @on-show="onShow"
+               @on-hide="onHide">
+        <p style="text-align:center;">您确定要删除当前客服吗？</p>
+      </confirm>
+    </div>
   </div>
 </template>
 
 <script>
-  import { XButton } from 'vux'
-  import { ERR_OK, removeCs, getImgUrl } from '@/server/index.js'
+  import { XButton, Confirm, TransferDomDirective as TransferDom } from 'vux'
+  import { ERR_OK, removeCs, getCsAvatar } from '@/server/index.js'
   import { mapGetters, mapMutations } from 'vuex'
   // import { queueStatus } from '@/common/js/status'
   // import {} from '@/server/index.js'
 
   export default {
     // name: "my-cs-card"
+    directives: {
+      TransferDom
+    },
     components: {
-      XButton
+      XButton,
+      Confirm
     },
     props: {
+      index: {
+        type: Number
+      },
       cusSerId: {
         type: String
       },
@@ -55,7 +72,10 @@
     },
     data() {
       return {
-        avatarUrl: getImgUrl(this.avatarSrc)
+        // avatarUrl: getImgUrl(this.avatarSrc)
+        avatarImgSrc: '',
+        showTips: false,
+        remove: false
       }
     },
     computed: {
@@ -63,19 +83,73 @@
         'userInfo'
       ])
     },
+    mounted() {
+      this.getAvatar()
+    },
     methods: {
-      // 删除客服
-      async removeCusSer() {
-        // const userId = '123'
+      // 弹框操作
+      onCancel() {
+        console.log('on cancel')
+      },
+      async onConfirm() {
         const userId = this.userInfo.userId
         const cusSerId = this.cusSerId
-
-        console.log('userId: ' + userId + ' ' + 'cusSerId:' + cusSerId)
-        const res = await removeCs(userId, cusSerId)
+        const data = {
+          'userId': userId,
+          'csId': cusSerId
+        }
+        debugger
+        this.remove = true
+        console.log('on confirm' + this.remove)
+        const res = await removeCs(data)
         if (res.result.code === ERR_OK) {
           console.log(JSON.stringify(res))
         } else {
           console.log('error of remove the cusSer:' + JSON.stringify(res))
+        }
+        // if (msg) {
+        //   alert(msg)
+        // }
+      },
+      onShow() {
+        console.log('on show')
+      },
+      onHide() {
+        console.log('on hide')
+      },
+      // 删除客服
+      async removeCusSer() {
+        const userId = this.userInfo.userId
+        const cusSerId = this.cusSerId
+        const data = {
+          'userId': userId,
+          'csId': cusSerId
+        }
+        console.log('there are for test: aaa========' + this.index)
+        console.log('=============删除专属客服输入的数据：' + 'data: ' + data)
+
+        this.showTips = true
+        console.log('123456uil,m c' + this.remove)
+        // if (this.remove === 'true') {
+        //   const res = await removeCs(data)
+        //   if (res.result.code === ERR_OK) {
+        //     console.log(JSON.stringify(res))
+        //   } else {
+        //     console.log('error of remove the cusSer:' + JSON.stringify(res))
+        //   }
+        // }
+      },
+
+      // 获取客服头像
+      async getAvatar() {
+        const cusSerId = this.cusSerId
+        const res = await getCsAvatar(cusSerId)
+
+        if (res) {
+          this.avatarImgSrc = res
+          console.log('==============您已经成功的获取到了客服的头像' + JSON.stringify(res))
+        } else {
+          console.log('there are some errors about query the avatar of cs' + JSON.stringify(res.result))
         }
       },
 

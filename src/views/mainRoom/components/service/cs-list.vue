@@ -4,7 +4,7 @@
       v-for="(item, index) in myCsList"
       :key="index"
       :cusSerId="item.id"
-      :avatarSrc="item.resultUrl"
+      :avatarSrc="item.avatar"
       :name="item.nickName"
       :num="item.servTimes"
       :gifts="item.giftCount"
@@ -73,6 +73,20 @@ export default {
         console.log('error in queryCsInfo' + JSON.stringify(res))
       }
     },
+
+    // 获取客服头像
+    // async getAvatar(cusSerId) {
+    //   // const cusSerId = this.cusSerId
+    //   const res = await getCsAvatar(cusSerId)
+    //
+    //   if (res) {
+    //     console.log('==============您已经成功的获取到了客服的头像' + JSON.stringify(res))
+    //     return JSON.stringify(res)
+    //   } else {
+    //     console.log('there are some errors about query the avatar of cs' + JSON.stringify(res.result))
+    //   }
+    // },
+
     addCs() {
       console.log('添加专属客服')
       this.$router.push('/room/cusServ/add')
@@ -88,7 +102,7 @@ export default {
 <style lang="less">
   .cs-list {
     min-height: 100%;
-    padding-top: 2.5rem;
+    padding: 2.5rem 0;
     background: #f4f4f4;
     box-sizing: border-box;
     .icon {

@@ -66,10 +66,10 @@ export const queryCsInfo = async(page, pageSize, userId, listType) => http.get('
 export const getCsAvatar = csId => http.url('video', `/video/image/csHeader?id=${csId}`)
 
 // 专属客服添加
-export const addCs = async(userId, csId) => http.post('video', `/video/user/cs/create`, {userId, csId})
+export const addCs = async(data) => http.post('video', `/video/user/cs/create`, data)
 
 // 专属客服删除
-export const removeCs = async(userId, csId) => http.post('video', `/video/user/cs/delete`, {userId, csId})
+export const removeCs = async(data) => http.post('video', `/video/user/cs/delete`, data)
 
 // 客服信息获取（获取客服的个人资料）
 export const getCsInfo = async(csId) => http.get('video', `/video/user/cs?csId=${csId}`)
@@ -94,3 +94,6 @@ export const createSession = (userId, userName, userPhone, chatType) => http.pos
  */
  export const getHistoryMsgs = (userId, page, pageSize) => http.get('chat', `/chat/history?page=${page}&pageSize=${pageSize}&userId=${userId}`)
  // export const getHistoryMsgs = (userId) => http.get('chat', `/chat/history?userId=${userId}`)
+
+// 评价信息保存
+export const saveAssess = async(data) => http.post('video', `/video/user/evaluate`, data)
