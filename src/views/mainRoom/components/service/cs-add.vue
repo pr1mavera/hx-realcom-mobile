@@ -88,19 +88,29 @@
         <badge text="1"></badge>
       </div>
     </div>
+    <!--  弹框提示客户最多只能添加3个专属客服 -->
+    <div v-transfer-dom>
+      <alert v-model="showTip">
+        您已经添加了3个专属客服啦！
+      </alert>
+    </div>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
 import { sleep } from '@/common/js/util'
-import { Badge } from 'vux'
+import { Badge, Alert, TransferDomDirective as TransferDom } from 'vux'
 import anime from 'animejs'
 import { ERR_OK, addCs, queryCsInfo, getImgUrl } from '@/server/index.js'
 import {mapGetters} from 'vuex'
 
 export default {
+  directives: {
+    TransferDom
+  },
   components: {
-    Badge
+    Badge,
+    Alert
   },
   data() {
     return {
@@ -137,7 +147,8 @@ export default {
       m_cslist: [], // 已添加的专属客服
       floadTipLeftAnimeCache: null,
       floadTipRightAnimeCache: null,
-      avatarImg: ''
+      avatarImg: '',
+      showTip: false
     }
   },
   computed: {
@@ -201,17 +212,24 @@ export default {
     async addCS() {
       // const userId = '123'
       const userId = this.userInfo.userId
-      const cuSerId = '123'
+      // const cuSerId = '123'
 
       this.m_cslist.push(this.curLabelInfo)
       // this.cslist.splice(0, 1)
       this.curLabelInfo = this.cslist[0]
+      // 选中客服的ID
+      const cuSerId = this.curLabelInfo.id
+      this.m_cslist.push(this.curLabelInfo)
 
-      const res = await addCs(userId, cuSerId)
-      if (res.result.code === ERR_OK) {
-        console.log(JSON.stringify(res))
+      if (this.m_cslist.length >= 3) {
+        this.showTip = true
       } else {
-        console.log('error about add the cS' + JSON.stringify(res))
+        const res = await addCs(userId, cuSerId)
+        if (res.result.code === ERR_OK) {
+          console.log(JSON.stringify(res))
+        } else {
+          console.log('error about add the cS' + JSON.stringify(res))
+        }
       }
     },
     switchCS() {
