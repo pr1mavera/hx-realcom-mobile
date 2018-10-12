@@ -47,8 +47,8 @@
       <p class="container-item-tit">认识我</p>
       <div class="container-item-con">
         <!--<x-button mini style="margin-right: 1.5rem">温柔1</x-button>-->
+        <!-- :labelsInfo=labelsInfo -->
         <label-btn
-          :labelsInfo=labelsInfo
         ></label-btn>
       </div>
     </div>
@@ -66,7 +66,7 @@
 <script type="text/ecmascript-6">
   import {mapGetters} from 'vuex'
   import { Swiper, SwiperItem, XButton, XCircle } from 'vux'
-  import { ERR_OK, getCsInfo, getImgUrl, viewGifts, viewLabels } from '@/server/index.js'
+  import { ERR_OK, getCsInfo, getImgUrl, viewGifts } from '@/server/index.js'
 
   // 顶部轮播图的列表
   // const displayList = []
@@ -96,7 +96,7 @@
     mounted() {
       this.getCsInfo()
       this.getGifts()
-      this.getLabels()
+      // this.getLabels()
     },
     methods: {
       // 获取客服信息
@@ -132,7 +132,8 @@
       async getGifts() {
         const page = 0
         const pageSize = -1
-        const csId = '1'
+        // const csId = '1'
+        const csId = this.cuSerInfo.id
 
         const res = await viewGifts(page, pageSize, csId)
         if (res.result.code === ERR_OK) {
@@ -140,23 +141,23 @@
         } else {
           console.log('======================= error about query gifts')
         }
-      },
+      }
 
       // 标签信息查询
-      async getLabels() {
-        // const csId = this.cuSerInfo.id
-        const csId = '123'
-        const page = 0
-        const pageSize = -1
-        const res = await viewLabels(page, pageSize, csId)
-
-        if (res.result.code === ERR_OK) {
-          console.log(JSON.stringify(res.data))
-          this.labelsInfo = res.data.labels
-        } else {
-          console.log('======================= error about query labels')
-        }
-      }
+      // async getLabels() {
+      //   const csId = this.cuSerInfo.id
+      //   // const csId = '123'
+      //   const page = 0
+      //   const pageSize = -1
+      //   const res = await viewLabels(page, pageSize, csId)
+      //
+      //   if (res.result.code === ERR_OK) {
+      //     console.log(JSON.stringify(res.data))
+      //     this.labelsInfo = res.data.labels
+      //   } else {
+      //     console.log('======================= error about query labels')
+      //   }
+      // }
     }
   }
 

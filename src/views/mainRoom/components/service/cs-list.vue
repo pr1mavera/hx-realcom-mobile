@@ -9,6 +9,7 @@
       :num="item.servTimes"
       :gifts="item.giftCount"
       @toLineUp="toLineUp"
+      @removeCs="removeCs(index)"
     ></my-cs-card>
     <p class="tips">您还可以添加 <span>{{3 - myCsList.length}}</span> 名专属客服</p>
     <x-button :gradients="['#FF8C6A', '#FF80A0']" @click.native="addCs"
@@ -91,6 +92,11 @@ export default {
       console.log('添加专属客服')
       this.$router.push('/room/cusServ/add')
     },
+
+    removeCs(index) {
+      this.myCsList.splice(index, 1)
+    },
+
     toLineUp(csId) {
       // this.$router.push({path: `/room/line-up/${this.userInfo.userId}/${this.cusSerId}`})
       this.$router.push({path: `/room/line-up/${csId}`})
