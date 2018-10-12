@@ -101,7 +101,7 @@
 import { sleep } from '@/common/js/util'
 import { Badge, Alert, TransferDomDirective as TransferDom } from 'vux'
 import anime from 'animejs'
-import { ERR_OK, addCs, queryCsInfo, getImgUrl } from '@/server/index.js'
+import { ERR_OK, addCs, queryCsInfo, getCsAvatar } from '@/server/index.js'
 import {mapGetters} from 'vuex'
 
 export default {
@@ -212,7 +212,6 @@ export default {
     async addCS() {
       // const userId = '123'
       const userId = this.userInfo.userId
-      // const cuSerId = '123'
 
       this.m_cslist.push(this.curLabelInfo)
       // this.cslist.splice(0, 1)
@@ -220,11 +219,16 @@ export default {
       // 选中客服的ID
       const cuSerId = this.curLabelInfo.id
       this.m_cslist.push(this.curLabelInfo)
+      const data = {
+        'userId': userId,
+        'csId': cuSerId
+      }
 
-      if (this.m_cslist.length >= 3) {
+      console.log('============添加专属客服输入的数据' + data)
+      if (this.m_cslist.length > 3) {
         this.showTip = true
       } else {
-        const res = await addCs(userId, cuSerId)
+        const res = await addCs(data)
         if (res.result.code === ERR_OK) {
           console.log(JSON.stringify(res))
         } else {
@@ -237,7 +241,9 @@ export default {
       this.cslist.splice(0, 1)
       this.cslist.push(temp)
       this.curLabelInfo = this.cslist[0]
-      this.avatarImg = getImgUrl(this.curLabelInfo.resultUrl)
+      // this.avatarImg = getImgUrl(this.curLabelInfo.resultUrl)
+      // this.avatarImg = this.getAvatar(this.curLabelInfo.id)
+      this.getAvatar(this.curLabelInfo.id)
     },
     resetAngle() {
       this.curLabelInfo = null
@@ -301,24 +307,29 @@ export default {
         this.cslist = res.data.csList
 
         this.curLabelInfo = this.cslist[0]
-        this.avatarImg = getImgUrl(this.curLabelInfo.resultUrl)
+        // this.avatarImg = getImgUrl(this.curLabelInfo.resultUrl)
+        // this.avatarImg = this.getAvatar(this.curLabelInfo.id)
+        this.getAvatar(this.curLabelInfo.id)
         console.log('===========客服列表:' + JSON.stringify(this.cslist))
       } else {
         console.log('error about query csInfo')
       }
-    }
+    },
 
-    // 获取客服头图片像流
-    // async getPic(url) {
-    //   const res = await getImgUrl(url)
-    //   if (res) {
-    //     // this.avatar.push(res)
-    //     this.avatarImg = res
-    //     console.log('===============当前图片的地址为：' + res)
-    //   } else {
-    //     console.log('======================= error about get url of img')
-    //   }
-    // }
+    // 获取客服头像
+    async getAvatar(cusSerId) {
+      // const cusSerId = this.cusSerId
+      const res = await getCsAvatar(cusSerId)
+
+      if (res) {
+        // debugger
+        console.log('==============您已经成功的获取到了客服的头像' + JSON.stringify(res))
+        this.avatarImg = res
+        return JSON.stringify(res)
+      } else {
+        console.log('there are some errors about query the avatar of cs' + JSON.stringify(res.result))
+      }
+    }
   }
 }
 </script>

@@ -50,6 +50,7 @@
 
 <script>
   import { TransferDom, Popup, Rater, XButton, Flexbox, FlexboxItem, Swiper, SwiperItem } from 'vux'
+  import {ERR_OK, saveAssess} from '@/server/index.js'
 
   const btnList = [
     ''
@@ -82,6 +83,20 @@
       cancelAssess() {
         alert('您关闭了评价')
         this.showAssess = false
+      },
+
+      // 保存评论的信息
+      async saveAssess() {
+        // 输入 sessionId(会话Id) userId, userName, csId, csName ,evaluateLevel(满意度) [{labelId: '', labelName: ''}]
+        const data = {
+          'sessionId': '1233'
+        }
+        const res = await saveAssess(data)
+        if (res.result.code === ERR_OK) {
+          console.log('已经保存了你评价的信息' + JSON.stringify(res))
+        } else {
+          console.log('there are some error about' + JSON.stringify(res.result))
+        }
       }
     }
   }

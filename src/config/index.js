@@ -14,8 +14,8 @@ const production = {
 
 const development = {
   videoPath: 'http://video-servertest.ihxlife.com:8083/api/v1',
+  // videoPath: 'http://192.168.8.108:7001/api/v1',
   webRTCRoomPath: 'http://room-servertest.ihxlife.com:8085/api/v1',
-  // webRTCRoomPath: 'http://192.168.8.108:7001/api/v1',
   chatPath: 'http://chat-servertest.ihxlife.com/api/v1'
 }
 
