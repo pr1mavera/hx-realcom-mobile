@@ -4,7 +4,7 @@
     <popup v-model="showAssess" is-transparent>
       <div class="popup-main" style="">
        <div class="avatar">
-         <img :src="avatarImg">
+         <img :src="avatarImgSrc">
        </div>
         <x-icon type="ios-close" @click.native="cancelAssess" size="30"></x-icon>
         <div class="eva-part">
@@ -16,41 +16,30 @@
           </rater>
         </div>
         <div class="eva-more" v-if="stars > 0">
-          <flexbox style="padding: 0 2rem;box-sizing: border-box;">
-            <flexbox-item style="box-sizing: border-box;">
-              <x-button mini>解决了问题</x-button>
-            </flexbox-item>
-            <flexbox-item>
-              <x-button mini>没有解决</x-button>
-            </flexbox-item>
-          </flexbox>
           <swiper height="9.5rem" style="background: #F1F1F1;margin-top: 1.5rem;" dots-class="custom-bottom" dots-position="center">
             <swiper-item><div class="btn-box"></div></swiper-item>
             <swiper-item><h2 class="fadeInUp animated">test2</h2></swiper-item>
-            <!--<swiper-item class="" v-for="(item, index) in btnBoxList" :key="index">-->
-              <!--<div class="btn-box" ></div>-->
-            <!--</swiper-item>-->
             <swiper-item v-for="(item, index) in btnBoxList" :key="index">
-              <div class="btn-box"></div>
             </swiper-item>
           </swiper>
-          <flexbox style="margin: 2rem 0;">
-            <flexbox-item>
-              <x-button :gradients="['#FF8C6A', '#ff80a0']" @click="cancelAssess">下次吧</x-button>
-            </flexbox-item>
-            <flexbox-item>
-              <x-button :gradients="['#1D62F0', '#19D5FD']">去分享</x-button>
-            </flexbox-item>
-          </flexbox>
+          <x-button :gradients="['#FF8C6A', '#ff80a0']" @click.native="saveAssess"
+                    style="width: 11rem;margin: 2rem auto 0;">
+            提交评价
+          </x-button>
         </div>
       </div>
     </popup>
+    <!--<toast v-model="showTips" type="text" :time="800" is-show-mask text="评论失败" :position="position">-->
+      <!--{{tips}}-->
+    <!--</toast>-->
+
   </div>
 </template>
 
 <script>
-  import { TransferDom, Popup, Rater, XButton, Flexbox, FlexboxItem, Swiper, SwiperItem } from 'vux'
-  import {ERR_OK, saveAssess} from '@/server/index.js'
+  import { TransferDom, Popup, Rater, XButton, Swiper, SwiperItem, Toast } from 'vux'
+  import {ERR_OK, saveAssess, getCsAvatar} from '@/server/index.js'
+  import {mapGetters} from 'vuex'
 
   const btnList = [
     ''
@@ -63,33 +52,66 @@
       Popup,
       Rater,
       XButton,
-      Flexbox,
-      FlexboxItem,
       Swiper,
-      SwiperItem
+      SwiperItem,
+      Toast,
+      'LabelBtn': () => import('@/views/mainRoom/components/label-btn')
     },
     data() {
       return {
         showAssess: true,
+        avatarImgSrc: '',
         name: '丽丽',
         stars: 0,
         next: true,
         btnBoxList: btnList
       }
     },
+    computed: {
+      ...mapGetters([
+        'sessionId',
+        'userInfo',
+        'csInfo'
+      ])
+    },
     mounted() {
+      this.getAvatar()
     },
     methods: {
       cancelAssess() {
-        alert('您关闭了评价')
         this.showAssess = false
+      },
+
+      // 获取客服头像
+      async getAvatar() {
+        const cusSerId = this.csInfo.id
+        console.log('====================' + JSON.stringify(this.csInfo))
+        // const cusSerId = '54321'
+        const res = await getCsAvatar(cusSerId)
+
+        if (res) {
+          this.avatarImgSrc = res
+          console.log('==============您已经成功的获取到了客服的头像' + JSON.stringify(res))
+        } else {
+          console.log('there are some errors about query the avatar of cs' + JSON.stringify(res.result))
+        }
       },
 
       // 保存评论的信息
       async saveAssess() {
         // 输入 sessionId(会话Id) userId, userName, csId, csName ,evaluateLevel(满意度) [{labelId: '', labelName: ''}]
         const data = {
-          'sessionId': '1233'
+          // 'sessionId': this.sessionId,
+          'sessionId': '00553330cc4a11e886ec19059d7ca77e',
+          'userId': this.userInfo.userId,
+          'userName': this.userInfo.userName,
+          'csId': this.csInfo.csId,
+          'csName': this.csInfo.csName,
+          'evaluateLevel': this.stars,
+          'labels': [{
+            'labelId': '111',
+            'labelName': 'aaa'
+          }]
         }
         const res = await saveAssess(data)
         if (res.result.code === ERR_OK) {
@@ -117,7 +139,7 @@
       opacity: .85;
       margin: 0 auto;
       align-self: center;
-      padding-top: 10px;
+      padding: 10px 0 2.5rem;
       background: #fff;
       text-align: center;
       border-radius: 1rem;
@@ -142,29 +164,10 @@
         font-size: 1.2rem;
         padding: 1.5rem 0 0;
         .vux-rater {
-          padding: 2.5rem 0 3rem;
+          padding: 2rem 0 1rem;
         }
       }
-      .eva-more {
-        .vux-flexbox {
-          button {
-            width: 10rem;
-            color: #D9DADE;
-            font-size: 1.2rem;
-            background: rgba(255, 255, 255, .9);
-          }
-          .weui-btn:after {
-            border-color: rgba(214, 215, 220, 1) !important;
-          }
-        }
-        .vux-slider + .vux-flexbox {
-          button {
-            width: 9rem;
-            cursor: pointer;
-            font-size: 1.6rem;
-          }
-        }
-      }
+      .eva-more {}
     }
   }
 </style>

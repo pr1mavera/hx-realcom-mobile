@@ -91,6 +91,7 @@
       onCancel() {
         console.log('on cancel')
       },
+      // 确定删除当前客服
       async onConfirm() {
         const userId = this.userInfo.userId
         const cusSerId = this.cusSerId
@@ -98,11 +99,12 @@
           'userId': userId,
           'csId': cusSerId
         }
-        debugger
+
         this.remove = true
         console.log('on confirm' + this.remove)
         const res = await removeCs(data)
         if (res.result.code === ERR_OK) {
+          this.$emit('removeCs')
           console.log(JSON.stringify(res))
         } else {
           console.log('error of remove the cusSer:' + JSON.stringify(res))
@@ -118,7 +120,7 @@
         console.log('on hide')
       },
       // 删除客服
-      async removeCusSer() {
+      removeCusSer() {
         const userId = this.userInfo.userId
         const cusSerId = this.cusSerId
         const data = {
@@ -129,7 +131,7 @@
         console.log('=============删除专属客服输入的数据：' + 'data: ' + data)
 
         this.showTips = true
-        console.log('123456uil,m c' + this.remove)
+        console.log('==================' + this.remove)
         // if (this.remove === 'true') {
         //   const res = await removeCs(data)
         //   if (res.result.code === ERR_OK) {
