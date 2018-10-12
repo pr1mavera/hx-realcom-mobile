@@ -331,11 +331,7 @@ export const IMMixin = {
     },
     onBigGroupMsgNotify(msgs) {
       if (msgs && msgs.length > 0) {
-        // alert('onBigGroupMsgNotify')
-        // console.log(msgs)
-        // const msgsObj = IM.parseMsgs(msgs)
-        const msgsObj = IM.parseMsgs(msgs)
-        this.sendMsgs(msgsObj.textMsgs)
+        this.receiveCustomMsgs(msgs)
         this.$nextTick(() => {
           const e = document.getElementById('video-msg-list-bottom-tag')
           if (this.videoMsgs.length > 3) {
@@ -418,10 +414,6 @@ export const IMMixin = {
     },
     receiveCustomMsgs(msgs) {
       const msgsObj = IM.parseMsgs(msgs).textMsgs[0]
-      // 给图片信息配置时间
-      // if (msgsObj.time === '') {
-      //   msgsObj.time = formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss')
-      // }
       this.sendMsgs([
         msgsObj
       ])
@@ -543,7 +535,7 @@ export const sendMsgsMixin = {
         IM.sendNormalMsg(
           this.userInfo.userId,
           this.csInfo.csId,
-          // '987654321',
+          // '123456789',
           {
             sessionId: this.sessionId,
             toUserName: this.csInfo.csName,
