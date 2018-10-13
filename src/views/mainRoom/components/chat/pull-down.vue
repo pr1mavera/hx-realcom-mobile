@@ -7,7 +7,7 @@
       <div v-if="isPullingDown" class="loading">
         <div class="mf-loading-container">
           <!-- <img src="/static/img/loading.gif"> -->
-          <img src="/static/img/loading.gif">
+          <spinner :type="`lines`" :size="'30px'"></spinner>
         </div>
       </div>
       <div v-else><span>{{pulldownResult}}</span></div>
@@ -17,10 +17,12 @@
 
 <script type="text/ecmascript-6">
 import Bubble from '@/views/mainRoom/components/chat/bubble'
-
+import { Spinner } from 'vux'
+// ['android', 'ios', 'ios-small', 'bubbles', 'circles', 'crescent', 'dots', 'lines', 'ripple', 'spiral']
 export default {
   components: {
-    Bubble
+    Bubble,
+    Spinner
   },
   props: {
     beforePullDown: {
