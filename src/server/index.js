@@ -78,7 +78,7 @@ export const getCsInfo = async(csId) => http.get('video', `/video/user/cs?csId=$
 export const viewGifts = async(page, pageSize, csId) => http.get('video', `/video/user/gifts/query?page=${page}&pageSize=${pageSize}&csId=${csId}`)
 
 // 标签信息查询
-export const viewLabels = async(page, pageSize, csId) => http.get('video', `/video/user/labels/query?page=${page}&pageSize=${pageSize}&csId=${csId}`)
+export const viewLabels = async(page, pageSize, csId) => http.get('video', `/video/user/labels?page=${page}&pageSize=${pageSize}&csId=${csId}`)
 
 /**
  ************************************ chat ************************************
@@ -97,3 +97,4 @@ export const createSession = (userId, userName, userPhone, chatType) => http.pos
 
 // 评价信息保存
 export const saveAssess = async(data) => http.post('video', `/video/user/evaluate`, data)
+

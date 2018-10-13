@@ -157,7 +157,8 @@
 
       enterSerCenter() {
         this.$router.push({
-          path: '/room/serverDetail'
+          path: '/room/serverDetail',
+          query: {cusSerId: this.cusSerId}
         })
       },
       clickToLineUp() {

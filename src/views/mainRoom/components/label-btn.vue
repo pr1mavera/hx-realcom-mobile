@@ -40,10 +40,10 @@
     data() {
       return {
         btnList: [
-          {key: '11', value: '111', labelName: '聪明伶俐', labelCount: 3},
-          {key: '12', value: '111', labelName: '气质美女', labelCount: 33},
-          {key: '13', value: '111', labelName: '可爱', labelCount: 2233},
-          {key: '14', value: '111', labelName: '解决了问题', labelCount: 256}
+          {labelName: '聪明伶俐', labelCount: 3},
+          {labelName: '气质美女', labelCount: 33},
+          {labelName: '解决了问题', labelCount: 256},
+          {labelName: '可爱', labelCount: 2233}
         ],
         selTags: null,
         isDisabled: ''
@@ -56,6 +56,7 @@
     },
     mounted() {
       // this.getLabelList()
+      this.getLabels()
     },
     methods: {
       // 获取label列表
@@ -63,21 +64,22 @@
         // 个人中心=> '认识我'模块中label信息的显示
         if (this.labelsInfo !== undefined) {
           this.btnList = this.labelsInfo
-          console.log('===========获取的label列表为' + JSON.stringify(this.btnList))
+          console.log('===========获取的个人中心的label列表为：' + JSON.stringify(this.btnList))
         }
       },
 
       // 标签信息查询
       async getLabels() {
-        const csId = this.cuSerInfo.id
-        // const csId = '123'
+        const csId = this.$route.query.cusSerId
+        // debugger
+        // const csId = '123456789'
         const page = 0
         const pageSize = -1
         const res = await viewLabels(page, pageSize, csId)
 
         if (res.result.code === ERR_OK) {
-          console.log(JSON.stringify(res.data))
-          this.btnList = res.data.labels
+          console.log('=============这是查询到的标签信息:' + JSON.stringify(res.data))
+          // this.btnList = res.data.labels
         } else {
           console.log('======================= error about query labelTags')
         }
@@ -92,7 +94,7 @@
   .tags-default {
     color: #FF959C;
     padding: .6rem 1.2rem;
-    margin: 1rem 1.5rem;
+    margin: 1rem 1rem;
     border-radius: 2rem;
     border: 1px solid #FF959C;
   }
