@@ -42,14 +42,21 @@ export const toggleBar = function({ dispatch, commit, state }, type) {
 }
 
 export const enterToLineUp = function({ commit, state }) {
-  commit(types.SET_FULL_SCREEN, true)
   commit(types.SET_QUEUE_MODE, queueStatus.queuing)
 }
 
 export const readyToVideoChat = function({ commit, state }) {
-  commit(types.SET_FULL_SCREEN, true)
   commit(types.SET_QUEUE_MODE, queueStatus.queueOver)
   commit(types.SET_ROOM_MODE, roomStatus.videoChat)
+}
+
+export const quitVideoChat = function({ commit, state }) {
+  commit(types.SET_CS_INFO, null)
+  commit(types.SET_ROOM_ID, '')
+  commit(types.SET_SESSION_ID, '')
+  commit(types.SET_QUEUE_NUM, 0)
+  commit(types.SET_QUEUE_MODE, queueStatus.noneQueue)
+  commit(types.SET_ROOM_MODE, roomStatus.AIChat)
 }
 
 export const sendMsgs = async function({ commit, state }, msgs) {

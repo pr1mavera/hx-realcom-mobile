@@ -90,6 +90,29 @@ const IM = (() => {
     })
   }
 
+  function quitGroup(group_id) {
+    var options = null
+    if (group_id) {
+      options = {
+        'GroupId': group_id
+      }
+    }
+    if (options == null) {
+      alert('退群时，群组ID非法')
+      return
+    }
+    webim.quitGroup(
+      options,
+      (resp) => {
+        // 退群成功
+        console.log('退群成功')
+      },
+      (err) => {
+        alert(err.ErrorInfo)
+      }
+    )
+  }
+
   function parseMsgs(newMsgList) {
     var textMsgs = []
     var whiteBoardMsgs = []
@@ -474,6 +497,7 @@ const IM = (() => {
     formatImgMsgOption,
     createGroup,
     joinGroup,
+    quitGroup,
     parseMsg,
     parseMsgs,
     parseMsgInSystem,
