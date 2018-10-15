@@ -48,8 +48,7 @@
       <div class="container-item-con">
         <!--<x-button mini style="margin-right: 1.5rem">温柔1</x-button>-->
         <!-- :labelsInfo=labelsInfo -->
-        <label-btn
-        ></label-btn>
+        <label-btn :labelType="labelType"></label-btn>
       </div>
     </div>
     <!-- the gifts which send to me -->
@@ -85,7 +84,7 @@
        personalDisplay: [],
        cuSerInfo: [],
        giftsInfo: [],
-       labelsInfo: []
+       labelType: 'notAll'
      }
     },
     computed: {
@@ -117,16 +116,6 @@
           console.log('======================= error about get cuSerInfo')
         }
       },
-
-      // 获取客服生活照的图片流
-      // async getPic(url) {
-      //   const res = await getImgUrl(url)
-      //   if (res) {
-      //     this.personalDisplay.push(res)
-      //   } else {
-      //     console.log('======================= error about get url of img')
-      //   }
-      // },
 
       // 礼物查询
       async getGifts() {

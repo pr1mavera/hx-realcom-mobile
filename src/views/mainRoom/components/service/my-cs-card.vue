@@ -128,7 +128,7 @@
           'csId': cusSerId
         }
         console.log('there are for test: aaa========' + this.index)
-        console.log('=============删除专属客服输入的数据：' + 'data: ' + data)
+        console.log('=============删除专属客服输入的数据：' + 'data: ' + data + '-' + JSON.stringify(this.userInfo) )
 
         this.showTips = true
         console.log('==================' + this.remove)
