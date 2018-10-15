@@ -97,4 +97,3 @@ export const createSession = (userId, userName, userPhone, chatType) => http.pos
 
 // 评价信息保存
 export const saveAssess = async(data) => http.post('video', `/video/user/evaluate`, data)
-
