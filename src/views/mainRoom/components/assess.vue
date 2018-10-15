@@ -29,10 +29,8 @@
         </div>
       </div>
     </popup>
-    <!--<toast v-model="showTips" type="text" :time="800" is-show-mask text="评论失败" :position="position">-->
-      <!--{{tips}}-->
-    <!--</toast>-->
-
+    <toast v-model="showFalseTips" type="text" :time="800" is-show-mask text="评论失败" :position="position"></toast>
+    <toast v-model="showSucTips" type="text" :time="800" is-show-mask text="评论成功" :position="position"></toast>
   </div>
 </template>
 
@@ -69,7 +67,10 @@
         name: '丽丽',
         stars: 0,
         next: true,
-        btnBoxList: btnList
+        btnBoxList: btnList,
+        showFalseTips: false,
+        showSucTips: false,
+        position: 'default'
       }
     },
     computed: {
@@ -120,9 +121,12 @@
         }
         const res = await saveAssess(data)
         if (res.result.code === ERR_OK) {
+          this.showSucTips = true
+          this.showAssess = false
           console.log('已经保存了你评价的信息' + JSON.stringify(res))
           this.$emit('assessSuccess')
         } else {
+          this.showFalseTips = true
           console.log('there are some error about' + JSON.stringify(res.result))
         }
       }

@@ -95,14 +95,14 @@
     },
     mounted() {
       this.getCsInfo()
-      this.getGifts()
+      // this.getGifts()
       // this.getLabels()
     },
     methods: {
       // 获取客服信息
       async getCsInfo() {
-        const cuSerId = '123456789'
-        // const cuSerId = this.csInfo.csId
+        // const cuSerId = '123456789'
+        const cuSerId = this.$route.query.cusSerId
         // console.log('=================================' + JSON.stringify(this.csInfo))
         const res = await getCsInfo(cuSerId)
         if (res.result.code === ERR_OK) {
@@ -133,7 +133,7 @@
         const page = 0
         const pageSize = -1
         // const csId = '1'
-        const csId = this.cuSerInfo.id
+        const csId = this.$route.query.cusSerId
 
         const res = await viewGifts(page, pageSize, csId)
         if (res.result.code === ERR_OK) {

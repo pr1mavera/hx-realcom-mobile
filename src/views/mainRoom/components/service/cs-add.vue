@@ -213,12 +213,15 @@ export default {
       // const userId = '123'
       const userId = this.userInfo.userId
 
-      this.m_cslist.push(this.curLabelInfo)
+      // this.m_cslist.push(this.cabeurLlInfo)
       // this.cslist.splice(0, 1)
       this.curLabelInfo = this.cslist[0]
       // 选中客服的ID
       const cuSerId = this.curLabelInfo.id
       this.m_cslist.push(this.curLabelInfo)
+      // 数组去重
+      Array.from(new Set(this.m_cslist))
+
       const data = {
         'userId': userId,
         'csId': cuSerId
