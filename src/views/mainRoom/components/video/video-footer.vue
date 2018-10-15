@@ -14,7 +14,7 @@
             <use xlink:href="#icon-liwu"></use>
           </svg>
         </button>
-        <button class="footer-btn footer-btn-star extend-click">
+        <button class="footer-btn footer-btn-star extend-click" @click="$emit('handleAssess')">
           <svg class="icon" aria-hidden="true">
             <use xlink:href="#icon-pingjia"></use>
           </svg>

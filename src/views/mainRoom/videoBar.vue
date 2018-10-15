@@ -31,10 +31,11 @@
           <div class="name">{{this.csInfo.csName}}</div>
         </div>
         <video-footer
+          @hangUpVideo="hangUpVideo"
+          @handleAssess="assessViewOpen = true"
+          @sendGift="giftSectionShow = true"
           @changeCamera="isChangeCamera = !isChangeCamera"
           @minimizeVideoBar="closeVideoBar"
-          @sendGift="giftSectionShow = true"
-          @hangUpVideo="hangUpVideo"
         ></video-footer>
         <video-msg-list></video-msg-list>
         <div class="video-fload-btn">
@@ -60,7 +61,7 @@
         </section>
       </section>
       <assess
-        v-model="assessViewOpen"
+        :showAssess="assessViewOpen"
         @handleToCancelAssess="handleToCancelAssess"
         @assessSuccess="assessSuccess"
       ></assess>

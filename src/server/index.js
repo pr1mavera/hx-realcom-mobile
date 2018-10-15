@@ -59,11 +59,6 @@ export const getUserInfoByOpenID = openID => http.get('video', `/video/user?open
  */
 export const getBotInfo = () => http.get('video', `/robot/query`)
 
-/**
- * [sendMsgToBot 发送消息给机器人]
- */
-export const sendMsgToBot = data => http.post('video', `/robot/question/send`, data)
-
 // 获取客服信息
 export const queryCsInfo = async(page, pageSize, userId, listType) => http.get('video', `/video/user/cs/query?page=${page}&pageSize=${pageSize}&userId=${userId}&listType=${listType}`)
 
@@ -95,6 +90,21 @@ export const viewLabels = async(page, pageSize, csId) => http.get('video', `/vid
 export const createSession = (userId, userName, userPhone, chatType) => http.post('chat', `/chat/session/create`, { userId, userName, userPhone, chatType })
 
 /**
+ * [getSessionList 获取会话列表]
+ */
+ export const getSessionList = userId => http.get('chat', `/user/session?userId=${userId}`)
+
+ /**
+  * [sendMsgToBot 发送消息给机器人]
+  */
+ export const sendMsgToBot = data => http.post('chat', `/robot/question/send`, data)
+
+/**
+ * [getBotRoamMsgs 拉取机器人漫游消息]
+ */
+ export const getBotRoamMsgs = (sessionId, page, pageSize) => http.get('chat', `/chat/robot?page=${page}&pageSize=${pageSize}&sessionId=${sessionId}`)
+
+/**
  * [getHistoryMsgs 拉取历史消息]
  */
  export const getHistoryMsgs = (userId, page, pageSize) => http.get('chat', `/chat/history?page=${page}&pageSize=${pageSize}&userId=${userId}`)
@@ -102,4 +112,3 @@ export const createSession = (userId, userName, userPhone, chatType) => http.pos
 
 // 评价信息保存
 export const saveAssess = async(data) => http.post('video', `/video/user/evaluate`, data)
-

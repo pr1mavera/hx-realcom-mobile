@@ -26,10 +26,10 @@ export const queueStatus = { // 排队状态
 }
 
 export const sessionStatus = {
-  robot: 1, // 机器人
-  video: 2, // 视频
-  onLine: 3, // 在线
-  website: 4 // 官网
+  robot: '1', // 机器人
+  video: '2', // 视频
+  onLine: '3', // 在线
+  website: '4' // 官网
 }
 
 export const systemMsgStatus = {
