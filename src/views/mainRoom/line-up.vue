@@ -39,6 +39,7 @@ export default {
       times: 1,
       videoQueueNum: 0,
       heart: '', // 判断心跳变量
+      heartBeatTimer: 0,
       heartBeatReq: null,
       heartBeatFailCount: 0 // 心跳包超时失败次数
     }
@@ -64,7 +65,7 @@ export default {
     },
     startHeartBeat() {
       this.heart = '1'
-      return setInterval(async() => {
+      this.heartBeatTimer = setInterval(async() => {
         if (!this.heart) {
           return
         }
@@ -82,11 +83,16 @@ export default {
     },
     stopHeartBeat() {
       this.heart = ''
+      debugger
+      this.heartBeatTimer = clearInterval(this.heartBeatTimer)
       if (this.heartBeatReq) {
         this.heartBeatReq = null
       }
     },
     async clickToCancelLineUp() {
+      // 停止心跳
+      this.stopHeartBeat()
+      // 取消排队
       const res = await videoQueueCancel(this.userInfo.userId, this.$route.params.csId)
       if (res.result.code === ERR_OK) {
         console.log('===============================> 取消排队 啊 取消排队 <===============================')
@@ -104,7 +110,6 @@ export default {
       this.videoQueueNum -= 1
     },
     confirmToVideo() {
-      this.stopHeartBeat()
       this.$router.push({path: `/room/chat?openId=${this.userInfo.openId}`})
       this.readyToVideoChat()
       // this.$emit('ready')

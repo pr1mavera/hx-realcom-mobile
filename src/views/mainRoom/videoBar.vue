@@ -59,6 +59,11 @@
           <send-gift :theme="`dark`" @selectGift="selectGift"></send-gift>
         </section>
       </section>
+      <assess
+        v-model="assessViewOpen"
+        @handleToCancelAssess="handleToCancelAssess"
+        @assessSuccess="assessSuccess"
+      ></assess>
       <div v-transfer-dom>
         <x-dialog v-model="isVideoOverReportShow" :dialog-style="{'max-width': '100%', width: '100%', height: '100%', 'background-color': 'transparent'}">
           <video-over-toast
@@ -103,6 +108,7 @@ export default {
     'VideoFooter': () => import('@/views/mainRoom/components/video/video-footer'),
     'VideoMsgList': () => import('@/views/mainRoom/components/video/video-msg-list'),
     'SendGift': () => import('@/views/mainRoom/components/chat/send-gift'),
+    'Assess': () => import('@/views/mainRoom/components/assess'),
     'videoOverToast': () => import('@/views/mainRoom/components/video/video-over-toast'),
     XDialog
   },
@@ -146,7 +152,8 @@ export default {
       // 礼物列表弹层开关：[false 开启 / [true 关闭]
       giftSectionShow: false,
       // 当前视频评论状态：[false 还没评论] / [true 已评论]
-      hasAssess: false
+      hasAssess: false,
+      assessViewOpen: false
     }
   },
   mounted() {
@@ -191,6 +198,18 @@ export default {
       // 判断当前是否评价过
       if (!this.hasAssess) {
         // 评价流程
+        this.assessViewOpen = true
+      }
+    },
+    assessSuccess() {
+      this.assessViewOpen = false
+      this.hasAssess = true
+    },
+    handleToCancelAssess() {
+      // 用户主动关闭评价
+      this.assessViewOpen = false
+      if (this.videoTime !== '') {
+        // 视频结束
         this.hasAssess = true
       }
     },

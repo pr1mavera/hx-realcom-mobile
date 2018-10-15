@@ -334,7 +334,7 @@ export const IMMixin = {
           },
           () => {
             console.log('===============================> initIM success <===============================')
-            IM.joinGroup('987654321', this.userInfo.userId)
+            // IM.joinGroup('987654321', this.userInfo.userId)
             resolve()
           },
           (err) => {

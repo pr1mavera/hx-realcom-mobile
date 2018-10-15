@@ -1,12 +1,12 @@
 <!-- 用户给客服评论的组件 -->
 <template>
-  <div v-transfer-dom>
+  <div class="assess-model" v-transfer-dom>
     <popup v-model="showAssess" is-transparent>
       <div class="popup-main" style="">
        <div class="avatar">
          <img :src="avatarImgSrc">
        </div>
-        <x-icon type="ios-close" @click.native="cancelAssess" size="30"></x-icon>
+        <x-icon type="ios-close" @click.native="$emit('handleToCancelAssess')" size="30"></x-icon>
         <div class="eva-part">
           <p>请对{{name}}本次的服务进行评价</p>
           <!-- fill:#bfbfbf; 未评价时星星的颜色； #FEC656,评价点亮后星星的颜色 -->
@@ -38,8 +38,8 @@
 
 <script>
   import { TransferDom, Popup, Rater, XButton, Swiper, SwiperItem, Toast } from 'vux'
-  import {ERR_OK, saveAssess, getCsAvatar} from '@/server/index.js'
-  import {mapGetters} from 'vuex'
+  import { ERR_OK, saveAssess, getCsAvatar } from '@/server/index.js'
+  import { mapGetters } from 'vuex'
 
   const btnList = [
     ''
@@ -57,9 +57,14 @@
       Toast,
       'LabelBtn': () => import('@/views/mainRoom/components/label-btn')
     },
+    props: {
+      showAssess: {
+        type: Boolean
+      }
+    },
     data() {
       return {
-        showAssess: true,
+        // showAssess: true,
         avatarImgSrc: '',
         name: '丽丽',
         stars: 0,
@@ -78,9 +83,9 @@
       this.getAvatar()
     },
     methods: {
-      cancelAssess() {
-        this.showAssess = false
-      },
+      // cancelAssess() {
+      //   this.showAssess = false
+      // },
 
       // 获取客服头像
       async getAvatar() {
@@ -116,6 +121,7 @@
         const res = await saveAssess(data)
         if (res.result.code === ERR_OK) {
           console.log('已经保存了你评价的信息' + JSON.stringify(res))
+          this.$emit('assessSuccess')
         } else {
           console.log('there are some error about' + JSON.stringify(res.result))
         }
@@ -125,6 +131,7 @@
 </script>
 
 <style scoped lang="less">
+.assess-model {
   .vux-popup-dialog {
     display: flex;
     height: 100vh!important;
@@ -170,4 +177,5 @@
       .eva-more {}
     }
   }
+}
 </style>
