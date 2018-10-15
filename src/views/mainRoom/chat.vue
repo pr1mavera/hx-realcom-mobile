@@ -200,6 +200,7 @@ export default {
       await this._setBotBaseInfo()
       await this.initIM()
       beforeEnterVideo()
+      // this.readyToVideoChat()
     },
     async _setBotBaseInfo() {
       const res = await getBotInfo()
@@ -400,28 +401,6 @@ export default {
         }
         resolve()
       })
-      // const option = {
-      //   'Peer_Account': '00f29791-f5f1-4c21-b486-8b553d9e5e99',
-      //   'MaxCnt': 5,
-      //   'LastMsgTime': Math.round(new Date('2018/09/18 14:20:05').getTime() / 1000),
-      //   'MsgKey': ''
-      // }
-      // const self = this
-      // return new Promise((resolve) => {
-      //   // eslint-disable-next-line
-      //   webim.getC2CHistoryMsgs(
-      //     option,
-      //     (resp) => {
-      //       let msgsObj = []
-      //       resp.MsgList.forEach((item) => {
-      //         msgsObj.push(IM.parseMsg(item))
-      //       })
-      //       self.history = msgsObj.concat(self.history)
-      //       console.log(msgsObj)
-      //       resolve()
-      //     }
-      //   )
-      // })
     },
     _reboundPullDown() {
       const stopTime = 600
@@ -658,6 +637,7 @@ export default {
       'enterToLineUp',
       'toggleBar',
       'sendMsgs'
+      // 'readyToVideoChat'
     ]),
     // 若ios用户 不在微信内置浏览器中打开该页面 则需要拉取漫游信息
     async getRoamMessage() {
@@ -684,19 +664,15 @@ export default {
         }
       }
     }
+  },
+  watch: {
+    msgs() {
+      this.$nextTick(() => {
+        this.chatScroll.refresh()
+        this.chatScroll.scrollToElement(this.$refs.chatContentEnd, 400)
+      })
+    }
   }
-  // watch: {
-  //   $route(newVal) {
-  //     switch (newVal.query.cmd) {
-  //       case 'ios-guide':
-  //         this.showGuide(true)
-  //         break
-  //       case 'low-version':
-  //         this.tipsUpgrade(true)
-  //         break
-  //     }
-  //   }
-  // }
 }
 </script>
 

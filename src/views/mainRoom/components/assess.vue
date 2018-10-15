@@ -122,7 +122,7 @@
         const res = await saveAssess(data)
         if (res.result.code === ERR_OK) {
           this.showSucTips = true
-          this.showAssess = false
+          // this.showAssess = false
           console.log('已经保存了你评价的信息' + JSON.stringify(res))
           this.$emit('assessSuccess')
         } else {
