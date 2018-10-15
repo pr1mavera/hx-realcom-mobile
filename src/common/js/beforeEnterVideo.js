@@ -22,11 +22,11 @@ export function beforeEnterVideo() {
 
     // 若用户当前设备的版本过低，则提示用户升级系统
     if (version < 11) {
-      alert('当前ios的版本为：' + version + '，请升级系统版本')
+      // alert('当前ios的版本为：' + version + '，请升级系统版本')
       // this.$emit('low-version', 'true')
       sessionStorage.setItem('enterVideoStatus', 'low-version')
     } else if (device === 'iPhone' && browser === 'wx') {
-      alert('你当前ios的版本为：' + version)
+      // alert('你当前ios的版本为：' + version)
       // 当前在微信内置浏览器中，弹层提示用户在浏览器中打开,
       // 而且用户此时点击右上角“...”出现的菜单项只有 “在Safari中打开一项”
       sessionStorage.setItem('enterVideoStatus', 'ios-guide')
@@ -44,10 +44,10 @@ export function beforeEnterVideo() {
       //   }
       // })
     } else if (device === 'iPhone' && browser === 'safari') {
-      alert('当前ios的版本为：' + version + '！')
+      // alert('当前ios的版本为：' + version + '！')
       // 进入排队的页面
       // this.$emit('enterVideoLineUp')
-      sessionStorage.setItem('enterVideoStatus', 'enterVideoLineUp')
+      sessionStorage.setItem('enterVideoStatus', 'enter-video-line-up')
     }
   }
 }

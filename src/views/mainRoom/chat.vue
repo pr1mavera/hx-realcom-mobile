@@ -44,6 +44,7 @@
                 :dialogInfo="msg.dialogInfo"
                 :proxyInfo="msg.proxyInfo"
                 @enterToMenChat="enterToMenChat"
+                @clickHotQues="chatInputCommit"
               ></component>
             </li>
             <li class="chat-content-block chat-content-end" ref="chatContentEnd"></li>
@@ -489,8 +490,8 @@ export default {
       this.inputEle.innerText = ''
       switch (this.roomMode) {
         case roomStatus.AIChat:
-          // this.sendTextMsgToBot(text)
-          await this.sendC2CMsgs(text)
+          await this.sendTextMsgToBot(text)
+          // await this.sendC2CMsgs(text)
           break
         case roomStatus.menChat:
           await this.sendTextMsg(text)

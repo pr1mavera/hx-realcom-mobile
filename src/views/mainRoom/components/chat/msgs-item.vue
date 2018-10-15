@@ -30,7 +30,7 @@
           <span class="line"></span>
           <span class="text-extend-hot">
             <span class="text-extend">您可能想问：</span>
-            <span class="text-extend button" v-for="(item, index) in this.extend" :key="index">{{item}}</span>
+            <span class="text-extend button" v-for="(item, index) in this.extend" :key="index" @click="clickHotQues(item)">{{item}}</span>
             <!-- <span class="text-extend button" @click="enterToMenChat">人工客服</span> -->
           </span>
         </span>
@@ -145,6 +145,9 @@ export default {
     },
     enterToMenChat() {
       this.$emit('enterToMenChat')
+    },
+    clickHotQues(ques) {
+      this.$emit('clickHotQues', ques)
     }
   }
 }

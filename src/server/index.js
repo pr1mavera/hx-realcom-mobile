@@ -36,6 +36,11 @@ export const videoQueue = (userId, csId, priority) => http.post('RTCRoom', '/vid
 export const videoQueueCancel = (userId, csId) => http.post('RTCRoom', '/video/user/queue/cancel', { userId, csId })
 
 /**
+ * [queueHeartBeat 客户端排队心跳]
+ */
+export const queueHeartBeat = (roomId, userId) => http.post('RTCRoom', '/comm/room/heartbeat', { roomId, userId, beatType: 0 })
+
+/**
  ************************************ video ************************************
  */
 

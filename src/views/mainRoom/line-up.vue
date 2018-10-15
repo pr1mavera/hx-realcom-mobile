@@ -18,7 +18,7 @@
 <script type="text/ecmascript-6">
 import { mapGetters, mapMutations, mapActions } from 'vuex'
 import { IMMixin } from '@/common/js/mixin'
-import { ERR_OK, videoQueue, videoQueueCancel } from '@/server/index.js'
+import { ERR_OK, videoQueue, queueHeartBeat, videoQueueCancel } from '@/server/index.js'
 import { queueStatus } from '@/common/js/status'
 
 export default {
@@ -38,16 +38,10 @@ export default {
     return {
       times: 1,
       videoQueueNum: 0,
-      loginInfo: {
-        // userId: `userid_web_${Date.now().toString()}`,
-        userId: 'cust-test',
-        userName: '田老师红烧肉盖饭'
-      }
-      // loginInfo: {
-      //   // userId: `userid_web_${Date.now().toString()}`,
-      //   userId: 'cs-test',
-      //   userName: '膳当家黄焖鸡米饭'
-      // }
+      heart: '', // 判断心跳变量
+      heartBeatTimer: 0,
+      heartBeatReq: null,
+      heartBeatFailCount: 0 // 心跳包超时失败次数
     }
   },
   mounted() {
@@ -61,13 +55,44 @@ export default {
         console.log('===============================> 排队啊 排队啊 排队啊 <===============================')
         return new Promise((resolve) => {
           this.setQueueNum(res.data.queueNum)
+          // 开启心跳
+          this.startHeartBeat()
           resolve()
         })
       } else {
         console.log('error in videoQueue')
       }
     },
+    startHeartBeat() {
+      this.heart = '1'
+      this.heartBeatTimer = setInterval(async() => {
+        if (!this.heart) {
+          return
+        }
+        this.heartBeatReq = await queueHeartBeat(this.$route.params.csId, this.userInfo.userId)
+        if (this.heartBeatReq.code === ERR_OK) {
+          console.info('心跳成功')
+          this.heartBeatFailCount = 0
+        } else {
+          this.heartBeatFailCount++
+          if (this.heartBeatFailCount > 2) {
+            console.error('心跳失败 辣')
+          }
+        }
+      }, 7000)
+    },
+    stopHeartBeat() {
+      this.heart = ''
+      debugger
+      this.heartBeatTimer = clearInterval(this.heartBeatTimer)
+      if (this.heartBeatReq) {
+        this.heartBeatReq = null
+      }
+    },
     async clickToCancelLineUp() {
+      // 停止心跳
+      this.stopHeartBeat()
+      // 取消排队
       const res = await videoQueueCancel(this.userInfo.userId, this.$route.params.csId)
       if (res.result.code === ERR_OK) {
         console.log('===============================> 取消排队 啊 取消排队 <===============================')
@@ -82,7 +107,6 @@ export default {
       }
     },
     queueListReduce() {
-      debugger
       this.videoQueueNum -= 1
     },
     confirmToVideo() {

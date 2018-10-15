@@ -59,12 +59,18 @@
           <send-gift :theme="`dark`" @selectGift="selectGift"></send-gift>
         </section>
       </section>
+      <assess
+        v-model="assessViewOpen"
+        @handleToCancelAssess="handleToCancelAssess"
+        @assessSuccess="assessSuccess"
+      ></assess>
       <div v-transfer-dom>
         <x-dialog v-model="isVideoOverReportShow" :dialog-style="{'max-width': '100%', width: '100%', height: '100%', 'background-color': 'transparent'}">
           <video-over-toast
             :csAvatarUrl="this.csInfo.csAvatar"
             :csName="this.csInfo.csName"
             :time="videoTime"
+            @goBackToChat="goBackToChat"
           ></video-over-toast>
         </x-dialog>
       </div>
@@ -83,7 +89,7 @@
 </template>
 
 <script type="text/ecmascript-6">
-import { mapGetters, mapMutations } from 'vuex'
+import { mapGetters, mapMutations, mapActions } from 'vuex'
 import { XDialog, TransferDomDirective as TransferDom } from 'vux'
 import { queueStatus } from '@/common/js/status'
 import { RTCRoomMixin, sendMsgsMixin } from '@/common/js/mixin'
@@ -102,6 +108,7 @@ export default {
     'VideoFooter': () => import('@/views/mainRoom/components/video/video-footer'),
     'VideoMsgList': () => import('@/views/mainRoom/components/video/video-msg-list'),
     'SendGift': () => import('@/views/mainRoom/components/chat/send-gift'),
+    'Assess': () => import('@/views/mainRoom/components/assess'),
     'videoOverToast': () => import('@/views/mainRoom/components/video/video-over-toast'),
     XDialog
   },
@@ -116,6 +123,9 @@ export default {
     // isLineUpShow() {
     //   return this.queueMode === queueStatus.queuing || this.queueMode === queueStatus.queueSuccess
     // },
+    isVideoOverReportShow() {
+      return this.hasAssess && this.videoTime !== ''
+    },
     customer() {
       return this.isChangeCamera ? 'big' : 'small'
     },
@@ -127,7 +137,8 @@ export default {
       'roomMode',
       'queueMode',
       'userInfo',
-      'csInfo'
+      'csInfo',
+      'roomId'
     ])
   },
   data() {
@@ -142,8 +153,7 @@ export default {
       giftSectionShow: false,
       // 当前视频评论状态：[false 还没评论] / [true 已评论]
       hasAssess: false,
-      // 视频通话结束报告
-      isVideoOverReportShow: false
+      assessViewOpen: false
     }
   },
   mounted() {
@@ -181,18 +191,40 @@ export default {
       this.initRTC(this.roomId)
     },
     hangUpVideo() {
+      // 退出音视频房间
+      this.quitRTC()
       // 记录通话时间
       this.videoTime = this._getVideoTime(this.startTimeStamp)
       // 判断当前是否评价过
       if (!this.hasAssess) {
         // 评价流程
+        this.assessViewOpen = true
       }
-      // 显示视频结束
-      this.isVideoOverReportShow = true
+    },
+    assessSuccess() {
+      this.assessViewOpen = false
+      this.hasAssess = true
+    },
+    handleToCancelAssess() {
+      // 用户主动关闭评价
+      this.assessViewOpen = false
+      if (this.videoTime !== '') {
+        // 视频结束
+        this.hasAssess = true
+      }
+    },
+    goBackToChat() {
+      // 退群
+      // IM.quitGroup(this.roomId)
+      // action
+      this.quitVideoChat()
     },
     ...mapMutations({
       setFullScreen: 'SET_FULL_SCREEN'
-    })
+    }),
+    ...mapActions([
+      'quitVideoChat'
+    ])
   },
   filters: {
     videoTimeFormat(val) {
@@ -254,6 +286,8 @@ export default {
     }
     .video-components-section {
       position: relative;
+      width: 100%;
+      height: 100%;
       .video-header {
         position: absolute;
         top: 2.6rem;

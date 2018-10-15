@@ -191,6 +191,20 @@ export const RTCRoomMixin = {
         console.warn('服务器超时断开')
         // self.goHomeRouter()
       })
+    },
+    stopRTC() {
+      this.RTC.stopRTC({}, () => {
+          console.log('停止推流 成功 辣')
+        }, () => {
+          console.error('停止推流 失败 辣')
+        })
+    },
+    quitRTC() {
+      this.RTC.quit({}, () => {
+        console.log('退出音视频房间 成功 辣')
+      }, () => {
+        console.error('退出音视频房间 失败 辣')
+      })
     }
     // afterCreateRoom(courseInfo) {
     //   // const self = this
@@ -331,24 +345,26 @@ export const IMMixin = {
     },
     onBigGroupMsgNotify(msgs) {
       if (msgs && msgs.length > 0) {
-        this.receiveCustomMsgs(msgs)
-        this.$nextTick(() => {
-          const e = document.getElementById('video-msg-list-bottom-tag')
-          if (this.videoMsgs.length > 3) {
-            const scrollObj = {
-              scrollTop: e.scrollTop
-            }
-            anime({
-              targets: scrollObj,
-              scrollTop: e.scrollHeight - e.clientHeight,
-              easing: 'easeInOutQuad',
-              round: 1,
-              update: function() {
-                e.scrollTop = scrollObj.scrollTop
+        if (msgs[0].fromAccount !== '@TIM#SYSTEM') {
+          this.receiveCustomMsgs(msgs)
+          this.$nextTick(() => {
+            const e = document.getElementById('video-msg-list-bottom-tag')
+            if (this.videoMsgs.length > 3) {
+              const scrollObj = {
+                scrollTop: e.scrollTop
               }
-            })
-          }
-        })
+              anime({
+                targets: scrollObj,
+                scrollTop: e.scrollHeight - e.clientHeight,
+                easing: 'easeInOutQuad',
+                round: 1,
+                update: function() {
+                  e.scrollTop = scrollObj.scrollTop
+                }
+              })
+            }
+          })
+        }
       }
     },
     onMsgNotify(msgs) {
@@ -393,8 +409,6 @@ export const IMMixin = {
             }
           }
           RTCSystemMsg.systemMsg(systemMsg)
-          // 设置排队状态
-          this.setQueueMode(queueStatus.queueSuccess)
           break
         case systemMsgStatus.requestCsEntance: // 座席端视频接入请求
 
@@ -409,6 +423,8 @@ export const IMMixin = {
           this.setCsInfo(csInfoWithName)
           this.setRoomId(msgsObj.csCode)
           this.setSessionId(msgsObj.sessionId)
+          // 设置排队状态
+          this.setQueueMode(queueStatus.queueSuccess)
           break
       }
     },
