@@ -74,10 +74,10 @@ export const removeCs = async(data) => http.post('video', `/video/user/cs/delete
 // 客服信息获取（获取客服的个人资料）
 export const getCsInfo = async(csId) => http.get('video', `/video/user/cs?csId=${csId}`)
 
-// 礼物查询信息
+// 礼物查询信息(同标签查询)
 export const viewGifts = async(page, pageSize, csId) => http.get('video', `/video/user/gifts/query?page=${page}&pageSize=${pageSize}&csId=${csId}`)
 
-// 标签信息查询(传csId查询到评价当前客服的标签，不传csId查询到所有的标签）
+// 标签信息查询(传csId查询到评价当前客服的标签，csId=‘’查询到所有的标签）
 export const viewLabels = async(page, pageSize, csId) => http.get('video', `/video/user/labels?page=${page}&pageSize=${pageSize}&csId=${csId}`)
 export const viewAllLabels = async(page, pageSize) => http.get('video', `/video/user/labels?page=${page}&pageSize=${pageSize}`)
 

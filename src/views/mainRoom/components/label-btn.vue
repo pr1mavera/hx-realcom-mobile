@@ -8,17 +8,17 @@
                     :likeNum="item.labelCount"
       >{{item.labelName}} {{item.labelCount}}</checker-item>
     </checker>-->
-    <!--<span>当前选中的值为：{{selTags}}</span>-->
-    <swiper height="9.5rem" style="" dots-class="custom-bottom" dots-position="center">
-      <swiper-item v-for="(item, index) in pageList" :key="index"
-      >
+    <span>当前选中的值为：{{selTags}}</span>
+    <swiper height="9.5rem" style="" :show-dots="showDots" @on-index-change="changePage" dots-class="custom-bottom" dots-position="center">
+      <swiper-item v-for="(item, index) in pageList" :key="index">
+        <!--{{index}}-->
         <checker v-model="selTags" type="checkbox" default-item-class="tags-default"
                  selected-item-class="tags-selected">
           <checker-item :disabled="disable" :value="item" v-for="(item, index) in btnList"
                         :key="index"
                         :text="item.labelName"
                         :likeNum="item.labelCount"
-          >{{item.labelName}} {{item.labelCount}}
+          >{{item.name}} {{item.count}}
           </checker-item>
         </checker>
       </swiper-item>
@@ -47,17 +47,22 @@
     data() {
       return {
         btnList: [
-          {labelName: '聪明伶俐', labelId: 3},
-          {labelName: '气质美女', labelId: 33},
-          {labelName: '解决了问题', labelId: 256},
-          {labelName: '可爱', labelId: 2233}
+          // {name: '聪明伶俐', id: 3}
         ],
-        selTags: null,
+        selTags: null, // 选中的标签
         isDisabled: '',
         disable: true, // 标签不能选，只是做展示功能
         currentPage: 1, // 当前页
-        pageList: [1, 2, 3]
+        pageList: [1],
+        showDots: true
       }
+    },
+    watch: {
+      selTags: [
+        function handle1(val, oldVal) {
+        this.$emit('seledLabels', this.selTags)
+        }
+      ]
     },
     computed: {
       ...mapGetters([
@@ -71,35 +76,60 @@
     methods: {
       // 获取label列表
       getLabelList() {
-        // 个人中心=> '认识我'模块中label信息的显示
         // if (this.labelsInfo !== undefined) {
         //   this.btnList = this.labelsInfo
         //   console.log('===========获取的个人中心的label列表为：' + JSON.stringify(this.btnList))
         // }
       },
 
+      // 切换轮播页
+      async changePage(index) {
+        this.currentPage = index + 1
+        // debugger
+        console.log('======================>当前页是' + index)
+        const page = this.currentPage
+        const pageSize = 2
+        // this.disable = false // 标签可以选
+        // debugger
+        const res = await viewAllLabels(page, pageSize)
+        if (res.result.code === ERR_OK) {
+          this.btnList = res.data.labels
+        } else {
+          console.log('======================= error about query labelTags')
+        }
+      },
+
       // 标签信息查询，获取label列表
       async getLabels() {
-        // const csId = this.$route.query.cusSerId
+        // const csId = this.csInfo.cusSerId
         const csId = '123'
-        const page = 1
-        const pageSize = 2
 
+        // debugger
         if (this.labelType === 'notAll') {
+          const page = 0
+          const pageSize = -1
           // 评价当前客服的标签
           const res = await viewLabels(page, pageSize, csId)
           if (res.result.code === ERR_OK) {
             console.log('=============这是查询到的标签信息:' + JSON.stringify(res.data))
+            this.showDots = false
             this.btnList = res.data.labels
           } else {
             console.log('======================= error about query labelTags')
           }
         } else {
           // 查询所有标签
+          const page = 1
+          const pageSize = 2
           this.disable = false // 标签可以选
-          const res = await viewAllLabels(page, pageSize, csId)
+          // debugger
+          const res = await viewAllLabels(page, pageSize)
           if (res.result.code === ERR_OK) {
-            console.log('=============这是查询到所有的标签信息:' + JSON.stringify(res.data))
+            console.log('=============这是当前页查询到所有的标签信息:' + JSON.stringify(res))
+            const pages = Math.ceil(res.data.totalCount[0].counts / pageSize) // 总页数
+            for (let i = 2; i <= pages; i++) {
+              this.pageList.push(i)
+            }
             this.btnList = res.data.labels
           } else {
             console.log('======================= error about query labelTags')
