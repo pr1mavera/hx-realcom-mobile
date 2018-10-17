@@ -56,7 +56,7 @@ export default {
         return new Promise((resolve) => {
           this.setQueueNum(res.data.queueNum)
           // 开启心跳
-          // this.startHeartBeat()
+          this.startHeartBeat()
           resolve()
         })
       } else {
