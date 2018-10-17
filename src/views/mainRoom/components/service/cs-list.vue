@@ -8,7 +8,7 @@
       :name="item.nickName"
       :num="item.servTimes"
       :gifts="item.giftCount"
-      @toLineUp="toLineUp"
+      @toLineUp="toLineUp(index)"
       @removeCs="removeCs(index)"
     ></my-cs-card>
     <p class="tips">您还可以添加 <span>{{3 - myCsList.length}}</span> 名专属客服</p>
@@ -19,23 +19,33 @@
       </svg>
       {{ myCsList.length === 3 ? '查看更多': '添加客服' }}
     </x-button>
+    <div v-transfer-dom>
+      <confirm v-model='alertTip'
+               >
+        <p style="text-align:center;">{{tipCon}}</p>
+      </confirm>
+    </div>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
-  import { XButton } from 'vux'
+  import { XButton, Confirm, TransferDomDirective as TransferDom } from 'vux'
   import { mapGetters } from 'vuex'
   import { ERR_OK, queryCsInfo } from '@/server/index.js'
 
 export default {
   components: {
     XButton,
+    Confirm,
     'myCsCard': () => import('@/views/mainRoom/components/service/my-cs-card')
   },
   computed: {
     ...mapGetters([
       'userInfo'
     ])
+  },
+  directives: {
+    TransferDom
   },
   data() {
     return {
@@ -53,7 +63,10 @@ export default {
         //   giftCount: 9933
         // }
       ],
-      quota: 3
+      quota: 3,
+      status: '',
+      alertTip: false,
+      tipCon: ''
     }
   },
   mounted() {
@@ -68,7 +81,7 @@ export default {
       const listType = '1'
       const res = await queryCsInfo(page, pageSize, userId, listType)
       if (res.result.code === ERR_OK) {
-        console.log('============================= 我现在来请求 专属客服 辣 =============================')
+        console.log('========================= 我现在来请求 专属客服 辣 ========================')
         this.myCsList = res.data.csList
       } else {
         console.log('error in queryCsInfo' + JSON.stringify(res))
@@ -97,9 +110,23 @@ export default {
       this.myCsList.splice(index, 1)
     },
 
-    toLineUp(csId) {
+    toLineUp(index, csId) {
+      debugger
       // this.$router.push({path: `/room/line-up/${this.userInfo.userId}/${this.cusSerId}`})
-      this.$router.push({path: `/room/line-up/${csId}`})
+      const status = this.myCsList[index].status // 0：就绪、1：小憩、3：签退
+      switch (status) {
+        case '0':
+          this.$router.push({path: `/room/line-up/${csId}`})
+          break
+        case '1':
+          this.alertTip = true
+          this.tipCon = '客服小姐姐正在休息'
+          break
+        case '3':
+          this.alertTip = true
+          this.tipCon = '客服小姐姐已经签退了'
+          break
+      }
     }
   }
 }
