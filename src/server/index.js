@@ -54,11 +54,6 @@ export const getImgUrl = imgUrl => http.url('video', `/video/image/get?imgUrl=${
  */
 export const getUserInfoByOpenID = openID => http.get('video', `/video/user?openId=${openID}`)
 
-/**
- * [getBotInfo 获取机器人基本信息]
- */
-export const getBotInfo = () => http.get('video', `/robot/query`)
-
 // 获取客服信息
 export const queryCsInfo = async(page, pageSize, userId, listType) => http.get('video', `/video/user/cs/query?page=${page}&pageSize=${pageSize}&userId=${userId}&listType=${listType}`)
 
@@ -95,9 +90,14 @@ export const createSession = (userId, userName, userPhone, chatType) => http.pos
  export const getSessionList = userId => http.get('chat', `/user/session?userId=${userId}`)
 
  /**
+  * [getBotInfo 获取机器人基本信息]
+  */
+ export const getBotInfo = () => http.get('chat', `/robot/query`)
+
+ /**
   * [sendMsgToBot 发送消息给机器人]
   */
- export const sendMsgToBot = data => http.post('chat', `/robot/question/send`, data)
+ export const sendMsgToBot = (question, sessionId, userId, userName) => http.post('chat', `/robot/question/send`, {question, sessionId, userId, userName})
 
 /**
  * [getBotRoamMsgs 拉取机器人漫游消息]
@@ -105,10 +105,10 @@ export const createSession = (userId, userName, userPhone, chatType) => http.pos
  export const getBotRoamMsgs = (sessionId, page, pageSize) => http.get('chat', `/chat/robot?page=${page}&pageSize=${pageSize}&sessionId=${sessionId}`)
 
 /**
- * [getHistoryMsgs 拉取历史消息]
+ * [requestHistoryMsgs 拉取历史消息]
  */
- export const getHistoryMsgs = (userId, page, pageSize) => http.get('chat', `/chat/history?page=${page}&pageSize=${pageSize}&userId=${userId}`)
- // export const getHistoryMsgs = (userId) => http.get('chat', `/chat/history?userId=${userId}`)
+ export const requestHistoryMsgs = (userId, page, pageSize) => http.get('chat', `/chat/history?page=${page}&pageSize=${pageSize}&userId=${userId}`)
+ // export const requestHistoryMsgs = (userId) => http.get('chat', `/chat/history?userId=${userId}`)
 
 // 评价信息保存
 export const saveAssess = async(data) => http.post('video', `/video/user/evaluate`, data)

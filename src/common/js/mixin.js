@@ -1,11 +1,10 @@
 import { mapGetters, mapMutations, mapActions } from 'vuex'
-// import WebRTCRoom from '@/server/webRTCRoom'
 import IM from '@/server/im'
 import anime from 'animejs'
-// import webim from '@/common/js/webim'
+import Creator from '@/common/js/msgsQuery'
 // import WebRTCAPI from 'webRTCAPI'
-import { ERR_OK, getUserInfoByOpenID, getLoginInfo, createSession, pushSystemMsg, sendMsgToBot, getSessionList, getHistoryMsgs, getCsAvatar } from '@/server/index.js'
-import { shallowCopy } from '@/common/js/util'
+import { ERR_OK, getUserInfoByOpenID, getLoginInfo, createSession, pushSystemMsg, sendMsgToBot, getSessionList, requestHistoryMsgs, getCsAvatar } from '@/server/index.js'
+import { shallowCopy, botAnswerfilter } from '@/common/js/util'
 import { formatDate } from '@/common/js/dateConfig.js'
 import { queueStatus, sessionStatus, systemMsgStatus, msgStatus, msgTypes } from '@/common/js/status'
 
@@ -475,13 +474,13 @@ export const sendMsgsMixin = {
           ques
         ])
         // 获取机器人返回
-        var params = new URLSearchParams()
-        params.append('question', question)
-        params.append('sessionId', this.sessionId)
-        const res = await sendMsgToBot(params)
+        const res = await sendMsgToBot(question, this.sessionId, this.userInfo.userId, this.userInfo.userName)
         if (res.result.code === ERR_OK) {
           // 此处将用户的输入保存至vuex
-          const answer = this.botAnswerfilter(res.data.answer.data)
+          const data = res.data.answer.data
+          data.botName = this.botInfo.botName
+          data.time = formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss')
+          const answer = botAnswerfilter(data)
           // this.setMsgs(this.msgs.concat([answer]))
           this.sendMsgs([
             answer
@@ -492,57 +491,6 @@ export const sendMsgsMixin = {
           alert('你可能不信，但是机器人崩了')
         }
       })
-    },
-    botAnswerfilter(data) {
-      let msg
-      if (data.info.length === 1) {
-        if (data.info[0].question === '如何转人工') {
-          // 转人工
-          msg = {
-            nickName: this.botInfo.name,
-            content: '',
-            isSelfSend: false,
-            time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
-            msgStatus: msgStatus.msg,
-            msgType: msgTypes.msg_no_idea
-          }
-        } else {
-          // normal
-          msg = {
-            nickName: this.botInfo.name,
-            content: data.info[0].answer,
-            isSelfSend: false,
-            time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
-            msgStatus: msgStatus.msg,
-            msgType: msgTypes.msg_normal
-          }
-        }
-      } else if (data.info.length === 3) {
-        // 猜问题
-        msg = {
-          nickName: this.botInfo.name,
-          content: '',
-          isSelfSend: false,
-          time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
-          msgStatus: msgStatus.msg,
-          msgType: msgTypes.msg_guess,
-          msgExtend: [
-            {
-              question: data.info[0].question,
-              answer: data.info[0].answer
-            },
-            {
-              question: data.info[1].question,
-              answer: data.info[1].answer
-            },
-            {
-              question: data.info[2].question,
-              answer: data.info[2].answer
-            }
-          ]
-        }
-      }
-      return msg
     },
     sendC2CMsgs(text) {
       return new Promise(resolve => {
@@ -684,7 +632,8 @@ export const getMsgsMixin = {
       historyMsgs: [],
       curPage: 1,
       pageSize: 10,
-      pulldownResult: '加载历史消息成功'
+      pulldownResult: '加载历史消息成功',
+      MsgsQuery: null
     }
   },
   methods: {
@@ -701,30 +650,23 @@ export const getMsgsMixin = {
         console.log('error in getHistoryMsgs')
       }
     },
-    /* ********************************* 腾讯请求漫游消息接口 ********************************* */
-    // getIMRoamMsgs(id, page, pageSize) {
-    //   const option = {
-    //     'Peer_Account': id,
-    //     'MaxCnt': pageSize,
-    //     'LastMsgTime': Math.round(new Date('2018/09/18 14:20:05').getTime() / 1000),
-    //     'MsgKey': ''
-    //   }
-    //   return new Promise((resolve) => {
-    //     // eslint-disable-next-line
-    //     webim.getC2CHistoryMsgs(
-    //       option,
-    //       (resp) => {
-    //         let msgsObj = []
-    //         resp.MsgList.forEach((item) => {
-    //           msgsObj.push(IM.parseMsg(item))
-    //         })
-    //         this.history = msgsObj.concat(this.history)
-    //         console.log(msgsObj)
-    //         resolve()
-    //       }
-    //     )
-    //   })
-    // },
+    async requestMsgsMixin() {
+      if (!this.MsgsQuery) {
+        let sessions = []
+        this.sessionList.forEach(item => {
+          sessions.push(Creator.createSession(item))
+        })
+        let SessionList = Creator.createSessionList(sessions)
+        this.MsgsQuery = Creator.createMsgsQuery(this.userInfo, SessionList)
+      }
+      const newMsgs = await this.MsgsQuery.getMsgs()
+      if (newMsgs && newMsgs.length) {
+        this.historyMsgs = newMsgs.concat(this.historyMsgs)
+      } else {
+        // 没有更多数据
+        this.pulldownResult = '别拉了，没有更多消息了！！！'
+      }
+    },
     /* ********************************* 统一漫游消息接口 ********************************* */
     // async unifyRoamData(session) {
     //   switch (session.chatType) {
@@ -766,7 +708,7 @@ export const getMsgsMixin = {
     // },
     /* ********************************* 请求历史消息 ********************************* */
     async requestHistoryMsgs() {
-      const res = await getHistoryMsgs(this.userInfo.userId, this.curPage, this.pageSize)
+      const res = await requestHistoryMsgs(this.userInfo.userId, this.curPage, this.pageSize)
       if (res.result.code === ERR_OK) {
         console.log('============================= 我现在来请求 历史消息 辣 =============================')
         return new Promise((resolve) => {

@@ -200,6 +200,7 @@ export default {
       await this._setBotBaseInfo()
       await this.initIM()
       beforeEnterVideo()
+      this.requestSessionList()
       // this.readyToVideoChat()
     },
     async _setBotBaseInfo() {
@@ -248,18 +249,6 @@ export default {
         console.log('============================= getBotInfo error =============================')
       }
     },
-    // async requestSessionList() {
-    //   // 请求sessionList
-    //   // const res =
-    //   const localStorage = window.localStorage
-    //   if (!sessionList) {
-    //     // 当天无漫游消息，清空localStotage, 稍后拉取直接上历史消息
-    //     localStorage.removeItem('msgsQueue')
-    //     localStorage.removeItem('msgsQueueMap')
-    //   } else {
-    //     // 判断本地缓存新鲜度
-    //   }
-    // },
     _initChatMsgList() {
       let map = []
       let timeCache = this.historyMsgs[0].time
@@ -372,12 +361,6 @@ export default {
     },
     pullingDown() {
       return new Promise((resolve) => {
-        const localStorage = window.localStorage
-        // const map = {
-        //   total: 5,
-        //   cur: 5
-        // }
-        // localStorage.setItem('msgsQueueMap', JSON.stringify(map))
         if (!this.historyMsgs.length) {
           const tip = {
             content: '以上为历史消息',
@@ -387,18 +370,7 @@ export default {
           }
           this.historyMsgs.push(tip)
         }
-        const msgsQueueMap = JSON.parse(localStorage.getItem('msgsQueueMap'))
-        switch (true) {
-          case !msgsQueueMap:
-            // 请求历史消息
-            this.requestHistoryMsgs()
-            break
-          case msgsQueueMap.total:
-            // 当前已缓存漫游消息，直接拉取
-            break
-          default:
-            // 按sessionList请求漫游消息
-        }
+        this.requestMsgsMixin()
         resolve()
       })
     },
