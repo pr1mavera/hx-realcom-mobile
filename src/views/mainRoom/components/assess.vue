@@ -16,12 +16,13 @@
           </rater>
         </div>
         <div class="eva-more" v-if="stars > 0">
-          <swiper height="9.5rem" style="background: #F1F1F1;margin-top: 1.5rem;" dots-class="custom-bottom" dots-position="center">
-            <swiper-item><div class="btn-box"></div></swiper-item>
-            <swiper-item><h2 class="fadeInUp animated">test2</h2></swiper-item>
-            <swiper-item v-for="(item, index) in btnBoxList" :key="index">
-            </swiper-item>
-          </swiper>
+          <!--<swiper height="9.5rem" style="background: #F1F1F1;margin-top: 1.5rem;" dots-class="custom-bottom" dots-position="center">-->
+            <!--<swiper-item><div class="btn-box"></div></swiper-item>-->
+            <!--<swiper-item><h2 class="fadeInUp animated">test2</h2></swiper-item>-->
+            <!--<swiper-item v-for="(item, index) in btnBoxList" :key="index">-->
+            <!--</swiper-item>-->
+          <!--</swiper>-->
+          <label-btn :labelType="labelType" :seledLabels="selLabels"></label-btn>
           <x-button :gradients="['#FF8C6A', '#ff80a0']" @click.native="saveAssess"
                     style="width: 11rem;margin: 2rem auto 0;">
             提交评价
@@ -70,7 +71,8 @@
         btnBoxList: btnList,
         showFalseTips: false,
         showSucTips: false,
-        position: 'default'
+        position: 'default',
+        labelType: 'all'
       }
     },
     computed: {
@@ -89,18 +91,24 @@
       // },
 
       // 获取客服头像
-      async getAvatar() {
-        const cusSerId = this.csInfo.id
-        console.log('====================' + JSON.stringify(this.csInfo))
-        // const cusSerId = '54321'
-        const res = await getCsAvatar(cusSerId)
+      getAvatar() {
+        this.avatarImgSrc = getCsAvatar('123456789')
+        // const cusSerId = this.csInfo.id
+        // console.log('====================' + JSON.stringify(this.csInfo))
+        // // const cusSerId = '54321'
+        // const res = await getCsAvatar(cusSerId)
+        //
+        // if (res) {
+        //   this.avatarImgSrc = res
+        //   console.log('==============您已经成功的获取到了客服的头像' + JSON.stringify(res))
+        // } else {
+        //   console.log('there are some errors about query the avatar of cs' + JSON.stringify(res.result))
+        // }
+      },
 
-        if (res) {
-          this.avatarImgSrc = res
-          console.log('==============您已经成功的获取到了客服的头像' + JSON.stringify(res))
-        } else {
-          console.log('there are some errors about query the avatar of cs' + JSON.stringify(res.result))
-        }
+      selLabels(selTags) {
+        debugger
+        console.log('=============>你当前选中的标签：' + JSON.stringify(selTags))
       },
 
       // 保存评论的信息

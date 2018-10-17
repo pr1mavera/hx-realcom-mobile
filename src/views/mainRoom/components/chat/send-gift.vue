@@ -13,7 +13,7 @@
 </template>
 
 <script type="text/ecmascript-6">
-  import {getImgUrl} from '@/server/index.js'
+  import {ERR_OK, getImgUrl, viewGifts} from '@/server/index.js'
 export default {
   components: {
     'SendExtendItem': () => import('@/views/mainRoom/components/chat/send-extend-item')
@@ -79,28 +79,44 @@ export default {
           name: '草莓蛋糕'
         }
       ],
-      myGifts: []
+      myGifts: [],
+      giftUrl: getImgUrl('url') // 礼物图片连接
     }
   },
   mounted() {
-    this.getGiftsInfo()
+    // this.getGiftsInfo()
   },
   methods: {
     // 获取礼物列表
-    getGiftsInfo() {
+    async getGiftsInfo() {
       // 个人中心获取的礼物的展示
-      if (this.giftsInfo !== undefined) {
-        // this.giftMap = this.giftsInfo
-        console.log('================ 收到的礼物列表在此：' + JSON.stringify(this.giftsInfo))
-        const giftsInfo = this.giftsInfo
-        for (var i in giftsInfo) {
-          const text = (giftsInfo[i].giftName + ' ' + giftsInfo[i].giftCount)
-          const giftPic = getImgUrl(giftsInfo[i].giftUrl)
+      // if (this.giftsInfo !== undefined) {
+      //   // this.giftMap = this.giftsInfo
+      //   console.log('================ 收到的礼物列表在此：' + JSON.stringify(this.giftsInfo))
+      //   const giftsInfo = this.giftsInfo
+      //   for (var i in giftsInfo) {
+      //     const text = (giftsInfo[i].giftName + ' ' + giftsInfo[i].giftCount)
+      //     const giftPic = getImgUrl(giftsInfo[i].giftUrl)
+      //
+      //     this.giftMap = this.myGifts.push({url: 'caomeidangao', name: text})
+      //     // this.giftMap = myGetGifts
+      //     console.log('====================  我的礼物列表：' + JSON.stringify({url: giftPic, name: text}))
+      //   }
+      // }
 
-          this.giftMap = this.myGifts.push({url: 'caomeidangao', name: text})
-          // this.giftMap = myGetGifts
-          console.log('====================  我的礼物列表：' + JSON.stringify({url: giftPic, name: text}))
-        }
+      // 未分页
+      // http://192.168.8.108:7001/api/v1/video/user/gifts?page=0&pageSize=-1&csId=1
+      const page = 0
+      const pageSize = -1
+      const csId = '1' // 测试数据
+
+      const res = await viewGifts(page, pageSize, csId)
+      debugger
+      console.log('==============>这里是礼物列表啊啊' + JSON.stringify(res))
+      if (res.result.code === ERR_OK) {
+        this.giftMap = res.data.gifts
+      } else {
+        console.log('there are some errors about get giftsInfo' + JSON.stringify(res))
       }
     }
   }

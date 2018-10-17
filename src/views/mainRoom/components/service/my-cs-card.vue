@@ -73,7 +73,7 @@
     data() {
       return {
         // avatarUrl: getImgUrl(this.avatarSrc)
-        avatarImgSrc: '',
+        avatarImgSrc: getCsAvatar(this.cusSerId),
         showTips: false,
         remove: false
       }
@@ -84,7 +84,7 @@
       ])
     },
     mounted() {
-      this.getAvatar()
+      // this.getAvatar()
     },
     methods: {
       // 弹框操作
@@ -128,7 +128,7 @@
           'csId': cusSerId
         }
         console.log('there are for test: aaa========' + this.index)
-        console.log('=============删除专属客服输入的数据：' + 'data: ' + data)
+        console.log('=============删除专属客服输入的数据：' + 'data: ' + data + '-' + JSON.stringify(this.userInfo))
 
         this.showTips = true
         console.log('==================' + this.remove)
@@ -143,17 +143,17 @@
       },
 
       // 获取客服头像
-      async getAvatar() {
-        const cusSerId = this.cusSerId
-        const res = await getCsAvatar(cusSerId)
-
-        if (res) {
-          this.avatarImgSrc = res
-          console.log('==============您已经成功的获取到了客服的头像' + JSON.stringify(res))
-        } else {
-          console.log('there are some errors about query the avatar of cs' + JSON.stringify(res.result))
-        }
-      },
+      // async getAvatar() {
+        // const cusSerId = this.cusSerId
+        // const res = await getCsAvatar(cusSerId)
+        //
+        // if (res) {
+        //   this.avatarImgSrc = res
+        //   console.log('==============您已经成功的获取到了客服的头像' + JSON.stringify(res))
+        // } else {
+        //   console.log('there are some errors about query the avatar of cs' + JSON.stringify(res.result))
+        // }
+      // },
 
       enterSerCenter() {
         this.$router.push({

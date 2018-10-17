@@ -48,25 +48,23 @@
       <div class="container-item-con">
         <!--<x-button mini style="margin-right: 1.5rem">温柔1</x-button>-->
         <!-- :labelsInfo=labelsInfo -->
-        <label-btn
-        ></label-btn>
+        <label-btn :labelType="labelType"></label-btn>
       </div>
     </div>
     <!-- the gifts which send to me -->
     <div class="container-item">
       <p class="container-item-tit">我的小幸福</p>
-      <send-gift
-        :giftsInfo=giftsInfo
+      <send-gift style="height: unset"
       ></send-gift>
     </div>
-    <a class="btn-back" @click="history.go(-1)">返 回</a>
+    <a class="btn-back" @click="$router.back(-1)">返 回</a>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
   import {mapGetters} from 'vuex'
   import { Swiper, SwiperItem, XButton, XCircle } from 'vux'
-  import { ERR_OK, getCsInfo, getImgUrl, viewGifts } from '@/server/index.js'
+  import { ERR_OK, getCsInfo, getImgUrl } from '@/server/index.js'
 
   // 顶部轮播图的列表
   // const displayList = []
@@ -84,8 +82,7 @@
      return {
        personalDisplay: [],
        cuSerInfo: [],
-       giftsInfo: [],
-       labelsInfo: []
+       labelType: 'notAll'
      }
     },
     computed: {
@@ -118,29 +115,19 @@
         }
       },
 
-      // 获取客服生活照的图片流
-      // async getPic(url) {
-      //   const res = await getImgUrl(url)
-      //   if (res) {
-      //     this.personalDisplay.push(res)
-      //   } else {
-      //     console.log('======================= error about get url of img')
-      //   }
-      // },
-
       // 礼物查询
       async getGifts() {
-        const page = 0
-        const pageSize = -1
-        // const csId = '1'
-        const csId = this.$route.query.cusSerId
-
-        const res = await viewGifts(page, pageSize, csId)
-        if (res.result.code === ERR_OK) {
-          this.giftsInfo = res.data.gifts
-        } else {
-          console.log('======================= error about query gifts')
-        }
+        // const page = 0
+        // const pageSize = -1
+        // // const csId = '1'
+        // const csId = this.$route.query.cusSerId
+        //
+        // const res = await viewGifts(page, pageSize, csId)
+        // if (res.result.code === ERR_OK) {
+        //   this.giftsInfo = res.data.gifts
+        // } else {
+        //   console.log('======================= error about query gifts')
+        // }
       }
 
       // 标签信息查询
