@@ -125,6 +125,7 @@ export default {
         case '3':
           this.alertTip = true
           this.tipCon = '客服小姐姐已经签退了'
+          // this.$router.push({path: `/room/line-up/${csId}`})
           break
       }
     }

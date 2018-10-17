@@ -57,7 +57,7 @@ export const getUserInfoByOpenID = openID => http.get('video', `/video/user?open
 /**
  * [getBotInfo 获取机器人基本信息]
  */
-export const getBotInfo = () => http.get('video', `/robot/query`)
+export const getBotInfo = () => http.get('chat', `/robot/query`)
 
 // 获取客服信息
 export const queryCsInfo = async(page, pageSize, userId, listType) => http.get('video', `/video/user/cs/query?page=${page}&pageSize=${pageSize}&userId=${userId}&listType=${listType}`)
