@@ -2,7 +2,7 @@
 <template>
   <div class="serverDetail container">
     <!-- 默认高度为180px, 如果设置aspect-ratio会根据宽度自动计算高度,如 :aspect-ratio="300/375" -->
-    <swiper auto dots-class="custom-bottom" dots-position="center">
+    <swiper auto dots-class="custom-bottom" dots-position="center" :aspect-ratio="210/375">
       <swiper-item class="swiper-img" v-for="(item, index) in personalDisplay" :key="index">
         <img :src="item" style="width: 100%;object-fit: fill;">
       </swiper-item>
@@ -64,7 +64,7 @@
 <script type="text/ecmascript-6">
   import {mapGetters} from 'vuex'
   import { Swiper, SwiperItem, XButton, XCircle } from 'vux'
-  import { ERR_OK, getCsInfo, getImgUrl } from '@/server/index.js'
+  import { ERR_OK, getCsInfo, csPhoto } from '@/server/index.js'
 
   // 顶部轮播图的列表
   // const displayList = []
@@ -102,13 +102,14 @@
         const cuSerId = this.$route.query.cusSerId
         // console.log('=================================' + JSON.stringify(this.csInfo))
         const res = await getCsInfo(cuSerId)
+        debugger
         if (res.result.code === ERR_OK) {
           this.cuSerInfo = res.data
           const cuSerPic = res.data.photos
 
           for (var i in cuSerPic) {
             // this.getPic(cuSerPic[i].url)
-            this.personalDisplay.push(getImgUrl(cuSerPic[i].url))
+            this.personalDisplay.push(csPhoto(cuSerPic[i].id))
           }
         } else {
           console.log('======================= error about get cuSerInfo')

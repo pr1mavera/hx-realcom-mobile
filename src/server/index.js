@@ -49,6 +49,9 @@ export const queueHeartBeat = (roomId, userId) => http.post('RTCRoom', '/comm/ro
  */
 export const getImgUrl = imgUrl => http.url('video', `/video/image/get?imgUrl=${imgUrl}`)
 
+// 获取客服生活照servertest.ihxlife.com:8083/api/v1/video/image/csPhoto?id=1
+export const csPhoto = id => http.url('video', `/video/image/csPhoto?id=${id}`)
+
 /**
  * [getUserInfoByOpenID 获取用户基本信息]
  */
