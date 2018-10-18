@@ -1,9 +1,9 @@
 import { mapGetters, mapMutations, mapActions } from 'vuex'
 import IM from '@/server/im'
 import anime from 'animejs'
-import Creator from '@/common/js/msgsQuery'
+import Creator from '@/common/js/msgsLoader'
 // import WebRTCAPI from 'webRTCAPI'
-import { ERR_OK, getUserInfoByOpenID, getLoginInfo, createSession, pushSystemMsg, sendMsgToBot, getSessionList, requestHistoryMsgs, getCsAvatar } from '@/server/index.js'
+import { ERR_OK, getUserInfoByOpenID, getLoginInfo, createSession, pushSystemMsg, sendMsgToBot, getSessionList, getCsAvatar } from '@/server/index.js'
 import { shallowCopy, botAnswerfilter } from '@/common/js/util'
 import { formatDate } from '@/common/js/dateConfig.js'
 import { queueStatus, sessionStatus, systemMsgStatus, msgStatus, msgTypes } from '@/common/js/status'
@@ -633,7 +633,7 @@ export const getMsgsMixin = {
       curPage: 1,
       pageSize: 10,
       pulldownResult: '加载历史消息成功',
-      MsgsQuery: null
+      MsgsLoader: null
     }
   },
   methods: {
@@ -651,127 +651,22 @@ export const getMsgsMixin = {
       }
     },
     async requestMsgsMixin() {
-      if (!this.MsgsQuery) {
+      if (!this.MsgsLoader) {
         let sessions = []
         this.sessionList.forEach(item => {
           sessions.push(Creator.createSession(item))
         })
         let SessionList = Creator.createSessionList(sessions)
-        this.MsgsQuery = Creator.createMsgsQuery(this.userInfo, SessionList)
+        this.MsgsLoader = Creator.createMsgsLoader(this.userInfo, SessionList)
       }
-      const newMsgs = await this.MsgsQuery.getMsgs()
+      const newMsgs = await this.MsgsLoader.getMsgs()
       if (newMsgs && newMsgs.length) {
-        this.historyMsgs = newMsgs.concat(this.historyMsgs)
+        const list = this.MsgsLoader.timeTipsFormat(newMsgs)
+        this.historyMsgs = list.concat(this.historyMsgs)
       } else {
         // 没有更多数据
         this.pulldownResult = '别拉了，没有更多消息了！！！'
       }
-    },
-    /* ********************************* 统一漫游消息接口 ********************************* */
-    // async unifyRoamData(session) {
-    //   switch (session.chatType) {
-    //     case sessionStatus.robot:
-    //       // 机器人
-    //       const botRoam = await getBotRoamMsgs(session.sessionId, this.curPage, this.pageSize)
-    //       return botRoam
-    //     case sessionStatus.video:
-    //       // 视频
-    //       const IMRoam = await this.getIMRoamMsgs(session.csId, this.curPage, this.pageSize)
-    //       return IMRoam
-    //     case sessionStatus.onLine:
-    //       break
-    //     case sessionStatus.website:
-    //       break
-    //   }
-    // },
-    /* ********************************* 请求漫游消息 ********************************* */
-    // requestRoamMsgs() {
-    //   const res = this.unifyRoamData(this.curSession)
-    //   if (res.result.code === ERR_OK) {
-    //     console.log('============================= 我现在来请求 漫游消息 辣 =============================')
-    //     return new Promise((resolve) => {
-    //       const list = res.data.msgList
-    //       if (list.length) {
-    //         this._normalizeHistoryList(list)
-    //         this.curPage += 1
-    //       } else {
-    //         // 没有更多数据
-    //         // 初始化分页
-    //         this.curPage = 1
-    //         this.pulldownResult = '别拉了，没有更多消息了！！！'
-    //       }
-    //       resolve()
-    //     })
-    //   } else {
-    //     console.log('error in getHistoryMsgs')
-    //   }
-    // },
-    /* ********************************* 请求历史消息 ********************************* */
-    async requestHistoryMsgs() {
-      const res = await requestHistoryMsgs(this.userInfo.userId, this.curPage, this.pageSize)
-      if (res.result.code === ERR_OK) {
-        console.log('============================= 我现在来请求 历史消息 辣 =============================')
-        return new Promise((resolve) => {
-          const list = res.data.msgList
-          if (list.length) {
-            this._normalizeHistoryList(list)
-            this.curPage += 1
-          } else {
-            // 没有更多数据
-            this.pulldownResult = '别拉了，没有更多消息了！！！'
-          }
-          resolve()
-        })
-      } else {
-        console.log('error in getHistoryMsgs')
-      }
-    },
-    /* ********************************* 历史消息解析 ********************************* */
-    _normalizeHistoryList(list) {
-      let msgsMap = []
-      list.forEach((item) => {
-        let msgs = {}
-        if (item.chatType === sessionStatus.robot) {
-          // 机器人
-          msgs = {
-            nickName: item.sendUserName,
-            content: item.msgContent,
-            isSelfSend: item.sendUserId === this.userInfo.userId,
-            time: item.msgTime,
-            msgStatus: msgStatus.msg,
-            msgType: item.msgType
-          }
-          // 添加机器人返回答案
-          if (msgs.msgType === msgTypes.msg_guess) {
-            msgs.msgExtend = item.msgExtend
-          }
-        } else if (item.chatType === sessionStatus.video) {
-          // IM
-          const msgsObj = JSON.parse(item.msgContent)[0].MsgContent
-          msgs = {
-            nickName: msgsObj.Desc.nickName,
-            content: msgsObj.Data,
-            isSelfSend: msgsObj.Desc.sendUserId === this.userInfo.userId,
-            time: msgsObj.Desc.time,
-            msgStatus: msgsObj.Desc.msgStatus,
-            msgType: msgsObj.Desc.msgType
-          }
-          // 添加机器人返回答案
-          // if (msgs.msgType === msgTypes.msg_guess) {
-          //   msgs.msgExtend = msgsObj.Ext.imgData
-          // }
-          // 添加图片
-          if (msgs.msgType === msgTypes.msg_img) {
-            msgs.imgData = msgsObj.Ext.imgData
-          }
-          // 添加名片
-          if (msgs.msgType === msgTypes.msg_card) {
-            msgs.proxyInfo = msgsObj.Ext.proxyInfo
-          }
-        }
-        msgsMap.unshift(msgs)
-      })
-      this.historyMsgs = msgsMap.concat(this.historyMsgs)
     }
   }
 }

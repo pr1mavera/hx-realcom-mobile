@@ -1,8 +1,37 @@
-import { sessionStatus, msgStatus, msgTypes } from '@/common/js/status'
+import { sessionStatus, msgStatus, msgTypes, tipTypes } from '@/common/js/status'
 import { ERR_OK, getBotRoamMsgs, requestHistoryMsgs } from '@/server/index.js'
 import IM from '@/server/im'
 import { botAnswerfilter } from '@/common/js/util'
-import { formatDate } from '@/common/js/dateConfig.js'
+import { formatDate, isTimeDiffLongEnough } from '@/common/js/dateConfig.js'
+
+/**
+ * [deprecate 装饰器]
+ */
+function deprecate(...list) {
+  return function(target) {
+    Object.assign(target.prototype, ...list)
+  }
+}
+
+const Format = {
+  timeTipsFormat(list) {
+    let timeCache = list[0].time
+    let map = []
+    list.forEach((item, i) => {
+      if (isTimeDiffLongEnough(timeCache, item.time) || i === 0) {
+        map.push({
+          content: item.time,
+          time: item.time,
+          msgStatus: msgStatus.tip,
+          msgType: tipTypes.tip_time
+        })
+        timeCache = item.time
+      }
+      map.push(item)
+    })
+    return map
+  }
+}
 
 /**
  * [Message 消息]
@@ -118,6 +147,14 @@ class Pagination {
   resetPage() {
     this.curPage = 1
   }
+  updateCurPage() {
+    // 更新分页
+    this.curPage += 1
+  }
+  updateCurTime(newTime) {
+    // 更新时间
+    this.curTime = newTime
+  }
 }
 
 /**
@@ -152,7 +189,8 @@ class History {
 /**
  * [MsgsQuery 消息请求类]
  */
-class MsgsQuery {
+@deprecate(Format)
+class MsgsLoader {
   constructor(userInfo, sessionList) {
     this.userInfo = userInfo
     this.clientHeight = 0
@@ -167,13 +205,15 @@ class MsgsQuery {
       return
     }
     let list = []
-    console.info(this.page)
+    console.info('this.page.curPage :' + this.page.curPage)
+    console.info('this.page.curTime :' + this.page.curTime)
+    console.info('this.page.pageSize :' + this.page.pageSize)
     if (this.sessionList.isRoamMsgsOver) {
       // 拉取历史消息
       list = await this.history.getHistoryMsgs(this.userInfo.userId, this.page)
-      console.log('this.page.curPage ================== ' + this.page.curPage)
       if (list.length) {
-        this.page.curPage += 1
+        this.page.updateCurPage()
+        this.page.updateCurTime(list[0].time)
       }
     } else {
       // 拉取漫游消息
@@ -183,12 +223,11 @@ class MsgsQuery {
         // 消息为当前会话最后一页，更新当前会话、分页
         this.sessionList.nextSession()
         this.page.resetPage()
+        this.page.updateCurTime(list[0].time)
       } else {
-        // 更新分页
-        this.page.curPage += 1
+        this.page.updateCurPage()
+        this.page.updateCurTime(list[0].time)
       }
-      // 更新时间
-      this.page.curTime = list[0].time
     }
     return list
   }
@@ -262,8 +301,8 @@ class Creator {
   createHistory() {
     return new History()
   }
-  createMsgsQuery(userInfo, sessionList) {
-    return new MsgsQuery(userInfo, sessionList)
+  createMsgsLoader(userInfo, sessionList) {
+    return new MsgsLoader(userInfo, sessionList)
   }
 }
 

@@ -92,7 +92,7 @@ import { Confirm, TransferDomDirective as TransferDom } from 'vux'
 import BScroll from 'better-scroll'
 // import HeaderBar from '@/views/mainRoom/components/chat/header-bar'
 import InputBar from '@/views/mainRoom/components/chat/input-bar'
-import { timeTipFormat } from '@/common/js/dateConfig'
+import { isTimeDiffLongEnough } from '@/common/js/dateConfig'
 import { debounce, shallowCopy, getRect } from '@/common/js/util'
 import { loginMixin, IMMixin, sendMsgsMixin, getMsgsMixin } from '@/common/js/mixin'
 import { beforeEnterVideo } from '@/common/js/beforeEnterVideo'
@@ -260,7 +260,7 @@ export default {
       }
       map.push(shallowCopy(temp))
       this.historyMsgs.forEach((item) => {
-        if (timeTipFormat(timeCache, item.time)) {
+        if (isTimeDiffLongEnough(timeCache, item.time)) {
           temp.msg = item.time
           timeCache = temp.msg
           map.push(this._shallowCopy(temp))
@@ -310,10 +310,6 @@ export default {
         //   interactive: false // 1.8.0 新增
         // }
       })
-      // this.chatScroll.on('scroll', (pos) => {
-      //   this.scrollY = Math.abs(Math.round(pos.y))
-      //   console.log(this.scrollY)
-      // })
       this.chatScroll.on('touchEnd', () => {
         if (this.inputBarOpen) {
           this.setInputBar(false)
@@ -356,7 +352,7 @@ export default {
           // this.pullDownStyle = `top: ${10 - (this.chatScroll.options.pullDownRefresh.stop - pos.y)}px`
         }
         this.scrollY = Math.abs(Math.round(pos.y))
-        console.log(this.scrollY)
+        // console.log(this.scrollY)
       })
     },
     pullingDown() {

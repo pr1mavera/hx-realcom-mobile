@@ -110,6 +110,8 @@ export default {
       this.videoQueueNum -= 1
     },
     confirmToVideo() {
+      // 停止心跳
+      this.stopHeartBeat()
       this.$router.push({path: `/room/chat?openId=${this.userInfo.openId}`})
       this.readyToVideoChat()
       // this.$emit('ready')

@@ -1,6 +1,6 @@
 import * as types from './mutation-types'
 import { sleep } from '@/common/js/util'
-import { timeTipFormat } from '@/common/js/dateConfig.js'
+import { isTimeDiffLongEnough } from '@/common/js/dateConfig.js'
 import { toggleBarStatus, roomStatus, queueStatus, msgStatus, tipTypes } from '@/common/js/status'
 
 export const closeBarBuffer = function({ commit }, { mutationType, delay }) {
@@ -71,7 +71,7 @@ export const sendMsgs = async function({ commit, state }, msgs) {
       console.log(`------------------------------------- 循环了 ${i} -------------------------------------`)
     }
     // 若间隔时间大于约定时间，则生成时间信息tip
-    if (lastT && timeTipFormat(lastT, msgs[0].time)) {
+    if (lastT && isTimeDiffLongEnough(lastT, msgs[0].time)) {
       const tip = [{
         content: msgs[0].time,
         time: msgs[0].time,

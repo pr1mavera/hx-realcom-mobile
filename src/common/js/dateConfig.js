@@ -28,7 +28,7 @@ export function formatDate(date, format) {
   return format
 }
 
-export function timeTipFormat(cache, next) {
+export function isTimeDiffLongEnough(cache, next) {
   const cacheT = new Date(cache.replace(/-/g, '/'))
   const nextT = new Date(next.replace(/-/g, '/'))
   return nextT - cacheT >= 60000

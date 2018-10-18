@@ -115,8 +115,8 @@
       async saveAssess() {
         // 输入 sessionId(会话Id) userId, userName, csId, csName ,evaluateLevel(满意度) [{labelId: '', labelName: ''}]
         const data = {
-          // 'sessionId': this.sessionId,
-          'sessionId': '00553330cc4a11e886ec19059d7ca77e',
+          'sessionId': this.sessionId,
+          // 'sessionId': '00553330cc4a11e886ec19059d7ca77e',
           'userId': this.userInfo.userId,
           'userName': this.userInfo.userName,
           'csId': this.csInfo.csId,
