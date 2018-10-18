@@ -494,7 +494,7 @@ const IM = (() => {
     const option = {
       'Peer_Account': id,
       'MaxCnt': pageSize,
-      'LastMsgTime': Math.round(new Date(time).getTime() / 1000),
+      'LastMsgTime': Math.round(new Date(time.replace(/-/g, '/')).getTime() / 1000),
       'MsgKey': ''
     }
     return new Promise((resolve) => {

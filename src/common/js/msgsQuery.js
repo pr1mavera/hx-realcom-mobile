@@ -167,6 +167,7 @@ class MsgsQuery {
       return
     }
     let list = []
+    console.info(this.page)
     if (this.sessionList.isRoamMsgsOver) {
       // 拉取历史消息
       list = await this.history.getHistoryMsgs(this.userInfo.userId, this.page)
