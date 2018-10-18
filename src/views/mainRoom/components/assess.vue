@@ -22,7 +22,7 @@
             <!--<swiper-item v-for="(item, index) in btnBoxList" :key="index">-->
             <!--</swiper-item>-->
           <!--</swiper>-->
-          <label-btn :labelType="labelType" :seledLabels="selLabels"></label-btn>
+          <label-btn :labelType="labelType" @seledLabels="selLabels"></label-btn>
           <x-button :gradients="['#FF8C6A', '#ff80a0']" @click.native="saveAssess"
                     style="width: 11rem;margin: 2rem auto 0;">
             提交评价
@@ -30,8 +30,8 @@
         </div>
       </div>
     </popup>
-    <toast v-model="showFalseTips" type="text" :time="800" is-show-mask text="评论失败" :position="position"></toast>
-    <toast v-model="showSucTips" type="text" :time="800" is-show-mask text="评论成功" :position="position"></toast>
+    <toast v-model="showFalseTips" type="text" :time="800" width="15rem" is-show-mask :position="position">{{failText}}</toast>
+    <toast v-model="showSucTips" type="text" :time="800" width="15rem" is-show-mask text="评论成功" :position="position"></toast>
   </div>
 </template>
 
@@ -40,9 +40,8 @@
   import { ERR_OK, saveAssess, getCsAvatar } from '@/server/index.js'
   import { mapGetters } from 'vuex'
 
-  const btnList = [
-    ''
-  ]
+  // const btnList = [
+  //   '']
   export default {
     directives: {
       TransferDom
@@ -68,8 +67,10 @@
         name: '丽丽',
         stars: 0,
         next: true,
-        btnBoxList: btnList,
+       // btnBoxList: btnList,
+        labels: [], // 用户选中的标签
         showFalseTips: false,
+        failText: '啊呀出错啦！',
         showSucTips: false,
         position: 'default',
         labelType: 'all'
@@ -86,29 +87,15 @@
       this.getAvatar()
     },
     methods: {
-      // cancelAssess() {
-      //   this.showAssess = false
-      // },
-
       // 获取客服头像
       getAvatar() {
-        this.avatarImgSrc = getCsAvatar('123456789')
-        // const cusSerId = this.csInfo.id
-        // console.log('====================' + JSON.stringify(this.csInfo))
-        // // const cusSerId = '54321'
-        // const res = await getCsAvatar(cusSerId)
-        //
-        // if (res) {
-        //   this.avatarImgSrc = res
-        //   console.log('==============您已经成功的获取到了客服的头像' + JSON.stringify(res))
-        // } else {
-        //   console.log('there are some errors about query the avatar of cs' + JSON.stringify(res.result))
-        // }
+        this.avatarImgSrc = getCsAvatar(this.csInfo.csId) // 测试数据
       },
 
+      // 接受子组件传的值
       selLabels(selTags) {
-        debugger
-        console.log('=============>你当前选中的标签：' + JSON.stringify(selTags))
+        // debugger
+        this.labels = selTags
       },
 
       // 保存评论的信息
@@ -122,10 +109,7 @@
           'csId': this.csInfo.csId,
           'csName': this.csInfo.csName,
           'evaluateLevel': this.stars,
-          'labels': [{
-            'labelId': '111',
-            'labelName': 'aaa'
-          }]
+          'labels': this.labels.length
         }
         const res = await saveAssess(data)
         if (res.result.code === ERR_OK) {
@@ -135,6 +119,7 @@
           this.$emit('assessSuccess')
         } else {
           this.showFalseTips = true
+          // this.failText = res.result.messagem
           console.log('there are some error about' + JSON.stringify(res.result))
         }
       }

@@ -81,7 +81,8 @@
           <use xlink:href="#icon-huanyipi"></use>
         </svg>
       </div>
-      <div class="tip tip-right" id="fload-tip-right" :class="{'show-fload-tip-right': angle >= targAngle}">
+      <!-- :class="{'show-fload-tip-right': angle >= targAngle}" -->
+      <div class="tip tip-right show-fload-tip-right" id="fload-tip-right" @click="$router.back(-1)">
         <svg class="icon extend-click" aria-hidden="true">
           <use xlink:href="#icon-zhuanshukefu"></use>
         </svg>
@@ -145,6 +146,7 @@ export default {
         // }
       ],
       m_cslist: [], // 已添加的专属客服
+      m_csNum: this.$route.query.myCsNum, // 已有的专属客服的个数
       floadTipLeftAnimeCache: null,
       floadTipRightAnimeCache: null,
       avatarImg: '',
@@ -208,7 +210,7 @@ export default {
       }
     },
 
-    // 将当前客服添加为专属客服
+    // 将当前客服添加为专属客服 获取当前专属客服的个数this.$route.query
     async addCS() {
       // const userId = '123'
       const userId = this.userInfo.userId
@@ -227,8 +229,9 @@ export default {
         'csId': cuSerId
       }
 
-      console.log('============添加专属客服输入的数据' + data)
-      if (this.m_cslist.length > 3) {
+      debugger
+      console.log('============添加专属客服输入的数据' + JSON.stringify(data) + JSON.stringify(this.m_csNum))
+      if (this.m_cslist.length > (3 - this.m_csNum)) {
         this.showTip = true
       } else {
         const res = await addCs(data)
@@ -246,7 +249,8 @@ export default {
       this.curLabelInfo = this.cslist[0]
       // this.avatarImg = getImgUrl(this.curLabelInfo.resultUrl)
       // this.avatarImg = this.getAvatar(this.curLabelInfo.id)
-      this.getAvatar(this.curLabelInfo.id)
+      // this.getAvatar(this.curLabelInfo.id)
+      this.avatarImg = getCsAvatar(this.curLabelInfo.id)
     },
     resetAngle() {
       this.curLabelInfo = null
@@ -312,7 +316,8 @@ export default {
         this.curLabelInfo = this.cslist[0]
         // this.avatarImg = getImgUrl(this.curLabelInfo.resultUrl)
         // this.avatarImg = this.getAvatar(this.curLabelInfo.id)
-        this.getAvatar(this.curLabelInfo.id)
+        // this.getAvatar(this.curLabelInfo.id)
+        this.avatarImg = getCsAvatar(this.curLabelInfo.id)
         console.log('===========客服列表:' + JSON.stringify(this.cslist))
       } else {
         console.log('error about query csInfo')
@@ -322,16 +327,16 @@ export default {
     // 获取客服头像
     async getAvatar(cusSerId) {
       // const cusSerId = this.cusSerId
-      const res = await getCsAvatar(cusSerId)
-
-      if (res) {
-        // debugger
-        console.log('==============您已经成功的获取到了客服的头像' + JSON.stringify(res))
-        this.avatarImg = res
-        return JSON.stringify(res)
-      } else {
-        console.log('there are some errors about query the avatar of cs' + JSON.stringify(res.result))
-      }
+      // const res = await getCsAvatar(cusSerId)
+      //
+      // if (res) {
+      //   // debugger
+      //   console.log('==============您已经成功的获取到了客服的头像' + JSON.stringify(res))
+      //   this.avatarImg = res
+      //   return JSON.stringify(res)
+      // } else {
+      //   console.log('there are some errors about query the avatar of cs' + JSON.stringify(res.result))
+      // }
     }
   }
 }
@@ -495,6 +500,7 @@ export default {
         }
       }
       &.tip-right {
+        cursor: pointer;
         justify-content: flex-end;
         .text {
           padding-right: 1.4rem;
