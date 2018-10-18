@@ -8,7 +8,8 @@
       :name="item.nickName"
       :num="item.servTimes"
       :gifts="item.giftCount"
-      @toLineUp="toLineUp(index)"
+      :csIndex="index"
+      @toLineUp="toLineUp"
       @removeCs="removeCs(index)"
     ></my-cs-card>
     <p class="tips">您还可以添加 <span>{{3 - myCsList.length}}</span> 名专属客服</p>

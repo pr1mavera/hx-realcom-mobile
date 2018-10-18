@@ -68,6 +68,9 @@
       },
       gifts: {
         type: Number
+      },
+      csIndex: {
+        type: Number
       }
     },
     data() {
@@ -162,7 +165,7 @@
         })
       },
       clickToLineUp() {
-        this.$emit('toLineUp', this.cusSerId)
+        this.$emit('toLineUp', this.csIndex, this.cusSerId)
       },
       ...mapMutations({
         setQueueMode: 'SET_QUEUE_MODE'
