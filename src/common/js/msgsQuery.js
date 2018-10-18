@@ -1,7 +1,8 @@
 import { sessionStatus, msgStatus, msgTypes } from '@/common/js/status'
 import { ERR_OK, getBotRoamMsgs, requestHistoryMsgs } from '@/server/index.js'
-import { getIMRoamMsgs } from '@/server/im'
+import IM from '@/server/im'
 import { botAnswerfilter } from '@/common/js/util'
+import { formatDate } from '@/common/js/dateConfig.js'
 
 /**
  * [Message 消息]
@@ -20,26 +21,6 @@ class Message {
   }
 }
 
-// class APISource {
-//   constructor(chatType) {
-//     this.chatType = chatType
-//   }
-//   getRequestFunc(...options) {
-//     switch (this.chatType) {
-//       case sessionStatus.robot:
-//         // 机器人
-//         return getBotRoamMsgs()
-//       case sessionStatus.video:
-//         // 视频
-//         return getIMRoamMsgs
-//       case sessionStatus.onLine:
-//         break
-//       case sessionStatus.website:
-//         break
-//     }
-//   }
-// }
-
 /**
  * [Session 会话]
  */
@@ -56,16 +37,17 @@ class Session {
     return this.chatCount - page.curPage * page.pageSize <= 0
   }
   async getRoamMsgs(userId, Pagination) {
-    let count = this.chatCount < Pagination.pageSize ? this.chatCount : Pagination.pageSize
+    const LeftCount = this.chatCount - (Pagination.curPage - 1) * Pagination.pageSize
+    let count = LeftCount > Pagination.pageSize ? Pagination.pageSize : LeftCount
     let res = {}
     switch (this.chatType) {
       case sessionStatus.robot:
         // 机器人
-        res = await getBotRoamMsgs(this.sessionId, Pagination.curPage, count)
+        res = await this.getBot(userId, this.sessionId, Pagination.curPage, count)
         break
       case sessionStatus.video:
         // 视频
-        res = await getIMRoamMsgs(this.csId, Pagination.curTime, count)
+        res = await this.getVideo(userId, this.csId, Pagination.curTime, count)
         break
       case sessionStatus.onLine:
         // 在线
@@ -74,8 +56,12 @@ class Session {
         // 官网
         break
     }
+    return res
+  }
+  async getBot(userId, sessionId, curPage, pageSize) {
+    const res = await getBotRoamMsgs(sessionId, curPage, pageSize)
     if (res.result.code === ERR_OK) {
-      console.log('============================= 我现在来请求 漫游消息 辣 =============================')
+      console.log('============================= 我现在来请求 机器人 漫游消息 辣 =============================')
       const list = res.data.msgList
       let map = []
       if (list.length) {
@@ -85,7 +71,17 @@ class Session {
       }
       return map
     } else {
-      console.log('error in getRoamMsgs')
+      console.log('error in getBotRoamMsgs')
+    }
+  }
+  async getVideo(userId, csId, curTime, pageSize) {
+    const res = await IM.getIMRoamMsgs(csId, curTime, pageSize)
+    if (res && res.MsgList) {
+      console.log('============================= 我现在来请求 视频坐席 漫游消息 辣 =============================')
+      const map = IM.parseMsgs(res.MsgList).textMsgs
+      return map
+    } else {
+      console.log('error in getIMRoamMsgs')
     }
   }
 }
@@ -96,15 +92,17 @@ class Session {
 class SessionList {
   constructor(sessions) {
     this.sessions = sessions || []
-    this.curIndex = this.sessions.length - 1
-    this.isRoamMsgsOver = false
-    // this.isRoamMsgsOver = true
+    this.curIndex = 0
+    this.isRoamMsgsOver = this.sessions.length === 0
   }
   getCurSession() {
     return this.sessions[this.curIndex]
   }
   nextSession() {
-    this.curIndex -= 1
+    this.curIndex += 1
+    if (!this.getCurSession()) {
+      this.isRoamMsgsOver = true
+    }
   }
 }
 
@@ -114,12 +112,11 @@ class SessionList {
 class Pagination {
   constructor(pageSize) {
     this.curPage = 1
-    this.curTime = ''
+    this.curTime = formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss')
     this.pageSize = pageSize
   }
   resetPage() {
     this.curPage = 1
-    this.curTime = ''
   }
 }
 
@@ -139,6 +136,7 @@ class History {
       let map = []
       if (list.length) {
         list.forEach(item => {
+          item.msgContent = JSON.parse(item.msgContent)[0].MsgContent
           map.unshift(this.Creator.createMessage(userId, item))
         })
       } else {
@@ -180,13 +178,16 @@ class MsgsQuery {
       // 拉取漫游消息
       const curSession = this.sessionList.getCurSession()
       list = await curSession.getRoamMsgs(this.userInfo.userId, this.page)
-      debugger
       if (curSession.isFinalPage(this.page)) {
+        // 消息为当前会话最后一页，更新当前会话、分页
         this.sessionList.nextSession()
         this.page.resetPage()
       } else {
+        // 更新分页
         this.page.curPage += 1
       }
+      // 更新时间
+      this.page.curTime = list[0].time
     }
     return list
   }
@@ -223,7 +224,7 @@ class Creator {
       }
     } else if (msgObj.chatType === sessionStatus.video) {
       // IM
-      const obj = JSON.parse(msgObj.msgContent)[0].MsgContent
+      const obj = msgObj.msgContent
       options = {
         nickName: obj.Desc.nickName,
         content: obj.Data,

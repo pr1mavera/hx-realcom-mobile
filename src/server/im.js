@@ -489,6 +489,21 @@ const IM = (() => {
       })
   }
 
+  /* ********************************* 腾讯请求漫游消息接口 ********************************* */
+  function getIMRoamMsgs(id, time, pageSize) {
+    const option = {
+      'Peer_Account': id,
+      'MaxCnt': pageSize,
+      'LastMsgTime': Math.round(new Date(time).getTime() / 1000),
+      'MsgKey': ''
+    }
+    return new Promise((resolve) => {
+      webim.getC2CHistoryMsgs(option, (resp) => {
+        resolve(resp)
+      })
+    })
+  }
+
   return {
     login,
     logout,
@@ -504,23 +519,9 @@ const IM = (() => {
     parseMsgsInSystem,
     sendMsg,
     uploadPic,
-    sendPic
+    sendPic,
+    getIMRoamMsgs
   }
 })()
 
 export default IM
-
-/* ********************************* 腾讯请求漫游消息接口 ********************************* */
-export function getIMRoamMsgs(id, time, pageSize) {
-  const option = {
-    'Peer_Account': id,
-    'MaxCnt': pageSize,
-    'LastMsgTime': Math.round(new Date(time).getTime() / 1000),
-    'MsgKey': ''
-  }
-  return new Promise((resolve) => {
-    webim.getC2CHistoryMsgs(option, (resp) => {
-      resolve(resp)
-    })
-  })
-}
