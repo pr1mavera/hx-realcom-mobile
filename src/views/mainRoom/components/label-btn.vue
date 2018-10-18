@@ -8,13 +8,14 @@
                     :likeNum="item.labelCount"
       >{{item.labelName}} {{item.labelCount}}</checker-item>
     </checker>-->
-    <span>当前选中的值为：{{selTags}}</span>
+    <!--<span>当前选中的值为：{{selTags}}</span>-->
     <swiper height="9.5rem" style="" :show-dots="showDots" @on-index-change="changePage" dots-class="custom-bottom" dots-position="center">
       <swiper-item v-for="(item, index) in pageList" :key="index">
         <!--{{index}}-->
-        <checker v-model="selTags" type="checkbox" default-item-class="tags-default"
+        <checker v-model="selTags" type="checkbox" default-item-class="tags-default" @on-change="selChanege"
                  selected-item-class="tags-selected">
-          <checker-item :disabled="disable" :value="item" v-for="(item, index) in btnList"
+          <checker-item :disabled="disable"
+                        :value="item" v-for="(item, index) in btnList"
                         :key="index"
                         :text="item.labelName"
                         :likeNum="item.labelCount"
@@ -57,13 +58,13 @@
         showDots: true
       }
     },
-    watch: {
-      selTags: [
-        function handle1(val, oldVal) {
-        this.$emit('seledLabels', this.selTags)
-        }
-      ]
-    },
+    // watch: {
+    //   selTags: [
+    //     function handle1(val, oldVal) {
+    //     this.$emit('seledLabels', this.selTags)
+    //     }
+    //   ]
+    // },
     computed: {
       ...mapGetters([
         'csInfo'
@@ -75,12 +76,7 @@
     },
     methods: {
       // 获取label列表
-      getLabelList() {
-        // if (this.labelsInfo !== undefined) {
-        //   this.btnList = this.labelsInfo
-        //   console.log('===========获取的个人中心的label列表为：' + JSON.stringify(this.btnList))
-        // }
-      },
+      getLabelList() {},
 
       // 切换轮播页
       async changePage(index) {
@@ -135,6 +131,11 @@
             console.log('======================= error about query labelTags')
           }
         }
+      },
+      selChanege() {
+        // debugger
+        this.$emit('seledLabels', this.selTags)
+        console.log('你选中了这一个选项' + JSON.stringify(this.selTags))
       }
     }
   }

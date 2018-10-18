@@ -53,12 +53,6 @@ export default {
       myCsList: [
         // {
         //   resultUrl: '/static/img/avatar@2x.png',
-        //   nickName: '丽丽',
-        //   servTimes: 2233,
-        //   giftCount: 3345
-        // },
-        // {
-        //   resultUrl: '/static/img/avatar@2x.png',
         //   nickName: '花花',
         //   servTimes: 4578,
         //   giftCount: 9933
@@ -74,8 +68,9 @@ export default {
     this.getCsList()
   },
   methods: {
+    // 获取专属客服列表
     async getCsList() {
-      console.log('获取用户信息=>' + this.userInfo.userId)
+      // console.log('获取用户信息=>' + this.userInfo.userId)
       const page = 1
       const pageSize = -1
       const userId = this.userInfo.userId // 获取用户的ID
@@ -102,9 +97,12 @@ export default {
     //   }
     // },
 
+    // J进入客服列表页
     addCs() {
-      console.log('添加专属客服')
-      this.$router.push('/room/cusServ/add')
+      this.$router.push({
+        path: '/room/cusServ/add',
+        query: {myCsNum: this.myCsList.length}
+      })
     },
 
     removeCs(index) {
@@ -155,5 +153,4 @@ export default {
       }
     }
   }
-
 </style>
