@@ -6,14 +6,14 @@
              @on-confirm="onConfirm"
              @on-show="onShow"
              @on-hide="onHide">
-      <div class="avatar"><img src="/static/img/avatar.png"></div>
+      <div class="avatar"><img :src="avatar"></div>
       <p class="confirm-bd-tit" style="">
           <icon type="success"></icon> 转接成功！
       </p>
-      <p class="confirm-bd-subtit">本次视频由客服{{name}}为您服务</p>
+      <p class="confirm-bd-subtit">本次视频由客服{{this.csInfo.csName}}为您服务</p>
       <!--<p class="confirm-tips">{{name}}{{num ? `已经为您服务过${num}次`: '首次为您服务'}}</p>-->
-      <p class="confirm-tips" v-if="num">{{name}}已经为您服务过<label class="num">{{num}}</label>次</p>
-      <p class="confirm-tips" v-else>{{name}}首次为您服务</p>
+      <!-- <p class="confirm-tips" v-if="num">{{this.csInfo.csName}}已经为您服务过<label class="num">{{num}}</label>次</p>
+      <p class="confirm-tips" v-else>{{this.csInfo.csName}}首次为您服务</p> -->
     </confirm>
     <!--<p>there are some words for test</p>-->
   </div>
@@ -23,6 +23,7 @@
   import { mapGetters } from 'vuex'
   import { Confirm, Icon } from 'vux'
   import { queueStatus } from '@/common/js/status'
+  import { getCsAvatar } from '@/server/index.js'
 
   export default {
     components: {
@@ -31,8 +32,12 @@
     },
     computed: {
       ...mapGetters([
-        'queueMode'
+        'queueMode',
+        'csInfo'
       ]),
+      avatar() {
+        return getCsAvatar(this.csInfo.csId)
+      },
       queueSuccess: {
         set() {
 

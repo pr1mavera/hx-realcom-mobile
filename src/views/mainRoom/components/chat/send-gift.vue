@@ -5,7 +5,7 @@
     <send-extend-item
       v-for="(item, index) in giftMap"
       :key="index"
-      :icon="item.id"
+      :icon="item.url"
       :text="item.name"
       @click.native.prevent="$emit('selectGift', item)"
     ></send-extend-item>
@@ -55,7 +55,7 @@ export default {
       },
       giftMap: [
         {
-          id: 'caomeidangao',
+          url: 'caomeidangao',
           name: '草莓蛋糕'
         },
         // {
@@ -67,15 +67,15 @@ export default {
         //   text: '草莓蛋糕'
         // },
         {
-          id: 'caomeidangao',
+          url: 'caomeidangao',
           name: '草莓蛋糕'
         },
         {
-          id: 'caomeidangao',
+          url: 'caomeidangao',
           name: '草莓蛋糕'
         },
         {
-          id: 'caomeidangao',
+          url: 'caomeidangao',
           name: '草莓蛋糕'
         }
       ],

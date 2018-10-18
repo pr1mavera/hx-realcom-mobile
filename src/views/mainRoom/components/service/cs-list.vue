@@ -110,7 +110,6 @@ export default {
     },
 
     toLineUp(index, csId) {
-      debugger
       // this.$router.push({path: `/room/line-up/${this.userInfo.userId}/${this.cusSerId}`})
       const status = this.myCsList[index].status // 0：就绪、1：小憩、3：签退
       switch (status) {
