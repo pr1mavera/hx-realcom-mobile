@@ -205,9 +205,9 @@ class MsgsLoader {
       return
     }
     let list = []
-    console.info('this.page.curPage :' + this.page.curPage)
-    console.info('this.page.curTime :' + this.page.curTime)
-    console.info('this.page.pageSize :' + this.page.pageSize)
+    // console.info('this.page.curPage :' + this.page.curPage)
+    // console.info('this.page.curTime :' + this.page.curTime)
+    // console.info('this.page.pageSize :' + this.page.pageSize)
     if (this.sessionList.isRoamMsgsOver) {
       // 拉取历史消息
       list = await this.history.getHistoryMsgs(this.userInfo.userId, this.page)

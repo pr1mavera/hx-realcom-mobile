@@ -68,38 +68,6 @@ export const loginMixin = {
         console.log('============================= 会话创建失败 辣 =============================')
       }
     },
-    setUserInfoToEnterRoom(query, ...Func) {
-      if (!query) {
-        alert('请先登录!')
-      } else if (query.cmd !== 'create' && query.cmd !== 'enter') {
-        alert('发生错误，无法识别身份')
-      } else {
-        this.userId = query.userId
-        this.userName = query.userName
-        this.roomName = query.roomName
-        if (query.cmd === 'enter') {
-          this.setRoomId(query.roomID)
-        }
-      }
-      // this.getUserInfo(this.userInfo.userId, query, ...Func)
-      // WebRTCRoom.getLoginInfo(
-      //   this.userId,
-      //   (res) => {
-      //     const info = {
-      //       userId: res.data.userId,
-      //       selfName: this.userName,
-      //       accountType: res.data.accountType,
-      //       sdkAppID: res.data.sdkAppID,
-      //       userSig: res.data.userSig
-      //     }
-      //     self.setUserInfo(info)
-      //     // 执行回调
-      //     Func && Func.forEach((fn) => {
-      //       fn(query)
-      //     })
-      //   }
-      // )
-    },
     ...mapMutations({
       setUserInfo: 'SET_USER_INFO',
       // setRoomId: 'SET_ROOM_ID',
@@ -628,10 +596,7 @@ export const getMsgsMixin = {
   data() {
     return {
       sessionList: [],
-      curSession: {},
       historyMsgs: [],
-      curPage: 1,
-      pageSize: 10,
       pulldownResult: '加载历史消息成功',
       MsgsLoader: null
     }

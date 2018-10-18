@@ -92,8 +92,8 @@ import { Confirm, TransferDomDirective as TransferDom } from 'vux'
 import BScroll from 'better-scroll'
 // import HeaderBar from '@/views/mainRoom/components/chat/header-bar'
 import InputBar from '@/views/mainRoom/components/chat/input-bar'
-import { isTimeDiffLongEnough } from '@/common/js/dateConfig'
-import { debounce, shallowCopy, getRect } from '@/common/js/util'
+// import { isTimeDiffLongEnough } from '@/common/js/dateConfig'
+import { debounce, getRect } from '@/common/js/util'
 import { loginMixin, IMMixin, sendMsgsMixin, getMsgsMixin } from '@/common/js/mixin'
 import { beforeEnterVideo } from '@/common/js/beforeEnterVideo'
 // eslint-disable-next-line
@@ -173,9 +173,6 @@ export default {
     }
   },
   mounted() {
-    // 初始化聊天信息
-    // 真实项目中拿到对应数据之后再初始化
-    // this._initChatMsgList()
     // 初始化滚动
     this.$nextTick(() => {
       this.inputEle = this.$refs.inputBar.$refs.inputContent
@@ -183,13 +180,6 @@ export default {
       this._initScroll()
       this._initPullDownRefresh()
     })
-    // 拉取历史消息
-    // this.setMsgs(this.historyMsgs)
-    // 获取漫游消息
-    // this.getRoamMessage()
-
-    // const params = this.$route.params
-    // params.openId = 'oKXX7wABsIulcFpdlbwUyMKGisjQ'
   },
   methods: {
     async login() {
@@ -210,7 +200,7 @@ export default {
         return new Promise((resolve) => {
           const info = {
             avatarUrl: getImgUrl(res.data.headUrl),
-            name: res.data.name
+            botName: res.data.name
           }
           this.setBotInfo(info)
           const botCard = {
@@ -235,7 +225,9 @@ export default {
             msgStatus: msgStatus.msg,
             msgType: msgTypes.msg_hot,
             msgExtend: res.data.hotspotQuestions.map((item) => {
-              return item.name
+              return {
+                question: item.name
+              }
             })
           }
           this.sendMsgs([
@@ -248,27 +240,6 @@ export default {
       } else {
         console.log('============================= getBotInfo error =============================')
       }
-    },
-    _initChatMsgList() {
-      let map = []
-      let timeCache = this.historyMsgs[0].time
-      let temp = {
-        content: timeCache,
-        time: timeCache,
-        msgStatus: msgStatus.tip,
-        msgType: tipTypes.tip_time
-      }
-      map.push(shallowCopy(temp))
-      this.historyMsgs.forEach((item) => {
-        if (isTimeDiffLongEnough(timeCache, item.time)) {
-          temp.msg = item.time
-          timeCache = temp.msg
-          map.push(this._shallowCopy(temp))
-        }
-        map.push(item)
-      })
-      this.historyMsgs = map
-      console.log(map)
     },
     _showItemByType(type) {
       let component = ''

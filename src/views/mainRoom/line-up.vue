@@ -38,7 +38,7 @@ export default {
     return {
       times: 1,
       videoQueueNum: 0,
-      heart: '', // 判断心跳变量
+      heart: false, // 判断心跳变量
       heartBeatTimer: 0,
       heartBeatReq: null,
       heartBeatFailCount: 0 // 心跳包超时失败次数
@@ -64,9 +64,12 @@ export default {
       }
     },
     startHeartBeat() {
-      this.heart = '1'
+      this.heart = true
       this.heartBeatTimer = setInterval(async() => {
-        if (!this.heart) {
+        console.warn('====== 我现在请求心跳 ======')
+        if (!this.heart || !this.$route.params.csId) {
+          // 非常规退出 & 浏览器回退
+          this.stopHeartBeat()
           return
         }
         this.heartBeatReq = await queueHeartBeat(this.$route.params.csId, this.userInfo.userId)
@@ -82,8 +85,7 @@ export default {
       }, 7000)
     },
     stopHeartBeat() {
-      this.heart = ''
-      debugger
+      this.heart = false
       this.heartBeatTimer = clearInterval(this.heartBeatTimer)
       if (this.heartBeatReq) {
         this.heartBeatReq = null

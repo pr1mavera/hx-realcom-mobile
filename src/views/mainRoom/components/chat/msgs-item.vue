@@ -30,7 +30,7 @@
           <span class="line"></span>
           <span class="text-extend-hot">
             <span class="text-extend">您可能想问：</span>
-            <span class="text-extend button" v-for="(item, index) in this.extend" :key="index" @click="clickHotQues(item)">{{item}}</span>
+            <span class="text-extend button" v-for="(item, index) in this.extend" :key="index" @click="clickHotQues(item.question)">{{item.question}}</span>
             <!-- <span class="text-extend button" @click="enterToMenChat">人工客服</span> -->
           </span>
         </span>
@@ -81,7 +81,7 @@
       <!-- 猜问题 模块 -->
       <div class="content chat-content-shadow left-content-style content-extend" v-if="this.types === msgTypes.msg_guess">
         <span class="text">
-          <span class="text-extend button" v-for="(item, index) in this.extend" :key="index">{{item.question}}</span>
+          <span class="text-extend button" v-for="(item, index) in this.extend" :key="index" @click="clickHotQues(item.question)">{{item.question}}</span>
           <!-- <span class="text-extend button" @click="enterToMenChat">人工客服</span> -->
         </span>
       </div>

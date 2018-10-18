@@ -28,6 +28,11 @@ Vue.prototype.$setgoindex = () => {
   }
 }
 
+FastClick.prototype.onTouchEnd = function(event) {
+  if (event.target.hasAttribute('type') && event.target.getAttribute('type') === 'file') {
+    return false
+  }
+}
 FastClick.attach(document.body) // 移动端消除300ms
 
 Vue.config.productionTip = false
