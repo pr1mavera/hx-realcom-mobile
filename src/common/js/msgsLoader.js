@@ -83,6 +83,7 @@ class Session {
         // 官网
         break
     }
+    // 过滤最后一页条数
     const LeftCount = this.chatCount - (Pagination.curPage - 1) * Pagination.pageSize
     if (LeftCount <= Pagination.pageSize) {
       return res.slice(res.length - LeftCount)

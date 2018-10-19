@@ -107,6 +107,7 @@ import { roomStatus, queueStatus, toggleBarStatus, msgStatus, msgTypes, tipTypes
 import { ERR_OK, getImgUrl, getBotInfo, syncGroupC2CMsg } from '@/server/index.js'
 
 export default {
+  name: 'chat',
   directives: {
     TransferDom
   },

@@ -23,7 +23,7 @@
             <!--</swiper-item>-->
           <!--</swiper>-->
           <label-btn :labelType="labelType" @seledLabels="selLabels"></label-btn>
-          <x-button :gradients="['#FF8C6A', '#ff80a0']" @click.native="saveAssess"
+          <x-button :gradients="['#FF8C6A', '#ff80a0']" @click.native="handleToSaveAssess"
                     style="width: 11rem;margin: 2rem auto 0;">
             提交评价
           </x-button>
@@ -99,7 +99,7 @@
       },
 
       // 保存评论的信息
-      async saveAssess() {
+      async handleToSaveAssess() {
         // 输入 sessionId(会话Id) userId, userName, csId, csName ,evaluateLevel(满意度) [{labelId: '', labelName: ''}]
         const data = {
           'sessionId': this.sessionId,
@@ -111,6 +111,7 @@
           'evaluateLevel': this.stars,
           'labels': this.labels.length
         }
+
         const res = await saveAssess(data)
         if (res.result.code === ERR_OK) {
           this.showSucTips = true
