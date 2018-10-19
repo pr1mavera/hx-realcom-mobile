@@ -66,17 +66,15 @@ class Session {
     return this.chatCount - page.curPage * page.pageSize <= 0
   }
   async getRoamMsgs(userId, Pagination) {
-    const LeftCount = this.chatCount - (Pagination.curPage - 1) * Pagination.pageSize
-    let count = LeftCount > Pagination.pageSize ? Pagination.pageSize : LeftCount
     let res = {}
     switch (this.chatType) {
       case sessionStatus.robot:
         // 机器人
-        res = await this.getBot(userId, this.sessionId, Pagination.curPage, count)
+        res = await this.getBot(userId, this.sessionId, Pagination.curPage, Pagination.pageSize)
         break
       case sessionStatus.video:
         // 视频
-        res = await this.getVideo(userId, this.csId, Pagination.curTime, count)
+        res = await this.getVideo(userId, this.csId, Pagination.curTime, Pagination.pageSize)
         break
       case sessionStatus.onLine:
         // 在线
@@ -85,7 +83,12 @@ class Session {
         // 官网
         break
     }
-    return res
+    const LeftCount = this.chatCount - (Pagination.curPage - 1) * Pagination.pageSize
+    if (LeftCount <= Pagination.pageSize) {
+      return res.slice(res.length - LeftCount)
+    } else {
+      return res
+    }
   }
   async getBot(userId, sessionId, curPage, pageSize) {
     const res = await getBotRoamMsgs(sessionId, curPage, pageSize)
