@@ -109,18 +109,19 @@
           'csId': this.csInfo.csId,
           'csName': this.csInfo.csName,
           'evaluateLevel': this.stars,
-          'labels': this.labels.length
+          'labels': this.labels
         }
+        debugger
         const res = await saveAssess(data)
         if (res.result.code === ERR_OK) {
           this.showSucTips = true
           // this.showAssess = false
-          console.log('已经保存了你评价的信息' + JSON.stringify(res))
+          // console.log('已经保存了你评价的信息' + JSON.stringify(res))
           this.$emit('assessSuccess')
         } else {
           this.showFalseTips = true
           // this.failText = res.result.messagem
-          console.log('there are some error about' + JSON.stringify(res.result))
+          console.log('there are some error about' + JSON.stringify(res))
         }
       }
     }
