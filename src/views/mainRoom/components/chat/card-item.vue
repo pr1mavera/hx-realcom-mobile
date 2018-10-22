@@ -6,11 +6,11 @@
           <img width=100% height=100% src="/static/img/chat/xiaohua@2x.png">
         </div>
         <div class="text">
-          <span class="name">{{this.cardInfo.nickName}}</span>
+          <span class="name">{{cardInfo.nickName}}</span>
           智能客服
         </div>
       </div>
-      <div class="label">{{this.cardInfo.nickName}}进入会话竭诚为您服务~</div>
+      <div class="label">{{cardInfo.nickName}}进入会话竭诚为您服务~</div>
     </div>
   </div>
 </template>

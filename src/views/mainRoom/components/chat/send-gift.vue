@@ -13,7 +13,7 @@
 </template>
 
 <script type="text/ecmascript-6">
-  import {ERR_OK, getImgUrl, viewGifts} from '@/server/index.js'
+import {ERR_OK, getImgUrl, viewGifts} from '@/server/index.js'
 export default {
   components: {
     'SendExtendItem': () => import('@/views/mainRoom/components/chat/send-extend-item')

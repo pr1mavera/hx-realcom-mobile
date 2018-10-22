@@ -130,18 +130,7 @@ export const RTCRoomMixin = {
       })
 
       this.RTC.on('onRemoteStreamRemove', (info) => {
-        const videoElement = document.getElementById(`v_${info.videoId}`)
-        if (videoElement) {
-          videoElement.srcObject = null
-        }
-        const temp = []
-        // eslint-disable-next-line
-        for (let i = 0; i < self.members.length; i++) {
-          if (self.members[i].id !== info.videoId) {
-            temp.push(self.members[i])
-          }
-        }
-        self.members = temp
+        this.hangUpVideo()
       })
 
       this.RTC.on('onKickOut', () => {

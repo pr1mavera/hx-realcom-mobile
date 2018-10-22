@@ -18,34 +18,38 @@
           <ul>
             <li class="chat-content-block chat-content-start" ref="chatContentStart"></li>
             <li class="chat-content-li" v-for="(item, i) in this.historyMsgs" :key="`history-${i}`" :class="{'text-center': item.msgStatus === msgStatus.tip}">
-              <component
-                :is="_showItemByType(item.msgStatus)"
-                :isSelf="item.isSelfSend"
-                :name="item.nickName"
-                :text="item.content"
-                :imgSrc="item.imgData"
-                :types="item.msgType"
-                :extend="item.msgExtend"
-                :cardInfo="item.cardInfo"
-                :proxyInfo="item.proxyInfo"
-              ></component>
+              <keep-alive>
+                <component
+                  :is="_showItemByType(item.msgStatus)"
+                  :isSelf="item.isSelfSend"
+                  :name="item.nickName"
+                  :text="item.content"
+                  :imgSrc="item.imgData"
+                  :types="item.msgType"
+                  :extend="item.msgExtend"
+                  :cardInfo="item.cardInfo"
+                  :proxyInfo="item.proxyInfo"
+                ></component>
+              </keep-alive>
             </li>
             <li class="chat-content-li" v-for="(msg, index) in this.msgs" :key="index" :class="{'text-center': msg.msgStatus === msgStatus.tip}">
-              <component
-                :is="_showItemByType(msg.msgStatus)"
-                :isSelf="msg.isSelfSend"
-                :name="msg.nickName"
-                :text="msg.content"
-                :imgSrc="msg.imgData"
-                :giftInfo="msg.giftInfo"
-                :types="msg.msgType"
-                :extend="msg.msgExtend"
-                :cardInfo="msg.cardInfo"
-                :dialogInfo="msg.dialogInfo"
-                :proxyInfo="msg.proxyInfo"
-                @enterToMenChat="enterToMenChat"
-                @clickHotQues="chatInputCommit"
-              ></component>
+              <keep-alive>
+                <component
+                  :is="_showItemByType(msg.msgStatus)"
+                  :isSelf="msg.isSelfSend"
+                  :name="msg.nickName"
+                  :text="msg.content"
+                  :imgSrc="msg.imgData"
+                  :giftInfo="msg.giftInfo"
+                  :types="msg.msgType"
+                  :extend="msg.msgExtend"
+                  :cardInfo="msg.cardInfo"
+                  :dialogInfo="msg.dialogInfo"
+                  :proxyInfo="msg.proxyInfo"
+                  @enterToMenChat="enterToMenChat"
+                  @clickHotQues="chatInputCommit"
+                ></component>
+              </keep-alive>
             </li>
             <li class="chat-content-block chat-content-end" ref="chatContentEnd"></li>
           </ul>
@@ -103,6 +107,7 @@ import { roomStatus, queueStatus, toggleBarStatus, msgStatus, msgTypes, tipTypes
 import { ERR_OK, getImgUrl, getBotInfo, syncGroupC2CMsg } from '@/server/index.js'
 
 export default {
+  name: 'chat',
   directives: {
     TransferDom
   },
@@ -208,7 +213,7 @@ export default {
             msgType: cardTypes.bot_card,
             cardInfo: {
               avatar: this.botInfo.avatarUrl,
-              nickName: this.botInfo.name
+              nickName: this.botInfo.botName
             }
           }
           const botWelcomeMsg = {

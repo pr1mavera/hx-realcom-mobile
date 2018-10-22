@@ -192,8 +192,8 @@ export default {
       this.initRTC(this.roomId)
     },
     hangUpVideo() {
-      // 退出音视频房间
-      this.quitRTC()
+      // 停止推流
+      this.stopRTC()
       // 记录通话时间
       this.videoTime = this._getVideoTime(this.startTimeStamp)
       // 判断当前是否评价过

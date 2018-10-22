@@ -1,7 +1,7 @@
 <template>
  <div class="tips-item">
-   <span class="item-span" v-if="this.types === tipTypes.tip_time">{{text}}</span>
-   <!-- <span class="item-span" v-if="this.types === tipTypes.tip_time">{{text | timeFilter}}</span> -->
+   <!-- <span class="item-span" v-if="this.types === tipTypes.tip_time">{{text}}</span> -->
+   <span class="item-span" v-if="this.types === tipTypes.tip_time">{{text | timeFilter}}</span>
    <span class="item-span" v-if="this.types === tipTypes.tip_normal">{{text}}</span>
    <span class="item-span" v-if="this.types === tipTypes.tip_success">
      <svg class="icon icon-success extend-click" aria-hidden="true">

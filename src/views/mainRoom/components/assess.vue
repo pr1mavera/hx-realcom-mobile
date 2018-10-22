@@ -23,7 +23,7 @@
             <!--</swiper-item>-->
           <!--</swiper>-->
           <label-btn :labelType="labelType" @seledLabels="selLabels"></label-btn>
-          <x-button :gradients="['#FF8C6A', '#ff80a0']" @click.native="saveAssess"
+          <x-button :gradients="['#FF8C6A', '#ff80a0']" @click.native="handleToSaveAssess"
                     style="width: 11rem;margin: 2rem auto 0;">
             提交评价
           </x-button>
@@ -99,7 +99,7 @@
       },
 
       // 保存评论的信息
-      async saveAssess() {
+      async handleToSaveAssess() {
         // 输入 sessionId(会话Id) userId, userName, csId, csName ,evaluateLevel(满意度) [{labelId: '', labelName: ''}]
         const data = {
           'sessionId': this.sessionId,
@@ -109,19 +109,19 @@
           'csId': this.csInfo.csId,
           'csName': this.csInfo.csName,
           'evaluateLevel': this.stars,
-          'labels': this.labels
+          'labels': this.labels.length
         }
-        debugger
+
         const res = await saveAssess(data)
         if (res.result.code === ERR_OK) {
           this.showSucTips = true
           // this.showAssess = false
-          // console.log('已经保存了你评价的信息' + JSON.stringify(res))
+          console.log('已经保存了你评价的信息' + JSON.stringify(res))
           this.$emit('assessSuccess')
         } else {
           this.showFalseTips = true
           // this.failText = res.result.messagem
-          console.log('there are some error about' + JSON.stringify(res))
+          console.log('there are some error about' + JSON.stringify(res.result))
         }
       }
     }
