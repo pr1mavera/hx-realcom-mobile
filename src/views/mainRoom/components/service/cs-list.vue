@@ -114,7 +114,7 @@ export default {
       const status = this.myCsList[index].status // 0：就绪、1：小憩、3：签退
       switch (status) {
         case '0':
-          this.$router.push({path: `/room/line-up/${csId}`})
+          this.$emit('goToLineUp', csId)
           break
         case '1':
           this.alertTip = true

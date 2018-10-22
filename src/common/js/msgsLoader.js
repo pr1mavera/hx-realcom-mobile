@@ -1,3 +1,9 @@
+/*
+* @Author: Primavera
+* @Date:   2018-10-15 14:25:00
+ * @Last Modified by: Primavera
+ * @Last Modified time: 2018-10-22 10:33:00
+*/
 import { sessionStatus, msgStatus, msgTypes, tipTypes } from '@/common/js/status'
 import { ERR_OK, getBotRoamMsgs, requestHistoryMsgs } from '@/server/index.js'
 import IM from '@/server/im'
@@ -209,9 +215,9 @@ class MsgsLoader {
       return
     }
     let list = []
-    // console.info('this.page.curPage :' + this.page.curPage)
-    // console.info('this.page.curTime :' + this.page.curTime)
-    // console.info('this.page.pageSize :' + this.page.pageSize)
+    console.info('this.page.curPage :' + this.page.curPage)
+    console.info('this.page.curTime :' + this.page.curTime)
+    console.info('this.page.pageSize :' + this.page.pageSize)
     if (this.sessionList.isRoamMsgsOver) {
       // 拉取历史消息
       list = await this.history.getHistoryMsgs(this.userInfo.userId, this.page)

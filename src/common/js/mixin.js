@@ -608,7 +608,9 @@ export const getMsgsMixin = {
       if (!this.MsgsLoader) {
         let sessions = []
         this.sessionList.forEach(item => {
-          sessions.push(Creator.createSession(item))
+          if (item.chatCount) {
+            sessions.push(Creator.createSession(item))
+          }
         })
         let SessionList = Creator.createSessionList(sessions)
         this.MsgsLoader = Creator.createMsgsLoader(this.userInfo, SessionList)

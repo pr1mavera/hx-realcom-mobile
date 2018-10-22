@@ -56,7 +56,7 @@
         </div>
         <fload-button
           :barStatus="this.inputBarOpen || this.extendBarOpen"
-          @enterVideoLineUp="lineUpAlert = true"
+          @enterVideoLineUp="confirmToLineUp"
         ></fload-button>
       </div>
       <input-bar
@@ -77,13 +77,6 @@
       @sendImg="sendImgMsgClick"
       @sendGift="sendGiftMsgClick"
     ></extend-bar>
-    <div v-transfer-dom>
-      <confirm v-model="lineUpAlert"
-        :title="'您即将转入视频客服'"
-        @on-cancel="lineUpAlert = false"
-        @on-confirm="confirmToLineUp"
-      ></confirm>
-    </div>
     <ios-guide v-if="iosGuide" @click.native="toggleGuide(false)"></ios-guide>
     <low-version v-if="lowVersion" @close="toggleUpgrade(false)"></low-version>
   </div>
@@ -92,7 +85,7 @@
 <script type="text/ecmascript-6">
 // import { wxConfig } from '@/server/index.js'
 import { mapGetters, mapMutations, mapActions } from 'vuex'
-import { Confirm, TransferDomDirective as TransferDom } from 'vux'
+// import { Confirm, TransferDomDirective as TransferDom } from 'vux'
 import BScroll from 'better-scroll'
 // import HeaderBar from '@/views/mainRoom/components/chat/header-bar'
 import InputBar from '@/views/mainRoom/components/chat/input-bar'
@@ -108,9 +101,6 @@ import { ERR_OK, getImgUrl, getBotInfo, syncGroupC2CMsg } from '@/server/index.j
 
 export default {
   name: 'chat',
-  directives: {
-    TransferDom
-  },
   mixins: [
     loginMixin,
     IMMixin,
@@ -123,7 +113,7 @@ export default {
      */
     // HeaderBar,
     InputBar,
-    Confirm,
+    // Confirm,
     'MsgsItem': () => import('@/views/mainRoom/components/chat/msgs-item'),
     'TipsItem': () => import('@/views/mainRoom/components/chat/tips-item'),
     'DialogItem': () => import('@/views/mainRoom/components/chat/dialog-item'),
@@ -161,7 +151,6 @@ export default {
       inputFocPos: 0,
       // inputObserver: null,
       extendBarLaunchOpen: false,
-      lineUpAlert: false,
       msgStatus: msgStatus,
       translateX: 0,
       iosGuide: false,
@@ -504,7 +493,6 @@ export default {
       this.$refs.inputBar.inputText += code
     },
     confirmToLineUp() {
-      this.lineUpAlert = false
       const enterVideoStatus = window.sessionStorage.getItem('enterVideoStatus')
       switch (enterVideoStatus) {
         case 'enter-video-line-up':

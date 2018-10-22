@@ -109,9 +109,9 @@
           'csId': this.csInfo.csId,
           'csName': this.csInfo.csName,
           'evaluateLevel': this.stars,
-          'labels': this.labels.length
+          'labels': this.labels
         }
-
+        debugger
         const res = await saveAssess(data)
         if (res.result.code === ERR_OK) {
           this.showSucTips = true
