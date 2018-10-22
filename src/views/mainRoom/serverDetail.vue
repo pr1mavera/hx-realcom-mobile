@@ -102,7 +102,7 @@
         const cuSerId = this.$route.query.cusSerId
         // console.log('=================================' + JSON.stringify(this.csInfo))
         const res = await getCsInfo(cuSerId)
-        debugger
+        // debugger
         if (res.result.code === ERR_OK) {
           this.cuSerInfo = res.data
           const cuSerPic = res.data.photos

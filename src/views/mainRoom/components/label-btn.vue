@@ -82,7 +82,7 @@
       async changePage(index) {
         this.currentPage = index + 1
         // debugger
-        console.log('======================>当前页是' + index)
+        // console.log('======================>当前页是' + index)
         const page = this.currentPage
         const pageSize = 2
         // this.disable = false // 标签可以选
@@ -91,7 +91,7 @@
         if (res.result.code === ERR_OK) {
           this.btnList = res.data.labels
         } else {
-          console.log('======================= error about query labelTags')
+          // console.log('======================= error about query labelTags')
         }
       },
 
@@ -107,11 +107,11 @@
           // 评价当前客服的标签
           const res = await viewLabels(page, pageSize, csId)
           if (res.result.code === ERR_OK) {
-            console.log('=============这是查询到的标签信息:' + JSON.stringify(res.data))
+            // console.log('=============这是查询到的标签信息:' + JSON.stringify(res.data))
             this.showDots = false
             this.btnList = res.data.labels
           } else {
-            console.log('======================= error about query labelTags')
+            // console.log('======================= error about query labelTags')
           }
         } else {
           // 查询所有标签
@@ -133,7 +133,7 @@
         }
       },
       selChanege() {
-        // debugger
+        debugger
         this.$emit('seledLabels', this.selTags)
         console.log('你选中了这一个选项' + JSON.stringify(this.selTags))
       }
