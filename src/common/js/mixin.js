@@ -466,7 +466,7 @@ export const sendMsgsMixin = {
             msg: text,
             time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
             nickName: this.userInfo.userName,
-            avatar: getCsAvatar(this.csInfo.csId),
+            avatar: this.csInfo.csId,
             identifier: this.userInfo.userId,
             msgStatus: msgStatus.msg,
             msgType: msgTypes.msg_normal,
@@ -500,7 +500,7 @@ export const sendMsgsMixin = {
           msg: `${this.userInfo.userName}给你送了一个礼物`,
           time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
           nickName: this.userInfo.userName,
-          avatar: getCsAvatar(this.csInfo.csId),
+          avatar: this.csInfo.csId,
           identifier: this.userInfo.userId,
           msgStatus: msgStatus.msg,
           msgType: msgTypes.msg_gift,
@@ -525,7 +525,7 @@ export const sendMsgsMixin = {
           msg: '图片消息',
           time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
           nickName: this.userInfo.userName,
-          avatar: getCsAvatar(this.csInfo.csId),
+          avatar: this.csInfo.csId,
           toUserName: this.csInfo.csName,
           sessionId: this.sessionId,
           identifier: this.userInfo.userId,
@@ -543,7 +543,7 @@ export const sendMsgsMixin = {
     afterSendC2CTextMsgs(text) {
       const msg = {
         nickName: this.userInfo.userName,
-        avatar: getCsAvatar(this.csInfo.csId),
+        avatar: this.csInfo.csId,
         content: text,
         isSelfSend: true,
         time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
@@ -558,7 +558,7 @@ export const sendMsgsMixin = {
     afterSendC2CImgMsgs(imgData) {
       const msg = {
         nickName: this.userInfo.userName,
-        avatar: getCsAvatar(this.csInfo.csId),
+        avatar: this.csInfo.csId,
         isSelfSend: true,
         time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
         msgStatus: msgStatus.msg,

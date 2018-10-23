@@ -23,7 +23,7 @@ const Format = {
   timeTipsFormat(list) {
     let timeCache = list[0].time
     let map = []
-    list.forEach((item, i) => {
+    list.length && list.forEach((item, i) => {
       if (isTimeDiffLongEnough(timeCache, item.time) || i === 0) {
         map.push({
           content: item.time,
@@ -183,6 +183,9 @@ class History {
       let map = []
       if (list.length) {
         list.forEach(item => {
+          if (!item.chatType) {
+            item.chatType = '2'
+          }
           item.msgContent = JSON.parse(item.msgContent)[0].MsgContent
           map.unshift(this.Creator.createMessage(userId, item))
         })
@@ -197,7 +200,7 @@ class History {
 }
 
 /**
- * [MsgsQuery 消息请求类]
+ * [MsgsLoader MsgsLoader]
  */
 @deprecate(Format)
 class MsgsLoader {

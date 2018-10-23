@@ -21,14 +21,7 @@
               <keep-alive>
                 <component
                   :is="_showItemByType(item.msgStatus)"
-                  :isSelf="item.isSelfSend"
-                  :name="item.nickName"
-                  :text="item.content"
-                  :imgSrc="item.imgData"
-                  :types="item.msgType"
-                  :extend="item.msgExtend"
-                  :cardInfo="item.cardInfo"
-                  :proxyInfo="item.proxyInfo"
+                  :msg="item"
                 ></component>
               </keep-alive>
             </li>
@@ -36,16 +29,7 @@
               <keep-alive>
                 <component
                   :is="_showItemByType(msg.msgStatus)"
-                  :isSelf="msg.isSelfSend"
-                  :name="msg.nickName"
-                  :text="msg.content"
-                  :imgSrc="msg.imgData"
-                  :giftInfo="msg.giftInfo"
-                  :types="msg.msgType"
-                  :extend="msg.msgExtend"
-                  :cardInfo="msg.cardInfo"
-                  :dialogInfo="msg.dialogInfo"
-                  :proxyInfo="msg.proxyInfo"
+                  :msg="msg"
                   @enterToMenChat="enterToMenChat"
                   @clickHotQues="chatInputCommit"
                 ></component>

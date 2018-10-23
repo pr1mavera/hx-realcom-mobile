@@ -1,6 +1,6 @@
 <template>
   <div class="dialog-item">
-    <div class="fail-container" v-if="this.types === dialogTypes.dialog_disconnect">
+    <div class="fail-container" v-if="msg.msgType === dialogTypes.dialog_disconnect">
       <div class="fail-con">
         <img src="/static/img/chat/connect-fail@2x.png"
              srcset="/static/img/chat/connect-fail.png 1x,
@@ -15,7 +15,7 @@
         <a @click="reConnect">点击重新连接</a>
       </div>
     </div>
-    <div class="suc-con" v-if="this.types === dialogTypes.dialog_success">
+    <div class="suc-con" v-if="msg.msgType === dialogTypes.dialog_success">
      <div class="avatar">
        <img src="/static/img/avatar@2x.png">
        <p class="name">{{this.dialogInfo.csName}}</p>
@@ -34,15 +34,12 @@
 </template>
 
 <script type="text/ecmascript-6">
-import {dialogTypes} from '@/common/js/status'
+import { dialogTypes } from '@/common/js/status'
 
 export default {
   props: {
-    dialogInfo: {
+    msg: {
       type: Object
-    },
-    types: {
-      type: String
     }
   },
   data() {

@@ -1,22 +1,22 @@
 <template>
  <div class="tips-item">
-   <!-- <span class="item-span" v-if="this.types === tipTypes.tip_time">{{text}}</span> -->
-   <span class="item-span" v-if="this.types === tipTypes.tip_time">{{text | timeFilter}}</span>
-   <span class="item-span" v-if="this.types === tipTypes.tip_normal">{{text}}</span>
-   <span class="item-span" v-if="this.types === tipTypes.tip_success">
+   <!-- <span class="item-span" v-if="msg.msgType === tipTypes.tip_time">{{msg.content}}</span> -->
+   <span class="item-span" v-if="msg.msgType === tipTypes.tip_time">{{msg.content | timeFilter}}</span>
+   <span class="item-span" v-if="msg.msgType === tipTypes.tip_normal">{{msg.content}}</span>
+   <span class="item-span" v-if="msg.msgType === tipTypes.tip_success">
      <svg class="icon icon-success extend-click" aria-hidden="true">
        <use xlink:href="#icon-chenggong"></use>
      </svg>
      视频客服转接成功，祝您沟通愉快！
    </span>
-   <span class="item-span" v-if="this.types === tipTypes.tip_fail">
+   <span class="item-span" v-if="msg.msgType === tipTypes.tip_fail">
      <svg class="icon icon-fail extend-click" aria-hidden="true">
        <use xlink:href="#icon-zhuanjiemang"></use>
      </svg>
      人工客服忙
      <span class="button">转其他客服</span>
    </span>
-   <span class="item-span" v-if="this.types === tipTypes.tip_line_up">
+   <span class="item-span" v-if="msg.msgType === tipTypes.tip_line_up">
      当前排队{{num}}人，请耐心等待
      <span class="button">取消排队</span>
    </span>
@@ -29,11 +29,8 @@ import { tipTypes } from '@/common/js/status'
 
 export default {
   props: {
-    text: {
-      type: String
-    },
-    types: {
-      type: String
+    msg: {
+      type: Object
     }
   },
   data() {

@@ -1,58 +1,58 @@
 <template>
-  <div class="msgs-item" :class="[{'item-padding-left': isSelf, 'item-padding-right': !isSelf}]">
-    <div class="avatar" v-if="!isSelf">
+  <div class="msgs-item" :class="[{'item-padding-left': msg.isSelfSend, 'item-padding-right': !msg.isSelfSend}]">
+    <div class="avatar" v-if="!msg.isSelfSend">
       <div class="bot-avatar bg-image">
-        <img width=100% height=100% src="/static/img/chat/xiaohua@2x.png">
+        <img width=100% height=100% :src="avatarUrl">
       </div>
       <svg class="icon extend-click" aria-hidden="true">
         <use xlink:href="#icon-wode"></use>
       </svg>
     </div>
-    <div class="content-box" :class="[{'right-content-box': isSelf, 'left-content-box': !isSelf}]">
-      <p class="name" v-if="!isSelf">{{name}}</p>
+    <div class="content-box" :class="[{'right-content-box': msg.isSelfSend, 'left-content-box': !msg.isSelfSend}]">
+      <p class="name" v-if="!msg.isSelfSend">{{msg.nickName}}</p>
       <div
         class="content chat-content-shadow"
         :class="[{
-          'right-content-style': isSelf,
-          'left-content-style': !isSelf,
-          'padding-for-img': this.types === msgTypes.msg_img
+          'right-content-style': msg.isSelfSend,
+          'left-content-style': !msg.isSelfSend,
+          'padding-for-img': msg.msgType === msgTypes.msg_img
         }]">
         <!-- 基本消息 -->
-        <span class="text" v-if="this.types === msgTypes.msg_normal" v-html="text"></span>
+        <span class="text" v-if="msg.msgType === msgTypes.msg_normal" v-html="msg.content"></span>
         <!-- 转人工 -->
-        <span class="text" v-if="this.types === msgTypes.msg_no_idea">
+        <span class="text" v-if="msg.msgType === msgTypes.msg_no_idea">
           小华智力有限，好像听不太懂您的问题呢，可转
           <span class="button" @click="enterToMenChat">人工客服</span>
         </span>
         <!-- 热点问题 -->
-        <span class="text" v-if="this.types === msgTypes.msg_hot">
-          {{text}}
+        <span class="text" v-if="msg.msgType === msgTypes.msg_hot">
+          {{msg.content}}
           <span class="line"></span>
           <span class="text-extend-hot">
             <span class="text-extend">您可能想问：</span>
-            <span class="text-extend button" v-for="(item, index) in this.extend" :key="index" @click="clickHotQues(item.question)">{{item.question}}</span>
+            <span class="text-extend button" v-for="(item, index) in msg.msgExtend" :key="index" @click="clickHotQues(item.question)">{{item.question}}</span>
             <!-- <span class="text-extend button" @click="enterToMenChat">人工客服</span> -->
           </span>
         </span>
         <!-- 图片消息 -->
-        <span class="text text-img" v-if="this.types === msgTypes.msg_img">
-          <img class="text-img" height=100% :src="this.imgSrc.small">
+        <span class="text text-img" v-if="msg.msgType === msgTypes.msg_img">
+          <img class="text-img" height=100% :src="msg.imgData.small">
         </span>
         <!-- 礼物消息 -->
-        <span class="text gift-item" v-if="this.types === msgTypes.msg_gift">
-          我送给{{this.csInfo.csName || '客服'}}一个{{this.giftInfo.name}} !
-          <img class="text-gift" :src="`/static/img/${this.giftInfo.url}@2x.png`">
+        <span class="text gift-item" v-if="msg.msgType === msgTypes.msg_gift">
+          我送给{{this.csInfo.csName || '客服'}}一个{{msg.giftInfo.name}} !
+          <img class="text-gift" :src="`/static/img/${msg.giftInfo.url}@2x.png`">
         </span>
         <!-- 留言 -->
-        <span class="text" v-if="this.types === msgTypes.msg_leave">客服暂时不在，请<span class="button">点击留言</span>~</span>
+        <span class="text" v-if="msg.msgType === msgTypes.msg_leave">客服暂时不在，请<span class="button">点击留言</span>~</span>
         <!-- 猜问题 -->
-        <span class="text" v-if="this.types === msgTypes.msg_guess">我猜您想知道这些问题</span>
+        <span class="text" v-if="msg.msgType === msgTypes.msg_guess">我猜您想知道这些问题</span>
         <!-- 名片消息 -->
-        <span class="text" v-if="this.types === msgTypes.msg_card">
+        <span class="text" v-if="msg.msgType === msgTypes.msg_card">
           <div class="text-card">
             <div class="card-left">
-              <span class="name">{{this.proxyInfo.agentName}}</span>
-              <!-- <span class="sex">{{this.proxyInfo.agentSex}}</span> -->
+              <span class="name">{{msg.proxyInfo.agentName}}</span>
+              <!-- <span class="sex">{{msg.proxyInfo.agentSex}}</span> -->
               <span class="sex">
                 <svg class="icon extend-click" aria-hidden="true">
                   <use xlink:href="#icon-nan"></use>
@@ -63,7 +63,7 @@
               <ul>
                 <li class="infoList">
                   <span class="title">工号：</span>
-                  <span class="val">{{this.proxyInfo.agentId}}</span>
+                  <span class="val">{{msg.proxyInfo.agentId}}</span>
                 </li>
                 <li class="infoList">
                   <span class="title">所属渠道：</span>
@@ -71,7 +71,7 @@
                 </li>
                 <li class="infoList">
                   <span class="title">电话：</span>
-                  <span class="val phone" @click="callPhone($event)">{{this.proxyInfo.agentPhone}}</span>
+                  <span class="val phone" @click="callPhone($event)">{{msg.proxyInfo.agentPhone}}</span>
                 </li>
               </ul>
             </div>
@@ -79,9 +79,9 @@
         </span>
       </div>
       <!-- 猜问题 模块 -->
-      <div class="content chat-content-shadow left-content-style content-extend" v-if="this.types === msgTypes.msg_guess">
+      <div class="content chat-content-shadow left-content-style content-extend" v-if="msg.msgType === msgTypes.msg_guess">
         <span class="text">
-          <span class="text-extend button" v-for="(item, index) in this.extend" :key="index" @click="clickHotQues(item.question)">{{item.question}}</span>
+          <span class="text-extend button" v-for="(item, index) in msg.msgExtend" :key="index" @click="clickHotQues(item.question)">{{item.question}}</span>
           <!-- <span class="text-extend button" @click="enterToMenChat">人工客服</span> -->
         </span>
       </div>
@@ -96,32 +96,12 @@
 
 <script type="text/ecmascript-6">
 import { mapGetters } from 'vuex'
-import { msgTypes } from '@/common/js/status'
+import { msgTypes, sessionStatus } from '@/common/js/status'
+import { getCsAvatar } from '@/server/index.js'
 
 export default {
   props: {
-    isSelf: {
-      type: Boolean
-    },
-    name: {
-      type: String
-    },
-    text: {
-      type: String
-    },
-    types: {
-      type: String
-    },
-    extend: {
-      type: Array
-    },
-    imgSrc: {
-      type: Object
-    },
-    giftInfo: {
-      type: Object
-    },
-    proxyInfo: {
+    msg: {
       type: Object
     }
   },
@@ -131,6 +111,18 @@ export default {
     }
   },
   computed: {
+    avatarUrl() {
+      switch (this.msg.chatType) {
+        case sessionStatus.robot:
+          return '/static/img/chat/xiaohua@2x.png'
+        case sessionStatus.video:
+          return getCsAvatar(this.msg.avatar)
+        case sessionStatus.onLine:
+          return '/static/img/chat/xiaohua@2x.png'
+        default:
+          return '/static/img/chat/xiaohua@2x.png'
+      }
+    },
     ...mapGetters([
       'csInfo'
     ])
