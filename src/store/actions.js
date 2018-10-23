@@ -1,7 +1,8 @@
 import * as types from './mutation-types'
 import { sleep } from '@/common/js/util'
 import { isTimeDiffLongEnough } from '@/common/js/dateConfig.js'
-import { toggleBarStatus, roomStatus, queueStatus, msgStatus, tipTypes } from '@/common/js/status'
+import { sessionStatus, toggleBarStatus, roomStatus, queueStatus, msgStatus, tipTypes } from '@/common/js/status'
+import { ERR_OK, createSession } from '@/server/index.js'
 
 export const closeBarBuffer = function({ commit }, { mutationType, delay }) {
   return (async function() {
@@ -53,10 +54,22 @@ export const readyToVideoChat = function({ commit, state }) {
 export const quitVideoChat = function({ commit, state }) {
   commit(types.SET_CS_INFO, null)
   commit(types.SET_ROOM_ID, '')
-  commit(types.SET_SESSION_ID, '')
   commit(types.SET_QUEUE_NUM, 0)
   commit(types.SET_QUEUE_MODE, queueStatus.noneQueue)
   commit(types.SET_ROOM_MODE, roomStatus.AIChat)
+  initSession()
+}
+
+export const initSession = async function({ commit, state }) {
+  // 创建机器人会话
+  const res = await createSession(state.userInfo.userId, state.userInfo.userName, state.userInfo.userPhone, sessionStatus.robot)
+  if (res.result.code === ERR_OK) {
+    console.log('============================= 会话创建成功 辣 =============================')
+    commit(types.SET_SESSION_ID, res.data.id)
+    return 0
+  } else {
+    console.log('============================= 会话创建失败 辣 =============================')
+  }
 }
 
 export const sendMsgs = async function({ commit, state }, msgs) {

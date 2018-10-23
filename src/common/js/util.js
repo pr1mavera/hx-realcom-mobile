@@ -1,4 +1,4 @@
-import { msgStatus, msgTypes } from '@/common/js/status'
+import { msgStatus, msgTypes, sessionStatus } from '@/common/js/status'
 
 export function debounce(func, time) {
   let timer
@@ -93,7 +93,8 @@ export function botAnswerfilter(data) {
         isSelfSend: false,
         time: data.time,
         msgStatus: msgStatus.msg,
-        msgType: msgTypes.msg_no_idea
+        msgType: msgTypes.msg_no_idea,
+        chatType: sessionStatus.robot
       }
     } else {
       // normal
@@ -103,7 +104,8 @@ export function botAnswerfilter(data) {
         isSelfSend: false,
         time: data.time,
         msgStatus: msgStatus.msg,
-        msgType: msgTypes.msg_normal
+        msgType: msgTypes.msg_normal,
+        chatType: sessionStatus.robot
       }
     }
   } else if (data.info.length === 3) {
@@ -115,6 +117,7 @@ export function botAnswerfilter(data) {
       time: data.time,
       msgStatus: msgStatus.msg,
       msgType: msgTypes.msg_guess,
+      chatType: sessionStatus.robot,
       msgExtend: [
         {
           question: data.info[0].question,

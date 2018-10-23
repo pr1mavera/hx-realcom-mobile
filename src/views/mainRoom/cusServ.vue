@@ -1,10 +1,8 @@
 <template>
   <div class="cus-serv">
-    <keep-alive>
-      <router-view
-        @goToLineUp="showConfirm"
-      ></router-view>
-    </keep-alive>
+    <router-view
+      @goToLineUp="showConfirm"
+    ></router-view>
     <div v-transfer-dom>
       <confirm v-model="lineUpAlert"
         :title="'您即将转入视频客服'"
@@ -48,7 +46,6 @@ export default {
 .weui-dialog {
   width: 70%;
   border-radius: 9px;
-  opacity: 0.8;
   .weui-dialog__hd {
     padding: 1.8em 1.6em 0.5em;
     .weui-dialog__title {

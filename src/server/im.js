@@ -134,16 +134,14 @@ const IM = (() => {
     var msgItem = newMsg.getElems()[0]
     var type = msgItem.getType()
     if (type === 'TIMCustomElem') {
-      var nickName = ''
-      var msgStatus = ''
-      var msgType = ''
-      var time = ''
       var content = msgItem.getContent() // 获取元素对象
       var desc = JSON.parse(content.getDesc())
-      msgType = desc.msgType
-      msgStatus = desc.msgStatus
-      time = desc.time
-      nickName = desc.nickName
+      var msgType = desc.msgType
+      var msgStatus = desc.msgStatus
+      var time = desc.time
+      var nickName = desc.nickName
+      var avatar = desc.avatar
+      var chatType = desc.chatType
       var ext = JSON.parse(content.getExt())
       if (ext.imgData) {
         var imgData = ext.imgData
@@ -157,6 +155,7 @@ const IM = (() => {
     }
     return {
       nickName,
+      avatar,
       imgData,
       proxyInfo,
       giftInfo,
@@ -165,6 +164,7 @@ const IM = (() => {
       isSystem: newMsg.getFromAccount() === '@TIM#SYSTEM' || false,
       msgType,
       msgStatus,
+      chatType,
       time
     }
   }
@@ -208,6 +208,7 @@ const IM = (() => {
       var sessionId = data.sessionId
       var likesCount = data.likesCount
       var csCode = data.csCode
+      var robotSessionId = data.robotSessionId
     }
     return {
       code,
@@ -220,6 +221,7 @@ const IM = (() => {
       sessionId,
       likesCount,
       csCode,
+      robotSessionId,
       desc
     }
   }
@@ -282,9 +284,11 @@ const IM = (() => {
       data: options.msg,
       desc: `{
         "nickName":"${options.nickName}",
+        "avatar":"${options.avatar}",
         "msgType":"${options.msgType}",
         "time":"${options.time}",
-        "msgStatus":"${options.msgStatus}"
+        "msgStatus":"${options.msgStatus}",
+        "chatType":"${options.chatType}"
       }`,
       ext: `{
         "giftInfo":${giftInfo}
@@ -324,9 +328,11 @@ const IM = (() => {
         "toUserName":"${options.toUserName}",
         "toUserType":"2",
         "nickName":"${options.nickName}",
+        "avatar":"${options.avatar}",
         "msgType":"${options.msgType}",
         "time":"${options.time}",
-        "msgStatus":"${options.msgStatus}"
+        "msgStatus":"${options.msgStatus}",
+        "chatType":"${options.chatType}"
       }`,
       ext: `{
         "imgData":${imgDataStr},

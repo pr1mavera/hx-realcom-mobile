@@ -3,7 +3,7 @@ import IM from '@/server/im'
 import anime from 'animejs'
 import Creator from '@/common/js/msgsLoader'
 // import WebRTCAPI from 'webRTCAPI'
-import { ERR_OK, getUserInfoByOpenID, getLoginInfo, createSession, pushSystemMsg, sendMsgToBot, getSessionList, getCsAvatar } from '@/server/index.js'
+import { ERR_OK, getUserInfoByOpenID, getLoginInfo, pushSystemMsg, sendMsgToBot, getSessionList, getCsAvatar } from '@/server/index.js'
 import { shallowCopy, botAnswerfilter } from '@/common/js/util'
 import { formatDate } from '@/common/js/dateConfig.js'
 import { queueStatus, sessionStatus, systemMsgStatus, msgStatus, msgTypes } from '@/common/js/status'
@@ -53,21 +53,21 @@ export const loginMixin = {
         console.log('error in getLoginInfo')
       }
     },
-    async initSession() {
-      // 机器人会话
-      const res = await createSession(this.userInfo.userId, this.userInfo.userName, this.userInfo.userPhone, sessionStatus.robot)
-      // const res = await createSession(this.userInfo.userId, this.userInfo.userName, this.userInfo.userPhone)
-      if (res.result.code === ERR_OK) {
-        console.log('============================= 会话创建成功 辣 =============================')
-        return new Promise((resolve) => {
-          // 存vuex roomId
-          this.setSessionId(res.data.id)
-          resolve()
-        })
-      } else {
-        console.log('============================= 会话创建失败 辣 =============================')
-      }
-    },
+    // async initSession() {
+    //   // 机器人会话
+    //   const res = await createSession(this.userInfo.userId, this.userInfo.userName, this.userInfo.userPhone, sessionStatus.robot)
+    //   // const res = await createSession(this.userInfo.userId, this.userInfo.userName, this.userInfo.userPhone)
+    //   if (res.result.code === ERR_OK) {
+    //     console.log('============================= 会话创建成功 辣 =============================')
+    //     return new Promise((resolve) => {
+    //       // 存vuex roomId
+    //       this.setSessionId(res.data.id)
+    //       resolve()
+    //     })
+    //   } else {
+    //     console.log('============================= 会话创建失败 辣 =============================')
+    //   }
+    // },
     ...mapMutations({
       setUserInfo: 'SET_USER_INFO',
       // setRoomId: 'SET_ROOM_ID',
@@ -258,6 +258,7 @@ export const IMMixin = {
     ...mapGetters([
       'userInfo',
       'roomId',
+      'sessionId',
       'msgs',
       'videoMsgs',
       'queueNum'
@@ -358,7 +359,8 @@ export const IMMixin = {
                 userId: this.userInfo.userId,
                 userName: this.userInfo.userName,
                 userPhone: this.userInfo.userPhone,
-                openId: this.userInfo.openId
+                openId: this.userInfo.openId,
+                robotSessionId: this.sessionId
               },
               desc: `${this.userInfo.userName}排队成功辣`,
               ext: ''
@@ -424,7 +426,8 @@ export const sendMsgsMixin = {
           isSelfSend: true,
           time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
           msgStatus: msgStatus.msg,
-          msgType: msgTypes.msg_normal
+          msgType: msgTypes.msg_normal,
+          chatType: sessionStatus.robot
         }
         // this.setMsgs(this.msgs.concat([ques]))
         this.sendMsgs([
@@ -463,29 +466,31 @@ export const sendMsgsMixin = {
             msg: text,
             time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
             nickName: this.userInfo.userName,
+            avatar: getCsAvatar(this.csInfo.csId),
             identifier: this.userInfo.userId,
             msgStatus: msgStatus.msg,
-            msgType: msgTypes.msg_normal
+            msgType: msgTypes.msg_normal,
+            chatType: sessionStatus.video
           })
       })
     },
-    sendTextMsg(text) {
-      return new Promise(resolve => {
-        resolve()
-        IM.sendNoticeMsg({
-          sessionId: this.sessionId,
-          toUserId: this.csInfo.csId,
-          toUserName: this.csInfo.nickName,
-          groupId: this.roomId,
-          msg: text,
-          time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
-          nickName: this.userInfo.userName,
-          identifier: this.userInfo.userId,
-          msgStatus: msgStatus.msg,
-          msgType: msgTypes.msg_normal
-        })
-      })
-    },
+    // sendTextMsg(text) {
+    //   return new Promise(resolve => {
+    //     resolve()
+    //     IM.sendNoticeMsg({
+    //       sessionId: this.sessionId,
+    //       toUserId: this.csInfo.csId,
+    //       toUserName: this.csInfo.nickName,
+    //       groupId: this.roomId,
+    //       msg: text,
+    //       time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+    //       nickName: this.userInfo.userName,
+    //       identifier: this.userInfo.userId,
+    //       msgStatus: msgStatus.msg,
+    //       msgType: msgTypes.msg_normal
+    //     })
+    //   })
+    // },
     sendGiftMsg(giftInfo) {
       return new Promise(resolve => {
         resolve()
@@ -495,9 +500,11 @@ export const sendMsgsMixin = {
           msg: `${this.userInfo.userName}给你送了一个礼物`,
           time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
           nickName: this.userInfo.userName,
+          avatar: getCsAvatar(this.csInfo.csId),
           identifier: this.userInfo.userId,
           msgStatus: msgStatus.msg,
           msgType: msgTypes.msg_gift,
+          chatType: sessionStatus.video,
           giftInfo
         })
       })
@@ -518,34 +525,31 @@ export const sendMsgsMixin = {
           msg: '图片消息',
           time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
           nickName: this.userInfo.userName,
-          sendUserId: this.userInfo.userId,
-          toUserId: this.csInfo.csId,
-          // toUserId: '987654321',
+          avatar: getCsAvatar(this.csInfo.csId),
           toUserName: this.csInfo.csName,
           sessionId: this.sessionId,
           identifier: this.userInfo.userId,
           msgStatus: msgStatus.msg,
-          msgType: msgTypes.msg_img
+          msgType: msgTypes.msg_img,
+          chatType: sessionStatus.video
         }
         // 上传图片
         const resp = await IM.uploadPic(img, info)
         // 发送图片
         const customMsgInfo = IM.formatImgMsgOption(resp, info)
-        await IM.sendNormalMsg(
-          this.userInfo.userId,
-          this.csInfo.csId,
-          // '987654321',
-          customMsgInfo)
+        await IM.sendNormalMsg(this.userInfo.userId, this.csInfo.csId, customMsgInfo)
       })
     },
     afterSendC2CTextMsgs(text) {
       const msg = {
         nickName: this.userInfo.userName,
+        avatar: getCsAvatar(this.csInfo.csId),
         content: text,
         isSelfSend: true,
         time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
         msgStatus: msgStatus.msg,
-        msgType: msgTypes.msg_normal
+        msgType: msgTypes.msg_normal,
+        chatType: sessionStatus.video
       }
       this.sendMsgs([
         msg
@@ -554,10 +558,12 @@ export const sendMsgsMixin = {
     afterSendC2CImgMsgs(imgData) {
       const msg = {
         nickName: this.userInfo.userName,
+        avatar: getCsAvatar(this.csInfo.csId),
         isSelfSend: true,
         time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
         msgStatus: msgStatus.msg,
         msgType: msgTypes.msg_img,
+        chatType: sessionStatus.video,
         imgData
       }
       this.sendMsgs([

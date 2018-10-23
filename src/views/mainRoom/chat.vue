@@ -566,6 +566,7 @@ export default {
       setQueueMode: 'SET_QUEUE_MODE'
     }),
     ...mapActions([
+      'initSession',
       'enterToLineUp',
       'toggleBar',
       'sendMsgs'
