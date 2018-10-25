@@ -8,7 +8,7 @@
     </span>
     <div class="container-main">
       <a @click="enterSerCenter" class="avatar">
-        <img :src='avatarImgSrc'>
+        <img v-lazy='avatarImgSrc'>
       </a>
       <div class="info">
         <p class="name">{{this.name}}</p>
@@ -24,11 +24,11 @@
     <!-- 删除时弹框提示 :title="$t('Confirm deleting the item')"-->
     <div v-transfer-dom>
       <confirm v-model="showTips"
-               @on-cancel="onCancel"
-               @on-confirm="onConfirm"
-               @on-show="onShow"
-               @on-hide="onHide">
-        <p style="text-align:center;">您确定要删除当前客服吗？</p>
+        :title="'您确定要删除当前客服吗？'"
+        @on-cancel="onCancel"
+        @on-confirm="onConfirm"
+        @on-show="onShow"
+        @on-hide="onHide">
       </confirm>
     </div>
   </div>
@@ -71,6 +71,9 @@
       },
       csIndex: {
         type: Number
+      },
+      csStatus: {
+        type: String
       }
     },
     data() {
@@ -166,7 +169,7 @@
         })
       },
       clickToLineUp() {
-        this.$emit('toLineUp', this.csIndex, this.cusSerId)
+        this.$emit('clickToLineUp', this.csStatus, this.cusSerId)
       },
       ...mapMutations({
         setQueueMode: 'SET_QUEUE_MODE'
@@ -205,7 +208,8 @@
         border: .25rem solid #ffffff;
         img {
           width: 100%;
-          height: 7.5rem;
+          height: 100%;
+          object-fit: cover;
           border-radius: 50%;
         }
       }
@@ -224,6 +228,25 @@
         p:first-child {
           padding-top: .4rem;
         }
+      }
+    }
+  }
+  .weui-dialog {
+    width: 70%;
+    border-radius: 9px;
+    .weui-dialog__hd {
+      padding: 1.8em 1.6em 0.5em;
+      .weui-dialog__title {
+        font-size: 1.6rem;
+      }
+    }
+    .weui-dialog__bd {
+      min-height: unset!important;
+    }
+    .weui-dialog__ft {
+      line-height: 44px;
+      a {
+        color: rgba(33, 150, 243, 1)!important;
       }
     }
   }

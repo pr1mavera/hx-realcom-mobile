@@ -57,7 +57,7 @@ export const quitVideoChat = function({ commit, state }) {
   commit(types.SET_QUEUE_NUM, 0)
   commit(types.SET_QUEUE_MODE, queueStatus.noneQueue)
   commit(types.SET_ROOM_MODE, roomStatus.AIChat)
-  initSession()
+  initSession({ commit, state })
 }
 
 export const initSession = async function({ commit, state }) {

@@ -7,7 +7,7 @@
         </div>
       <div class="tips">
         <p class="tips-top">当前还有<label class="num">{{this.queueNum}}</label>人排队.</p>
-        <p class="tips-bottom">预计需要等待{{times}}分钟</p>
+        <!-- <p class="tips-bottom">预计需要等待{{times}}分钟</p> -->
       </div>
       <a type="reset" class="btn-cancel" @click="clickToCancelLineUp">取 消</a>
       <connect-success ref="connectSuccess" @confirmToVideo="confirmToVideo"></connect-success>

@@ -3,6 +3,7 @@
 import Vue from 'vue'
 import App from './App'
 import FastClick from 'fastclick'
+import VueLazyload from 'vue-lazyload'
 import { WechatPlugin, AlertPlugin, ToastPlugin, ConfirmPlugin, LoadingPlugin } from 'vux'
 import router from './router'
 import store from './store'
@@ -17,6 +18,10 @@ Vue.use(AlertPlugin)
 Vue.use(ToastPlugin)
 Vue.use(ConfirmPlugin)
 Vue.use(LoadingPlugin)
+
+Vue.use(VueLazyload, {
+  loading: require('@/common/img/default_img.png')
+})
 
 Vue.prototype.$setgoindex = () => {
   if (window.history.length <= 1) {

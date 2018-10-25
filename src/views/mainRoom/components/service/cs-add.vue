@@ -6,22 +6,22 @@
           <div
             class="cs-label"
             ref="csLabel"
-            @touchstart.stop.prevent="startSlide($event)"
-            @touchmove.stop.prevent="slideMove($event)"
-            @touchend.stop.prevent="endSlide($event)"
+            @touchstart.stop="startSlide($event)"
+            @touchmove.stop="slideMove($event)"
+            @touchend.stop="endSlide($event)"
             :style="setRotate"> <!-- 限制边框范围及显示阴影 -->
             <div class="container">
               <div class="header">
                 <img width=100% class="header-img" src="/static/img/chat/csAddBg.png">
                 <div class="header-msg">
                   <div class="avatar">
-                    <img width=100% height=100% :src=avatarImg>
+                    <img width=100% height=100% v-lazy="avatarImg">
                   </div>
                   <div class="nickname">{{curLabelInfo.nickName}}</div>
                 </div>
               </div>
               <div class="video-btn">
-                <button class="button">视频咨询</button>
+                <button class="button" @click.stop.prevent="clickToLineUp(curLabelInfo.status, curLabelInfo.id)">视频咨询</button>
               </div>
               <div class="cs-info">
                 <ul>
@@ -72,8 +72,8 @@
       </div>
     </div>
     <div class="slide-btn">
-      <div class="btn btn-left">切 换</div>
-      <div class="btn btn-right" @click="addCS">添加为专属客服</div>
+      <div class="btn btn-left" @click="hendleChange">切 换</div>
+      <div class="btn btn-right" @click="hendleAdd">添加为专属客服</div>
     </div>
     <div class="fload-tip">
       <div class="tip tip-left" id="fload-tip-left" :class="{'show-fload-tip-left': angle <= -targAngle}">
@@ -86,14 +86,12 @@
         <svg class="icon extend-click" aria-hidden="true">
           <use xlink:href="#icon-zhuanshukefu"></use>
         </svg>
-        <badge text="1"></badge>
+        <badge :text="myCs.length"></badge>
       </div>
     </div>
     <!--  弹框提示客户最多只能添加3个专属客服 -->
     <div v-transfer-dom>
-      <alert v-model="showTip">
-        您已经添加了3个专属客服啦！
-      </alert>
+      <alert v-model="showTip" :title="'您已经添加了3个专属客服啦！'"></alert>
     </div>
   </div>
 </template>
@@ -112,6 +110,11 @@ export default {
   components: {
     Badge,
     Alert
+  },
+  props: {
+    myCs: {
+      type: Array
+    }
   },
   data() {
     return {
@@ -145,8 +148,8 @@ export default {
         //   gift: 2561
         // }
       ],
-      m_cslist: [], // 已添加的专属客服
-      m_csNum: this.$route.query.myCsNum, // 已有的专属客服的个数
+      // m_cslist: [], // 已添加的专属客服
+      // m_csNum: this.$route.query.myCsNum, // 已有的专属客服的个数
       floadTipLeftAnimeCache: null,
       floadTipRightAnimeCache: null,
       avatarImg: '',
@@ -165,6 +168,10 @@ export default {
     this.getCsList()
   },
   methods: {
+    clickToLineUp(status, csId) {
+      debugger
+      this.$emit('goToLineUp', status, csId)
+    },
     startSlide(event) {
       const e = event.targetTouches[0]
       // const label = this.$refs.csLabel
@@ -181,76 +188,86 @@ export default {
       }
       console.log(`angle: ${this.angle}`)
     },
-    async endSlide(event) {
+    endSlide(event) {
       // const e = event.targetTouches[0]
       if (Math.abs(this.angle) <= this.targAngle) {
         // 复原
         this.angle = 0
       } else {
         if (this.angle > 0) {
-          // 添加
-          this.angle = this.endAngle
-          // this.resetAngle()
-          // 模拟请求服务，添加专属客服
-          await sleep(1000)
-          this.resetAngle()
-          console.log('addCS')
-          await sleep(10)
-          this.addCS()
+          this.hendleAdd()
         } else {
-          // 切换
-          this.angle = -this.endAngle
-          // this.resetAngle()
-          await sleep(1000)
-          this.resetAngle()
-          console.log('switchCS')
-          await sleep(10)
-          this.switchCS()
+          this.hendleChange()
         }
       }
     },
-
+    async hendleChange() {
+      // 切换
+      this.angle = -this.endAngle
+      // this.resetAngle()
+      await sleep(300)
+      this.resetAngle()
+      console.log('switchCS')
+      await sleep(10)
+      this.switchCS()
+    },
+    async hendleAdd() {
+      // 添加
+      this.angle = this.endAngle
+      // this.resetAngle()
+      // 模拟请求服务，添加专属客服
+      await sleep(300)
+      this.resetAngle()
+      console.log('addCS')
+      await sleep(10)
+      await this.addCS()
+    },
     // 将当前客服添加为专属客服 获取当前专属客服的个数this.$route.query
     async addCS() {
-      // const userId = '123'
-      const userId = this.userInfo.userId
-
-      // this.m_cslist.push(this.cabeurLlInfo)
-      // this.cslist.splice(0, 1)
-      this.curLabelInfo = this.cslist[0]
-      // 选中客服的ID
-      const cuSerId = this.curLabelInfo.id
-      this.m_cslist.push(this.curLabelInfo)
+      // debugger
+      // 包装当前已添加的专属客服列表
+      const temp = [this.cslist[0]].concat(this.myCs)
       // 数组去重
-      Array.from(new Set(this.m_cslist))
+      Array.from(new Set(temp))
+      if (temp.length > 3) {
+        this.showTip = true
+        this.curLabelInfo = this.cslist[0]
+        return
+      }
+
+      // 用户Id
+      const userId = this.userInfo.userId
+      // 选中客服的ID
+      const cuSerId = this.cslist[0].id
 
       const data = {
         'userId': userId,
         'csId': cuSerId
       }
-
-      debugger
-      console.log('============添加专属客服输入的数据' + JSON.stringify(data) + JSON.stringify(this.m_csNum))
-      if (this.m_cslist.length > (3 - this.m_csNum)) {
-        this.showTip = true
+      console.log('============添加专属客服输入的数据' + JSON.stringify(data) + JSON.stringify(temp.length))
+      const res = await addCs(data)
+      if (res.result.code === ERR_OK) {
+        console.log(JSON.stringify(res))
+        this.$emit('resetMyCs', temp)
       } else {
-        const res = await addCs(data)
-        if (res.result.code === ERR_OK) {
-          console.log(JSON.stringify(res))
-        } else {
-          console.log('error about add the cS' + JSON.stringify(res))
-        }
+        console.log('error about add the cS' + JSON.stringify(res))
       }
+      this.resetCurLabelInfo()
+      return 0
     },
     switchCS() {
       const temp = this.cslist[0]
-      this.cslist.splice(0, 1)
       this.cslist.push(temp)
-      this.curLabelInfo = this.cslist[0]
+      this.resetCurLabelInfo()
       // this.avatarImg = getImgUrl(this.curLabelInfo.resultUrl)
       // this.avatarImg = this.getAvatar(this.curLabelInfo.id)
       // this.getAvatar(this.curLabelInfo.id)
       this.avatarImg = getCsAvatar(this.curLabelInfo.id)
+    },
+    resetCurLabelInfo() {
+      // 更新当前显示的客服
+      this.cslist.splice(0, 1)
+      this.curLabelInfo = this.cslist[0]
     },
     resetAngle() {
       this.curLabelInfo = null
@@ -349,6 +366,7 @@ export default {
   position: relative;
   width: 100%;
   height: 100%;
+  overflow: hidden;
   background-color: @bg-light-shadow;
   .cs-label-wrapper{
     width: 100%;
@@ -586,6 +604,25 @@ export default {
           vertical-align: bottom;
           // line-height: 16px;
         }
+      }
+    }
+  }
+  .weui-dialog {
+    width: 70%;
+    border-radius: 9px;
+    .weui-dialog__hd {
+      padding: 1.8em 1.6em 0.5em;
+      .weui-dialog__title {
+        font-size: 1.6rem;
+      }
+    }
+    .weui-dialog__bd {
+      min-height: unset!important;
+    }
+    .weui-dialog__ft {
+      line-height: 44px;
+      a {
+        color: rgba(33, 150, 243, 1)!important;
       }
     }
   }

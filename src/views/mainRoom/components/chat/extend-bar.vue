@@ -3,9 +3,9 @@
     <transition @enter="extendBarEnter">
       <div id="extendBarContainer" class="extend-bar-section extend-bar-container" ref="extendBarContainer" v-show="this.extendBarOpen">
         <div class="extend-bar-button button_1">
-          <button class="img" @click="onSendGiftClick">
+          <button class="img" @click="onSendGiftClick" :disabled="isRobotChat">
             <svg class="icon extend-click" aria-hidden="true">
-              <use xlink:href="#icon-liwu"></use>
+              <use :xlink:href="sendGiftIcon"></use>
             </svg>
           </button>
           <div class="text">礼物</div>
@@ -19,9 +19,9 @@
           <div class="text">表情</div>
         </div>
         <div class="extend-bar-button button_3">
-          <button class="img" @click="selectImgClick">
+          <button class="img" @click="selectImgClick" :disabled="isRobotChat">
             <svg class="icon extend-click" aria-hidden="true">
-              <use xlink:href="#icon-fasongtupian"></use>
+              <use :xlink:href="sendImgIcon"></use>
             </svg>
           </button>
           <div class="text">图片</div>
@@ -41,6 +41,7 @@
 <script type="text/ecmascript-6">
 import { mapGetters } from 'vuex'
 import anime from 'animejs'
+import { roomStatus } from '@/common/js/status'
 
 export default {
   components: {
@@ -48,8 +49,18 @@ export default {
     'SendGift': () => import('@/views/mainRoom/components/chat/send-gift')
   },
   computed: {
+    isRobotChat() {
+      return this.roomMode === roomStatus.AIChat
+    },
+    sendGiftIcon() {
+      return this.isRobotChat ? '#icon-liwuzhihui' : '#icon-liwu'
+    },
+    sendImgIcon() {
+      return this.isRobotChat ? '#icon-fasongtupianzhihui' : '#icon-fasongtupian'
+    },
     ...mapGetters([
-      'extendBarOpen'
+      'extendBarOpen',
+      'roomMode'
     ])
   },
   data() {
@@ -189,7 +200,7 @@ export default {
           margin: 0;
           padding: 0;
           border-radius: 50%;
-          background-color: @label-line-light;
+          background-color: rgb(246, 246, 246);
           .icon {
             width: 2.9rem;
             height: 2.9rem;

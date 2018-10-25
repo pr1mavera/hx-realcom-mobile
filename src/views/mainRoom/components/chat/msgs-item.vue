@@ -1,12 +1,12 @@
-<template>
+<template v-once>
   <div class="msgs-item" :class="[{'item-padding-left': msg.isSelfSend, 'item-padding-right': !msg.isSelfSend}]">
     <div class="avatar" v-if="!msg.isSelfSend">
       <div class="bot-avatar bg-image">
-        <img width=100% height=100% :src="avatarUrl">
+        <img width=100% height=100% v-lazy="avatarUrl">
       </div>
-      <svg class="icon extend-click" aria-hidden="true">
+      <!-- <svg class="icon extend-click" aria-hidden="true">
         <use xlink:href="#icon-wode"></use>
-      </svg>
+      </svg> -->
     </div>
     <div class="content-box" :class="[{'right-content-box': msg.isSelfSend, 'left-content-box': !msg.isSelfSend}]">
       <p class="name" v-if="!msg.isSelfSend">{{msg.nickName}}</p>
@@ -176,6 +176,8 @@ export default {
       left: 0;
       right: 0;
       img {
+        width: 100%;
+        height: 100%;
         object-fit: cover;
       }
       // .bg-image('~/static/img/chat/xiaohua');

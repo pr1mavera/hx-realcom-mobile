@@ -148,15 +148,8 @@ export const RTCRoomMixin = {
         // self.goHomeRouter()
       })
     },
-    stopRTC() {
-      this.RTC.stopRTC({}, () => {
-          console.log('停止推流 成功 辣')
-        }, () => {
-          console.error('停止推流 失败 辣')
-        })
-    },
     quitRTC() {
-      this.RTC.quit({}, () => {
+      this.RTC && this.RTC.quit({}, () => {
         console.log('退出音视频房间 成功 辣')
       }, () => {
         console.error('退出音视频房间 失败 辣')

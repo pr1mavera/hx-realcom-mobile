@@ -1,8 +1,13 @@
 <template>
   <div class="cus-serv">
-    <router-view
-      @goToLineUp="showConfirm"
-    ></router-view>
+    <keep-alive>
+      <router-view
+        :myCs="myCs"
+        @resetMyCs="resetMyCs"
+        @removeCs="removeCs"
+        @goToLineUp="showConfirm"
+      ></router-view>
+    </keep-alive>
     <div v-transfer-dom>
       <confirm v-model="lineUpAlert"
         :title="'您即将转入视频客服'"
@@ -25,18 +30,43 @@ export default {
   },
   data() {
     return {
+      myCs: [],
       lineUpAlert: false,
-      csId: ''
+      csSelected: {
+        csId: '',
+        csStatus: '' // 就绪、1：小憩、3：签退
+      }
     }
   },
   methods: {
-    showConfirm(csId) {
+    showConfirm(status, csId) {
       this.lineUpAlert = true
-      this.csId = csId
+      this.csSelected.csId = csId
+      this.csSelected.csStatus = status
+    },
+    resetMyCs(list) {
+      this.myCs = list
+      debugger
+    },
+    removeCs(index) {
+      this.myCs.splice(index, 1)
     },
     goToLineUp() {
-      this.lineUpAlert = false
-      this.$router.push({path: `/room/line-up/${this.csId}`})
+      switch (this.csSelected.csStatus) {
+        case '0':
+          this.lineUpAlert = false
+          this.$router.push({path: `/room/line-up/${this.csSelected.csId}`})
+          break
+        case '1':
+          this.alertTip = true
+          this.tipCon = '客服小姐姐正在休息'
+          break
+        case '3':
+          this.alertTip = true
+          this.tipCon = '客服小姐姐已经签退了'
+          // this.$router.push({path: `/room/line-up/${csId}`})
+          break
+      }
     }
   }
 }

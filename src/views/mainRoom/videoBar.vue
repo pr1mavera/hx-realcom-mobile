@@ -193,7 +193,7 @@ export default {
     },
     hangUpVideo() {
       // 停止推流
-      this.stopRTC()
+      this.quitRTC()
       // 记录通话时间
       this.videoTime = this._getVideoTime(this.startTimeStamp)
       // 判断当前是否评价过

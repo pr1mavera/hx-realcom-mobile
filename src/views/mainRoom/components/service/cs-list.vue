@@ -1,7 +1,7 @@
 <template>
   <div class="cs-list">
     <my-cs-card
-      v-for="(item, index) in myCsList"
+      v-for="(item, index) in myCs"
       :key="index"
       :cusSerId="item.id"
       :avatarSrc="item.avatar"
@@ -9,20 +9,20 @@
       :num="item.servTimes"
       :gifts="item.giftCount"
       :csIndex="index"
-      @toLineUp="toLineUp"
+      :csStatus="item.status"
+      @clickToLineUp="clickToLineUp"
       @removeCs="removeCs(index)"
     ></my-cs-card>
-    <p class="tips">您还可以添加 <span>{{3 - myCsList.length}}</span> 名专属客服</p>
+    <p class="tips">您还可以添加 <span>{{3 - myCs.length}}</span> 名专属客服</p>
     <x-button :gradients="['#FF8C6A', '#FF80A0']" @click.native="addCs"
               style="width: 15rem;height: 4rem;line-height: 4rem;font-size: 1.6rem;margin-top: 2rem;">
       <svg class="icon" aria-hidden="true">
         <use xlink:href="#icon-jiahao"></use>
       </svg>
-      {{ myCsList.length === 3 ? '查看更多': '添加客服' }}
+      {{ myCs.length === 3 ? '查看更多': '添加客服' }}
     </x-button>
     <div v-transfer-dom>
-      <confirm v-model='alertTip'
-               >
+      <confirm v-model='alertTip'>
         <p style="text-align:center;">{{tipCon}}</p>
       </confirm>
     </div>
@@ -47,6 +47,11 @@ export default {
   },
   directives: {
     TransferDom
+  },
+  props: {
+    myCs: {
+      type: Array
+    }
   },
   data() {
     return {
@@ -78,7 +83,8 @@ export default {
       const res = await queryCsInfo(page, pageSize, userId, listType)
       if (res.result.code === ERR_OK) {
         console.log('========================= 我现在来请求 专属客服 辣 ========================')
-        this.myCsList = res.data.csList
+        // this.myCsList = res.data.csList
+        this.$emit('resetMyCs', res.data.csList)
       } else {
         console.log('error in queryCsInfo' + JSON.stringify(res))
       }
@@ -99,33 +105,15 @@ export default {
 
     // J进入客服列表页
     addCs() {
-      this.$router.push({
-        path: '/room/cusServ/add',
-        query: {myCsNum: this.myCsList.length}
-      })
+      this.$router.push({path: '/room/cusServ/add'})
     },
 
     removeCs(index) {
-      this.myCsList.splice(index, 1)
+      this.$emit('removeCs', index)
+      // this.myCsList.splice(index, 1)
     },
-
-    toLineUp(index, csId) {
-      // this.$router.push({path: `/room/line-up/${this.userInfo.userId}/${this.cusSerId}`})
-      const status = this.myCsList[index].status // 0：就绪、1：小憩、3：签退
-      switch (status) {
-        case '0':
-          this.$emit('goToLineUp', csId)
-          break
-        case '1':
-          this.alertTip = true
-          this.tipCon = '客服小姐姐正在休息'
-          break
-        case '3':
-          this.alertTip = true
-          this.tipCon = '客服小姐姐已经签退了'
-          // this.$router.push({path: `/room/line-up/${csId}`})
-          break
-      }
+    clickToLineUp(status, csId) {
+      this.$emit('goToLineUp', status, csId)
     }
   }
 }
