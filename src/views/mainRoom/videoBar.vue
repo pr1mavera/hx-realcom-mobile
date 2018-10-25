@@ -40,12 +40,12 @@
         <video-msg-list></video-msg-list>
         <div class="video-fload-btn">
           <div class="item">
-            <div class="item-icon icon-hongxin">
-              <svg class="icon extend-click" aria-hidden="true">
+            <div class="item-icon icon-hongxin extend-click" @click.once="sendLike">
+              <svg class="icon" aria-hidden="true">
                 <use xlink:href="#icon-xin-hong"></use>
               </svg>
             </div>
-            <div class="text">{{this.csInfo.likesCount}}</div>
+            <div class="text">{{this.likesCount}}</div>
           </div>
           <!-- <div class="item">
             <div class="item-icon icon-zhuanfa">
@@ -154,12 +154,14 @@ export default {
       giftSectionShow: false,
       // 当前视频评论状态：[false 还没评论] / [true 已评论]
       hasAssess: false,
-      assessViewOpen: false
+      assessViewOpen: false,
+      likesCount: 0
     }
   },
   mounted() {
     this.readyToVideo()
     this.startTimeStamp = new Date()
+    this.likesCount = this.csInfo.likesCount
   },
   methods: {
     _getVideoTime(dateBegin) {
@@ -180,9 +182,13 @@ export default {
     openVideoBar() {
       this.setFullScreen(true)
     },
-    async selectGift(giftInfo) {
+    selectGift(giftInfo) {
       console.log('发礼物辣：', giftInfo)
-      await this.sendGiftMsg(giftInfo)
+      this.sendGiftMsg(giftInfo)
+    },
+    sendLike() {
+      this.sendLikeMsg()
+      this.likesCount++
     },
     closeVideoBar() {
       this.setFullScreen(false)

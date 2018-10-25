@@ -485,21 +485,32 @@ export const sendMsgsMixin = {
     //   })
     // },
     sendGiftMsg(giftInfo) {
-      return new Promise(resolve => {
-        resolve()
-        IM.sendNoticeMsg({
-          groupId: this.roomId,
-          // groupId: '987654321',
-          msg: `${this.userInfo.userName}给你送了一个礼物`,
-          time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
-          nickName: this.userInfo.userName,
-          avatar: this.csInfo.csId,
-          identifier: this.userInfo.userId,
-          msgStatus: msgStatus.msg,
-          msgType: msgTypes.msg_gift,
-          chatType: sessionStatus.video,
-          giftInfo
-        })
+      IM.sendNoticeMsg({
+        groupId: this.roomId,
+        // groupId: '987654321',
+        msg: `${this.userInfo.userName}给你送了一个礼物`,
+        time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+        nickName: this.userInfo.userName,
+        avatar: this.csInfo.csId,
+        identifier: this.userInfo.userId,
+        msgStatus: msgStatus.msg,
+        msgType: msgTypes.msg_gift,
+        chatType: sessionStatus.video,
+        giftInfo
+      })
+    },
+    sendLikeMsg() {
+      IM.sendNoticeMsg({
+        groupId: this.roomId,
+        // groupId: '987654321',
+        msg: `我${this.userInfo.userName}给你点赞`,
+        time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+        nickName: this.userInfo.userName,
+        avatar: this.csInfo.csId,
+        identifier: this.userInfo.userId,
+        msgStatus: msgStatus.msg,
+        msgType: msgTypes.msg_liked,
+        chatType: sessionStatus.video
       })
     },
     sendImgMsg(img) {
