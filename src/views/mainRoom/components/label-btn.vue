@@ -19,7 +19,7 @@
                         :key="index"
                         :text="item.labelName"
                         :likeNum="item.labelCount"
-          >{{item.name}} {{item.count}}
+          >{{item.labelName}} {{item.labelCount}}
           </checker-item>
         </checker>
       </swiper-item>

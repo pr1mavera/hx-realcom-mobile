@@ -69,7 +69,7 @@ export default {
       tipCon: ''
     }
   },
-  mounted() {
+  created() {
     this.getCsList()
   },
   methods: {

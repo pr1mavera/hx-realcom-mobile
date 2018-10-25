@@ -1,6 +1,6 @@
 <template>
   <div class="main-room">
-    <keep-alive :include="['chat']">
+    <keep-alive :include="['chat', 'cus-serv']">
       <router-view class="router-view"></router-view>
     </keep-alive>
     <videoBar class="video-bar" v-if="isVideoBarOpen"></videoBar>

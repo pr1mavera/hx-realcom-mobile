@@ -159,7 +159,7 @@ export default {
     }
   },
   mounted() {
-    this.readyToVideo()
+    // this.readyToVideo()
     this.startTimeStamp = new Date()
     this.likesCount = this.csInfo.likesCount
   },

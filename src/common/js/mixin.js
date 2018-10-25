@@ -3,10 +3,10 @@ import IM from '@/server/im'
 import anime from 'animejs'
 import Creator from '@/common/js/msgsLoader'
 // import WebRTCAPI from 'webRTCAPI'
-import { ERR_OK, getUserInfoByOpenID, getLoginInfo, pushSystemMsg, sendMsgToBot, getSessionList, getCsAvatar } from '@/server/index.js'
+import { ERR_OK, getUserInfoByOpenID, getLoginInfo, pushSystemMsg, sendMsgToBot, getSessionList, getCsAvatar, onLineQueue } from '@/server/index.js'
 import { shallowCopy, botAnswerfilter } from '@/common/js/util'
 import { formatDate } from '@/common/js/dateConfig.js'
-import { queueStatus, sessionStatus, systemMsgStatus, msgStatus, msgTypes } from '@/common/js/status'
+import { queueStatus, sessionStatus, systemMsgStatus, msgStatus, msgTypes, tipTypes } from '@/common/js/status'
 
 export const loginMixin = {
   data() {
@@ -329,56 +329,73 @@ export const IMMixin = {
       }
     },
     receiveSystemMsgs(msgs) {
+      // 处理系统消息（视频、在线）
       const msgsObj = IM.parseMsgsInSystem(msgs).textMsgs[0]
       switch (msgsObj.code) {
-        case systemMsgStatus.queuesReduce: // 人数减少
-          this.setQueueNum(this.queueNum - 1)
+        case systemMsgStatus.video_queuesReduce: // 人数减少（视频）
+          this.responseVideoQueuesReduce()
           break
-        case systemMsgStatus.queuesSuccess: // 客户端排队成功
-          // 存vuex csInfo / roomId / fullScreen
-          const csInfoWithId = {
-            csId: msgsObj.csId
-          }
-          // 获取客服基本信息
-          this.setCsInfo(csInfoWithId)
-          // this.setFullScreen(true)
-          // 发送系统消息，通知座席端视频接入
-          const systemMsg = {
-            userId: msgsObj.csId,
-            msgBody: {
-              data: {
-                code: systemMsgStatus.requestCsEntance,
-                csId: msgsObj.csId,
-                userId: this.userInfo.userId,
-                userName: this.userInfo.userName,
-                userPhone: this.userInfo.userPhone,
-                openId: this.userInfo.openId,
-                robotSessionId: this.sessionId
-              },
-              desc: `${this.userInfo.userName}排队成功辣`,
-              ext: ''
-            }
-          }
-          RTCSystemMsg.systemMsg(systemMsg)
+        case systemMsgStatus.video_queuesSuccess: // 客户端排队成功（视频）
+          this.responseVideoQueuesSuccess(msgsObj)
           break
-        case systemMsgStatus.requestCsEntance: // 座席端视频接入请求
+        case systemMsgStatus.video_requestCsEntance: // 座席端视频接入请求（视频）
 
           break
-        case systemMsgStatus.transSessionId: // 座席端创建会话传递
-          // 存csName & sessionId
-          const csInfoWithName = shallowCopy(this.csInfo)
-          csInfoWithName.csAvatar = getCsAvatar(this.csInfo.csId)
-          csInfoWithName.csName = msgsObj.csName
-          csInfoWithName.likesCount = msgsObj.likesCount
-          csInfoWithName.csCode = msgsObj.csCode
-          this.setCsInfo(csInfoWithName)
-          this.setRoomId(msgsObj.csCode)
-          this.setSessionId(msgsObj.sessionId)
-          // 设置排队状态
-          this.setQueueMode(queueStatus.queueSuccess)
+        case systemMsgStatus.video_transBaseInfo: // 座席端会话、坐席基本信息传递（视频）
+          this.responseVideoTransBaseInfo(msgsObj)
           break
       }
     },
+
+    /* 响应 人数减少（视频） */
+    responseVideoQueuesReduce() {
+      this.setQueueNum(this.queueNum - 1)
+    },
+
+    /* 响应 客户端排队成功（视频） */
+    responseVideoQueuesSuccess(msgsObj) {
+      // 存vuex csInfo / roomId / fullScreen
+      const csInfoWithId = {
+        csId: msgsObj.csId
+      }
+      // 获取客服基本信息
+      this.setCsInfo(csInfoWithId)
+      // this.setFullScreen(true)
+      // 发送系统消息，通知座席端视频接入
+      const systemMsg = {
+        userId: msgsObj.csId,
+        msgBody: {
+          data: {
+            code: systemMsgStatus.video_requestCsEntance,
+            csId: msgsObj.csId,
+            userId: this.userInfo.userId,
+            userName: this.userInfo.userName,
+            userPhone: this.userInfo.userPhone,
+            openId: this.userInfo.openId,
+            robotSessionId: this.sessionId
+          },
+          desc: `${this.userInfo.userName}排队成功辣`,
+          ext: ''
+        }
+      }
+      RTCSystemMsg.systemMsg(systemMsg)
+    },
+
+    /* 响应 座席端会话、坐席基本信息传递（视频） */
+    responseVideoTransBaseInfo(msgsObj) {
+      // 存csName & sessionId
+      const csInfoWithName = shallowCopy(this.csInfo)
+      csInfoWithName.csAvatar = getCsAvatar(this.csInfo.csId)
+      csInfoWithName.csName = msgsObj.csName
+      csInfoWithName.likesCount = msgsObj.likesCount
+      csInfoWithName.csCode = msgsObj.csCode
+      this.setCsInfo(csInfoWithName)
+      this.setRoomId(msgsObj.csCode)
+      this.setSessionId(msgsObj.sessionId)
+      // 设置排队状态
+      this.setQueueMode(queueStatus.queueSuccess)
+    },
+
     receiveCustomMsgs(msgs) {
       const msgsObj = IM.parseMsgs(msgs).textMsgs[0]
       this.sendMsgs([
@@ -634,5 +651,115 @@ export const getMsgsMixin = {
         this.pulldownResult = '别拉了，没有更多消息了！！！'
       }
     }
+  }
+}
+
+export const onLineQueueMixin = {
+  data() {
+    return {
+      onLineQueueCsId: ''
+    }
+  },
+  computed: {
+    ...mapGetters([
+      'userInfo',
+      'queueNum'
+    ])
+  },
+  methods: {
+    async enterOnLineLineUp() {
+      // 在线转人工流程
+      // 1. 添加转人工提示
+      this.pushNormalTipMsg('正在为您转接在线客服，请稍候')
+      // 2. 请求排队
+      const res = await this.formatOnLineQueueAPI()
+      // 3. 处理
+      if (res.code === ERR_OK) {
+        this.afterQueueSuccess(res.data)
+      } else {
+        this.botSendLeaveMsg()
+      }
+    },
+    async formatOnLineQueueAPI() {
+      const res = await onLineQueue({
+        customerGuid: this.userInfo.userId,
+        type: '2',
+        customerNick: this.userInfo.userName,
+        origin: '官微',
+        chatGuid: this.sessionId,
+        identity: this.userInfo.userGrade
+      })
+      const data = res.data
+      if (res.result_code === '200') {
+        // return {
+        //   code: '0',
+        //   data: {
+        //     num: data.teamNum,
+        //     csId: data.userCode
+        //   }
+        // }
+        if (data.isTeam) {
+          // 排队中
+          return {
+            code: '0',
+            data: {
+              num: data.teamNum,
+              csId: data.userCode
+            }
+          }
+        }
+      } else {
+        console.log('===== 排队出错 辣 =====')
+      }
+      return {
+        code: '1',
+        data: '请留言'
+      }
+    },
+    afterQueueSuccess(data) {
+      // 设置排队人数
+      this.setQueueNum(data.teamNum)
+      // 记录系统返回的默认排队坐席Id
+      this.onLineQueueCsId = data.userCode
+      const msg = {
+        content: '',
+        time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+        msgStatus: msgStatus.tip,
+        msgType: tipTypes.tip_line_up,
+        queueNum: this.queueNum
+      }
+      this.sendMsgs([
+        msg
+      ])
+      // 设置排队状态
+      this.setQueueMode(queueStatus.queuing)
+    },
+    botSendLeaveMsg() {
+      const msg = {
+        nickName: this.botInfo.botName,
+        content: '',
+        isSelfSend: false,
+        msgStatus: msgStatus.msg,
+        msgType: msgTypes.msg_leave
+      }
+      this.sendMsgs([
+        msg
+      ])
+    },
+    pushNormalTipMsg(content) {
+      const tip = {
+        content,
+        time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+        msgStatus: msgStatus.tip,
+        msgType: tipTypes.tip_normal
+      }
+      this.sendMsgs([
+        tip
+      ])
+    },
+    ...mapMutations({
+      setQueueMode: 'SET_QUEUE_MODE',
+      setQueueNum: 'SET_QUEUE_NUM'
+    })
   }
 }

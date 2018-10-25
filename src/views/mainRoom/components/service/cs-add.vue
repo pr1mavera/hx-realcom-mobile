@@ -6,9 +6,9 @@
           <div
             class="cs-label"
             ref="csLabel"
-            @touchstart.stop="startSlide($event)"
-            @touchmove.stop="slideMove($event)"
-            @touchend.stop="endSlide($event)"
+            @touchstart.capture="startSlide($event)"
+            @touchmove.capture="slideMove($event)"
+            @touchend.capture="endSlide($event)"
             :style="setRotate"> <!-- 限制边框范围及显示阴影 -->
             <div class="container">
               <div class="header">
@@ -21,7 +21,7 @@
                 </div>
               </div>
               <div class="video-btn">
-                <button class="button" @click.stop.prevent="clickToLineUp(curLabelInfo.status, curLabelInfo.id)">视频咨询</button>
+                <button class="button" @click.self="clickToLineUp(curLabelInfo.status, curLabelInfo.id)">视频咨询</button>
               </div>
               <div class="cs-info">
                 <ul>
@@ -93,6 +93,7 @@
     <div v-transfer-dom>
       <alert v-model="showTip" :title="'您已经添加了3个专属客服啦！'"></alert>
     </div>
+    <!-- <alert v-model="showTip" :title="'您已经添加了3个专属客服啦！'"></alert> -->
   </div>
 </template>
 
@@ -101,7 +102,7 @@ import { sleep } from '@/common/js/util'
 import { Badge, Alert, TransferDomDirective as TransferDom } from 'vux'
 import anime from 'animejs'
 import { ERR_OK, addCs, queryCsInfo, getCsAvatar } from '@/server/index.js'
-import {mapGetters} from 'vuex'
+import { mapGetters } from 'vuex'
 
 export default {
   directives: {
@@ -169,7 +170,6 @@ export default {
   },
   methods: {
     clickToLineUp(status, csId) {
-      debugger
       this.$emit('goToLineUp', status, csId)
     },
     startSlide(event) {
@@ -607,24 +607,28 @@ export default {
       }
     }
   }
-  .weui-dialog {
-    width: 70%;
-    border-radius: 9px;
-    .weui-dialog__hd {
-      padding: 1.8em 1.6em 0.5em;
-      .weui-dialog__title {
-        font-size: 1.6rem;
-      }
-    }
-    .weui-dialog__bd {
-      min-height: unset!important;
-    }
-    .weui-dialog__ft {
-      line-height: 44px;
-      a {
-        color: rgba(33, 150, 243, 1)!important;
-      }
-    }
-  }
 }
+// .vux-alert {
+//   .vux-x-dialog {
+//     .weui-dialog {
+//       width: 70%;
+//       border-radius: 9px;
+//       .weui-dialog__hd {
+//         padding: 1.8em 1.6em 0.5em;
+//         .weui-dialog__title {
+//           font-size: 1.6rem;
+//         }
+//       }
+//       .weui-dialog__bd {
+//         min-height: unset!important;
+//       }
+//       .weui-dialog__ft {
+//         line-height: 44px;
+//         a {
+//           color: rgba(33, 150, 243, 1)!important;
+//         }
+//       }
+//     }
+//   }
+// }
 </style>

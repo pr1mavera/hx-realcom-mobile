@@ -26,10 +26,12 @@ export const sessionStatus = {
 }
 
 export const systemMsgStatus = {
-  queuesReduce: 0, // 人数减少
-  queuesSuccess: 1, // 客户端排队成功
-  requestCsEntance: 2, // 座席端视频接入请求
-  transSessionId: 3 // 座席端创建会话传递
+  // 0 - 19 视频
+  video_queuesReduce: 0, // 人数减少
+  video_queuesSuccess: 1, // 客户端排队成功
+  video_requestCsEntance: 2, // 座席端视频接入请求
+  video_transBaseInfo: 3 // 座席端创建会话传递
+  // 20 - ~ 在线
 }
 
 export const msgStatus = {
@@ -43,7 +45,7 @@ export const tipTypes = {
   tip_time: '0', // 会话时间标签
   tip_normal: '1', // 纯文本标签
   tip_success: '2', // 转接成功
-  tip_fail: '3',
+  tip_fail: '3', // 转接失败
   tip_line_up: '4' // 排队人数以及取消排队标签
 }
 

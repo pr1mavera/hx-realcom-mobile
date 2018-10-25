@@ -17,7 +17,7 @@
      <span class="button">转其他客服</span>
    </span>
    <span class="item-span" v-if="msg.msgType === tipTypes.tip_line_up">
-     当前排队{{num}}人，请耐心等待
+     当前排队{{msg.queueNum}}人，请耐心等待
      <span class="button">取消排队</span>
    </span>
  </div>
@@ -35,8 +35,7 @@ export default {
   },
   data() {
     return {
-      tipTypes: tipTypes,
-      num: 3
+      tipTypes: tipTypes
     }
   },
   created() {

@@ -30,7 +30,7 @@
                 <component
                   :is="_showItemByType(msg.msgStatus)"
                   :msg="msg"
-                  @enterToMenChat="enterToMenChat"
+                  @enterToMenChat="enterOnLineLineUp"
                   @clickHotQues="chatInputCommit"
                 ></component>
               </keep-alive>
@@ -41,6 +41,7 @@
         <fload-button
           :barStatus="this.inputBarOpen || this.extendBarOpen"
           @enterVideoLineUp="confirmToLineUp"
+          @enterOnLineLineUp="enterOnLineLineUp"
         ></fload-button>
       </div>
       <input-bar
@@ -67,20 +68,15 @@
 </template>
 
 <script type="text/ecmascript-6">
-// import { wxConfig } from '@/server/index.js'
 import { mapGetters, mapMutations, mapActions } from 'vuex'
-// import { Confirm, TransferDomDirective as TransferDom } from 'vux'
 import BScroll from 'better-scroll'
-// import HeaderBar from '@/views/mainRoom/components/chat/header-bar'
 import InputBar from '@/views/mainRoom/components/chat/input-bar'
-// import { isTimeDiffLongEnough } from '@/common/js/dateConfig'
 import { debounce, getRect } from '@/common/js/util'
-import { loginMixin, IMMixin, sendMsgsMixin, getMsgsMixin } from '@/common/js/mixin'
+// import { formatDate } from '@/common/js/dateConfig.js'
+import { loginMixin, IMMixin, sendMsgsMixin, getMsgsMixin, onLineQueueMixin } from '@/common/js/mixin'
 import { beforeEnterVideo } from '@/common/js/beforeEnterVideo'
 // eslint-disable-next-line
 import { roomStatus, queueStatus, toggleBarStatus, msgStatus, msgTypes, tipTypes, dialogTypes, cardTypes } from '@/common/js/status'
-// 调用拉取漫游信息的接口
-// import IM from '@/server/im'
 import { ERR_OK, getImgUrl, getBotInfo, syncGroupC2CMsg } from '@/server/index.js'
 
 export default {
@@ -89,7 +85,8 @@ export default {
     loginMixin,
     IMMixin,
     sendMsgsMixin,
-    getMsgsMixin
+    getMsgsMixin,
+    onLineQueueMixin
   ],
   components: {
     /**
@@ -407,32 +404,6 @@ export default {
       this.$refs.extendBar.expressSectionShow = false
     },
     /* *********************************** change chat mode *********************************** */
-    enterToMenChat() {
-      const self = this
-      console.log('人工客服排队')
-      debounce(() => {
-        self.$router.push({
-          path: '/room/chat',
-          query: {
-            cmd: 'create',
-            groupID: '12345678',
-            userId: 'cust-test',
-            userName: '田老师红烧肉盖饭'
-          }
-          // query: {
-          //   cmd: 'create',
-          //   userId: 'cs-test',
-          //   userName: '膳当家黄焖鸡米饭'
-          // }
-        })
-        self.readyToMenChat()
-      }, 1000)()
-    },
-    readyToMenChat() {
-      const query = this.$route.query
-      this.setModeToMenChat(roomStatus.menChat)
-      this.setUserInfoToEnterRoom(query, this.initIM)
-    },
     toggleGuide(data) {
       this.iosGuide = data
     },

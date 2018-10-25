@@ -12,7 +12,7 @@
     <button
       class="item extend-click transition-bezier"
       :disabled="barStatus"
-      @click="enterVideoLineUp"
+      @click="videoLineUp"
       :class="[{'visible-when-input': barStatus, 'item-2': !barStatus}]">
       <svg class="icon" aria-hidden="true">
         <use xlink:href="#icon-shipinkefu"></use>
@@ -21,6 +21,7 @@
     <button
       class="item extend-click transition-bezier"
       :disabled="barStatus"
+      @click="onLineLineUp"
       :class="[{'visible-when-input': barStatus, 'item-3': !barStatus}]">
       <svg class="icon" aria-hidden="true">
         <use xlink:href="#icon-zhuanshukefu"></use>
@@ -34,52 +35,75 @@
         <use xlink:href="#icon-pingjiashouye"></use>
       </svg>
     </button>
+    <div v-transfer-dom>
+      <alert v-model="showAlert" :title="alertContent" :mask-z-index="1000"></alert>
+    </div>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
-
-  // import { beforeEnterVideo } from '@/common/js/beforeEnterVideo'
+import { Alert, TransferDomDirective as TransferDom } from 'vux'
+import { mapGetters } from 'vuex'
+import { roomStatus } from '@/common/js/status'
 
 export default {
+  directives: {
+    TransferDom
+  },
+  components: {
+    Alert
+  },
   props: {
     barStatus: {
       type: Boolean
+    }
+  },
+  computed: {
+    ...mapGetters([
+      'roomMode'
+    ])
+  },
+  data() {
+    return {
+      showAlert: false,
+      alertContent: ''
     }
   },
   methods: {
     callPhone() {
       window.location.href = 'tel:95300'
     },
-    // _beforeEnterVideo() {
-    //   beforeEnterVideo()
-    // },
-    enterVideoLineUp() {
-      // beforeEnterVideo()
-      this.$emit('enterVideoLineUp')
-      //
-      // const nextStatus = sessionStorage.getItem('enterVideoStatus')
-      // this.$emit(nextStatus, 'true')
-      // sessionStorage.removeItem('enterVideoStatus')
-
-      // this.$router.push('/room/cusServ/list')
-
-      // WebRTCAPI.fn.detectRTC({
-      //   screenshare: false
-      // }, function(info) {
-      //   if (info.support) {
-      //     // 判断手机类型, 系统的版本
-      //     const device = sessionStorage.getItem('device')
-      //     const browser = sessionStorage.getItem('browser')
-      //     if (browser === 'wx' && device === 'iPhone') {
-      //       this.$emit('ios-guide', 'true')
-      //     } else {
-      //       this.$emit('enterVideoLineUp')
-      //     }
-      //   } else {
-      //     alert('不支持WebRTC')
-      //   }
-      // })
+    // 视频客服
+    videoLineUp() {
+      switch (this.roomMode) {
+        case roomStatus.AIChat:
+          this.$emit('enterVideoLineUp')
+          break
+        case roomStatus.videoChat:
+          this.alertContent = '当前已经在视频中！！'
+          this.showAlert = true
+          break
+        case roomStatus.menChat:
+          this.alertContent = '当前正在人工客服中！！请先退出'
+          this.showAlert = true
+          break
+      }
+    },
+    // 在线客服
+    onLineLineUp() {
+      switch (this.roomMode) {
+        case roomStatus.AIChat:
+          this.$emit('enterOnLineLineUp')
+          break
+        case roomStatus.videoChat:
+          this.alertContent = '当前正在视频客服中！！请先退出'
+          this.showAlert = true
+          break
+        case roomStatus.menChat:
+          this.alertContent = '当前已经在人工客服中！！'
+          this.showAlert = true
+          break
+      }
     }
   }
 }
@@ -127,4 +151,23 @@ export default {
     }
   }
 }
+// .weui-dialog {
+//   width: 70%;
+//   border-radius: 9px;
+//   .weui-dialog__hd {
+//     padding: 1.8em 1.6em 0.5em;
+//     .weui-dialog__title {
+//       font-size: 1.6rem;
+//     }
+//   }
+//   .weui-dialog__bd {
+//     min-height: unset!important;
+//   }
+//   .weui-dialog__ft {
+//     line-height: 44px;
+//     a {
+//       color: rgba(33, 150, 243, 1)!important;
+//     }
+//   }
+// }
 </style>

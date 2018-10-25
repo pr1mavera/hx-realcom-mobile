@@ -22,6 +22,8 @@ const hostFilter = hostType => {
       return conf.webRTCRoomPath
     case 'chat':
       return conf.chatPath
+    case 'onLine':
+      return conf.onLine
   }
 }
 
