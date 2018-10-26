@@ -38,6 +38,37 @@ export function sleepByAnimation(time) {
   })
 }
 
+// 字符串删除
+export function subLastString(str) {
+  // 当前应该删除的字符所占的位数（因为含有emoji）
+  const len = isLastStrEmoji(str) ? 2 : 1
+  // 返回删除后的字符
+  return str.substring(0, str.length - len)
+}
+
+// 正则判断一个字符的结尾是否是emoji
+export function isLastStrEmoji(str) {
+  const a = str.substring(str.length - 2, str.length)
+  return /&#(.*);/g.test(utf16toEntities(a))
+}
+
+// 带emoji字符转编码
+export function utf16toEntities(str) {
+  var patt = /[\ud800-\udbff][\udc00-\udfff]/g // 检测utf16字符正则
+  str = str.replace(patt, function(char) {
+    var H, L, code
+    if (char.length === 2) {
+      H = char.charCodeAt(0) // 取出高位
+      L = char.charCodeAt(1) // 取出低位
+      code = (H - 0xD800) * 0x400 + 0x10000 + L - 0xDC00 // 转换算法
+      return `&#${code};`
+    } else {
+      return char
+    }
+  })
+  return str
+}
+
 // 浅拷贝
 export function shallowCopy(obj) {
   let newObj = {}
@@ -64,22 +95,6 @@ export function getRect(el) {
       height: el.offsetHeight
     }
   }
-}
-
-export function utf16toEntities(str) {
-  var patt = /[\ud800-\udbff][\udc00-\udfff]/g // 检测utf16字符正则
-  str = str.replace(patt, function(char) {
-    var H, L, code
-    if (char.length === 2) {
-      H = char.charCodeAt(0) // 取出高位
-      L = char.charCodeAt(1) // 取出低位
-      code = (H - 0xD800) * 0x400 + 0x10000 + L - 0xDC00 // 转换算法
-      return `&#${code};`
-    } else {
-      return char
-    }
-  })
-  return str
 }
 
 export function botAnswerfilter(data) {

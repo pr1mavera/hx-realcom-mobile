@@ -32,8 +32,8 @@
     <section class="extend-bar-section send-gift-section" v-show="giftSectionShow">
       <send-gift :theme="`light`" @selectGift="selectGift"></send-gift>
     </section>
-    <section class="extend-bar-section send-express-section" v-show="expressSectionShow">
-      <send-express @selectEmojiWithCode="selectEmojiWithCode" @deleteBtn="this.$emit('deleteBtn')"></send-express>
+    <section class="extend-bar-section send-express-section" v-if="expressSectionShow">
+      <send-express @selectEmojiWithCode="selectEmojiWithCode" @deleteBtn="$emit('deleteBtn')"></send-express>
     </section>
   </div>
 </template>

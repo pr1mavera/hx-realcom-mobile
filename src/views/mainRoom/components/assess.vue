@@ -8,7 +8,7 @@
        </div>
         <x-icon type="ios-close" @click.native="$emit('handleToCancelAssess')" size="30"></x-icon>
         <div class="eva-part">
-          <p>请对{{name}}本次的服务进行评价</p>
+          <p>请对{{this.csInfo.csName}}本次的服务进行评价</p>
           <!-- fill:#bfbfbf; 未评价时星星的颜色； #FEC656,评价点亮后星星的颜色 -->
           <rater v-model="stars"
                  star="<svg class='icon' style='width:2rem;height:2rem;' aria-hidden='true'>
@@ -63,8 +63,6 @@
     data() {
       return {
         // showAssess: true,
-        avatarImgSrc: '',
-        name: '丽丽',
         stars: 0,
         next: true,
        // btnBoxList: btnList,
@@ -81,16 +79,15 @@
         'sessionId',
         'userInfo',
         'csInfo'
-      ])
+      ]),
+      avatarImgSrc() {
+        return getCsAvatar(this.csInfo.csId)
+      }
     },
     mounted() {
       this.getAvatar()
     },
     methods: {
-      // 获取客服头像
-      getAvatar() {
-        this.avatarImgSrc = getCsAvatar(this.csInfo.csId) // 测试数据
-      },
 
       // 接受子组件传的值
       selLabels(selTags) {
@@ -100,6 +97,8 @@
 
       // 保存评论的信息
       async handleToSaveAssess() {
+        // 评价完成
+        this.$emit('assessSuccess')
         // 输入 sessionId(会话Id) userId, userName, csId, csName ,evaluateLevel(满意度) [{labelId: '', labelName: ''}]
         const data = {
           'sessionId': this.sessionId,
@@ -111,13 +110,12 @@
           'evaluateLevel': this.stars,
           'labels': this.labels
         }
-        debugger
+        // 异步处理评价保存
         const res = await saveAssess(data)
         if (res.result.code === ERR_OK) {
           this.showSucTips = true
           // this.showAssess = false
           console.log('已经保存了你评价的信息' + JSON.stringify(res))
-          this.$emit('assessSuccess')
         } else {
           this.showFalseTips = true
           // this.failText = res.result.messagem

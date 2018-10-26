@@ -29,7 +29,7 @@
       </div>
       <div class="nav-delete">
         <div class="menu-nav-item">
-          <div class="menu-nav-delete" @click="this.$emit('deleteBtn')">
+          <div class="menu-nav-delete" @click="$emit('deleteBtn')">
             <svg class="icon extend-click" aria-hidden="true">
               <use xlink:href="#icon-chahao"></use>
             </svg>
@@ -43,9 +43,9 @@
         <ul v-else>
           <li
             class="history-item-li"
-            v-for="item in express[0].list"
+            v-for="(item, index) in express[0].list"
             v-html="item.code"
-            :key="item.id"
+            :key="index"
             @click="selectEmoji(item.code)"
           ></li>
         </ul>
@@ -128,9 +128,9 @@ export default {
     }
   },
   mounted() {
-    const self = this
     this.$nextTick(() => {
-      self._normalizeEmojiList()
+      this._normalizeEmojiList()
+      this._setEmojiHistory()
     })
   },
   methods: {
@@ -149,6 +149,17 @@ export default {
         this.express[1].list.push(temp)
       }
       console.dir(this.express[1].list)
+    },
+    _setEmojiHistory() {
+      const localStorage = window.localStorage
+      let temp = JSON.parse(localStorage.getItem('emoji_cache'))
+      if (temp) {
+        temp.forEach((item) => {
+          this.express[0].list.push({
+            code: item
+          })
+        })
+      }
     },
     selectEmoji(code) {
       this.$emit('selectEmojiWithCode', code)

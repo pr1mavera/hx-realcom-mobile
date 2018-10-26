@@ -385,7 +385,6 @@ export const IMMixin = {
     /* 响应 座席端会话、坐席基本信息传递（视频） */
     responseVideoTransBaseInfo(msgsObj) {
       // 存csName & sessionId
-      debugger
       const csInfoWithName = shallowCopy(this.csInfo)
       csInfoWithName.csAvatar = getCsAvatar(this.csInfo.csId)
       csInfoWithName.csName = msgsObj.csName

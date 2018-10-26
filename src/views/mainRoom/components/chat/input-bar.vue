@@ -26,7 +26,7 @@
         ref="inputContent"
         type="text"
         @click="chatFocus"
-        @keyup="chatInput($event, false)"
+        @keyup="chatInput($event)"
       ></div>
       <!-- <input v-model="inputText" type="text" ref="invisibleInput" v-show="false"> -->
     </div>
@@ -34,7 +34,7 @@
       <transition
         @enter="sendBtnEnter"
         @leave="sendBtnLeave">
-        <button id="sendBtn" class="sendBtn" v-if="this.inputBarOpen" @click="chatInput($event, true)">发送</button>
+        <button id="sendBtn" class="sendBtn" v-if="this.inputBarOpen" @click="chatCommit">发送</button>
       </transition>
       <transition name="send-plus" mode="out-in">
         <button class="input-bar-item-btn" v-if="!this.inputBarOpen" @click="toggleExtend">
@@ -82,15 +82,31 @@ export default {
     chatFocus() {
       this.$emit('targetInputBuffer')
     },
-    chatInput(event, isEnter) {
-      if (!isEnter) {
-        const e = event || window.event
-        this.inputText = e.currentTarget.textContent
-        this.$emit('chatInputChange', this.inputText)
-      } else {
-        const str = utf16toEntities(this.inputText)
-        this.$emit('chatInputCommit', str)
+    chatInput(event) {
+      const e = event || window.event
+      this.inputText = e.currentTarget.textContent
+      this.$emit('chatInputChange', this.inputText)
+    },
+    chatCommit() {
+      const str = utf16toEntities(this.$refs.inputContent.innerHTML)
+      // 存发送过的表情
+      let emojiArr = str.match(/&#\d{6};/g)
+      if (emojiArr) {
+        const localStorage = window.localStorage
+        // 取出缓存中的发送过的表情，拼接新的缓存
+        let temp = JSON.parse(localStorage.getItem('emoji_cache'))
+        if (temp) {
+          emojiArr = emojiArr.concat(temp)
+        }
+        // 新的emoji缓存去重
+        emojiArr = Array.from(new Set(emojiArr))
+        // 判断长度，移除超出24个的部分
+        if (emojiArr.length > 24) {
+          emojiArr = emojiArr.splice(0, 24)
+        }
+        localStorage.setItem('emoji_cache', JSON.stringify(emojiArr))
       }
+      this.$emit('chatInputCommit', str)
     },
     // getInputEditState() {
     //   return this.$refs.inputContent.getAttribute('contentEditable')

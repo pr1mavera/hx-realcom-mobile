@@ -71,7 +71,7 @@
 import { mapGetters, mapMutations, mapActions } from 'vuex'
 import BScroll from 'better-scroll'
 import InputBar from '@/views/mainRoom/components/chat/input-bar'
-import { debounce, getRect } from '@/common/js/util'
+import { debounce, getRect, isLastStrEmoji } from '@/common/js/util'
 // import { formatDate } from '@/common/js/dateConfig.js'
 import { loginMixin, IMMixin, sendMsgsMixin, getMsgsMixin, onLineQueueMixin } from '@/common/js/mixin'
 import { beforeEnterVideo } from '@/common/js/beforeEnterVideo'
@@ -440,8 +440,12 @@ export default {
       }
     },
     onDeleteBtnClick() {
-      // 删除
-      console.log('我想删点东西，比如说田老师红烧肉')
+      // 字符串删除
+      let str = this.inputEle.innerText
+      // 当前应该删除的字符所占的位数（因为含有emoji）
+      const len = isLastStrEmoji(str) ? 2 : 1
+      // 返回删除后的字符
+      this.inputEle.innerText = str.substring(0, str.length - len)
     },
     selectEmojiWithCode(code) {
       this.inputEle.innerHTML += code
