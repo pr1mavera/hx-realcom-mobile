@@ -44,21 +44,31 @@ export default {
       heartBeatFailCount: 0 // 心跳包超时失败次数
     }
   },
-  mounted() {
+  async mounted() {
     this.setQueueMode(queueStatus.queuing)
-    this.initQueue()
+    const queueNum = await this.initQueue()
+    if (!queueNum) {
+      // 当前队列无人排队，直接推送排队成功的消息给坐席
+      const msg = {
+        csId: this.$route.params.csId
+      }
+      await this.responseVideoQueuesSuccess(msg)
+      return 0
+    }
+    debugger
+    // 开启心跳
+    this.startHeartBeat()
   },
   methods: {
     async initQueue() {
       const res = await videoQueue(this.userInfo.userId, this.$route.params.csId, 1)
       if (res.result.code === ERR_OK) {
         console.log('===============================> 排队啊 排队啊 排队啊 <===============================')
-        return new Promise((resolve) => {
-          this.setQueueNum(res.data.queueNum)
-          // 开启心跳
-          this.startHeartBeat()
-          resolve()
-        })
+        // return new Promise((resolve) => {
+        //   this.setQueueNum(res.data.queueNum)
+        //   resolve()
+        // })
+        return res.data.queueNum
       } else {
         console.log('error in videoQueue')
       }

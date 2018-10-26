@@ -44,10 +44,10 @@ const Format = {
  */
 class Message {
   constructor(options) {
-    this.nickName = options.nickName
-    this.content = options.content
+    this.nickName = options.nickName || ''
+    this.content = options.content || ''
     this.isSelfSend = options.isSelfSend
-    this.time = options.time
+    this.time = options.time || formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss')
     this.msgStatus = options.msgStatus
     this.msgType = options.msgType
     this.msgExtend = options.msgExtend || []
@@ -67,7 +67,7 @@ class Session {
     this.chatCount = options.chatCount
     this.Creator = new Creator()
   }
-  isFinalPage(page) {
+  isCurSessionReachFinalPage(page) {
     // 当前会话已经拉取到最后一页
     return this.chatCount - page.curPage * page.pageSize <= 0
   }
@@ -232,7 +232,7 @@ class MsgsLoader {
       // 拉取漫游消息
       const curSession = this.sessionList.getCurSession()
       list = await curSession.getRoamMsgs(this.userInfo.userId, this.page)
-      if (curSession.isFinalPage(this.page)) {
+      if (curSession.isCurSessionReachFinalPage(this.page)) {
         // 消息为当前会话最后一页，更新当前会话、分页
         this.sessionList.nextSession()
         this.page.resetPage()

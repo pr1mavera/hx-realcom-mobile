@@ -353,7 +353,7 @@ export const IMMixin = {
     },
 
     /* 响应 客户端排队成功（视频） */
-    responseVideoQueuesSuccess(msgsObj) {
+    async responseVideoQueuesSuccess(msgsObj) {
       // 存vuex csInfo / roomId / fullScreen
       const csInfoWithId = {
         csId: msgsObj.csId
@@ -378,12 +378,14 @@ export const IMMixin = {
           ext: ''
         }
       }
-      RTCSystemMsg.systemMsg(systemMsg)
+      await RTCSystemMsg.systemMsg(systemMsg)
+      return 0
     },
 
     /* 响应 座席端会话、坐席基本信息传递（视频） */
     responseVideoTransBaseInfo(msgsObj) {
       // 存csName & sessionId
+      debugger
       const csInfoWithName = shallowCopy(this.csInfo)
       csInfoWithName.csAvatar = getCsAvatar(this.csInfo.csId)
       csInfoWithName.csName = msgsObj.csName
@@ -602,6 +604,7 @@ export const RTCSystemMsg = {
     const res = await pushSystemMsg(systemMsg)
     if (res.result.code === ERR_OK) {
       console.log('排队完成，推送系统消息成功')
+      return 0
     } else {
       console.log('推送系统消息失败')
     }
