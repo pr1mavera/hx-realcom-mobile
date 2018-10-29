@@ -635,6 +635,7 @@ export const getMsgsMixin = {
     },
     async requestMsgsMixin() {
       if (!this.MsgsLoader) {
+        // 初始化
         let sessions = []
         this.sessionList.forEach(item => {
           if (item.chatCount) {

@@ -126,23 +126,44 @@ class Session {
 }
 
 /**
+ * [Iterator 自定义迭代器]
+ */
+class Iterator {
+  constructor(conatiner) {
+    this.list = conatiner.list
+    this.index = 0
+  }
+  next() {
+    const done = !this.hasNext()
+    const value = this.hasNext() ? this.list[this.index++] : undefined
+    return { value, done }
+  }
+  hasNext() {
+    return this.index < this.list.length
+  }
+}
+
+/**
  * [SessionList 会话队列]
  */
 class SessionList {
   constructor(sessions) {
-    this.sessions = sessions || []
-    this.curIndex = 0
-    this.isRoamMsgsOver = this.sessions.length === 0
+    this.list = sessions || []
+    // this.curIndex = 0
+    // this.isRoamMsgsOver = this.sessions.length === 0
   }
-  getCurSession() {
-    return this.sessions[this.curIndex]
+  getIterator() {
+    return new Iterator(this)
   }
-  nextSession() {
-    this.curIndex += 1
-    if (!this.getCurSession()) {
-      this.isRoamMsgsOver = true
-    }
-  }
+  // getCurSession() {
+  //   return this.sessions[this.curIndex]
+  // }
+  // nextSession() {
+  //   this.curIndex += 1
+  //   if (!this.getCurSession()) {
+  //     this.isRoamMsgsOver = true
+  //   }
+  // }
 }
 
 /**
@@ -208,7 +229,8 @@ class MsgsLoader {
     this.userInfo = userInfo
     this.clientHeight = 0
     this.page = new Pagination(5)
-    this.sessionList = sessionList
+    this.roamMsgsIterator = sessionList.getIterator()
+    // this.sessionList = sessionList
     this.history = new History()
   }
   recordMsgsClientHeight() {}
@@ -221,23 +243,23 @@ class MsgsLoader {
     console.info('this.page.curPage :' + this.page.curPage)
     console.info('this.page.curTime :' + this.page.curTime)
     console.info('this.page.pageSize :' + this.page.pageSize)
-    if (this.sessionList.isRoamMsgsOver) {
-      // 拉取历史消息
-      list = await this.history.getHistoryMsgs(this.userInfo.userId, this.page)
-      if (list.length) {
+    if (this.roamMsgsIterator.hasNext()) {
+      // 拉取漫游消息
+      const curSession = this.roamMsgsIterator.list[this.roamMsgsIterator.index]
+      list = await curSession.getRoamMsgs(this.userInfo.userId, this.page)
+      if (curSession.isCurSessionReachFinalPage(this.page)) {
+        // 消息为当前会话最后一页，更新当前会话、分页
+        this.roamMsgsIterator.next()
+        this.page.resetPage()
+        this.page.updateCurTime(list[0].time)
+      } else {
         this.page.updateCurPage()
         this.page.updateCurTime(list[0].time)
       }
     } else {
-      // 拉取漫游消息
-      const curSession = this.sessionList.getCurSession()
-      list = await curSession.getRoamMsgs(this.userInfo.userId, this.page)
-      if (curSession.isCurSessionReachFinalPage(this.page)) {
-        // 消息为当前会话最后一页，更新当前会话、分页
-        this.sessionList.nextSession()
-        this.page.resetPage()
-        this.page.updateCurTime(list[0].time)
-      } else {
+      // 拉取历史消息
+      list = await this.history.getHistoryMsgs(this.userInfo.userId, this.page)
+      if (list.length) {
         this.page.updateCurPage()
         this.page.updateCurTime(list[0].time)
       }
@@ -245,7 +267,7 @@ class MsgsLoader {
     return list
   }
   noMoreMsgs() {
-    return this.sessionList.isRoamMsgsOver && this.history.isHistoryOver
+    return !this.roamMsgsIterator.hasNext() && this.history.isHistoryOver
   }
 }
 

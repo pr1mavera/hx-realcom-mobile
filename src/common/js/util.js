@@ -38,18 +38,23 @@ export function sleepByAnimation(time) {
   })
 }
 
-// 字符串删除
+// 字符串删除最后一个字符
 export function subLastString(str) {
   // 当前应该删除的字符所占的位数（因为含有emoji）
   const len = isLastStrEmoji(str) ? 2 : 1
+  // 截去需要删除的字符
+  const newStr = str.substring(0, str.length - len)
   // 返回删除后的字符
-  return str.substring(0, str.length - len)
+  return newStr
 }
 
 // 正则判断一个字符的结尾是否是emoji
 export function isLastStrEmoji(str) {
-  const a = str.substring(str.length - 2, str.length)
-  return /&#(.*);/g.test(utf16toEntities(a))
+  // 最后两位字符
+  const lastTwoCharacter = str.substring(str.length - 2, str.length)
+  // 转码
+  const transcode = utf16toEntities(lastTwoCharacter)
+  return /&#(.*);/g.test(transcode)
 }
 
 // 带emoji字符转编码

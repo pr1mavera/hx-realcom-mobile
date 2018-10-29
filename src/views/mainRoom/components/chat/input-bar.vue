@@ -90,6 +90,12 @@ export default {
     chatCommit() {
       const str = utf16toEntities(this.$refs.inputContent.innerHTML)
       // 存发送过的表情
+      this.storageEmoji(str)
+      // 提交发送
+      this.$emit('chatInputCommit', str)
+    },
+    storageEmoji(str) {
+      // 存发送过的表情
       let emojiArr = str.match(/&#\d{6};/g)
       if (emojiArr) {
         const localStorage = window.localStorage
@@ -106,7 +112,6 @@ export default {
         }
         localStorage.setItem('emoji_cache', JSON.stringify(emojiArr))
       }
-      this.$emit('chatInputCommit', str)
     },
     // getInputEditState() {
     //   return this.$refs.inputContent.getAttribute('contentEditable')
