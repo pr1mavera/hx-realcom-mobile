@@ -251,6 +251,7 @@ export const IMMixin = {
   computed: {
     ...mapGetters([
       'userInfo',
+      'csInfo',
       'roomId',
       'sessionId',
       'msgs',
@@ -340,7 +341,7 @@ export const IMMixin = {
 
           break
         case systemMsgStatus.video_transBaseInfo: // 座席端会话、坐席基本信息传递（视频）
-          const csInfomation = RTCSystemMsg.responseVideoTransBaseInfo(msgsObj)
+          const csInfomation = RTCSystemMsg.responseVideoTransBaseInfo(msgsObj, this.csInfo)
           this.setCsInfo(csInfomation)
           this.setRoomId(msgsObj.csCode)
           this.setSessionId(msgsObj.sessionId)
@@ -592,14 +593,14 @@ export const RTCSystemMsg = {
   },
 
   /* 响应 座席端会话、坐席基本信息传递（视频） */
-  responseVideoTransBaseInfo(msgsObj) {
+  responseVideoTransBaseInfo(msgsObj, csInfo) {
     // 存csName & sessionId
-    const csInfo = shallowCopy(this.csInfo)
-    csInfo.csAvatar = getCsAvatar(this.csInfo.csId)
-    csInfo.csName = msgsObj.csName
-    csInfo.likesCount = msgsObj.likesCount
-    csInfo.csCode = msgsObj.csCode
-    return csInfo
+    const csInfoTemp = shallowCopy(csInfo)
+    csInfoTemp.csAvatar = getCsAvatar(csInfo.csId)
+    csInfoTemp.csName = msgsObj.csName
+    csInfoTemp.likesCount = msgsObj.likesCount
+    csInfoTemp.csCode = msgsObj.csCode
+    return csInfoTemp
   }
 }
 
