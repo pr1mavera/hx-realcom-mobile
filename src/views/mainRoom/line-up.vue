@@ -17,7 +17,7 @@
 
 <script type="text/ecmascript-6">
 import { mapGetters, mapMutations, mapActions } from 'vuex'
-import { IMMixin } from '@/common/js/mixin'
+import { IMMixin, RTCSystemMsg } from '@/common/js/mixin'
 import { ERR_OK, videoQueue, queueHeartBeat, videoQueueCancel } from '@/server/index.js'
 import { queueStatus } from '@/common/js/status'
 
@@ -53,7 +53,7 @@ export default {
       const msg = {
         csId: this.$route.params.csId
       }
-      this.responseVideoQueuesSuccess(msg)
+      RTCSystemMsg.responseVideoQueuesSuccess(msg, this.userInfo)
     }
     // 开启心跳
     this.startHeartBeat()

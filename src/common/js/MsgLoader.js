@@ -6,7 +6,7 @@
 */
 import { sessionStatus, msgStatus, msgTypes, tipTypes } from '@/common/js/status'
 // import { ERR_OK, getBotRoamMsgs, requestHistoryMsgs } from '@/server/index.js'
-import IM from '@/server/im'
+// import IM from '@/server/im'
 import { botAnswerfilter } from '@/common/js/util'
 import { formatDate, isTimeDiffLongEnough } from '@/common/js/dateConfig.js'
 
@@ -19,7 +19,7 @@ const MsgsLoader = {
   roamMsgsIterator: {},
   history: {},
   init: function(config) {
-    Creator.createMsgsLoader(config)
+    return Creator.createMsgsLoader(config)
   },
   getMsgs: async function() {
     if (this.noMoreMsgs()) {
@@ -78,21 +78,6 @@ const MsgsLoader = {
 export default MsgsLoader
 
 /**
- * [Message 消息]
- */
-// const Message = {
-//   nickName: '',
-//   content: '',
-//   isSelfSend: false,
-//   time: '',
-//   msgStatus: '',
-//   msgType: '',
-//   msgExtend: [],
-//   imgData: {},
-//   proxyInfo: {}
-// }
-
-/**
  * [Session 会话]
  */
 const Session = {
@@ -120,7 +105,7 @@ const Session = {
       case sessionStatus.video:
         // 视频
         res = await this.getVideoAPI(id, this.csId, Pagination.curTime, Pagination.pageSize)
-        map = IM.parseMsgs(res.MsgList).textMsgs
+        map = Creator.IMMsgsparse(res.MsgList)
         break
       case sessionStatus.onLine:
         // 在线
@@ -194,9 +179,9 @@ const Pagination = {
  */
 const History = {
   isHistoryOver: false,
-  getHistoryMsgsAPI: function() {},
-  getHistoryMsgs: async function(id) {
-    let list = await this.getHistoryMsgsAPI()
+  getHistoryMsgsAPI: async function() {},
+  getHistoryMsgs: async function(id, page) {
+    let list = await this.getHistoryMsgsAPI(id, page)
     let map = []
     if (list.length) {
       list.forEach(item => {
@@ -260,6 +245,52 @@ const Creator = {
       }
     }
     return options
+  },
+  IMMsgsparse: function(newMsgList) {
+    var textMsgs = []
+    for (var i in newMsgList) { // 遍历新消息
+      var msg = this.parseMsg(newMsgList[i])
+      textMsgs.push(msg)
+    }
+    return textMsgs
+  },
+  parseMsg: function(newMsg) {
+    var msgItem = newMsg.getElems()[0]
+    var type = msgItem.getType()
+    if (type === 'TIMCustomElem') {
+      var content = msgItem.getContent() // 获取元素对象
+      var desc = JSON.parse(content.getDesc())
+      var msgType = desc.msgType
+      var msgStatus = desc.msgStatus
+      var time = desc.time
+      var nickName = desc.nickName
+      var avatar = desc.avatar
+      var chatType = desc.chatType
+      var ext = JSON.parse(content.getExt())
+      if (ext.imgData) {
+        var imgData = ext.imgData
+      }
+      if (ext.proxyInfo) {
+        var proxyInfo = ext.proxyInfo
+      }
+      if (ext.giftInfo) {
+        var giftInfo = ext.giftInfo
+      }
+    }
+    return {
+      nickName,
+      avatar,
+      imgData,
+      proxyInfo,
+      giftInfo,
+      content: newMsg.toHtml(),
+      isSelfSend: newMsg.getIsSend(),
+      isSystem: newMsg.getFromAccount() === '@TIM#SYSTEM' || false,
+      msgType,
+      msgStatus,
+      chatType,
+      time
+    }
   },
   createSession: function(sessionObj, getBotAPI, getVideoAPI) {
     let session = Object.create(Session)

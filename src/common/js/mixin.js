@@ -1,10 +1,10 @@
 import { mapGetters, mapMutations, mapActions } from 'vuex'
 import IM from '@/server/im'
 import anime from 'animejs'
-import Creator from '@/common/js/msgsLoader'
-// import MsgsLoader from '@/common/js/MsgLoader'
+// import Creator from '@/common/js/msgsLoader'
+import MsgsLoader from '@/common/js/MsgLoader'
 // import WebRTCAPI from 'webRTCAPI'
-import { ERR_OK, getUserInfoByOpenID, getLoginInfo, pushSystemMsg, sendMsgToBot, getSessionList, getCsAvatar, onLineQueue } from '@/server/index.js'
+import { ERR_OK, getUserInfoByOpenID, getLoginInfo, pushSystemMsg, sendMsgToBot, getSessionList, getCsAvatar, onLineQueue, getBotRoamMsgs, requestHistoryMsgs } from '@/server/index.js'
 import { shallowCopy, botAnswerfilter } from '@/common/js/util'
 import { formatDate } from '@/common/js/dateConfig.js'
 import { queueStatus, sessionStatus, systemMsgStatus, msgStatus, msgTypes, tipTypes } from '@/common/js/status'
@@ -626,27 +626,6 @@ export const getMsgsMixin = {
         console.log('error in getHistoryMsgs')
       }
     },
-    async requestMsgsMixin() {
-      if (!this.MsgsLoader) {
-        // 初始化
-        let sessions = []
-        this.sessionList.forEach(item => {
-          if (item.chatCount) {
-            sessions.push(Creator.createSession(item))
-          }
-        })
-        let SessionList = Creator.createSessionList(sessions)
-        this.MsgsLoader = Creator.createMsgsLoader(this.userInfo, SessionList)
-      }
-      const newMsgs = await this.MsgsLoader.getMsgs()
-      if (newMsgs && newMsgs.length) {
-        const list = this.MsgsLoader.timeTipsFormat(newMsgs)
-        this.historyMsgs = list.concat(this.historyMsgs)
-      } else {
-        // 没有更多数据
-        this.pulldownResult = '别拉了，没有更多消息了！！！'
-      }
-    }
     // async requestMsgsMixin() {
     //   if (!this.MsgsLoader) {
     //     // 初始化
@@ -668,63 +647,60 @@ export const getMsgsMixin = {
     //     this.pulldownResult = '别拉了，没有更多消息了！！！'
     //   }
     // },
-    // /* 漫游消息分流 */
-    // async getRoamMsgs(userId, Pagination) {
-    //   let res = {}
-    //   switch (this.chatType) {
-    //     case sessionStatus.robot:
-    //       // 机器人
-    //       res = await this.getBot(userId, this.sessionId, Pagination.curPage, Pagination.pageSize)
-    //       break
-    //     case sessionStatus.video:
-    //       // 视频
-    //       res = await this.getVideo(userId, this.csId, Pagination.curTime, Pagination.pageSize)
-    //       break
-    //     case sessionStatus.onLine:
-    //       // 在线
-    //       break
-    //     case sessionStatus.website:
-    //       // 官网
-    //       break
-    //   }
-    //   // 过滤最后一页条数
-    //   const LeftCount = this.chatCount - (Pagination.curPage - 1) * Pagination.pageSize
-    //   if (LeftCount <= Pagination.pageSize) {
-    //     return res.slice(res.length - LeftCount)
-    //   } else {
-    //     return res
-    //   }
-    // },
-    // /* 机器人漫游消息 */
-    // async getBot(userId, sessionId, curPage, pageSize) {
-    //   const res = await getBotRoamMsgs(sessionId, curPage, pageSize)
-    //   if (res.result.code === ERR_OK) {
-    //     console.log('============================= 我现在来请求 机器人 漫游消息 辣 =============================')
-    //     return res.data.msgList
-    //   } else {
-    //     console.log('error in getBotRoamMsgs')
-    //   }
-    // },
-    // /* IM漫游消息 */
-    // async getVideo(userId, csId, curTime, pageSize) {
-    //   const res = await IM.getIMRoamMsgs(csId, curTime, pageSize)
-    //   if (res && res.MsgList) {
-    //     console.log('============================= 我现在来请求 视频坐席 漫游消息 辣 =============================')
-    //     return res
-    //   } else {
-    //     console.log('error in getIMRoamMsgs')
-    //   }
-    // },
-    // /* 历史消息 */
-    // getHistoryMsgs: async function(userId, page) {
-    //   const res = await requestHistoryMsgs(userId, page.curPage, page.pageSize)
-    //   if (res.result.code === ERR_OK) {
-    //     console.log('============================= 我现在来请求 历史消息 辣 =============================')
-    //     return res.data.msgList
-    //   } else {
-    //     console.log('error in requestHistoryMsgs')
-    //   }
-    // }
+    async requestMsgsMixin() {
+      if (!this.MsgsLoader) {
+        // 初始化
+        const MsgLoader = Object.create(MsgsLoader)
+        this.MsgsLoader = MsgLoader.init({
+          info: {
+            id: this.userInfo.userId
+          }, // 用户信息（必须）
+          sessions: this.sessionList, // 当日会话列表（必须）
+          getHistoryMsgsAPI: this.getHistoryMsgsAPI, // 查询历史消息接口（必须）
+          getBotAPI: this.getBotAPI, // 查询机器人漫游消息接口（必须）
+          getVideoAPI: this.getVideoAPI, // 查询IM漫游消息接口（必须）
+          pageSize: 15 // 单页条数（非必须，默认为5）
+        })
+      }
+      const newMsgs = await this.MsgsLoader.getMsgs()
+      if (newMsgs && newMsgs.length) {
+        const list = this.MsgsLoader.timeTipsFormat(newMsgs)
+        this.historyMsgs = list.concat(this.historyMsgs)
+      } else {
+        // 没有更多数据
+        this.pulldownResult = '别拉了，没有更多消息了！！！'
+      }
+    },
+    /* 机器人漫游消息 */
+    async getBotAPI(userId, sessionId, curPage, pageSize) {
+      const res = await getBotRoamMsgs(sessionId, curPage, pageSize)
+      if (res.result.code === ERR_OK) {
+        console.log('============================= 我现在来请求 机器人 漫游消息 辣 =============================')
+        return res.data.msgList
+      } else {
+        console.log('error in getBotRoamMsgs')
+      }
+    },
+    /* IM漫游消息 */
+    async getVideoAPI(userId, csId, curTime, pageSize) {
+      const res = await IM.getIMRoamMsgs(csId, curTime, pageSize)
+      if (res && res.MsgList) {
+        console.log('============================= 我现在来请求 视频坐席 漫游消息 辣 =============================')
+        return res
+      } else {
+        console.log('error in getIMRoamMsgs')
+      }
+    },
+    /* 历史消息 */
+    async getHistoryMsgsAPI(userId, page) {
+      const res = await requestHistoryMsgs(userId, page.curPage, page.pageSize)
+      if (res.result.code === ERR_OK) {
+        console.log('============================= 我现在来请求 历史消息 辣 =============================')
+        return res.data.msgList
+      } else {
+        console.log('error in requestHistoryMsgs')
+      }
+    }
   }
 }
 
