@@ -46,16 +46,15 @@ export default {
   },
   async mounted() {
     this.setQueueMode(queueStatus.queuing)
+    window.sessionStorage.setItem('queue_start_time', new Date().getTime())
     const queueNum = await this.initQueue()
-    if (!queueNum) {
+    if (queueNum === 0) {
       // 当前队列无人排队，直接推送排队成功的消息给坐席
       const msg = {
         csId: this.$route.params.csId
       }
-      await this.responseVideoQueuesSuccess(msg)
-      return 0
+      this.responseVideoQueuesSuccess(msg)
     }
-    debugger
     // 开启心跳
     this.startHeartBeat()
   },

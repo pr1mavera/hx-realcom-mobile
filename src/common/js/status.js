@@ -30,8 +30,9 @@ export const systemMsgStatus = {
   video_queuesReduce: 0, // 人数减少
   video_queuesSuccess: 1, // 客户端排队成功
   video_requestCsEntance: 2, // 座席端视频接入请求
-  video_transBaseInfo: 3 // 座席端创建会话传递
+  video_transBaseInfo: 3, // 座席端创建会话传递
   // 20 - ~ 在线
+  onLine_requestCsEntance: 22
 }
 
 export const msgStatus = {

@@ -103,56 +103,40 @@ export function getRect(el) {
 }
 
 export function botAnswerfilter(data) {
-  let msg
+  let msg = {
+    content: '',
+    nickName: data.botName,
+    isSelfSend: false,
+    time: data.time,
+    msgStatus: msgStatus.msg,
+    chatType: sessionStatus.robot
+  }
   if (data.info.length === 1) {
     if (data.info[0].question === '如何转人工') {
       // 转人工
-      msg = {
-        nickName: data.botName,
-        content: '',
-        isSelfSend: false,
-        time: data.time,
-        msgStatus: msgStatus.msg,
-        msgType: msgTypes.msg_no_idea,
-        chatType: sessionStatus.robot
-      }
+      msg.msgType = msgTypes.msg_no_idea
     } else {
       // normal
-      msg = {
-        nickName: data.botName,
-        content: data.info[0].answer,
-        isSelfSend: false,
-        time: data.time,
-        msgStatus: msgStatus.msg,
-        msgType: msgTypes.msg_normal,
-        chatType: sessionStatus.robot
-      }
+      msg.content = data.info[0].answer
+      msg.msgType = msgTypes.msg_normal
     }
   } else if (data.info.length === 3) {
     // 猜问题
-    msg = {
-      nickName: data.botName,
-      content: '',
-      isSelfSend: false,
-      time: data.time,
-      msgStatus: msgStatus.msg,
-      msgType: msgTypes.msg_guess,
-      chatType: sessionStatus.robot,
-      msgExtend: [
-        {
-          question: data.info[0].question,
-          answer: data.info[0].answer
-        },
-        {
-          question: data.info[1].question,
-          answer: data.info[1].answer
-        },
-        {
-          question: data.info[2].question,
-          answer: data.info[2].answer
-        }
-      ]
-    }
+    msg.msgType = msgTypes.msg_guess
+    msg.msgExtend = [
+      {
+        question: data.info[0].question,
+        answer: data.info[0].answer
+      },
+      {
+        question: data.info[1].question,
+        answer: data.info[1].answer
+      },
+      {
+        question: data.info[2].question,
+        answer: data.info[2].answer
+      }
+    ]
   }
   return msg
 }

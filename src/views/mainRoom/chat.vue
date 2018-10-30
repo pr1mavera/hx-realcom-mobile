@@ -383,11 +383,11 @@ export default {
       this.inputEle.innerText = ''
       switch (this.roomMode) {
         case roomStatus.AIChat:
-          await this.sendTextMsgToBot(text)
-          // await this.sendC2CMsgs(text)
+          // await this.sendTextMsgToBot(text)
+          await this.sendC2CMsgs(text)
           break
         case roomStatus.menChat:
-          await this.sendTextMsg(text)
+          await this.sendC2CMsgs(text)
           break
         case roomStatus.videoChat:
           // this.sendTextMsg(text)

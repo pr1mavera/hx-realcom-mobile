@@ -126,7 +126,7 @@ class Session {
 }
 
 /**
- * [Iterator 自定义迭代器]
+ * [Iterator 迭代器]
  */
 class Iterator {
   constructor(conatiner) {
