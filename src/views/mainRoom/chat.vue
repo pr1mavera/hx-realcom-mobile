@@ -17,7 +17,7 @@
         <div class="chat-content" ref="chatContent">
           <ul>
             <li class="chat-content-block chat-content-start" ref="chatContentStart"></li>
-            <li class="chat-content-li" v-for="(item, i) in this.historyMsgs" :key="`history-${i}`" :class="{'text-center': item.msgStatus === msgStatus.tip}">
+            <li class="chat-content-li" v-for="(item, index) in this.historyMsgs" :key="`history-${index}`" :class="{'text-center': item.msgStatus === msgStatus.tip}">
               <keep-alive>
                 <component
                   :is="_showItemByType(item.msgStatus)"
@@ -25,7 +25,7 @@
                 ></component>
               </keep-alive>
             </li>
-            <li class="chat-content-li" v-for="(msg, index) in this.msgs" :key="index" :class="{'text-center': msg.msgStatus === msgStatus.tip}">
+            <li class="chat-content-li" v-for="(msg, index) in this.msgs" :key="`cur-${index}`" :class="{'text-center': msg.msgStatus === msgStatus.tip}">
               <keep-alive>
                 <component
                   :is="_showItemByType(msg.msgStatus)"
@@ -35,6 +35,7 @@
                 ></component>
               </keep-alive>
             </li>
+            <!-- @onClickImgMsg="onClickImgMsg" -->
             <li class="chat-content-block chat-content-end" ref="chatContentEnd"></li>
           </ul>
         </div>
@@ -64,6 +65,9 @@
     ></extend-bar>
     <ios-guide v-if="iosGuide" @click.native="toggleGuide(false)"></ios-guide>
     <low-version v-if="lowVersion" @close="toggleUpgrade(false)"></low-version>
+    <!-- <div v-transfer-dom>
+      <previewer :list="previewImgList" ref="previewer" :options="previewImgOptions"></previewer>
+    </div> -->
   </div>
 </template>
 
@@ -78,9 +82,13 @@ import { beforeEnterVideo } from '@/common/js/beforeEnterVideo'
 // eslint-disable-next-line
 import { roomStatus, queueStatus, toggleBarStatus, msgStatus, msgTypes, tipTypes, dialogTypes, cardTypes } from '@/common/js/status'
 import { ERR_OK, getImgUrl, getBotInfo, syncGroupC2CMsg } from '@/server/index.js'
+import { Previewer, TransferDom } from 'vux'
 
 export default {
   name: 'chat',
+  directives: {
+    TransferDom
+  },
   mixins: [
     loginMixin,
     IMMixin,
@@ -94,6 +102,7 @@ export default {
      */
     // HeaderBar,
     InputBar,
+    Previewer,
     // Confirm,
     'MsgsItem': () => import('@/views/mainRoom/components/chat/msgs-item'),
     'TipsItem': () => import('@/views/mainRoom/components/chat/tips-item'),
@@ -109,6 +118,33 @@ export default {
     'PullDown': () => import('@/views/mainRoom/components/chat/pull-down')
   },
   computed: {
+    // previewImgOptions() {
+    //   const self = this
+    //   return {
+    //     getThumbBoundsFn(index) {
+    //       // find thumbnail element
+    //       let thumbnail = document.getElementById(self.imgIdWithDate)
+    //       // get window scroll Y
+    //       let pageYScroll = window.pageYOffset || document.documentElement.scrollTop
+    //       // optionally get horizontal scroll
+    //       // get position of element relative to viewport
+    //       let rect = thumbnail.getBoundingClientRect()
+    //       // w = width
+    //       return { x: rect.left, y: rect.top + pageYScroll, w: rect.width }
+    //     }
+    //   }
+    // },
+    // previewImgList() {
+    //   const
+    //   if (this.msg.imgData) {
+    //     return [{
+    //       src: this.msg.imgData.big || '',
+    //       msrc: this.msg.imgData.small || ''
+    //     }]
+    //   } else {
+    //     return []
+    //   }
+    // },
     ...mapGetters([
       'userInfo',
       'botInfo',
@@ -235,6 +271,10 @@ export default {
       return component
       // return type === 'text_msg' ? 'ContentItem' : type === 'time_msg' ? 'TimeItem' : ''
     },
+    // onClickImgMsg() {
+    //   this.$refs.previewer.show(0)
+    // },
+
     /* *********************************** better scroll *********************************** */
     _initScroll() {
       if (this.$refs.chatContent) {
@@ -375,24 +415,25 @@ export default {
       console.log(text)
     },
     async chatInputCommit(text) {
-      const localStorage = window.localStorage
-      if (!localStorage.getItem('msgsDateCache')) {
-        const date = new Date()
-        localStorage.setItem('msgsDateCache', date.getDate())
-      }
       this.inputEle.innerText = ''
-      switch (this.roomMode) {
-        case roomStatus.AIChat:
-          await this.sendTextMsgToBot(text)
-          // await this.sendC2CMsgs(text)
-          break
-        case roomStatus.menChat:
-          await this.sendC2CMsgs(text)
-          break
-        case roomStatus.videoChat:
-          // this.sendTextMsg(text)
-          await this.sendC2CMsgs(text)
-          break
+      if (text && text.trim()) {
+        switch (this.roomMode) {
+          case roomStatus.AIChat:
+            await this.sendTextMsgToBot(text)
+            // await this.sendC2CMsgs(text)
+            break
+          case roomStatus.menChat:
+            await this.sendC2CMsgs(text)
+            break
+          case roomStatus.videoChat:
+            // this.sendTextMsg(text)
+            await this.sendC2CMsgs(text)
+            break
+        }
+      } else {
+        this.$vux.alert.show({
+          title: '消息为空'
+        })
       }
       this.setInputBar(false)
       this._inputBlur()

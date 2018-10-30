@@ -156,29 +156,30 @@ body {
   }
 }
 
-.v-transfer-dom {
-  // position: absolute;
-  // z-index: 10000;
-    .vux-x-dialog {
-      .weui-dialog {
-        width: 70%;
-        border-radius: 9px;
-        .weui-dialog__hd {
-          padding: 1.8em 1.6em 0.5em;
-          .weui-dialog__title {
-            font-size: 1.6rem;
-          }
+.vux-alert, .vux-confirm {
+  .vux-x-dialog {
+    .weui-mask {
+      z-index: 2000;
+    }
+    .weui-dialog {
+      width: 70%;
+      border-radius: 9px;
+      .weui-dialog__hd {
+        padding: 1.8em 1.6em 0.5em;
+        .weui-dialog__title {
+          font-size: 1.6rem;
         }
-        .weui-dialog__bd {
-          min-height: unset!important;
-        }
-        .weui-dialog__ft {
-          line-height: 44px;
-          a {
-            color: rgba(33, 150, 243, 1)!important;
-          }
+      }
+      .weui-dialog__bd {
+        min-height: unset!important;
+      }
+      .weui-dialog__ft {
+        line-height: 44px;
+        a {
+          color: rgba(33, 150, 243, 1)!important;
         }
       }
     }
+  }
 }
 </style>

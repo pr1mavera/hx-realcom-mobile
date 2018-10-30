@@ -2,7 +2,7 @@
   <div class="video-footer">
     <div class="footer-bar">
       <div class="hang-up">
-        <button class="footer-btn footer-btn-hang-up extend-click" @click="warningConfirmShow = true">
+        <button class="footer-btn footer-btn-hang-up extend-click" @click="warningConfirmShow">
           <svg class="icon" aria-hidden="true">
             <use xlink:href="#icon-guaduan"></use>
           </svg>
@@ -31,37 +31,20 @@
         </button>
       </div>
     </div>
-    <div v-transfer-dom>
-      <confirm
-        v-model="warningConfirmShow"
-        :title="`我跟你讲。。你点了一下挂电话的按钮`"
-        @on-cancel="warningConfirmShow = false"
-        @on-confirm="hangUpVideoConfirm">
-        <p style="text-align:center;">你真滴要？退出当前视频啊？？？</p>
-      </confirm>
-    </div>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
-import { Confirm, TransferDomDirective as TransferDom } from 'vux'
 
 export default {
-  directives: {
-    TransferDom
-  },
-  components: {
-    Confirm
-  },
-  data() {
-    return {
-      warningConfirmShow: false
-    }
-  },
   methods: {
-    hangUpVideoConfirm() {
-      this.warningConfirmShow = false
-      this.$emit('hangUpVideo')
+    warningConfirmShow() {
+      this.$vux.confirm.show({
+        title: '真的要退出当前视频嘛？？',
+        onConfirm() {
+          this.$emit('hangUpVideo')
+        }
+      })
     }
   }
 }
