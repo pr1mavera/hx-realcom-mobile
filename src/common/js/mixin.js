@@ -573,8 +573,8 @@ export const RTCSystemMsg = {
       msgBody: {
         data: {
           queueTimeLength,
-          // code: systemMsgStatus.video_requestCsEntance,
-          code: systemMsgStatus.onLine_requestCsEntance,
+          code: systemMsgStatus.video_requestCsEntance,
+          // code: systemMsgStatus.onLine_requestCsEntance,
           csId: msgsObj.csId,
           csName: msgsObj.csName || msgsObj.csId,
           userId: userInfo.userId,
