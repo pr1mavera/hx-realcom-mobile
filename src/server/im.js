@@ -422,6 +422,7 @@ const IM = (() => {
     // }
     businessType = webim.UPLOAD_PIC_BUSSINESS_TYPE.C2C_MSG
     // 封装上传图片请求
+    debugger
     var opt = {
       'file': img, // 图片对象
       // 'onProgressCallBack': onProgress || (() => {}), // 上传图片进度条回调函数

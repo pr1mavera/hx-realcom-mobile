@@ -341,9 +341,9 @@ export const IMMixin = {
 
           break
         case systemMsgStatus.video_transBaseInfo: // 座席端会话、坐席基本信息传递（视频）
-          const csInfomation = RTCSystemMsg.responseVideoTransBaseInfo(msgsObj, this.csInfo)
+          const csInfomation = RTCSystemMsg.responseVideoTransBaseInfo(msgsObj)
           this.setCsInfo(csInfomation)
-          this.setRoomId(msgsObj.csCode)
+          this.setRoomId(csInfomation.csCode)
           this.setSessionId(msgsObj.sessionId)
           // 设置排队状态
           this.setQueueMode(queueStatus.queueSuccess)
@@ -593,13 +593,15 @@ export const RTCSystemMsg = {
   },
 
   /* 响应 座席端会话、坐席基本信息传递（视频） */
-  responseVideoTransBaseInfo(msgsObj, csInfo) {
+  responseVideoTransBaseInfo(msgsObj) {
     // 存csName & sessionId
-    const csInfoTemp = shallowCopy(csInfo)
-    csInfoTemp.csAvatar = getCsAvatar(csInfo.csId)
-    csInfoTemp.csName = msgsObj.csName
-    csInfoTemp.likesCount = msgsObj.likesCount
-    csInfoTemp.csCode = msgsObj.csCode
+    const csInfoTemp = {
+      csId: msgsObj.csId,
+      csAvatar: getCsAvatar(msgsObj.csId),
+      csName: msgsObj.csName,
+      likesCount: msgsObj.likesCount,
+      csCode: msgsObj.csCode
+    }
     return csInfoTemp
   }
 }
