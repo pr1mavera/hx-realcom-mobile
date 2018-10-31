@@ -36,7 +36,7 @@
         </span>
         <!-- 图片消息 -->
         <span class="text text-img" v-if="msg.msgType === msgTypes.msg_img">
-          <img class="text-img" :id="imgIdWithDate" height=100% :src="msg.imgData.small" @click="$refs.previewer.show(0)">
+          <img class="text-img" :id="imgIdWithDate" height=100% :src="msg.imgData.small" @click="clickImgMsg">
         </span>
         <!-- 礼物消息 -->
         <span class="text gift-item" v-if="msg.msgType === msgTypes.msg_gift">
@@ -91,9 +91,6 @@
         <use xlink:href="#icon-wode"></use>
       </svg>
     </div> -->
-    <div v-transfer-dom>
-      <previewer :list="previewImgList" ref="previewer" :options="previewImgOptions"></previewer>
-    </div>
   </div>
 </template>
 
@@ -101,15 +98,8 @@
 import { mapGetters } from 'vuex'
 import { msgTypes, sessionStatus } from '@/common/js/status'
 import { getCsAvatar } from '@/server/index.js'
-import { Previewer, TransferDom } from 'vux'
 
 export default {
-  directives: {
-    TransferDom
-  },
-  components: {
-    Previewer
-  },
   props: {
     msg: {
       type: Object
@@ -134,33 +124,7 @@ export default {
       }
     },
     imgIdWithDate() {
-      return `text-img-${new Date().getTime()}`
-    },
-    previewImgOptions() {
-      const self = this
-      return {
-        getThumbBoundsFn(index) {
-          // find thumbnail element
-          let thumbnail = document.getElementById(self.imgIdWithDate)
-          // get window scroll Y
-          let pageYScroll = window.pageYOffset || document.documentElement.scrollTop
-          // optionally get horizontal scroll
-          // get position of element relative to viewport
-          let rect = thumbnail.getBoundingClientRect()
-          // w = width
-          return { x: rect.left, y: rect.top + pageYScroll, w: rect.width }
-        }
-      }
-    },
-    previewImgList() {
-      if (this.msg.imgData) {
-        return [{
-          src: this.msg.imgData.big || '',
-          msrc: this.msg.imgData.small || ''
-        }]
-      } else {
-        return []
-      }
+      return `${this.msg.time.replace(/\s*/g, '')}`
     },
     ...mapGetters([
       'csInfo'
@@ -179,6 +143,9 @@ export default {
     },
     clickHotQues(ques) {
       this.$emit('clickHotQues', ques)
+    },
+    clickImgMsg() {
+      this.$emit('onClickImgMsg', this.imgIdWithDate)
     }
   }
 }

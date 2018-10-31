@@ -22,6 +22,7 @@
                 <component
                   :is="_showItemByType(item.msgStatus)"
                   :msg="item"
+                  @onClickImgMsg="onClickImgMsg"
                 ></component>
               </keep-alive>
             </li>
@@ -30,12 +31,12 @@
                 <component
                   :is="_showItemByType(msg.msgStatus)"
                   :msg="msg"
+                  @onClickImgMsg="onClickImgMsg"
                   @enterToMenChat="enterOnLineLineUp"
                   @clickHotQues="chatInputCommit"
                 ></component>
               </keep-alive>
             </li>
-            <!-- @onClickImgMsg="onClickImgMsg" -->
             <li class="chat-content-block chat-content-end" ref="chatContentEnd"></li>
           </ul>
         </div>
@@ -65,9 +66,9 @@
     ></extend-bar>
     <ios-guide v-if="iosGuide" @click.native="toggleGuide(false)"></ios-guide>
     <low-version v-if="lowVersion" @close="toggleUpgrade(false)"></low-version>
-    <!-- <div v-transfer-dom>
+    <div v-transfer-dom>
       <previewer :list="previewImgList" ref="previewer" :options="previewImgOptions"></previewer>
-    </div> -->
+    </div>
   </div>
 </template>
 
@@ -118,33 +119,36 @@ export default {
     'PullDown': () => import('@/views/mainRoom/components/chat/pull-down')
   },
   computed: {
-    // previewImgOptions() {
-    //   const self = this
-    //   return {
-    //     getThumbBoundsFn(index) {
-    //       // find thumbnail element
-    //       let thumbnail = document.getElementById(self.imgIdWithDate)
-    //       // get window scroll Y
-    //       let pageYScroll = window.pageYOffset || document.documentElement.scrollTop
-    //       // optionally get horizontal scroll
-    //       // get position of element relative to viewport
-    //       let rect = thumbnail.getBoundingClientRect()
-    //       // w = width
-    //       return { x: rect.left, y: rect.top + pageYScroll, w: rect.width }
-    //     }
-    //   }
-    // },
-    // previewImgList() {
-    //   const
-    //   if (this.msg.imgData) {
-    //     return [{
-    //       src: this.msg.imgData.big || '',
-    //       msrc: this.msg.imgData.small || ''
-    //     }]
-    //   } else {
-    //     return []
-    //   }
-    // },
+    previewImgOptions() {
+      const self = this
+      return {
+        getThumbBoundsFn(index) {
+          // find thumbnail element
+          let thumbnail = document.getElementById(self.curPreviewImgId)
+          // get window scroll Y
+          let pageYScroll = window.pageYOffset || document.documentElement.scrollTop
+          // optionally get horizontal scroll
+          // get position of element relative to viewport
+          let rect = thumbnail.getBoundingClientRect()
+          // w = width
+          return { x: rect.left, y: rect.top + pageYScroll, w: rect.width }
+        }
+      }
+    },
+    previewImgList() {
+      const allMsgs = this.historyMsgs.concat(this.msgs)
+      let map = []
+      allMsgs.forEach(item => {
+        if (item.msgStatus === msgStatus.msg && item.msgType === msgTypes.msg_img) {
+          map.push({
+            src: item.imgData.big || '',
+            msrc: item.imgData.small || '',
+            id: item.time.replace(/\s*/g, '')
+          })
+        }
+      })
+      return map
+    },
     ...mapGetters([
       'userInfo',
       'botInfo',
@@ -157,12 +161,6 @@ export default {
   },
   data() {
     return {
-      /**
-       * [scrollY        消息显示区域滑动距离]
-       * [inputEle       真实输入框元素]
-       * [inputFocPos    每次键盘弹出记录的光标位置]
-       * [chat           消息队列]
-       */
       scrollY: 0,
       inputEle: null,
       inputFocPos: 0,
@@ -180,7 +178,8 @@ export default {
       pullDownStyle: '',
       bubbleY: 0,
       /* pull-down-load  over */
-      sessionList: []
+      sessionList: [],
+      curPreviewImgId: ''
     }
   },
   mounted() {
@@ -271,9 +270,17 @@ export default {
       return component
       // return type === 'text_msg' ? 'ContentItem' : type === 'time_msg' ? 'TimeItem' : ''
     },
-    // onClickImgMsg() {
-    //   this.$refs.previewer.show(0)
-    // },
+    onClickImgMsg(id) {
+      this.curPreviewImgId = id
+      let curIndex = 0
+      for (let i = 0; i < this.previewImgList.length; i++) {
+        if (this.previewImgList[i].id === id) {
+          curIndex = i
+          break
+        }
+      }
+      this.$refs.previewer.show(curIndex)
+    },
 
     /* *********************************** better scroll *********************************** */
     _initScroll() {

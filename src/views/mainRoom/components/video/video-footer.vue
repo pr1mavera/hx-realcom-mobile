@@ -39,10 +39,11 @@
 export default {
   methods: {
     warningConfirmShow() {
+      const self = this
       this.$vux.confirm.show({
         title: '真的要退出当前视频嘛？？',
         onConfirm() {
-          this.$emit('hangUpVideo')
+          self.$emit('hangUpVideo')
         }
       })
     }

@@ -509,7 +509,10 @@ export const sendMsgsMixin = {
           chatType: sessionStatus.video
         }
         // 上传图片
-        const resp = await IM.uploadPic(img, info)
+        const resp = await IM.uploadPic(img, {
+          sendUserId: this.userInfo.userId,
+          toUserId: this.csInfo.csId
+        })
         // 发送图片
         const customMsgInfo = IM.formatImgMsgOption(resp, info)
         await IM.sendNormalMsg(this.userInfo.userId, this.csInfo.csId, customMsgInfo)
