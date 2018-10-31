@@ -324,6 +324,16 @@ export default {
             }
           }
         }
+        .vux-indicator {
+          .vux-icon-dot {
+            &.active {
+              background-color: @text-light;
+              width: 0.8rem;
+              height: 0.8rem;
+              border-radius: 50%;
+            }
+          }
+        }
       }
     }
     .xiaohua-express {

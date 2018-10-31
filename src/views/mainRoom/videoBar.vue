@@ -222,7 +222,7 @@ export default {
     },
     goBackToChat() {
       // 退群
-      // IM.quitGroup(this.roomId)
+      IM.quitGroup(this.roomId)
       // action
       this.quitVideoChat()
     },

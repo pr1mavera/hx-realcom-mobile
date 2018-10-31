@@ -438,51 +438,47 @@ export const sendMsgsMixin = {
           })
       })
     },
-    // sendTextMsg(text) {
-    //   return new Promise(resolve => {
-    //     resolve()
-    //     IM.sendNoticeMsg({
-    //       sessionId: this.sessionId,
-    //       toUserId: this.csInfo.csId,
-    //       toUserName: this.csInfo.nickName,
-    //       groupId: this.roomId,
-    //       msg: text,
-    //       time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
-    //       nickName: this.userInfo.userName,
-    //       identifier: this.userInfo.userId,
-    //       msgStatus: msgStatus.msg,
-    //       msgType: msgTypes.msg_normal
-    //     })
-    //   })
-    // },
     sendGiftMsg(giftInfo) {
-      IM.sendNoticeMsg({
-        groupId: this.roomId,
-        // groupId: '987654321',
-        msg: `${this.userInfo.userName}给你送了一个礼物`,
-        time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
-        nickName: this.userInfo.userName,
-        avatar: this.csInfo.csId,
-        identifier: this.userInfo.userId,
-        msgStatus: msgStatus.msg,
-        msgType: msgTypes.msg_gift,
-        chatType: sessionStatus.video,
-        giftInfo
+      return new Promise(resolve => {
+        this.afterSendC2CGiftMsgs(giftInfo)
+        resolve()
+        IM.sendNormalMsg(
+          this.userInfo.userId,
+          this.csInfo.csId,
+          // '123456789',
+          {
+            sessionId: this.sessionId,
+            toUserName: this.csInfo.csName,
+            msg: `${this.userInfo.userName}给你送了一个礼物`,
+            time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+            nickName: this.userInfo.userName,
+            avatar: this.csInfo.csId,
+            identifier: this.userInfo.userId,
+            msgStatus: msgStatus.msg,
+            msgType: msgTypes.msg_gift,
+            chatType: sessionStatus.video,
+            isMsgSync: 2
+          })
       })
     },
     sendLikeMsg() {
-      IM.sendNoticeMsg({
-        groupId: this.roomId,
-        // groupId: '987654321',
-        msg: `我${this.userInfo.userName}给你点赞`,
-        time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
-        nickName: this.userInfo.userName,
-        avatar: this.csInfo.csId,
-        identifier: this.userInfo.userId,
-        msgStatus: msgStatus.msg,
-        msgType: msgTypes.msg_liked,
-        chatType: sessionStatus.video
-      })
+      IM.sendNormalMsg(
+        this.userInfo.userId,
+        this.csInfo.csId,
+        // '123456789',
+        {
+          sessionId: this.sessionId,
+          toUserName: this.csInfo.csName,
+          msg: `我${this.userInfo.userName}给你点赞`,
+          time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+          nickName: this.userInfo.userName,
+          avatar: this.csInfo.csId,
+          identifier: this.userInfo.userId,
+          msgStatus: msgStatus.msg,
+          msgType: msgTypes.msg_liked,
+          chatType: sessionStatus.video,
+          isMsgSync: 2
+        })
     },
     sendImgMsg(img) {
       return new Promise(async(resolve) => {
@@ -528,6 +524,22 @@ export const sendMsgsMixin = {
         msgStatus: msgStatus.msg,
         msgType: msgTypes.msg_normal,
         chatType: sessionStatus.video
+      }
+      this.sendMsgs([
+        msg
+      ])
+    },
+    afterSendC2CGiftMsgs(giftInfo) {
+      const msg = {
+        nickName: this.userInfo.userName,
+        avatar: this.csInfo.csId,
+        content: `${this.userInfo.userName}给你送了一个礼物`,
+        isSelfSend: true,
+        time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+        msgStatus: msgStatus.msg,
+        msgType: msgTypes.msg_gift,
+        chatType: sessionStatus.video,
+        giftInfo
       }
       this.sendMsgs([
         msg

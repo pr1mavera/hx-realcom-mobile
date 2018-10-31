@@ -1,6 +1,6 @@
 // import webim from 'webim'
 /* eslint-disable */
-// import webim from '@/common/js/webim'
+import webim from '@/server/webim'
 const IM = (() => {
   function login(loginInfo, listeners, succ, fail) {
     webim.login(
@@ -226,7 +226,7 @@ const IM = (() => {
     }
   }
 
-  function sendMsg(from_id, to_id, msgInfo, callback) {
+  function sendC2CCustomMsg(from_id, to_id, msgInfo, callback) {
     if (!from_id) {
       console.error("您还没有登录，暂不能聊天")
       return
@@ -237,6 +237,8 @@ const IM = (() => {
     var data = msgInfo.data || ''
     var desc = msgInfo.desc || ''
     var ext = msgInfo.ext || ''
+    // 是否保存进漫游消息（默认为1：同步到 From_Account 在线终端和漫游上）
+    var isMsgSync = msgInfo.isMsgSync
 
     var msgLen = webim.Tool.getStrBytes(data)
     if (data.length < 1) {
@@ -254,7 +256,7 @@ const IM = (() => {
     var msgTime = Math.round(new Date().getTime() / 1000) //消息时间戳
     var subType = webim.GROUP_MSG_SUB_TYPE.COMMON
     var msg = new webim.Msg(selSess, isSend, seq, random, msgTime, from_id, subType, msgInfo.nickName)
-    var custom_obj = new webim.Msg.Elem.Custom(data, desc, ext)
+    var custom_obj = new webim.Msg.Elem.Custom(data, desc, ext, isMsgSync)
     msg.addCustom(custom_obj)
 
     webim.sendMsg(msg, (resp) => {
@@ -263,6 +265,54 @@ const IM = (() => {
     }, function (err) {
       console.log('发自定义消息失败:', err);
     });
+  }
+
+  // 发送自定义消息
+  function sendGroupCustomMsg(msgInfo, callback) {
+    if (!msgInfo.groupId) {
+      console.error('您还没有进入房间，暂不能聊天')
+      return
+    }
+    // custom消息
+    var data = msgInfo.data || ''
+    var desc = msgInfo.desc || ''
+    var ext = msgInfo.ext || ''
+    // 是否保存进漫游消息（默认为1：同步到 From_Account 在线终端和漫游上）
+    var isMsgSync = msgInfo.isMsgSync
+
+    var msgLen = webim.Tool.getStrBytes(data)
+    if (data.length < 1) {
+      alert('发送的消息不能为空!')
+      return
+    }
+    var maxLen = webim.MSG_MAX_LENGTH.GROUP
+    var errInfo = `消息长度超出限制(最多${Math.round(maxLen / 3)}汉字)`
+
+    if (msgLen > maxLen) {
+      alert(errInfo)
+      return
+    }
+
+    var selSess = new webim.Session(webim.SESSION_TYPE.GROUP, msgInfo.groupId, msgInfo.groupId, null, Math.round(new Date().getTime() / 1000))
+    var isSend = true // 是否为自己发送
+    var seq = -1 // 消息序列，-1表示sdk自动生成，用于去重
+    var random = Math.round(Math.random() * 4294967296) // 消息随机数，用于去重
+    var msgTime = Math.round(new Date().getTime() / 1000) // 消息时间戳
+    var subType = webim.GROUP_MSG_SUB_TYPE.COMMON
+
+    var msg = new webim.Msg(selSess, isSend, seq, random, msgTime, msgInfo.identifier, subType, msgInfo.nickName)
+    var customObj = new webim.Msg.Elem.Custom(data, desc, ext, isMsgSync)
+    msg.addCustom(customObj)
+
+    // 调用发送消息接口
+    webim.sendMsg(msg, (resp) => {
+      webim.Log.info('发自定义消息成功')
+      console.log('发自定义消息成功')
+      callback && callback()
+    }, function(err) {
+      webim.Log.info(err.ErrorInfo)
+      console.log('发自定义消息失败:', err)
+    })
   }
 
   // 发送提示消息（点赞、礼物，不保存进历史消息）
@@ -279,7 +329,7 @@ const IM = (() => {
     if (options.giftInfo) {
       giftInfo = JSON.stringify(options.giftInfo)
     }
-    sendCustomMsg({
+    sendGroupCustomMsg({
       groupId: options.groupId,
       data: options.msg,
       desc: `{
@@ -318,7 +368,7 @@ const IM = (() => {
     if (options.proxyInfo) {
       proxyInfoStr = JSON.stringify(options.proxyInfo)
     }
-    sendMsg(from_id, to_id, {
+    sendC2CCustomMsg(from_id, to_id, {
       data: options.msg,
       desc: `{
         "sessionId":"${options.sessionId}",
@@ -338,6 +388,7 @@ const IM = (() => {
         "imgData":${imgDataStr},
         "proxyInfo":${proxyInfoStr}
       }`,
+      isMsgSync: options.isMsgSync,
       identifier: options.identifier,
       nickName: options.nickName
     }, function() {
@@ -365,51 +416,6 @@ const IM = (() => {
     // options.imgData = imgStr.substr(1, imgStr.length - 2)
     options.imgData = imgData
     return options
-  }
-
-  // 发送自定义消息
-  function sendCustomMsg(msgInfo, callback) {
-    if (!msgInfo.groupId) {
-      console.error('您还没有进入房间，暂不能聊天')
-      return
-    }
-    // custom消息
-    var data = msgInfo.data || ''
-    var desc = msgInfo.desc || ''
-    var ext = msgInfo.ext || ''
-
-    var msgLen = webim.Tool.getStrBytes(data)
-    if (data.length < 1) {
-      alert('发送的消息不能为空!')
-      return
-    }
-    var maxLen = webim.MSG_MAX_LENGTH.GROUP
-    var errInfo = `消息长度超出限制(最多${Math.round(maxLen / 3)}汉字)`
-
-    if (msgLen > maxLen) {
-      alert(errInfo)
-      return
-    }
-
-    var selSess = new webim.Session(webim.SESSION_TYPE.GROUP, msgInfo.groupId, msgInfo.groupId, null, Math.round(new Date().getTime() / 1000))
-    var isSend = true // 是否为自己发送
-    var seq = -1 // 消息序列，-1表示sdk自动生成，用于去重
-    var random = Math.round(Math.random() * 4294967296) // 消息随机数，用于去重
-    var msgTime = Math.round(new Date().getTime() / 1000) // 消息时间戳
-    var subType = webim.GROUP_MSG_SUB_TYPE.COMMON
-    var msg = new webim.Msg(selSess, isSend, seq, random, msgTime, msgInfo.identifier, subType, msgInfo.nickName)
-    var customObj = new webim.Msg.Elem.Custom(data, desc, ext)
-    msg.addCustom(customObj)
-
-    // 调用发送消息接口
-    webim.sendMsg(msg, (resp) => {
-      webim.Log.info('发自定义消息成功')
-      console.log('发自定义消息成功')
-      callback && callback()
-    }, function(err) {
-      webim.Log.info(err.ErrorInfo)
-      console.log('发自定义消息失败:', err)
-    })
   }
 
   // 上传照片
@@ -523,7 +529,6 @@ const IM = (() => {
     parseMsgs,
     parseMsgInSystem,
     parseMsgsInSystem,
-    sendMsg,
     uploadPic,
     sendPic,
     getIMRoamMsgs
