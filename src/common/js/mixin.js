@@ -457,6 +457,7 @@ export const sendMsgsMixin = {
             msgStatus: msgStatus.msg,
             msgType: msgTypes.msg_gift,
             chatType: sessionStatus.video,
+            giftInfo,
             isMsgSync: 2
           })
       })
@@ -738,11 +739,9 @@ export const onLineQueueMixin = {
     async enterOnLineLineUp() {
       window.sessionStorage.setItem('queue_start_time', new Date().getTime())
       // // 在线转人工流程
-      // // 1. 添加转人工提示
-      // this.pushNormalTipMsg('正在为您转接在线客服，请稍候')
-      // // 2. 请求排队
+      // // 1. 请求排队
       // const res = await this.formatOnLineQueueAPI()
-      // // 3. 处理
+      // // 2. 处理
       // if (res.code === ERR_OK) {
       //   this.afterQueueSuccess(res.data)
       // } else {
@@ -780,6 +779,7 @@ export const onLineQueueMixin = {
       const data = res.data
       if (res.result_code === '200') {
         if (data.workTIme) {
+          this.enterToLineUp('正在为您转接在线客服，请稍候')
           // 排队中
           return {
             code: '0',
@@ -791,6 +791,15 @@ export const onLineQueueMixin = {
         }
       } else {
         console.log('===== 排队出错 辣 =====')
+        const tip = {
+          content: '转接失败',
+          time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+          msgStatus: msgStatus.tip,
+          msgType: tipTypes.tip_fail
+        }
+        this.sendMsgs([
+          tip
+        ])
       }
       return {
         code: '1',
@@ -803,7 +812,7 @@ export const onLineQueueMixin = {
         const msg = {
           csId: data.csId
         }
-        RTCSystemMsg.responseVideoQueuesSuccess(msg)
+        RTCSystemMsg.responseVideoQueuesSuccess(msg, this.userInfo)
       } else {
         // 排队等待
         // 设置排队人数
@@ -821,7 +830,7 @@ export const onLineQueueMixin = {
           msg
         ])
         // 设置排队状态
-        this.setQueueMode(queueStatus.queuing)
+        // this.setQueueMode(queueStatus.queuing)
       }
     },
     botSendLeaveMsg() {
@@ -849,8 +858,12 @@ export const onLineQueueMixin = {
     },
     ...mapMutations({
       setCsInfo: 'SET_CS_INFO',
+      sendMsgs: 'SET_MSGS',
       setQueueMode: 'SET_QUEUE_MODE',
       setQueueNum: 'SET_QUEUE_NUM'
-    })
+    }),
+    ...mapActions([
+      'enterToLineUp'
+    ])
   }
 }

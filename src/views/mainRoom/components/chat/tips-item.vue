@@ -7,14 +7,13 @@
      <svg class="icon icon-success extend-click" aria-hidden="true">
        <use xlink:href="#icon-chenggong"></use>
      </svg>
-     视频客服转接成功，祝您沟通愉快！
+     {{msg.content}}
    </span>
    <span class="item-span" v-if="msg.msgType === tipTypes.tip_fail">
      <svg class="icon icon-fail extend-click" aria-hidden="true">
        <use xlink:href="#icon-zhuanjiemang"></use>
      </svg>
-     人工客服忙
-     <span class="button">转其他客服</span>
+     客服转接失败，请稍后重试~
    </span>
    <span class="item-span" v-if="msg.msgType === tipTypes.tip_line_up">
      当前排队{{msg.queueNum}}人，请耐心等待

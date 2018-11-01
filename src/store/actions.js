@@ -1,6 +1,6 @@
 import * as types from './mutation-types'
 import { sleep } from '@/common/js/util'
-import { isTimeDiffLongEnough } from '@/common/js/dateConfig.js'
+import { isTimeDiffLongEnough, formatDate } from '@/common/js/dateConfig.js'
 import { sessionStatus, toggleBarStatus, roomStatus, queueStatus, msgStatus, tipTypes } from '@/common/js/status'
 import { ERR_OK, createSession } from '@/server/index.js'
 
@@ -42,13 +42,27 @@ export const toggleBar = function({ dispatch, commit, state }, type) {
   }
 }
 
-export const enterToLineUp = function({ commit, state }) {
+export const enterToLineUp = function({ commit, state }, content) {
   commit(types.SET_QUEUE_MODE, queueStatus.queuing)
+  const tip = [{
+    content,
+    time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+    msgStatus: msgStatus.tip,
+    msgType: tipTypes.tip_normal
+  }]
+  commit(types.SET_MSGS, state.msgs.concat(tip))
 }
 
 export const readyToVideoChat = function({ commit, state }) {
   commit(types.SET_QUEUE_MODE, queueStatus.queueOver)
   commit(types.SET_ROOM_MODE, roomStatus.videoChat)
+  const tip = [{
+    content: '视频客服转接成功，祝您沟通愉快！',
+    time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+    msgStatus: msgStatus.tip,
+    msgType: tipTypes.tip_success
+  }]
+  commit(types.SET_MSGS, state.msgs.concat(tip))
 }
 
 export const quitVideoChat = function({ commit, state }) {
@@ -58,6 +72,13 @@ export const quitVideoChat = function({ commit, state }) {
   commit(types.SET_QUEUE_MODE, queueStatus.noneQueue)
   commit(types.SET_ROOM_MODE, roomStatus.AIChat)
   initSession({ commit, state })
+  const tip = [{
+    content: '服务结束，期待与您的下次对话！',
+    time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+    msgStatus: msgStatus.tip,
+    msgType: tipTypes.tip_normal
+  }]
+  commit(types.SET_MSGS, state.msgs.concat(tip))
 }
 
 export const initSession = async function({ commit, state }) {
@@ -89,7 +110,7 @@ export const sendMsgs = async function({ commit, state }, msgs) {
         content: msgs[0].time,
         time: msgs[0].time,
         msgStatus: msgStatus.tip,
-        msgType: tipTypes.tip_normal
+        msgType: tipTypes.tip_time
       }]
       await commit(types.SET_MSGS, state.msgs.concat(tip))
     }

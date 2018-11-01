@@ -574,7 +574,6 @@ export default {
     }),
     ...mapActions([
       'initSession',
-      'enterToLineUp',
       'toggleBar',
       'sendMsgs'
       // 'readyToVideoChat'

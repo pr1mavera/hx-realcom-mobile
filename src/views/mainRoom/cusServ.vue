@@ -10,6 +10,7 @@
 </template>
 
 <script type="text/ecmascript-6">
+import { mapGetters, mapMutations, mapActions } from 'vuex'
 
 export default {
   name: 'cus-serv',
@@ -45,6 +46,7 @@ export default {
         case '0':
           this.lineUpAlert = false
           this.$router.push({path: `/room/line-up/${this.csSelected.csId}`})
+          this.enterToLineUp('正在为您转接视频客服，请稍候')
           break
         case '1':
           this.alertTip = true
@@ -56,7 +58,10 @@ export default {
           // this.$router.push({path: `/room/line-up/${csId}`})
           break
       }
-    }
+    },
+    ...mapActions([
+      'enterToLineUp'
+    ])
   }
 }
 </script>
