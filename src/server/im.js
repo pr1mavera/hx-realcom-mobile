@@ -260,10 +260,10 @@ const IM = (() => {
     msg.addCustom(custom_obj)
 
     webim.sendMsg(msg, (resp) => {
-      console.log('发自定义消息成功');
+      console.log('发C2C自定义消息成功');
       callback && callback();
     }, function (err) {
-      console.log('发自定义消息失败:', err);
+      console.log('发C2C自定义消息失败:', err);
     });
   }
 
@@ -306,12 +306,11 @@ const IM = (() => {
 
     // 调用发送消息接口
     webim.sendMsg(msg, (resp) => {
-      webim.Log.info('发自定义消息成功')
-      console.log('发自定义消息成功')
+      console.log('发群组自定义消息成功')
       callback && callback()
     }, function(err) {
       webim.Log.info(err.ErrorInfo)
-      console.log('发自定义消息失败:', err)
+      console.log('发群组自定义消息失败:', err)
     })
   }
 

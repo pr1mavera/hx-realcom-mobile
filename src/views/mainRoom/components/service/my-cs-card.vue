@@ -8,7 +8,7 @@
     </span>
     <div class="container-main">
       <a @click="enterSerCenter" class="avatar">
-        <img v-lazy='avatarImgSrc'>
+        <img v-lazy="avatarImgSrc" :key="avatarImgSrc">
       </a>
       <div class="info">
         <p class="name">{{this.name}}</p>
@@ -21,39 +21,21 @@
         视频咨询
       </x-button>
     </div>
-    <!-- 删除时弹框提示 :title="$t('Confirm deleting the item')"-->
-    <div v-transfer-dom>
-      <confirm v-model="showTips"
-        :title="'您确定要删除当前客服吗？'"
-        @on-cancel="onCancel"
-        @on-confirm="onConfirm"
-        @on-show="onShow"
-        @on-hide="onHide">
-      </confirm>
-    </div>
   </div>
 </template>
 
 <script>
-  import { XButton, Confirm, TransferDomDirective as TransferDom } from 'vux'
+  import { XButton } from 'vux'
   import { ERR_OK, removeCs, getCsAvatar } from '@/server/index.js'
   import { mapGetters, mapMutations } from 'vuex'
   // import { queueStatus } from '@/common/js/status'
   // import {} from '@/server/index.js'
 
   export default {
-    // name: "my-cs-card"
-    directives: {
-      TransferDom
-    },
     components: {
-      XButton,
-      Confirm
+      XButton
     },
     props: {
-      index: {
-        type: Number
-      },
       cusSerId: {
         type: String
       },
@@ -79,12 +61,13 @@
     data() {
       return {
         // avatarUrl: getImgUrl(this.avatarSrc)
-        avatarImgSrc: getCsAvatar(this.cusSerId),
-        showTips: false,
-        remove: false
+        showTips: false
       }
     },
     computed: {
+      avatarImgSrc() {
+        return getCsAvatar(this.avatarSrc)
+      },
       ...mapGetters([
         'userInfo'
       ])
@@ -98,7 +81,7 @@
         console.log('on cancel')
       },
       // 确定删除当前客服
-      async onConfirm() {
+      async deleteCsConfirm() {
         const userId = this.userInfo.userId
         const cusSerId = this.cusSerId
         const data = {
@@ -106,11 +89,9 @@
           'csId': cusSerId
         }
 
-        this.remove = true
-        console.log('on confirm' + this.remove)
         const res = await removeCs(data)
         if (res.result.code === ERR_OK) {
-          this.$emit('removeCs')
+          this.$emit('removeCs', this.csIndex)
           console.log(JSON.stringify(res))
         } else {
           console.log('error of remove the cusSer:' + JSON.stringify(res))
@@ -127,25 +108,13 @@
       },
       // 删除客服
       removeCusSer() {
-        const userId = this.userInfo.userId
-        const cusSerId = this.cusSerId
-        const data = {
-          'userId': userId,
-          'csId': cusSerId
-        }
-        console.log('there are for test: aaa========' + this.index)
-        console.log('=============删除专属客服输入的数据：' + 'data: ' + data + '-' + JSON.stringify(this.userInfo))
-
-        this.showTips = true
-        console.log('==================' + this.remove)
-        // if (this.remove === 'true') {
-        //   const res = await removeCs(data)
-        //   if (res.result.code === ERR_OK) {
-        //     console.log(JSON.stringify(res))
-        //   } else {
-        //     console.log('error of remove the cusSer:' + JSON.stringify(res))
-        //   }
-        // }
+        const self = this
+        this.$vux.confirm.show({
+          title: '您确定要删除当前客服吗？',
+          onConfirm() {
+            self.deleteCsConfirm()
+          }
+        })
       },
 
       // 获取客服头像
@@ -169,7 +138,7 @@
         })
       },
       clickToLineUp() {
-        this.$emit('clickToLineUp', this.csStatus, this.cusSerId)
+        this.$emit('clickToLineUp', this.csStatus || '0', this.cusSerId)
       },
       ...mapMutations({
         setQueueMode: 'SET_QUEUE_MODE'

@@ -52,7 +52,7 @@ export const readyToVideoChat = function({ commit, state }) {
 }
 
 export const quitVideoChat = function({ commit, state }) {
-  commit(types.SET_CS_INFO, null)
+  commit(types.SET_CS_INFO, {})
   commit(types.SET_ROOM_ID, '')
   commit(types.SET_QUEUE_NUM, 0)
   commit(types.SET_QUEUE_MODE, queueStatus.noneQueue)

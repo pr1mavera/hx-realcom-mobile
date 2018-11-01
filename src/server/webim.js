@@ -2715,7 +2715,6 @@ var webim = { // namespace object webim
 
         switch (msg.sess.type()) {
             case SESSION_TYPE.C2C:
-                debugger
                 msgInfo = {
                     'SyncOtherMachine': msg.elems[0].getContent().getSyncType(),
                     'From_Account': ctx.identifier,

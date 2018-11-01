@@ -1,38 +1,21 @@
 <template>
   <div class="cus-serv">
-    <keep-alive>
-      <router-view
-        :myCs="myCs"
-        @resetMyCs="resetMyCs"
-        @removeCs="removeCs"
-        @goToLineUp="showConfirm"
-      ></router-view>
-    </keep-alive>
-    <div v-transfer-dom>
-      <confirm v-model="lineUpAlert"
-        :title="'您即将转入视频客服'"
-        @on-cancel="lineUpAlert = false"
-        @on-confirm="goToLineUp"
-      ></confirm>
-    </div>
+    <router-view
+      :myCs="myCs"
+      @resetMyCs="resetMyCs"
+      @removeCs="removeCs"
+      @goToLineUp="showConfirm"
+    ></router-view>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
-import { Confirm, TransferDomDirective as TransferDom } from 'vux'
 
 export default {
   name: 'cus-serv',
-  directives: {
-    TransferDom
-  },
-  components: {
-    Confirm
-  },
   data() {
     return {
       myCs: [],
-      lineUpAlert: false,
       csSelected: {
         csId: '',
         csStatus: '' // 就绪、1：小憩、3：签退
@@ -41,9 +24,15 @@ export default {
   },
   methods: {
     showConfirm(status, csId) {
-      this.lineUpAlert = true
       this.csSelected.csId = csId
       this.csSelected.csStatus = status
+      const self = this
+      this.$vux.confirm.show({
+        title: '您即将转入视频客服',
+        onConfirm() {
+          self.goToLineUp()
+        }
+      })
     },
     resetMyCs(list) {
       this.myCs = list

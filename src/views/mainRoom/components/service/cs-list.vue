@@ -4,14 +4,14 @@
       v-for="(item, index) in myCs"
       :key="index"
       :cusSerId="item.id"
-      :avatarSrc="item.avatar"
+      :avatarSrc="item.id"
       :name="item.nickName"
       :num="item.servTimes"
       :gifts="item.giftCount"
       :csIndex="index"
       :csStatus="item.status"
       @clickToLineUp="clickToLineUp"
-      @removeCs="removeCs(index)"
+      @removeCs="removeCs"
     ></my-cs-card>
     <p class="tips">您还可以添加 <span>{{3 - myCs.length}}</span> 名专属客服</p>
     <x-button :gradients="['#FF8C6A', '#FF80A0']" @click.native="addCs"

@@ -84,9 +84,6 @@
         return getCsAvatar(this.csInfo.csId)
       }
     },
-    mounted() {
-      this.getAvatar()
-    },
     methods: {
 
       // 接受子组件传的值
