@@ -17,20 +17,28 @@
         <div class="chat-content" ref="chatContent">
           <ul>
             <li class="chat-content-block chat-content-start" ref="chatContentStart"></li>
-            <li class="chat-content-li" v-for="(item, index) in this.historyMsgs" :key="`history-${index}`" :class="{'text-center': item.msgStatus === msgStatus.tip}">
+            <li class="chat-content-li"
+              v-for="(item, index) in this.historyMsgs"
+              :key="`history-${index}`"
+              :class="{'text-center': item.msgStatus === msgStatus.tip}">
               <keep-alive>
                 <component
                   :is="_showItemByType(item.msgStatus)"
                   :msg="item"
+                  @msgLongPress="showCopy"
                   @onClickImgMsg="onClickImgMsg"
                 ></component>
               </keep-alive>
             </li>
-            <li class="chat-content-li" v-for="(msg, index) in this.msgs" :key="`cur-${index}`" :class="{'text-center': msg.msgStatus === msgStatus.tip}">
+            <li class="chat-content-li"
+              v-for="(msg, index) in this.msgs"
+              :key="`cur-${index}`"
+              :class="{'text-center': msg.msgStatus === msgStatus.tip}">
               <keep-alive>
                 <component
                   :is="_showItemByType(msg.msgStatus)"
                   :msg="msg"
+                  @msgLongPress="showCopy"
                   @onClickImgMsg="onClickImgMsg"
                   @enterToMenChat="enterOnLineLineUp"
                   @clickHotQues="chatInputCommit"
@@ -66,6 +74,14 @@
     ></extend-bar>
     <ios-guide v-if="iosGuide" @click.native="toggleGuide(false)"></ios-guide>
     <low-version v-if="lowVersion" @close="toggleUpgrade(false)"></low-version>
+    <!-- 长按 复制 -->
+    <div class="copy"
+      ref="copyBtn"
+      :style="copyButtonRect"
+      @click="clickCopyBtn()">
+      <span class="text">复制</span>
+    </div>
+    <div class="copyMask" v-show="isCopyButtonShow" @touchstart="resetCopyBtn"></div>
     <div v-transfer-dom>
       <previewer :list="previewImgList" ref="previewer" :options="previewImgOptions"></previewer>
     </div>
@@ -75,9 +91,10 @@
 <script type="text/ecmascript-6">
 import { mapGetters, mapMutations, mapActions } from 'vuex'
 import BScroll from 'better-scroll'
+import Clipboard from 'clipboard'
 import InputBar from '@/views/mainRoom/components/chat/input-bar'
 import { debounce, getRect, isLastStrEmoji } from '@/common/js/util'
-// import { formatDate } from '@/common/js/dateConfig.js'
+import { formatDate } from '@/common/js/dateConfig.js'
 import { loginMixin, IMMixin, sendMsgsMixin, getMsgsMixin, onLineQueueMixin } from '@/common/js/mixin'
 import { beforeEnterVideo } from '@/common/js/beforeEnterVideo'
 // eslint-disable-next-line
@@ -113,9 +130,6 @@ export default {
     'extendBar': () => import('@/views/mainRoom/components/chat/extend-bar'),
     'IosGuide': () => import('@/views/mainRoom/components/video/ios-guide'),
     'LowVersion': () => import('@/views/mainRoom/components/video/low-version'),
-    // 'SendFile': () => import('@/views/mainRoom/components/chat/send-file'),
-    // 'SendExpress': () => import('@/views/mainRoom/components/chat/send-express'),
-    // 'SendGift': () => import('@/views/mainRoom/components/chat/send-gift'),
     'PullDown': () => import('@/views/mainRoom/components/chat/pull-down')
   },
   computed: {
@@ -149,6 +163,14 @@ export default {
       })
       return map
     },
+    copyButtonRect() {
+      const self = this
+      const pos = {
+        top: self.targetEleRect.top - 50 - self.scrollY,
+        left: self.targetEleRect.left + self.targetEleRect.width / 2 - 30
+      }
+      return `transform: translate(${pos.left}px, ${pos.top}px); opacity: ${self.isCopyButtonShow ? 1 : 0};`
+    },
     ...mapGetters([
       'userInfo',
       'botInfo',
@@ -161,6 +183,7 @@ export default {
   },
   data() {
     return {
+      clipboard: null,
       scrollY: 0,
       inputEle: null,
       inputFocPos: 0,
@@ -179,7 +202,16 @@ export default {
       bubbleY: 0,
       /* pull-down-load  over */
       sessionList: [],
-      curPreviewImgId: ''
+      curPreviewImgId: '',
+      isCopyButtonShow: false,
+      copyTextTemp: '',
+      // 长按对话dom的位置信息
+      targetEleRect: {
+        top: 0,
+        left: 0,
+        width: 0,
+        height: 0
+      }
     }
   },
   mounted() {
@@ -213,6 +245,7 @@ export default {
             botName: res.data.name
           }
           this.setBotInfo(info)
+
           const botCard = {
             msgStatus: msgStatus.card,
             msgType: cardTypes.bot_card,
@@ -221,17 +254,23 @@ export default {
               nickName: this.botInfo.botName
             }
           }
+          this.sendMsgs(botCard)
+
           const botWelcomeMsg = {
             nickName: res.data.name,
             content: res.data.welcomeTip,
             isSelfSend: false,
+            time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
             msgStatus: msgStatus.msg,
             msgType: msgTypes.msg_normal
           }
+          this.sendMsgs(botWelcomeMsg)
+
           const botHotMsg = {
             content: res.data.hotspotDoc,
             nickName: res.data.name,
             isSelfSend: false,
+            time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
             msgStatus: msgStatus.msg,
             msgType: msgTypes.msg_hot,
             msgExtend: res.data.hotspotQuestions.map((item) => {
@@ -240,11 +279,8 @@ export default {
               }
             })
           }
-          this.sendMsgs([
-            botCard,
-            botWelcomeMsg,
-            botHotMsg
-          ])
+          this.sendMsgs(botHotMsg)
+
           resolve()
         })
       } else {
@@ -564,6 +600,33 @@ export default {
         window.onresize = null
       }
     },
+    /* *********************************** copy btn *********************************** */
+    showCopy(el, msg) {
+      this.targetEleRect = getRect(el)
+      this.copyTextTemp = msg
+      this.isCopyButtonShow = true
+    },
+    clickCopyBtn() {
+      if (!this.isCopyButtonShow) {
+        return
+      }
+      const self = this
+      this.clipboard = new Clipboard('.copy', {
+        text: function() {
+          return self.copyTextTemp
+        }
+      })
+      this.resetCopyBtn()
+    },
+    resetCopyBtn() {
+      this.isCopyButtonShow = false
+      this.targetEleRect = {
+        top: 0,
+        left: 0,
+        width: 0,
+        height: 0
+      }
+    },
     ...mapMutations({
       setBotInfo: 'SET_BOT_INFO',
       setModeToMenChat: 'SET_ROOM_MODE',
@@ -703,6 +766,48 @@ export default {
     color: @text-normal;
     transition: all 0.3s;
     z-index: -1;
+  }
+  .copy {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 5000;
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+    .text {
+      display: inline-block;
+      line-height: 1.3rem;
+      padding: 1rem 1.3rem;
+      background-color: #000;
+      border-radius: .7rem;
+      color: #fff;
+      font-size: 1.3rem;
+      &::after {
+        content: '';
+        display: block;
+        width: 0;
+        height: 0;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        margin: auto;
+        transform: translateY(100%);
+        border-width: 0.8rem 0.8rem 0;
+        border-style: solid;
+        border-color: #000 transparent transparent;
+      }
+    }
+  }
+  .copyMask {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: auto;
+    z-index: 4999;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
   }
 }
 </style>

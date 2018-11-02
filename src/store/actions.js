@@ -93,8 +93,8 @@ export const initSession = async function({ commit, state }) {
   }
 }
 
-export const sendMsgs = async function({ commit, state }, msgs) {
-  if (msgs[0].msgStatus === msgStatus.msg) {
+export const sendMsgs = async function({ commit, state }, msg) {
+  if (msg.msgStatus === msgStatus.msg) {
     let lastT = null
     // 缓存最后一条信息的时间
     for (let i = state.msgs.length - 1; i > 0; i--) {
@@ -105,15 +105,16 @@ export const sendMsgs = async function({ commit, state }, msgs) {
       console.log(`------------------------------------- 循环了 ${i} -------------------------------------`)
     }
     // 若间隔时间大于约定时间，则生成时间信息tip
-    if (lastT && isTimeDiffLongEnough(lastT, msgs[0].time)) {
+    if (lastT && isTimeDiffLongEnough(lastT, msg.time)) {
       const tip = [{
-        content: msgs[0].time,
-        time: msgs[0].time,
+        content: msg.time,
+        time: msg.time,
         msgStatus: msgStatus.tip,
         msgType: tipTypes.tip_time
       }]
       await commit(types.SET_MSGS, state.msgs.concat(tip))
     }
   }
-  await commit(types.SET_MSGS, state.msgs.concat(msgs))
+  msg.timestamp = new Date().getTime()
+  await commit(types.SET_MSGS, state.msgs.concat([msg]))
 }

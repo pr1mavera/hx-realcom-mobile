@@ -1,5 +1,8 @@
 <template v-once>
-  <div class="msgs-item" :class="[{'item-padding-left': msg.isSelfSend, 'item-padding-right': !msg.isSelfSend}]">
+  <div class="msgs-item"
+    @touchstart="showCopyButton"
+    @touchend="clearLoop"
+    :class="[{'item-padding-left': msg.isSelfSend, 'item-padding-right': !msg.isSelfSend}]">
     <div class="avatar" v-if="!msg.isSelfSend">
       <div class="bot-avatar bg-image">
         <img width=100% height=100% v-lazy="avatarUrl">
@@ -12,6 +15,7 @@
       <p class="name" v-if="!msg.isSelfSend">{{msg.nickName}}</p>
       <div
         class="content chat-content-shadow"
+        :id="msgCellId"
         :class="[{
           'right-content-style': msg.isSelfSend,
           'left-content-style': !msg.isSelfSend,
@@ -124,7 +128,10 @@ export default {
       }
     },
     imgIdWithDate() {
-      return `${this.msg.time.replace(/\s*/g, '')}`
+      return `${this.msg.timestamp}`
+    },
+    msgCellId() {
+      return `msgCell_${this.imgIdWithDate}`
     },
     ...mapGetters([
       'csInfo'
@@ -146,6 +153,20 @@ export default {
     },
     clickImgMsg() {
       this.$emit('onClickImgMsg', this.imgIdWithDate)
+    },
+    /* *********************************** CopyButton *********************************** */
+    showCopyButton() {
+      if (this.msg.msgType === msgTypes.msg_normal) {
+        clearInterval(this.Loop) // 再次清空定时器，防止重复注册定时器
+        this.Loop = setTimeout(() => {
+          const el = document.getElementById(this.msgCellId)
+          this.$emit('msgLongPress', el, this.msg.content)
+          // alert(`长按${JSON.stringify(this.msg.content)}`)
+        }, 1000)
+      }
+    },
+    clearLoop() {
+      clearInterval(this.Loop)
     }
   }
 }
@@ -238,6 +259,7 @@ export default {
       &.content-extend{
         width: 100%;
         .text {
+          -webkit-user-select: text;
           .text-extend {
             display: block;
             margin-bottom: 0.6rem;
@@ -262,6 +284,7 @@ export default {
         line-height: 2rem;
         max-width: 100%;
         word-wrap: break-word;
+        -webkit-user-select: text;
         &.gift-item {
           padding-left: 2rem;
         }

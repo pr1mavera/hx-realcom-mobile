@@ -10,7 +10,7 @@
 </template>
 
 <script type="text/ecmascript-6">
-import { mapGetters, mapMutations, mapActions } from 'vuex'
+import { mapActions } from 'vuex'
 
 export default {
   name: 'cus-serv',
