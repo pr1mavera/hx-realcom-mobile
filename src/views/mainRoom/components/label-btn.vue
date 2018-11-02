@@ -58,13 +58,6 @@
         showDots: true
       }
     },
-    // watch: {
-    //   selTags: [
-    //     function handle1(val, oldVal) {
-    //     this.$emit('seledLabels', this.selTags)
-    //     }
-    //   ]
-    // },
     computed: {
       ...mapGetters([
         'csInfo'
@@ -97,8 +90,8 @@
 
       // 标签信息查询，获取label列表
       async getLabels() {
-        // const csId = this.csInfo.cusSerId
-        const csId = '123'
+        const csId = this.$route.query.cusSerId
+        // const csId = '123'
 
         // debugger
         if (this.labelType === 'notAll') {
