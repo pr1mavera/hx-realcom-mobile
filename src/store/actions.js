@@ -94,7 +94,7 @@ export const initSession = async function({ commit, state }) {
 }
 
 export const sendMsgs = async function({ commit, state }, msg) {
-  if (msg.msgStatus === msgStatus.msg) {
+  if (msg.msgStatus !== msgStatus.tip) {
     let lastT = null
     // 缓存最后一条信息的时间
     for (let i = state.msgs.length - 1; i > 0; i--) {
@@ -106,13 +106,13 @@ export const sendMsgs = async function({ commit, state }, msg) {
     }
     // 若间隔时间大于约定时间，则生成时间信息tip
     if (lastT && isTimeDiffLongEnough(lastT, msg.time)) {
-      const tip = [{
+      const tip = {
         content: msg.time,
         time: msg.time,
         msgStatus: msgStatus.tip,
         msgType: tipTypes.tip_time
-      }]
-      await commit(types.SET_MSGS, state.msgs.concat(tip))
+      }
+      await commit(types.SET_MSGS, state.msgs.concat([tip]))
     }
   }
   msg.timestamp = new Date().getTime()

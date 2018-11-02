@@ -21,6 +21,15 @@ export default {
   created() {
     deviceConfig()
     // wxConfig()
+    window.addEventListener('offline', () => {
+      this.$vux.toast.show({
+        type: 'text',
+        text: '测试你看，断网了 (-_-||)',
+        position: 'top',
+        width: '80%',
+        time: 5000
+      })
+    }, true)
   },
   activated() {
     this.$setgoindex()

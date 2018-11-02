@@ -14,7 +14,7 @@ export const msgs = state => state.msgs
 // 视频界面的信息队列
 export const videoMsgs = state => {
   return state.msgs.filter(item => {
-    return item.msgStatus === msgStatus.msg && item.msgType === msgTypes.msg_gift
+    return item.msgStatus === msgStatus.msg && (item.msgType === msgTypes.msg_gift || item.msgType === msgTypes.msg_liked)
   })
 }
 // 拓展输入打开状态

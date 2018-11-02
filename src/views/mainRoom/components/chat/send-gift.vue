@@ -50,32 +50,32 @@ export default {
         'dark': {
           bgColor: 'rgba(0, 0, 0, 0.5)',
           textColor: '#fff',
-          height: '18rem'
+          height: '23rem'
         }
       },
       giftMap: [
         {
-          id: 'caomeidangao',
-          name: '草莓蛋糕'
-        },
-        // {
-        //   id: 'caomeidangao',
-        //   text: '草莓蛋糕'
-        // },
-        // {
-        //   id: 'caomeidangao',
-        //   text: '草莓蛋糕'
-        // },
-        {
-          id: 'caomeidangao',
-          name: '草莓蛋糕'
+          id: 'gift_car',
+          name: '豪华跑车'
         },
         {
-          id: 'caomeidangao',
-          name: '草莓蛋糕'
+          id: 'gift_wing',
+          name: '天使翅膀'
         },
         {
-          id: 'caomeidangao',
+          id: 'gift_rocket',
+          name: '土豪火箭'
+        },
+        {
+          id: 'gift_earphones',
+          name: '镶钻耳麦'
+        },
+        {
+          id: 'gift_island',
+          name: '优享海岛'
+        },
+        {
+          id: 'gift_cake',
           name: '草莓蛋糕'
         }
       ],
@@ -132,6 +132,7 @@ export default {
   .send-extend-item {
     height: 7.6rem;
     flex: 25%;
+    flex-grow: 0;
     text-align: center;
   }
 }

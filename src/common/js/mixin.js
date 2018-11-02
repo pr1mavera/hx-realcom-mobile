@@ -141,12 +141,18 @@ export const RTCRoomMixin = {
 
       this.RTC.on('onWebSocketClose', () => {
         console.warn('websocket断开')
-        // self.goHomeRouter()
+        this.$vux.toast.show({
+          text: '当前websocket已断开',
+          position: 'top'
+        })
       })
 
       this.RTC.on('onRelayTimeout', () => {
         console.warn('服务器超时断开')
-        // self.goHomeRouter()
+        this.$vux.toast.show({
+          text: '当前网络状况不佳，服务器超时断开',
+          position: 'top'
+        })
       })
     },
     quitRTC() {
@@ -294,23 +300,6 @@ export const IMMixin = {
       if (msgs && msgs.length > 0) {
         if (msgs[0].fromAccount !== '@TIM#SYSTEM') {
           this.receiveCustomMsgs(msgs)
-          this.$nextTick(() => {
-            const e = document.getElementById('video-msg-list-bottom-tag')
-            if (this.videoMsgs.length > 3) {
-              const scrollObj = {
-                scrollTop: e.scrollTop
-              }
-              anime({
-                targets: scrollObj,
-                scrollTop: e.scrollHeight - e.clientHeight,
-                easing: 'easeInOutQuad',
-                round: 1,
-                update: function() {
-                  e.scrollTop = scrollObj.scrollTop
-                }
-              })
-            }
-          })
         }
       }
     },
@@ -457,6 +446,7 @@ export const sendMsgsMixin = {
       })
     },
     sendLikeMsg() {
+      this.afterSendC2CLikeMsgs()
       IM.sendNormalMsg(
         this.userInfo.userId,
         this.csInfo.csId,
@@ -533,6 +523,19 @@ export const sendMsgsMixin = {
         msgType: msgTypes.msg_gift,
         chatType: sessionStatus.video,
         giftInfo
+      }
+      this.sendMsgs(msg)
+    },
+    afterSendC2CLikeMsgs() {
+      const msg = {
+        nickName: this.userInfo.userName,
+        avatar: this.csInfo.csId,
+        content: `我${this.userInfo.userName}给你点赞`,
+        isSelfSend: true,
+        time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+        msgStatus: msgStatus.msg,
+        msgType: msgTypes.msg_liked,
+        chatType: sessionStatus.video
       }
       this.sendMsgs(msg)
     },

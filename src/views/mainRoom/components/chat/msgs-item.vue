@@ -23,6 +23,8 @@
         }]">
         <!-- 基本消息 -->
         <span class="text" v-if="msg.msgType === msgTypes.msg_normal" v-html="msg.content"></span>
+        <!-- 点赞消息 -->
+        <span class="text" v-if="msg.msgType === msgTypes.msg_liked" v-html="msg.content"></span>
         <!-- 转人工 -->
         <span class="text" v-if="msg.msgType === msgTypes.msg_no_idea">
           小华智力有限，好像听不太懂您的问题呢，可转
