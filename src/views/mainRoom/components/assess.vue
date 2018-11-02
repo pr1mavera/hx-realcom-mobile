@@ -94,9 +94,6 @@
 
       // 保存评论的信息
       async handleToSaveAssess() {
-        // 评价完成
-        this.$emit('assessSuccess')
-        // 输入 sessionId(会话Id) userId, userName, csId, csName ,evaluateLevel(满意度) [{labelId: '', labelName: ''}]
         const data = {
           'sessionId': this.sessionId,
           // 'sessionId': '00553330cc4a11e886ec19059d7ca77e',
@@ -109,14 +106,22 @@
         }
         // 异步处理评价保存
         const res = await saveAssess(data)
-        if (res.result.code === ERR_OK) {
-          this.showSucTips = true
-          // this.showAssess = false
-          console.log('已经保存了你评价的信息' + JSON.stringify(res))
-        } else {
+        if (this.labels.length === 0) {
+          debugger
+          this.failText = '啊呀，给个评价呗~'
           this.showFalseTips = true
-          // this.failText = res.result.messagem
-          console.log('there are some error about' + JSON.stringify(res.result))
+        } else {
+          // 评价完成
+          this.$emit('assessSuccess')
+          if (res.result.code === ERR_OK) {
+            this.showSucTips = true
+            // this.showAssess = false
+            console.log('已经保存了你评价的信息')
+          } else {
+            this.failText = '啊呀，出错了~'
+            this.showFalseTips = true
+            console.log('there are some error about' + JSON.stringify(res.result))
+          }
         }
       }
     }

@@ -121,7 +121,7 @@
           // debugger
           const res = await viewAllLabels(page, pageSize)
           if (res.result.code === ERR_OK) {
-            console.log('=============这是当前页查询到所有的标签信息:' + JSON.stringify(res))
+            // console.log('=============这是当前页查询到所有的标签信息:' + JSON.stringify(res))
             const pages = Math.ceil(res.data.totalCount[0].counts / pageSize) // 总页数
             for (let i = 2; i <= pages; i++) {
               this.pageList.push(i)
@@ -133,9 +133,9 @@
         }
       },
       selChanege() {
-        debugger
+        // debugger
         this.$emit('seledLabels', this.selTags)
-        console.log('你选中了这一个选项' + JSON.stringify(this.selTags))
+        // console.log('你选中了这一个选项' + JSON.stringify(this.selTags))
       }
     }
   }
