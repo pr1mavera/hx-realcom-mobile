@@ -729,34 +729,17 @@ export const onLineQueueMixin = {
   methods: {
     async enterOnLineLineUp() {
       window.sessionStorage.setItem('queue_start_time', new Date().getTime())
-      // // 在线转人工流程
-      // // 1. 请求排队
-      // const res = await this.formatOnLineQueueAPI()
-      // // 2. 处理
-      // if (res.code === ERR_OK) {
-      //   this.afterQueueSuccess(res.data)
-      // } else {
-      //   this.botSendLeaveMsg()
-      // }
-
-      // 排队成功，直接通知坐席
-      const msg = {
-        csId: '00535530bcdd11e8bac9b72d08583923'
+      // 在线转人工流程
+      // 1. 请求排队
+      const res = await this.formatOnLineQueueAPI()
+      // 2. 处理
+      if (res.code === ERR_OK) {
+        this.afterQueueSuccess(res.data)
+      } else {
+        this.botSendLeaveMsg()
       }
-      RTCSystemMsg.responseVideoQueuesSuccess(msg, this.userInfo)
-      // 存客服基本信息
-      this.setCsInfo(msg)
     },
     async formatOnLineQueueAPI() {
-      // const res = await onLineQueue({
-      //   chatGuid: this.sessionId,
-      //   customerGuid: this.userInfo.userId,
-      //   customerNick: this.userInfo.userName,
-      //   identity: this.userInfo.userGrade,
-      //   insuranceType: '1',
-      //   origin: '官微',
-      //   type: '2'
-      // })
       const res = await onLineQueue({
         chatGuid: this.sessionId,
         customerGuid: this.userInfo.userId,
@@ -770,13 +753,15 @@ export const onLineQueueMixin = {
       const data = res.data
       if (res.result_code === '200') {
         if (data.workTIme) {
+          // 发送正在转接提示
           this.enterToLineUp('正在为您转接在线客服，请稍候')
           // 排队中
           return {
             code: '0',
             data: {
               num: data.teamNum,
-              csId: data.userCode
+              csId: data.userCode || '',
+              isTeam: data.isTeam
             }
           }
         }
@@ -796,7 +781,7 @@ export const onLineQueueMixin = {
       }
     },
     afterQueueSuccess(data) {
-      if (data.num === 0) {
+      if (!data.isTeam) {
         // 排队成功，直接通知坐席
         const msg = {
           csId: data.csId
@@ -817,7 +802,7 @@ export const onLineQueueMixin = {
         }
         this.sendMsgs(msg)
         // 设置排队状态
-        // this.setQueueMode(queueStatus.queuing)
+        this.setQueueMode(queueStatus.queuing)
       }
     },
     botSendLeaveMsg() {

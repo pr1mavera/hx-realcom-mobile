@@ -124,4 +124,4 @@ export const saveAssess = async(data) => http.post('video', `/video/user/evaluat
 /**
  * [onLineQueue 客户端在线排队]
  */
-export const onLineQueue = data => http.post('onLine', '/queueUp', data)
+export const onLineQueue = data => http.post('onLine', '/queueup', data)
