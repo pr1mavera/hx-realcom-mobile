@@ -5,8 +5,6 @@
  * @Last Modified time: 2018-10-29 15:30:00
 */
 import { sessionStatus, msgStatus, msgTypes, tipTypes } from '@/common/js/status'
-// import { ERR_OK, getBotRoamMsgs, requestHistoryMsgs } from '@/server/index.js'
-// import IM from '@/server/im'
 import { botAnswerfilter } from '@/common/js/util'
 import { formatDate, isTimeDiffLongEnough } from '@/common/js/dateConfig.js'
 
@@ -60,6 +58,7 @@ const MsgsLoader = {
     let timeCache = list[0].time
     let map = []
     list.length && list.forEach((item, i) => {
+      item.timestamp = new Date(item.time.replace(/-/g, '/')).getTime()
       if (isTimeDiffLongEnough(timeCache, item.time) || i === 0) {
         map.push({
           content: item.time,

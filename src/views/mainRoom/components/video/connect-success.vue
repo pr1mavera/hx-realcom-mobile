@@ -1,34 +1,33 @@
 <!-- 转接成功的提示模态框 -->
 <template>
   <div class="connect-success">
-    <confirm v-model="queueSuccess"
-             @on-cancel="onCancel"
-             @on-confirm="onConfirm"
-             @on-show="onShow"
-             @on-hide="onHide">
-      <div class="avatar"><img :src="avatar"></div>
+    <x-dialog v-model="queueSuccess">
+      <div class="avatar"><img width=100% height=100% :src="avatar"></div>
       <p class="confirm-bd-tit" style="">
-          <icon type="success"></icon> 转接成功！
+          <icon class="icon" type="success"></icon> 转接成功！
       </p>
       <p class="confirm-bd-subtit">本次视频由客服{{this.csInfo.csName}}为您服务</p>
       <!--<p class="confirm-tips">{{name}}{{num ? `已经为您服务过${num}次`: '首次为您服务'}}</p>-->
       <!-- <p class="confirm-tips" v-if="num">{{this.csInfo.csName}}已经为您服务过<label class="num">{{num}}</label>次</p>
       <p class="confirm-tips" v-else>{{this.csInfo.csName}}首次为您服务</p> -->
-    </confirm>
-    <!--<p>there are some words for test</p>-->
+    </x-dialog>
+    <div class="countdown" v-show="queueSuccess">
+      <countdown v-model="time" :start="queueSuccess" @on-finish="$emit('confirmToVideo')"></countdown>
+    </div>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
   import { mapGetters } from 'vuex'
-  import { Confirm, Icon } from 'vux'
+  import { XDialog, Icon, Countdown } from 'vux'
   import { queueStatus } from '@/common/js/status'
   import { getCsAvatar } from '@/server/index.js'
 
   export default {
     components: {
-      Confirm,
-      Icon
+      XDialog,
+      Icon,
+      Countdown
     },
     computed: {
       ...mapGetters([
@@ -37,6 +36,7 @@
       ]),
       avatar() {
         return getCsAvatar(this.csInfo.csId)
+        // return 'http://video-servertest.ihxlife.com:8083/api/v1/video/image/csHeader?id=00235530bcdd11e8bac9b72d08583910'
       },
       queueSuccess: {
         set() {
@@ -49,26 +49,7 @@
     },
     data() {
       return {
-        name: '丽丽',
-        num: 2
-      }
-    },
-    methods: {
-      onCancel() {
-        console.log('on cancel')
-      },
-      onConfirm(msg) {
-        console.log('on confirm')
-        // if (msg) {
-        //   alert(msg)
-        // }
-        this.$emit('confirmToVideo')
-      },
-      onHide() {
-        console.log('on hide')
-      },
-      onShow() {
-        console.log('on show')
+        time: 3
       }
     }
   }
@@ -84,15 +65,15 @@
       height: 8rem;
       position: absolute;
       top: -4rem;
-      left: 50%;
-      margin-left: -4rem;
+      left: 0;
+      right: 0;
+      margin: auto;
+      padding: 0.5rem;
       background: linear-gradient(to right, #FF8C6A, #FF80A0);
       border-radius: 50%;
+      overflow: hidden;
       img {
-        width: 88%;
-        height: 88%;
         border-radius: 50%;
-        margin-top: 6%;
         vertical-align: middle;
       }
     }
@@ -108,12 +89,15 @@
       height: 4rem;
       color: #000000;
       line-height: 4.7rem;
-      font-size: 1.8rem;
+      font-size: 1.6rem;
       font-weight: bold;
       text-align: center;
+      margin-top: 5rem;
     }
     .confirm-bd-subtit {
       color: #000000;
+      font-size: 1.3rem;
+      margin-bottom: 4rem;
     }
     .confirm-tips {
       font-size: 1.2rem;
@@ -121,6 +105,22 @@
         color: #ff444a;
       }
     }
+  }
+  .countdown {
+    position: absolute;
+    left: 0;
+    right: 0;
+    margin: auto;
+    z-index: 5000;
+    width: 7.2rem;
+    height: 7.2rem;
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+    font-size: 4.4rem;
+    line-height: 7.2rem;
+    text-align: center;
+    color: #fff;
+    font-weight: lighter;
   }
 }
 </style>

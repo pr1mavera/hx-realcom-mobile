@@ -93,9 +93,17 @@ export function getRect(el) {
       height: rect.height
     }
   } else {
+    let actualTop = el.offsetTop
+    let actualLeft = el.offsetLeft
+    let current = el.offsetParent
+    while (current !== null) {
+      actualTop += current.offsetTop
+      actualLeft += current.offsetLeft
+      current = current.offsetParent
+    }
     return {
-      top: el.offsetTop,
-      left: el.offsetLeft,
+      top: actualTop,
+      left: actualLeft,
       width: el.offsetWidth,
       height: el.offsetHeight
     }

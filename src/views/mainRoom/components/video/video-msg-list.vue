@@ -19,6 +19,9 @@
                 <img width=100% height=100% :src="`/static/img/${item.giftInfo.id}@2x.png`">
               </i>
             </span>
+            <span class="text-section" v-if="item.msgType === msgTypes.msg_liked">
+              <span class="text">我送给客服点了一个赞</span>
+            </span>
           </div>
         </li>
       </ul>
@@ -54,6 +57,27 @@ export default {
           text: '木子李已分享到微信'
         }
       ]
+    }
+  },
+  watch: {
+    videoMsgs() {
+      this.$nextTick(() => {
+        const e = document.getElementById('video-msg-list-bottom-tag')
+        if (this.videoMsgs.length > 3) {
+          const scrollObj = {
+            scrollTop: e.scrollTop
+          }
+          anime({
+            targets: scrollObj,
+            scrollTop: e.scrollHeight - e.clientHeight,
+            easing: 'easeInOutQuad',
+            round: 1,
+            update: function() {
+              e.scrollTop = scrollObj.scrollTop
+            }
+          })
+        }
+      })
     }
   }
 }

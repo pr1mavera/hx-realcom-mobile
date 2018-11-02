@@ -141,12 +141,18 @@ export const RTCRoomMixin = {
 
       this.RTC.on('onWebSocketClose', () => {
         console.warn('websocket断开')
-        // self.goHomeRouter()
+        this.$vux.toast.show({
+          text: '当前websocket已断开',
+          position: 'top'
+        })
       })
 
       this.RTC.on('onRelayTimeout', () => {
         console.warn('服务器超时断开')
-        // self.goHomeRouter()
+        this.$vux.toast.show({
+          text: '当前网络状况不佳，服务器超时断开',
+          position: 'top'
+        })
       })
     },
     quitRTC() {
@@ -294,23 +300,6 @@ export const IMMixin = {
       if (msgs && msgs.length > 0) {
         if (msgs[0].fromAccount !== '@TIM#SYSTEM') {
           this.receiveCustomMsgs(msgs)
-          this.$nextTick(() => {
-            const e = document.getElementById('video-msg-list-bottom-tag')
-            if (this.videoMsgs.length > 3) {
-              const scrollObj = {
-                scrollTop: e.scrollTop
-              }
-              anime({
-                targets: scrollObj,
-                scrollTop: e.scrollHeight - e.clientHeight,
-                easing: 'easeInOutQuad',
-                round: 1,
-                update: function() {
-                  e.scrollTop = scrollObj.scrollTop
-                }
-              })
-            }
-          })
         }
       }
     },
@@ -352,9 +341,7 @@ export const IMMixin = {
     },
     receiveCustomMsgs(msgs) {
       const msgsObj = IM.parseMsgs(msgs).textMsgs[0]
-      this.sendMsgs([
-        msgsObj
-      ])
+      this.sendMsgs(msgsObj)
     },
     ...mapMutations({
       setQueueMode: 'SET_QUEUE_MODE',
@@ -394,9 +381,7 @@ export const sendMsgsMixin = {
           chatType: sessionStatus.robot
         }
         // this.setMsgs(this.msgs.concat([ques]))
-        this.sendMsgs([
-          ques
-        ])
+        this.sendMsgs(ques)
         // 获取机器人返回
         const res = await sendMsgToBot(question, this.sessionId, this.userInfo.userId, this.userInfo.userName)
         if (res.result.code === ERR_OK) {
@@ -406,9 +391,7 @@ export const sendMsgsMixin = {
           data.time = formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss')
           const answer = botAnswerfilter(data)
           // this.setMsgs(this.msgs.concat([answer]))
-          this.sendMsgs([
-            answer
-          ])
+          this.sendMsgs(answer)
           resolve()
           console.log('============================= 我现在来请求 sendMsgToBot 辣 =============================')
         } else {
@@ -463,6 +446,7 @@ export const sendMsgsMixin = {
       })
     },
     sendLikeMsg() {
+      this.afterSendC2CLikeMsgs()
       IM.sendNormalMsg(
         this.userInfo.userId,
         this.csInfo.csId,
@@ -526,9 +510,7 @@ export const sendMsgsMixin = {
         msgType: msgTypes.msg_normal,
         chatType: sessionStatus.video
       }
-      this.sendMsgs([
-        msg
-      ])
+      this.sendMsgs(msg)
     },
     afterSendC2CGiftMsgs(giftInfo) {
       const msg = {
@@ -542,9 +524,20 @@ export const sendMsgsMixin = {
         chatType: sessionStatus.video,
         giftInfo
       }
-      this.sendMsgs([
-        msg
-      ])
+      this.sendMsgs(msg)
+    },
+    afterSendC2CLikeMsgs() {
+      const msg = {
+        nickName: this.userInfo.userName,
+        avatar: this.csInfo.csId,
+        content: `我${this.userInfo.userName}给你点赞`,
+        isSelfSend: true,
+        time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+        msgStatus: msgStatus.msg,
+        msgType: msgTypes.msg_liked,
+        chatType: sessionStatus.video
+      }
+      this.sendMsgs(msg)
     },
     afterSendC2CImgMsgs(imgData) {
       const msg = {
@@ -557,9 +550,7 @@ export const sendMsgsMixin = {
         chatType: sessionStatus.video,
         imgData
       }
-      this.sendMsgs([
-        msg
-      ])
+      this.sendMsgs(msg)
     },
     ...mapActions([
       'sendMsgs'
@@ -797,9 +788,7 @@ export const onLineQueueMixin = {
           msgStatus: msgStatus.tip,
           msgType: tipTypes.tip_fail
         }
-        this.sendMsgs([
-          tip
-        ])
+        this.sendMsgs(tip)
       }
       return {
         code: '1',
@@ -826,9 +815,7 @@ export const onLineQueueMixin = {
           msgType: tipTypes.tip_line_up,
           queueNum: this.queueNum
         }
-        this.sendMsgs([
-          msg
-        ])
+        this.sendMsgs(msg)
         // 设置排队状态
         // this.setQueueMode(queueStatus.queuing)
       }
@@ -841,9 +828,7 @@ export const onLineQueueMixin = {
         msgStatus: msgStatus.msg,
         msgType: msgTypes.msg_leave
       }
-      this.sendMsgs([
-        msg
-      ])
+      this.sendMsgs(msg)
     },
     pushNormalTipMsg(content) {
       const tip = {
@@ -852,9 +837,7 @@ export const onLineQueueMixin = {
         msgStatus: msgStatus.tip,
         msgType: tipTypes.tip_normal
       }
-      this.sendMsgs([
-        tip
-      ])
+      this.sendMsgs(tip)
     },
     ...mapMutations({
       setCsInfo: 'SET_CS_INFO',
