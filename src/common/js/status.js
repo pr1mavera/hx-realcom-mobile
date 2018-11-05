@@ -32,7 +32,10 @@ export const systemMsgStatus = {
   video_requestCsEntance: 2, // 座席端视频接入请求
   video_transBaseInfo: 3, // 座席端创建会话传递
   // 20 - ~ 在线
-  onLine_requestCsEntance: 22
+  onLine_queuesReduce: 20, // 在线排队位置
+  onLine_queuesSuccess: 21, // 客户端排队成功
+  onLine_requestCsEntance: 22, // 座席端人工坐席接入请求
+  onLine_transBaseInfo: 23 // 座席端创建会话传递
 }
 
 export const msgStatus = {

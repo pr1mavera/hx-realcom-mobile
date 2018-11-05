@@ -17,13 +17,14 @@
    </span>
    <span class="item-span" v-if="msg.msgType === tipTypes.tip_line_up">
      当前排队{{msg.queueNum}}人，请耐心等待
-     <span class="button">取消排队</span>
+     <span class="button" @click="$emit('onLineCancelQueue')">取消排队</span>
    </span>
  </div>
 </template>
 
 <script type="text/ecmascript-6">
-import { formatDate } from '@/common/js/dateConfig.js'
+// import { formatDate } from '@/common/js/dateConfig.js'
+import Tools from '@/common/js/tools'
 import { tipTypes } from '@/common/js/status'
 
 export default {
@@ -43,7 +44,7 @@ export default {
   filters: {
     timeFilter(val) {
       const temp = new Date(val.replace(/-/g, '/'))
-      return formatDate(temp, 'yyyy-MM-dd hh:mm')
+      return Tools.DateTools.formatDate(temp, 'yyyy-MM-dd hh:mm')
     }
   }
 }

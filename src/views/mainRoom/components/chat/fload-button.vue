@@ -30,6 +30,7 @@
     <button
       class="item extend-click transition-bezier"
       :disabled="barStatus"
+      @click="assessViewOpen = true"
       :class="[{'visible-when-input': barStatus, 'item-4': !barStatus}]">
       <svg class="icon" aria-hidden="true">
         <use xlink:href="#icon-pingjiashouye"></use>
@@ -38,6 +39,10 @@
     <div v-transfer-dom>
       <alert v-model="showAlert" :title="alertContent" :mask-z-index="1000"></alert>
     </div>
+    <assess
+      :showAssess="assessViewOpen"
+      @handleToCancelAssess="handleToCancelAssess"
+    ></assess>
   </div>
 </template>
 
@@ -51,7 +56,8 @@ export default {
     TransferDom
   },
   components: {
-    Alert
+    Alert,
+    'Assess': () => import('@/views/mainRoom/components/assess')
   },
   props: {
     barStatus: {
@@ -66,7 +72,8 @@ export default {
   data() {
     return {
       showAlert: false,
-      alertContent: ''
+      alertContent: '',
+      assessViewOpen: false
     }
   },
   methods: {
@@ -103,6 +110,14 @@ export default {
           this.alertContent = '当前已经在人工客服中！！'
           this.showAlert = true
           break
+      }
+    },
+    handleToCancelAssess() {
+      // 用户主动关闭评价
+      this.assessViewOpen = false
+      if (this.videoTime !== '') {
+        // 视频结束
+        this.hasAssess = true
       }
     }
   }

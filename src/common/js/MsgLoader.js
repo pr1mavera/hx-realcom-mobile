@@ -5,8 +5,8 @@
  * @Last Modified time: 2018-10-29 15:30:00
 */
 import { sessionStatus, msgStatus, msgTypes, tipTypes } from '@/common/js/status'
-import { botAnswerfilter } from '@/common/js/util'
-import { formatDate, isTimeDiffLongEnough } from '@/common/js/dateConfig.js'
+import Tools from '@/common/js/tools'
+// import { formatDate, isTimeDiffLongEnough } from '@/common/js/dateConfig.js'
 
 /**
  * [MsgsLoader MsgsLoader]
@@ -59,7 +59,7 @@ const MsgsLoader = {
     let map = []
     list.length && list.forEach((item, i) => {
       item.timestamp = new Date(item.time.replace(/-/g, '/')).getTime()
-      if (isTimeDiffLongEnough(timeCache, item.time) || i === 0) {
+      if (Tools.DateTools.isTimeDiffLongEnough(timeCache, item.time) || i === 0) {
         map.push({
           content: item.time,
           time: item.time,
@@ -158,7 +158,7 @@ const SessionList = {
  */
 const Pagination = {
   curPage: 1,
-  curTime: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+  curTime: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
   pageSize: 5,
   resetPage: function() {
     this.curPage = 1
@@ -221,7 +221,7 @@ const Creator = {
         const data = JSON.parse(msgObj.msgContent).data
         data.botName = msgObj.sendUserName
         data.time = msgObj.msgTime
-        options = botAnswerfilter(data)
+        options = Tools.MsgsFilterTools.botAnswerfilter(data)
       }
     } else if (msgObj.chatType === sessionStatus.video) {
       // IM

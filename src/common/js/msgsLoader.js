@@ -7,8 +7,9 @@
 import { sessionStatus, msgStatus, msgTypes, tipTypes } from '@/common/js/status'
 import { ERR_OK, getBotRoamMsgs, requestHistoryMsgs } from '@/server/index.js'
 import IM from '@/server/im'
-import { botAnswerfilter } from '@/common/js/util'
-import { formatDate, isTimeDiffLongEnough } from '@/common/js/dateConfig.js'
+// import { botAnswerfilter } from '@/common/js/util'
+import Tools from '@/common/js/tools'
+// import { formatDate, isTimeDiffLongEnough } from '@/common/js/dateConfig.js'
 
 /**
  * [deprecate 装饰器]
@@ -24,7 +25,7 @@ const Format = {
     let timeCache = list[0].time
     let map = []
     list.length && list.forEach((item, i) => {
-      if (isTimeDiffLongEnough(timeCache, item.time) || i === 0) {
+      if (Tools.DateTools.isTimeDiffLongEnough(timeCache, item.time) || i === 0) {
         map.push({
           content: item.time,
           time: item.time,
@@ -47,7 +48,7 @@ class Message {
     this.nickName = options.nickName || ''
     this.content = options.content || ''
     this.isSelfSend = options.isSelfSend
-    this.time = options.time || formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss')
+    this.time = options.time || Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss')
     this.msgStatus = options.msgStatus
     this.msgType = options.msgType
     this.msgExtend = options.msgExtend || []
@@ -172,7 +173,7 @@ class SessionList {
 class Pagination {
   constructor(pageSize) {
     this.curPage = 1
-    this.curTime = formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss')
+    this.curTime = Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss')
     this.pageSize = pageSize
   }
   resetPage() {
@@ -295,7 +296,7 @@ class Creator {
         const data = JSON.parse(msgObj.msgContent).data
         data.botName = msgObj.sendUserName
         data.time = msgObj.msgTime
-        options = botAnswerfilter(data)
+        options = Tools.MsgsFilterTools.botAnswerfilter(data)
       }
     } else if (msgObj.chatType === sessionStatus.video) {
       // IM

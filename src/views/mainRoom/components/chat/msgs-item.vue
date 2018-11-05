@@ -42,7 +42,7 @@
         </span>
         <!-- 图片消息 -->
         <span class="text text-img" v-if="msg.msgType === msgTypes.msg_img">
-          <img class="text-img" :id="imgIdWithDate" height=100% :src="msg.imgData.small" @click="clickImgMsg">
+          <img class="text-img" :id="imgId" height=100% :src="msg.imgData.small" @click="clickImgMsg">
         </span>
         <!-- 礼物消息 -->
         <span class="text gift-item" v-if="msg.msgType === msgTypes.msg_gift">
@@ -129,11 +129,11 @@ export default {
           return '/static/img/chat/xiaohua@2x.png'
       }
     },
-    imgIdWithDate() {
+    imgId() {
       return `${this.msg.timestamp}`
     },
     msgCellId() {
-      return `msgCell_${this.imgIdWithDate}`
+      return `msgCell_${this.imgId}`
     },
     ...mapGetters([
       'csInfo'
@@ -154,7 +154,7 @@ export default {
       this.$emit('clickHotQues', ques)
     },
     clickImgMsg() {
-      this.$emit('onClickImgMsg', this.imgIdWithDate)
+      this.$emit('onClickImgMsg', +this.imgId)
     },
     /* *********************************** CopyButton *********************************** */
     showCopyButton() {

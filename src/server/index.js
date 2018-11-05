@@ -36,9 +36,9 @@ export const videoQueue = (userId, csId, priority) => http.post('RTCRoom', '/vid
 export const videoQueueCancel = (userId, csId) => http.post('RTCRoom', '/video/user/queue/cancel', { userId, csId })
 
 /**
- * [queueHeartBeat 客户端排队心跳]
+ * [videoQueueHeartBeat 客户端排队心跳]
  */
-export const queueHeartBeat = (roomId, userId) => http.post('RTCRoom', '/comm/room/heartbeat', { roomId, userId, beatType: 0 })
+export const videoQueueHeartBeat = (roomId, userId) => http.post('RTCRoom', '/comm/room/heartbeat', { roomId, userId, beatType: 0 })
 
 /**
  ************************************ video ************************************
@@ -125,3 +125,13 @@ export const saveAssess = async(data) => http.post('video', `/video/user/evaluat
  * [onLineQueue 客户端在线排队]
  */
 export const onLineQueue = data => http.post('onLine', '/queueup', data)
+
+/**
+ * [onLineQueueCancel 客户端在线取消排队]
+ */
+export const onLineQueueCancel = data => http.post('onLine', '/cancelqueue', data)
+
+/**
+ * [chatQueueHeartBeat 客户端排队心跳]
+ */
+export const chatQueueHeartBeat = data => http.post('onLine', '/heartbeat', data)

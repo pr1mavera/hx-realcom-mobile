@@ -42,6 +42,7 @@
                   @onClickImgMsg="onClickImgMsg"
                   @enterToMenChat="enterOnLineLineUp"
                   @clickHotQues="chatInputCommit"
+                  @onLineCancelQueue="cancelQueue"
                 ></component>
               </keep-alive>
             </li>
@@ -93,8 +94,8 @@ import { mapGetters, mapMutations, mapActions } from 'vuex'
 import BScroll from 'better-scroll'
 import Clipboard from 'clipboard'
 import InputBar from '@/views/mainRoom/components/chat/input-bar'
-import { debounce, getRect, isLastStrEmoji } from '@/common/js/util'
-import { formatDate } from '@/common/js/dateConfig.js'
+import Tools from '@/common/js/tools'
+// import { formatDate } from '@/common/js/dateConfig.js'
 import { loginMixin, IMMixin, sendMsgsMixin, getMsgsMixin, onLineQueueMixin } from '@/common/js/mixin'
 import { beforeEnterVideo } from '@/common/js/beforeEnterVideo'
 // eslint-disable-next-line
@@ -157,7 +158,7 @@ export default {
           map.push({
             src: item.imgData.big || '',
             msrc: item.imgData.small || '',
-            id: item.time.replace(/\s*/g, '')
+            id: item.timestamp
           })
         }
       })
@@ -260,7 +261,7 @@ export default {
             nickName: res.data.name,
             content: res.data.welcomeTip,
             isSelfSend: false,
-            time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+            time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
             msgStatus: msgStatus.msg,
             msgType: msgTypes.msg_normal
           }
@@ -270,7 +271,7 @@ export default {
             content: res.data.hotspotDoc,
             nickName: res.data.name,
             isSelfSend: false,
-            time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+            time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
             msgStatus: msgStatus.msg,
             msgType: msgTypes.msg_hot,
             msgExtend: res.data.hotspotQuestions.map((item) => {
@@ -321,7 +322,7 @@ export default {
     /* *********************************** better scroll *********************************** */
     _initScroll() {
       if (this.$refs.chatContent) {
-        this.$refs.chatContent.style.minHeight = `${getRect(this.$refs.chatScroll).height + 1}px`
+        this.$refs.chatContent.style.minHeight = `${Tools.RectTools.getRect(this.$refs.chatScroll).height + 1}px`
       }
       this.chatScroll = new BScroll(this.$refs.chatScroll, {
         click: true,
@@ -512,7 +513,7 @@ export default {
         return new Promise((resolve) => {
           self.setInputBar(false)
           // self.$refs.inputBar.setInputEditState('false')
-          debounce(() => {
+          Tools.AsyncTools.debounce(() => {
             resolve()
           }, 300)()
         }).then(() => {
@@ -527,7 +528,7 @@ export default {
       // 字符串删除
       let str = this.inputEle.innerText
       // 当前应该删除的字符所占的位数（因为含有emoji）
-      const len = isLastStrEmoji(str) ? 2 : 1
+      const len = Tools.CharTools.isLastStrEmoji(str) ? 2 : 1
       // 返回删除后的字符
       this.inputEle.innerText = str.substring(0, str.length - len)
     },
@@ -602,7 +603,7 @@ export default {
     },
     /* *********************************** copy btn *********************************** */
     showCopy(el, msg) {
-      this.targetEleRect = getRect(el)
+      this.targetEleRect = Tools.RectTools.getRect(el)
       this.copyTextTemp = msg
       this.isCopyButtonShow = true
     },
@@ -669,7 +670,8 @@ export default {
   },
   watch: {
     msgs() {
-      this.$nextTick(() => {
+      this.$nextTick(async() => {
+        await Tools.AsyncTools.sleep(30)
         this.chatScroll.refresh()
         this.chatScroll.scrollToElement(this.$refs.chatContentEnd, 400)
       })

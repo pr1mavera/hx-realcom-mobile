@@ -18,7 +18,7 @@
 <script type="text/ecmascript-6">
 import { mapGetters, mapMutations, mapActions } from 'vuex'
 import { IMMixin, RTCSystemMsg } from '@/common/js/mixin'
-import { ERR_OK, videoQueue, videoQueueCancel, queueHeartBeat } from '@/server/index.js'
+import { ERR_OK, videoQueue, videoQueueCancel, videoQueueHeartBeat } from '@/server/index.js'
 import { queueStatus } from '@/common/js/status'
 
 export default {
@@ -81,7 +81,7 @@ export default {
           this.stopHeartBeat()
           return
         }
-        this.heartBeatReq = await queueHeartBeat(this.$route.params.csId, this.userInfo.userId)
+        this.heartBeatReq = await videoQueueHeartBeat(this.$route.params.csId, this.userInfo.userId)
         if (this.heartBeatReq.code === ERR_OK) {
           console.info('心跳成功')
           this.heartBeatFailCount = 0

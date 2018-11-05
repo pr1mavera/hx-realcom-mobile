@@ -50,7 +50,7 @@
 <script type="text/ecmascript-6">
 import { mapGetters } from 'vuex'
 import anime from 'animejs'
-import { utf16toEntities } from '@/common/js/util'
+import Tools from '@/common/js/tools'
 // import { XTextarea, Group } from 'vux'
 
 export default {
@@ -64,6 +64,9 @@ export default {
     }
   },
   computed: {
+    // isSendBtnShow() {
+    //   return this.inputBarOpen || this.
+    // },
     ...mapGetters([
       'extendBarOpen',
       'inputBarOpen'
@@ -88,7 +91,7 @@ export default {
       this.$emit('chatInputChange', this.inputText)
     },
     chatCommit() {
-      const str = utf16toEntities(this.$refs.inputContent.innerHTML)
+      const str = Tools.CharTools.utf16toEntities(this.$refs.inputContent.innerHTML)
       // 存发送过的表情
       this.storageEmoji(str)
       // 提交发送

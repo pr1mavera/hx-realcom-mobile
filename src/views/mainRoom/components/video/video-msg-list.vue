@@ -20,7 +20,7 @@
               </i>
             </span>
             <span class="text-section" v-if="item.msgType === msgTypes.msg_liked">
-              <span class="text">我送给客服点了一个赞</span>
+              <span class="text">我{{userInfo.userName}}给你点赞</span>
             </span>
           </div>
         </li>
@@ -32,6 +32,7 @@
 <script type="text/ecmascript-6">
 import { mapGetters } from 'vuex'
 import { msgTypes } from '@/common/js/status'
+import anime from 'animejs'
 
 export default {
   computed: {

@@ -1,13 +1,13 @@
 import * as types from './mutation-types'
-import { sleep } from '@/common/js/util'
-import { isTimeDiffLongEnough, formatDate } from '@/common/js/dateConfig.js'
+import Tools from '@/common/js/tools'
+// import { isTimeDiffLongEnough, formatDate } from '@/common/js/dateConfig.js'
 import { sessionStatus, toggleBarStatus, roomStatus, queueStatus, msgStatus, tipTypes } from '@/common/js/status'
 import { ERR_OK, createSession } from '@/server/index.js'
 
 export const closeBarBuffer = function({ commit }, { mutationType, delay }) {
   return (async function() {
     commit(mutationType, false)
-    await sleep(delay)
+    await Tools.AsyncTools.sleep(delay)
   })()
 }
 
@@ -46,7 +46,7 @@ export const enterToLineUp = function({ commit, state }, content) {
   commit(types.SET_QUEUE_MODE, queueStatus.queuing)
   const tip = [{
     content,
-    time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+    time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
     msgStatus: msgStatus.tip,
     msgType: tipTypes.tip_normal
   }]
@@ -58,7 +58,7 @@ export const readyToVideoChat = function({ commit, state }) {
   commit(types.SET_ROOM_MODE, roomStatus.videoChat)
   const tip = [{
     content: '视频客服转接成功，祝您沟通愉快！',
-    time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+    time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
     msgStatus: msgStatus.tip,
     msgType: tipTypes.tip_success
   }]
@@ -74,7 +74,7 @@ export const quitVideoChat = function({ commit, state }) {
   initSession({ commit, state })
   const tip = [{
     content: '服务结束，期待与您的下次对话！',
-    time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+    time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
     msgStatus: msgStatus.tip,
     msgType: tipTypes.tip_normal
   }]
@@ -105,7 +105,7 @@ export const sendMsgs = async function({ commit, state }, msg) {
       console.log(`------------------------------------- 循环了 ${i} -------------------------------------`)
     }
     // 若间隔时间大于约定时间，则生成时间信息tip
-    if (lastT && isTimeDiffLongEnough(lastT, msg.time)) {
+    if (lastT && Tools.DateTools.isTimeDiffLongEnough(lastT, msg.time)) {
       const tip = {
         content: msg.time,
         time: msg.time,

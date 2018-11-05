@@ -98,7 +98,7 @@
 </template>
 
 <script type="text/ecmascript-6">
-import { sleep } from '@/common/js/util'
+import Tools from '@/common/js/tools'
 import { Badge, Alert, TransferDomDirective as TransferDom } from 'vux'
 import anime from 'animejs'
 import { ERR_OK, addCs, queryCsInfo, getCsAvatar } from '@/server/index.js'
@@ -205,10 +205,10 @@ export default {
       // 切换
       this.angle = -this.endAngle
       // this.resetAngle()
-      await sleep(300)
+      await Tools.AsyncTools.sleep(300)
       this.resetAngle()
       console.log('switchCS')
-      await sleep(10)
+      await Tools.AsyncTools.sleep(10)
       this.switchCS()
     },
     async hendleAdd() {
@@ -216,10 +216,10 @@ export default {
       this.angle = this.endAngle
       // this.resetAngle()
       // 模拟请求服务，添加专属客服
-      await sleep(300)
+      await Tools.AsyncTools.sleep(300)
       this.resetAngle()
       console.log('addCS')
-      await sleep(10)
+      await Tools.AsyncTools.sleep(10)
       await this.addCS()
     },
     // 将当前客服添加为专属客服 获取当前专属客服的个数this.$route.query
