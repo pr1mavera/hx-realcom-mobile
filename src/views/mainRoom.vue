@@ -1,9 +1,24 @@
 <template>
   <div class="main-room">
     <keep-alive :include="['chat', 'cus-serv']">
-      <router-view class="router-view"></router-view>
+      <router-view class="router-view"
+        @showIosGuide="iosGuide = true"
+        @showLowVersion="lowVersion = true"
+        @showShare="isShareView = true"
+      ></router-view>
     </keep-alive>
-    <videoBar class="video-bar" v-if="isVideoBarOpen"></videoBar>
+    <videoBar class="video-bar"
+      v-if="isVideoBarOpen"
+      @showShare="toShare"
+    ></videoBar>
+    <share
+      :show="isShareView"
+      @cancelShare="isShareView = false"
+      @toShare="toShare"
+    ></share>
+    <ios-guide v-if="iosGuide" @click.native="iosGuide = false"></ios-guide>
+    <low-version v-if="lowVersion" @click.native="lowVersion = false"></low-version>
+    <share-guide v-if="shareGuide" @click.native="shareGuide = false"></share-guide>
   </div>
 </template>
 
@@ -13,11 +28,18 @@ import { roomStatus } from '@/common/js/status'
 
 export default {
   components: {
-    'videoBar': () => import('@/views/mainRoom/videoBar')
+    'videoBar': () => import('@/views/mainRoom/videoBar'),
+    'Share': () => import('@/views/mainRoom/components/share'),
+    'IosGuide': () => import('@/views/mainRoom/components/video/ios-guide'),
+    'LowVersion': () => import('@/views/mainRoom/components/video/low-version'),
+    'ShareGuide': () => import('@/views/mainRoom/components/share-guide')
   },
   data() {
     return {
-
+      isShareView: false,
+      shareGuide: false,
+      iosGuide: false,
+      lowVersion: false
     }
   },
   computed: {
@@ -29,10 +51,12 @@ export default {
       'roomMode'
     ])
   },
-  mounted() {
-
-  },
-  methods: {}
+  methods: {
+    toShare() {
+      this.isShareView = false
+      this.shareGuide = true
+    }
+  }
 }
 </script>
 

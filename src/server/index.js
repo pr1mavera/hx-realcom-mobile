@@ -36,9 +36,9 @@ export const videoQueue = (userId, csId, priority) => http.post('RTCRoom', '/vid
 export const videoQueueCancel = (userId, csId) => http.post('RTCRoom', '/video/user/queue/cancel', { userId, csId })
 
 /**
- * [queueHeartBeat 客户端排队心跳]
+ * [videoQueueHeartBeat 客户端排队心跳]
  */
-export const queueHeartBeat = (roomId, userId) => http.post('RTCRoom', '/comm/room/heartbeat', { roomId, userId, beatType: 0 })
+export const videoQueueHeartBeat = (roomId, userId) => http.post('RTCRoom', '/comm/room/heartbeat', { roomId, userId, beatType: 0 })
 
 /**
  ************************************ video ************************************
@@ -78,6 +78,11 @@ export const viewGifts = async(page, pageSize, csId) => http.get('video', `/vide
 // 标签信息查询(传csId查询到评价当前客服的标签，csId=‘’查询到所有的标签）
 export const viewLabels = async(page, pageSize, csId) => http.get('video', `/video/user/labels?page=${page}&pageSize=${pageSize}&csId=${csId}`)
 export const viewAllLabels = async(page, pageSize) => http.get('video', `/video/user/labels?page=${page}&pageSize=${pageSize}`)
+
+/**
+ * [getUserInfoByOpenID 获取用户基本信息]
+ */
+export const getShareTicket = url => http.get('video', `/ticket/query`, { url })
 
 /**
  ************************************ chat ************************************
@@ -124,4 +129,14 @@ export const saveAssess = async(data) => http.post('video', `/video/user/evaluat
 /**
  * [onLineQueue 客户端在线排队]
  */
-export const onLineQueue = data => http.post('onLine', '/queueUp', data)
+export const onLineQueue = data => http.post('onLine', '/queueup', data)
+
+/**
+ * [onLineQueueCancel 客户端在线取消排队]
+ */
+export const onLineQueueCancel = data => http.post('onLine', '/cancelqueue', data)
+
+/**
+ * [chatQueueHeartBeat 客户端排队心跳]
+ */
+export const chatQueueHeartBeat = data => http.post('onLine', '/heartbeat', data)

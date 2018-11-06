@@ -1,12 +1,11 @@
 import { mapGetters, mapMutations, mapActions } from 'vuex'
 import IM from '@/server/im'
-import anime from 'animejs'
 // import Creator from '@/common/js/msgsLoader'
-import MsgsLoader from '@/common/js/MsgLoader'
+import MsgsLoader from '@/common/js/MsgsLoader'
 // import WebRTCAPI from 'webRTCAPI'
-import { ERR_OK, getUserInfoByOpenID, getLoginInfo, pushSystemMsg, sendMsgToBot, getSessionList, getCsAvatar, onLineQueue, getBotRoamMsgs, requestHistoryMsgs } from '@/server/index.js'
-import { shallowCopy, botAnswerfilter } from '@/common/js/util'
-import { formatDate } from '@/common/js/dateConfig.js'
+import { ERR_OK, getUserInfoByOpenID, getLoginInfo, pushSystemMsg, sendMsgToBot, getSessionList, getCsAvatar, onLineQueue, getBotRoamMsgs, requestHistoryMsgs, onLineQueueCancel, chatQueueHeartBeat } from '@/server/index.js'
+import Tools from '@/common/js/tools'
+// import { formatDate } from '@/common/js/dateConfig.js'
 import { queueStatus, sessionStatus, systemMsgStatus, msgStatus, msgTypes, tipTypes } from '@/common/js/status'
 
 export const loginMixin = {
@@ -42,7 +41,7 @@ export const loginMixin = {
       if (res.result.code === ERR_OK) {
         console.log('============================= 我现在来请求 getUserInfo 辣 =============================')
         return new Promise((resolve) => {
-          const info = shallowCopy(this.userInfo)
+          const info = Tools.CopyTools.objShallowClone(this.userInfo)
           info.accountType = res.data.accountType
           info.sdkAppID = res.data.sdkAppId
           info.userSig = res.data.userSig
@@ -54,24 +53,8 @@ export const loginMixin = {
         console.log('error in getLoginInfo')
       }
     },
-    // async initSession() {
-    //   // 机器人会话
-    //   const res = await createSession(this.userInfo.userId, this.userInfo.userName, this.userInfo.userPhone, sessionStatus.robot)
-    //   // const res = await createSession(this.userInfo.userId, this.userInfo.userName, this.userInfo.userPhone)
-    //   if (res.result.code === ERR_OK) {
-    //     console.log('============================= 会话创建成功 辣 =============================')
-    //     return new Promise((resolve) => {
-    //       // 存vuex roomId
-    //       this.setSessionId(res.data.id)
-    //       resolve()
-    //     })
-    //   } else {
-    //     console.log('============================= 会话创建失败 辣 =============================')
-    //   }
-    // },
     ...mapMutations({
       setUserInfo: 'SET_USER_INFO',
-      // setRoomId: 'SET_ROOM_ID',
       setSessionId: 'SET_SESSION_ID'
     })
   }
@@ -375,7 +358,7 @@ export const sendMsgsMixin = {
           nickName: this.userInfo.userName,
           content: question,
           isSelfSend: true,
-          time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+          time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
           msgStatus: msgStatus.msg,
           msgType: msgTypes.msg_normal,
           chatType: sessionStatus.robot
@@ -388,8 +371,8 @@ export const sendMsgsMixin = {
           // 此处将用户的输入保存至vuex
           const data = res.data.answer.data
           data.botName = this.botInfo.botName
-          data.time = formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss')
-          const answer = botAnswerfilter(data)
+          data.time = Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss')
+          const answer = Tools.MsgsFilterTools.botAnswerfilter(data)
           // this.setMsgs(this.msgs.concat([answer]))
           this.sendMsgs(answer)
           resolve()
@@ -411,7 +394,7 @@ export const sendMsgsMixin = {
             sessionId: this.sessionId,
             toUserName: this.csInfo.csName,
             msg: text,
-            time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+            time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
             nickName: this.userInfo.userName,
             avatar: this.csInfo.csId,
             identifier: this.userInfo.userId,
@@ -433,7 +416,7 @@ export const sendMsgsMixin = {
             sessionId: this.sessionId,
             toUserName: this.csInfo.csName,
             msg: `${this.userInfo.userName}给你送了一个礼物`,
-            time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+            time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
             nickName: this.userInfo.userName,
             avatar: this.csInfo.csId,
             identifier: this.userInfo.userId,
@@ -455,7 +438,7 @@ export const sendMsgsMixin = {
           sessionId: this.sessionId,
           toUserName: this.csInfo.csName,
           msg: `我${this.userInfo.userName}给你点赞`,
-          time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+          time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
           nickName: this.userInfo.userName,
           avatar: this.csInfo.csId,
           identifier: this.userInfo.userId,
@@ -477,14 +460,15 @@ export const sendMsgsMixin = {
         this.afterSendC2CImgMsgs(imgData)
         resolve()
         // IM 封装上传/发送图片
+        const self = this
         const info = {
           msg: '图片消息',
-          time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
-          nickName: this.userInfo.userName,
-          avatar: this.csInfo.csId,
-          toUserName: this.csInfo.csName,
-          sessionId: this.sessionId,
-          identifier: this.userInfo.userId,
+          time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+          nickName: self.userInfo.userName,
+          avatar: self.csInfo.csId,
+          toUserName: self.csInfo.csName,
+          sessionId: self.sessionId,
+          identifier: self.userInfo.userId,
           msgStatus: msgStatus.msg,
           msgType: msgTypes.msg_img,
           chatType: sessionStatus.video
@@ -500,12 +484,13 @@ export const sendMsgsMixin = {
       })
     },
     afterSendC2CTextMsgs(text) {
+      const self = this
       const msg = {
-        nickName: this.userInfo.userName,
-        avatar: this.csInfo.csId,
+        nickName: self.userInfo.userName,
+        avatar: self.csInfo.csId,
         content: text,
         isSelfSend: true,
-        time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+        time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
         msgStatus: msgStatus.msg,
         msgType: msgTypes.msg_normal,
         chatType: sessionStatus.video
@@ -513,12 +498,13 @@ export const sendMsgsMixin = {
       this.sendMsgs(msg)
     },
     afterSendC2CGiftMsgs(giftInfo) {
+      const self = this
       const msg = {
-        nickName: this.userInfo.userName,
-        avatar: this.csInfo.csId,
-        content: `${this.userInfo.userName}给你送了一个礼物`,
+        nickName: self.userInfo.userName,
+        avatar: self.csInfo.csId,
+        content: `${self.userInfo.userName}给你送了一个礼物`,
         isSelfSend: true,
-        time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+        time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
         msgStatus: msgStatus.msg,
         msgType: msgTypes.msg_gift,
         chatType: sessionStatus.video,
@@ -527,12 +513,13 @@ export const sendMsgsMixin = {
       this.sendMsgs(msg)
     },
     afterSendC2CLikeMsgs() {
+      const self = this
       const msg = {
-        nickName: this.userInfo.userName,
-        avatar: this.csInfo.csId,
-        content: `我${this.userInfo.userName}给你点赞`,
+        nickName: self.userInfo.userName,
+        avatar: self.csInfo.csId,
+        content: `我${self.userInfo.userName}给你点赞`,
         isSelfSend: true,
-        time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+        time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
         msgStatus: msgStatus.msg,
         msgType: msgTypes.msg_liked,
         chatType: sessionStatus.video
@@ -540,11 +527,12 @@ export const sendMsgsMixin = {
       this.sendMsgs(msg)
     },
     afterSendC2CImgMsgs(imgData) {
+      const self = this
       const msg = {
-        nickName: this.userInfo.userName,
-        avatar: this.csInfo.csId,
+        nickName: self.userInfo.userName,
+        avatar: self.csInfo.csId,
         isSelfSend: true,
-        time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+        time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
         msgStatus: msgStatus.msg,
         msgType: msgTypes.msg_img,
         chatType: sessionStatus.video,
@@ -588,7 +576,7 @@ export const RTCSystemMsg = {
           userId: userInfo.userId,
           userName: userInfo.userName,
           userPhone: userInfo.userPhone,
-          openId: userInfo.openId,
+          openId: userInfo.userId,
           orign: '官微',
           robotSessionId: this.sessionId
         },
@@ -717,7 +705,11 @@ export const getMsgsMixin = {
 export const onLineQueueMixin = {
   data() {
     return {
-      onLineQueueCsId: ''
+      onLineQueueCsId: '',
+      heart: false, // 判断心跳变量
+      heartBeatTimer: 0,
+      heartBeatReq: null,
+      heartBeatFailCount: 0 // 心跳包超时失败次数
     }
   },
   computed: {
@@ -729,54 +721,41 @@ export const onLineQueueMixin = {
   methods: {
     async enterOnLineLineUp() {
       window.sessionStorage.setItem('queue_start_time', new Date().getTime())
-      // // 在线转人工流程
-      // // 1. 请求排队
-      // const res = await this.formatOnLineQueueAPI()
-      // // 2. 处理
-      // if (res.code === ERR_OK) {
-      //   this.afterQueueSuccess(res.data)
-      // } else {
-      //   this.botSendLeaveMsg()
-      // }
-
-      // 排队成功，直接通知坐席
-      const msg = {
-        csId: '00535530bcdd11e8bac9b72d08583923'
+      // 在线转人工流程
+      // 1. 请求排队
+      const res = await this.formatOnLineQueueAPI()
+      // 2. 处理
+      if (res.code === ERR_OK) {
+        this.afterQueueSuccess(res.data)
+      } else {
+        this.botSendLeaveMsg()
       }
-      RTCSystemMsg.responseVideoQueuesSuccess(msg, this.userInfo)
-      // 存客服基本信息
-      this.setCsInfo(msg)
     },
     async formatOnLineQueueAPI() {
-      // const res = await onLineQueue({
-      //   chatGuid: this.sessionId,
-      //   customerGuid: this.userInfo.userId,
-      //   customerNick: this.userInfo.userName,
-      //   identity: this.userInfo.userGrade,
-      //   insuranceType: '1',
-      //   origin: '官微',
-      //   type: '2'
-      // })
-      const res = await onLineQueue({
-        chatGuid: this.sessionId,
-        customerGuid: this.userInfo.userId,
+      const self = this
+      const option = {
+        chatGuid: self.sessionId,
+        customerGuid: self.userInfo.userId,
         customerImg: '',
-        customerNick: this.userInfo.userName,
+        customerNick: self.userInfo.userName,
         identity: '4',
         insuranceType: '1',
         origin: '1',
         type: '1'
-      })
+      }
+      const res = await onLineQueue(option)
       const data = res.data
       if (res.result_code === '200') {
         if (data.workTIme) {
+          // 发送正在转接提示
           this.enterToLineUp('正在为您转接在线客服，请稍候')
           // 排队中
           return {
             code: '0',
             data: {
               num: data.teamNum,
-              csId: data.userCode
+              csId: data.userCode || '',
+              isTeam: data.team
             }
           }
         }
@@ -784,7 +763,7 @@ export const onLineQueueMixin = {
         console.log('===== 排队出错 辣 =====')
         const tip = {
           content: '转接失败',
-          time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+          time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
           msgStatus: msgStatus.tip,
           msgType: tipTypes.tip_fail
         }
@@ -796,7 +775,7 @@ export const onLineQueueMixin = {
       }
     },
     afterQueueSuccess(data) {
-      if (data.num === 0) {
+      if (!data.isTeam) {
         // 排队成功，直接通知坐席
         const msg = {
           csId: data.csId
@@ -804,26 +783,63 @@ export const onLineQueueMixin = {
         RTCSystemMsg.responseVideoQueuesSuccess(msg, this.userInfo)
       } else {
         // 排队等待
+        // 开启心跳
+        this.startHeartBeat()
         // 设置排队人数
         this.setQueueNum(data.num)
         // 记录系统返回的默认排队坐席Id
         this.onLineQueueCsId = data.csId
         const msg = {
           content: '',
-          time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+          time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
           msgStatus: msgStatus.tip,
           msgType: tipTypes.tip_line_up,
           queueNum: this.queueNum
         }
         this.sendMsgs(msg)
         // 设置排队状态
-        // this.setQueueMode(queueStatus.queuing)
+        this.setQueueMode(queueStatus.queuing)
+      }
+    },
+    async cancelQueue() {
+      // const res = await onLineQueueCancel({
+      //   chatGuid: this.sessionId,
+      //   customerGuid: this.userInfo.userId
+      // })
+    },
+    startHeartBeat() {
+      this.heart = true
+      this.heartBeatTimer = setInterval(async() => {
+        console.warn('====== 在线的 我现在请求心跳 ======')
+        if (!this.heart || !this.$route.params.csId) {
+          // 非常规退出 & 浏览器回退
+          this.stopHeartBeat()
+          return
+        }
+        this.heartBeatReq = await chatQueueHeartBeat(this.$route.params.csId, this.userInfo.userId)
+        if (this.heartBeatReq.code === ERR_OK) {
+          console.info('心跳成功')
+          this.heartBeatFailCount = 0
+        } else {
+          this.heartBeatFailCount++
+          if (this.heartBeatFailCount > 2) {
+            console.error('心跳失败 辣')
+          }
+        }
+      }, 10000)
+    },
+    stopHeartBeat() {
+      this.heart = false
+      this.heartBeatTimer = clearInterval(this.heartBeatTimer)
+      if (this.heartBeatReq) {
+        this.heartBeatReq = null
       }
     },
     botSendLeaveMsg() {
       const msg = {
         nickName: this.botInfo.botName,
         content: '',
+        time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
         isSelfSend: false,
         msgStatus: msgStatus.msg,
         msgType: msgTypes.msg_leave
@@ -833,7 +849,7 @@ export const onLineQueueMixin = {
     pushNormalTipMsg(content) {
       const tip = {
         content,
-        time: formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+        time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
         msgStatus: msgStatus.tip,
         msgType: tipTypes.tip_normal
       }

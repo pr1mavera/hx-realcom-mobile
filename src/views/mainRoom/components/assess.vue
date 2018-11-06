@@ -15,7 +15,8 @@
                  <use xlink:href='#icon-xingxing'></use></svg>" :margin="8">
           </rater>
         </div>
-        <div class="eva-more" v-if="stars > 0">
+        <!-- <div class="eva-more" v-if="stars > 0"> -->
+        <div class="eva-more" v-show="stars > 0">
           <!--<swiper height="9.5rem" style="background: #F1F1F1;margin-top: 1.5rem;" dots-class="custom-bottom" dots-position="center">-->
             <!--<swiper-item><div class="btn-box"></div></swiper-item>-->
             <!--<swiper-item><h2 class="fadeInUp animated">test2</h2></swiper-item>-->
@@ -39,6 +40,7 @@
   import { TransferDom, Popup, Rater, XButton, Swiper, SwiperItem, Toast } from 'vux'
   import { ERR_OK, saveAssess, getCsAvatar } from '@/server/index.js'
   import { mapGetters } from 'vuex'
+  import LabelBtn from '@/views/mainRoom/components/label-btn'
 
   // const btnList = [
   //   '']
@@ -53,7 +55,8 @@
       Swiper,
       SwiperItem,
       Toast,
-      'LabelBtn': () => import('@/views/mainRoom/components/label-btn')
+      LabelBtn
+      // 'LabelBtn': () => import('@/views/mainRoom/components/label-btn')
     },
     props: {
       showAssess: {
@@ -81,7 +84,7 @@
         'csInfo'
       ]),
       avatarImgSrc() {
-        return getCsAvatar(this.csInfo.csId)
+        return this.csInfo.csId ? getCsAvatar(this.csInfo.csId) : ''
       }
     },
     methods: {

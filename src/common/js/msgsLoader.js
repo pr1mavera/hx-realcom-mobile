@@ -1,30 +1,65 @@
 /*
 * @Author: Primavera
-* @Date:   2018-10-15 14:25:00
+* @Date:   2018-10-29 15:30:00
  * @Last Modified by: Primavera
- * @Last Modified time: 2018-10-22 10:33:00
+ * @Last Modified time: 2018-10-29 15:30:00
 */
 import { sessionStatus, msgStatus, msgTypes, tipTypes } from '@/common/js/status'
-import { ERR_OK, getBotRoamMsgs, requestHistoryMsgs } from '@/server/index.js'
-import IM from '@/server/im'
-import { botAnswerfilter } from '@/common/js/util'
-import { formatDate, isTimeDiffLongEnough } from '@/common/js/dateConfig.js'
+import Tools from '@/common/js/tools'
+// import { formatDate, isTimeDiffLongEnough } from '@/common/js/dateConfig.js'
 
 /**
- * [deprecate 装饰器]
+ * [MsgsLoader MsgsLoader]
  */
-function deprecate(...list) {
-  return function(target) {
-    Object.assign(target.prototype, ...list)
-  }
-}
-
-const Format = {
-  timeTipsFormat(list) {
+const MsgsLoader = {
+  info: {},
+  page: {},
+  roamMsgsIterator: {},
+  history: {},
+  init: function(config) {
+    return Creator.createMsgsLoader(config)
+  },
+  getMsgs: async function() {
+    if (this.noMoreMsgs()) {
+      // 当前已无消息
+      return
+    }
+    let list = []
+    console.info('this.page.curPage :' + this.page.curPage)
+    console.info('this.page.curTime :' + this.page.curTime)
+    console.info('this.page.pageSize :' + this.page.pageSize)
+    if (this.roamMsgsIterator.hasNext()) {
+      // 拉取漫游消息
+      const curSession = this.roamMsgsIterator.list[this.roamMsgsIterator.index]
+      list = await curSession.getRoamMsgs(this.info.id, this.page)
+      if (curSession.isCurSessionReachFinalPage(this.page)) {
+        // 消息为当前会话最后一页，更新当前会话、分页
+        this.roamMsgsIterator.next()
+        this.page.resetPage()
+        this.page.updateCurTime(list[0].time)
+      } else {
+        this.page.updateCurPage()
+        this.page.updateCurTime(list[0].time)
+      }
+    } else {
+      // 拉取历史消息
+      list = await this.history.getHistoryMsgs(this.info.id, this.page)
+      if (list.length) {
+        this.page.updateCurPage()
+        this.page.updateCurTime(list[0].time)
+      }
+    }
+    return list
+  },
+  noMoreMsgs: function() {
+    return !this.roamMsgsIterator.hasNext() && this.history.isHistoryOver
+  },
+  timeTipsFormat: function(list) {
     let timeCache = list[0].time
     let map = []
     list.length && list.forEach((item, i) => {
-      if (isTimeDiffLongEnough(timeCache, item.time) || i === 0) {
+      item.timestamp = new Date(item.time.replace(/-/g, '/')).getTime()
+      if (Tools.DateTools.isTimeDiffLongEnough(timeCache, item.time) || i === 0) {
         map.push({
           content: item.time,
           time: item.time,
@@ -39,48 +74,37 @@ const Format = {
   }
 }
 
-/**
- * [Message 消息]
- */
-class Message {
-  constructor(options) {
-    this.nickName = options.nickName || ''
-    this.content = options.content || ''
-    this.isSelfSend = options.isSelfSend
-    this.time = options.time || formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss')
-    this.msgStatus = options.msgStatus
-    this.msgType = options.msgType
-    this.msgExtend = options.msgExtend || []
-    this.imgData = options.imgData || {}
-    this.proxyInfo = options.proxyInfo || {}
-  }
-}
+export default MsgsLoader
 
 /**
  * [Session 会话]
  */
-class Session {
-  constructor(options) {
-    this.sessionId = options.sessionId
-    this.csId = options.csId
-    this.chatType = options.chatType
-    this.chatCount = options.chatCount
-    this.Creator = new Creator()
-  }
-  isCurSessionReachFinalPage(page) {
+const Session = {
+  sessionId: '',
+  csId: '',
+  chatType: '',
+  chatCount: 0,
+  isCurSessionReachFinalPage: function(page) {
     // 当前会话已经拉取到最后一页
     return this.chatCount - page.curPage * page.pageSize <= 0
-  }
-  async getRoamMsgs(userId, Pagination) {
-    let res = {}
+  },
+  getRoamMsgs: async function(id, Pagination) {
+    let res = []
+    let map = []
     switch (this.chatType) {
       case sessionStatus.robot:
         // 机器人
-        res = await this.getBot(userId, this.sessionId, Pagination.curPage, Pagination.pageSize)
+        res = await this.getBotAPI(id, this.sessionId, Pagination.curPage, Pagination.pageSize)
+        if (res.length) {
+          res.forEach(item => {
+            map.unshift(Creator.createMessage(id, item))
+          })
+        }
         break
       case sessionStatus.video:
         // 视频
-        res = await this.getVideo(userId, this.csId, Pagination.curTime, Pagination.pageSize)
+        res = await this.getVideoAPI(id, this.csId, Pagination.curTime, Pagination.pageSize)
+        map = Creator.IMMsgsparse(res.MsgList)
         break
       case sessionStatus.onLine:
         // 在线
@@ -92,53 +116,27 @@ class Session {
     // 过滤最后一页条数
     const LeftCount = this.chatCount - (Pagination.curPage - 1) * Pagination.pageSize
     if (LeftCount <= Pagination.pageSize) {
-      return res.slice(res.length - LeftCount)
+      return map.slice(map.length - LeftCount)
     } else {
-      return res
-    }
-  }
-  async getBot(userId, sessionId, curPage, pageSize) {
-    const res = await getBotRoamMsgs(sessionId, curPage, pageSize)
-    if (res.result.code === ERR_OK) {
-      console.log('============================= 我现在来请求 机器人 漫游消息 辣 =============================')
-      const list = res.data.msgList
-      let map = []
-      if (list.length) {
-        list.forEach(item => {
-          map.unshift(this.Creator.createMessage(userId, item))
-        })
-      }
       return map
-    } else {
-      console.log('error in getBotRoamMsgs')
     }
-  }
-  async getVideo(userId, csId, curTime, pageSize) {
-    const res = await IM.getIMRoamMsgs(csId, curTime, pageSize)
-    if (res && res.MsgList) {
-      console.log('============================= 我现在来请求 视频坐席 漫游消息 辣 =============================')
-      const map = IM.parseMsgs(res.MsgList).textMsgs
-      return map
-    } else {
-      console.log('error in getIMRoamMsgs')
-    }
-  }
+  },
+  getBotAPI: async function() {},
+  getVideoAPI: async function() {}
 }
 
 /**
  * [Iterator 迭代器]
  */
-class Iterator {
-  constructor(conatiner) {
-    this.list = conatiner.list
-    this.index = 0
-  }
-  next() {
+const Iterator = {
+  list: [],
+  index: 0,
+  next: function() {
     const done = !this.hasNext()
     const value = this.hasNext() ? this.list[this.index++] : undefined
     return { value, done }
-  }
-  hasNext() {
+  },
+  hasNext: function() {
     return this.index < this.list.length
   }
 }
@@ -146,43 +144,30 @@ class Iterator {
 /**
  * [SessionList 会话队列]
  */
-class SessionList {
-  constructor(sessions) {
-    this.list = sessions || []
-    // this.curIndex = 0
-    // this.isRoamMsgsOver = this.sessions.length === 0
+const SessionList = {
+  sesslist: [],
+  getIterator: function() {
+    let iterator = Object.create(Iterator)
+    iterator.list = this.sesslist
+    return iterator
   }
-  getIterator() {
-    return new Iterator(this)
-  }
-  // getCurSession() {
-  //   return this.sessions[this.curIndex]
-  // }
-  // nextSession() {
-  //   this.curIndex += 1
-  //   if (!this.getCurSession()) {
-  //     this.isRoamMsgsOver = true
-  //   }
-  // }
 }
 
 /**
  * [Pagination 分页]
  */
-class Pagination {
-  constructor(pageSize) {
+const Pagination = {
+  curPage: 1,
+  curTime: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+  pageSize: 5,
+  resetPage: function() {
     this.curPage = 1
-    this.curTime = formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss')
-    this.pageSize = pageSize
-  }
-  resetPage() {
-    this.curPage = 1
-  }
-  updateCurPage() {
+  },
+  updateCurPage: function() {
     // 更新分页
     this.curPage += 1
-  }
-  updateCurTime(newTime) {
+  },
+  updateCurTime: function(newTime) {
     // 更新时间
     this.curTime = newTime
   }
@@ -191,95 +176,36 @@ class Pagination {
 /**
  * [History 历史消息]
  */
-class History {
-  constructor() {
-    this.isHistoryOver = false
-    this.Creator = new Creator()
-  }
-  async getHistoryMsgs(userId, page) {
-    const res = await requestHistoryMsgs(userId, page.curPage, page.pageSize)
-    if (res.result.code === ERR_OK) {
-      console.log('============================= 我现在来请求 历史消息 辣 =============================')
-      const list = res.data.msgList
-      let map = []
-      if (list.length) {
-        list.forEach(item => {
-          if (!item.chatType) {
-            item.chatType = '2'
-          }
-          item.msgContent = JSON.parse(item.msgContent)[0].MsgContent
-          map.unshift(this.Creator.createMessage(userId, item))
-        })
-      } else {
-        this.isHistoryOver = true
-      }
-      return map
+const History = {
+  isHistoryOver: false,
+  getHistoryMsgsAPI: async function() {},
+  getHistoryMsgs: async function(id, page) {
+    let list = await this.getHistoryMsgsAPI(id, page)
+    let map = []
+    if (list.length) {
+      list.forEach(item => {
+        if (!item.chatType) {
+          item.chatType = '2'
+        }
+        item.msgContent = JSON.parse(item.msgContent)[0].MsgContent
+        map.unshift(Creator.createMessage(id, item))
+      })
     } else {
-      console.log('error in requestHistoryMsgs')
+      this.isHistoryOver = true
     }
+    return map
   }
 }
 
 /**
- * [MsgsLoader MsgsLoader]
+ * [Creator 工厂]
  */
-@deprecate(Format)
-class MsgsLoader {
-  constructor(userInfo, sessionList) {
-    this.userInfo = userInfo
-    this.clientHeight = 0
-    this.page = new Pagination(5)
-    this.roamMsgsIterator = sessionList.getIterator()
-    // this.sessionList = sessionList
-    this.history = new History()
-  }
-  recordMsgsClientHeight() {}
-  async getMsgs() {
-    if (this.noMoreMsgs()) {
-      // 当前已无消息
-      return
-    }
-    let list = []
-    console.info('this.page.curPage :' + this.page.curPage)
-    console.info('this.page.curTime :' + this.page.curTime)
-    console.info('this.page.pageSize :' + this.page.pageSize)
-    if (this.roamMsgsIterator.hasNext()) {
-      // 拉取漫游消息
-      const curSession = this.roamMsgsIterator.list[this.roamMsgsIterator.index]
-      list = await curSession.getRoamMsgs(this.userInfo.userId, this.page)
-      if (curSession.isCurSessionReachFinalPage(this.page)) {
-        // 消息为当前会话最后一页，更新当前会话、分页
-        this.roamMsgsIterator.next()
-        this.page.resetPage()
-        this.page.updateCurTime(list[0].time)
-      } else {
-        this.page.updateCurPage()
-        this.page.updateCurTime(list[0].time)
-      }
-    } else {
-      // 拉取历史消息
-      list = await this.history.getHistoryMsgs(this.userInfo.userId, this.page)
-      if (list.length) {
-        this.page.updateCurPage()
-        this.page.updateCurTime(list[0].time)
-      }
-    }
-    return list
-  }
-  noMoreMsgs() {
-    return !this.roamMsgsIterator.hasNext() && this.history.isHistoryOver
-  }
-}
-
-/**
- * [Creator 工厂类]
- */
-class Creator {
-  createMessage(userId, msgObj) {
+const Creator = {
+  createMessage: function(id, msgObj) {
     let options = {}
     if (msgObj.chatType === sessionStatus.robot) {
       // 机器人
-      const isSelfSend = msgObj.sendUserId === userId
+      const isSelfSend = msgObj.sendUserId === id
       if (isSelfSend) {
         // 我发送的机器人的
         options = {
@@ -295,7 +221,7 @@ class Creator {
         const data = JSON.parse(msgObj.msgContent).data
         data.botName = msgObj.sendUserName
         data.time = msgObj.msgTime
-        options = botAnswerfilter(data)
+        options = Tools.MsgsFilterTools.botAnswerfilter(data)
       }
     } else if (msgObj.chatType === sessionStatus.video) {
       // IM
@@ -303,7 +229,7 @@ class Creator {
       options = {
         nickName: obj.Desc.nickName,
         content: obj.Data,
-        isSelfSend: obj.Desc.sendUserId === userId,
+        isSelfSend: obj.Desc.sendUserId === id,
         time: obj.Desc.time,
         msgStatus: obj.Desc.msgStatus,
         msgType: obj.Desc.msgType
@@ -317,28 +243,93 @@ class Creator {
         options.proxyInfo = obj.Ext.proxyInfo
       }
     }
-    return new Message(options)
-  }
-  createSession(sessionObj) {
-    return new Session({
-      sessionId: sessionObj.sessionId,
-      csId: sessionObj.csId,
-      chatType: sessionObj.chatType,
-      chatCount: sessionObj.chatCount
+    return options
+  },
+  IMMsgsparse: function(newMsgList) {
+    var textMsgs = []
+    for (var i in newMsgList) { // 遍历新消息
+      var msg = this.parseMsg(newMsgList[i])
+      textMsgs.push(msg)
+    }
+    return textMsgs
+  },
+  parseMsg: function(newMsg) {
+    var msgItem = newMsg.getElems()[0]
+    var type = msgItem.getType()
+    if (type === 'TIMCustomElem') {
+      var content = msgItem.getContent() // 获取元素对象
+      var desc = JSON.parse(content.getDesc())
+      var msgType = desc.msgType
+      var msgStatus = desc.msgStatus
+      var time = desc.time
+      var nickName = desc.nickName
+      var avatar = desc.avatar
+      var chatType = desc.chatType
+      var ext = JSON.parse(content.getExt())
+      if (ext.imgData) {
+        var imgData = ext.imgData
+      }
+      if (ext.proxyInfo) {
+        var proxyInfo = ext.proxyInfo
+      }
+      if (ext.giftInfo) {
+        var giftInfo = ext.giftInfo
+      }
+    }
+    return {
+      nickName,
+      avatar,
+      imgData,
+      proxyInfo,
+      giftInfo,
+      content: newMsg.toHtml(),
+      isSelfSend: newMsg.getIsSend(),
+      isSystem: newMsg.getFromAccount() === '@TIM#SYSTEM' || false,
+      msgType,
+      msgStatus,
+      chatType,
+      time
+    }
+  },
+  createSession: function(sessionObj, getBotAPI, getVideoAPI) {
+    let session = Object.create(Session)
+    session.sessionId = sessionObj.sessionId
+    session.csId = sessionObj.csId
+    session.chatType = sessionObj.chatType
+    session.chatCount = sessionObj.chatCount
+    session.getBotAPI = getBotAPI
+    session.getVideoAPI = getVideoAPI
+    return session
+  },
+  createSessionList: function(sessions) {
+    let sessionList = Object.create(SessionList)
+    sessionList.sesslist = sessions || []
+    return sessionList
+  },
+  createPagination: function(pageSize) {
+    let pagination = Object.create(Pagination)
+    pagination.pageSize = pageSize
+    return pagination
+  },
+  createHistory: function(getHistoryMsgsAPI) {
+    let history = Object.create(History)
+    history.getHistoryMsgsAPI = getHistoryMsgsAPI
+    return history
+  },
+  createMsgsLoader: function({ info, pageSize, sessions, getHistoryMsgsAPI, getBotAPI, getVideoAPI }) {
+    let msgsLoader = Object.create(MsgsLoader)
+    msgsLoader.info = info
+    msgsLoader.page = this.createPagination(pageSize)
+    // 初始化
+    let sessionsTemp = []
+    sessions.forEach(item => {
+      if (item.chatCount) {
+        sessionsTemp.push(this.createSession(item, getBotAPI, getVideoAPI))
+      }
     })
-  }
-  createSessionList(sessions) {
-    return new SessionList(sessions)
-  }
-  createPagination(pageSize) {
-    return new Pagination(pageSize)
-  }
-  createHistory() {
-    return new History()
-  }
-  createMsgsLoader(userInfo, sessionList) {
-    return new MsgsLoader(userInfo, sessionList)
+    let sessionList = this.createSessionList(sessionsTemp)
+    msgsLoader.roamMsgsIterator = sessionList.getIterator()
+    msgsLoader.history = this.createHistory(getHistoryMsgsAPI)
+    return msgsLoader
   }
 }
-
-export default new Creator()

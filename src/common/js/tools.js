@@ -1,6 +1,44 @@
 import { msgStatus, msgTypes, sessionStatus } from '@/common/js/status'
 
-const Tools = {
+const DateTools = {
+  formatDate: (date, format) => {
+    if (format === undefined) {
+      format = date
+      date = new Date()
+    }
+    var map = {
+      'M': date.getMonth() + 1, // 月份
+      'd': date.getDate(), // 日
+      'h': date.getHours(), // 小时
+      'm': date.getMinutes(), // 分
+      's': date.getSeconds(), // 秒
+      'q': Math.floor((date.getMonth() + 3) / 3), // 季度
+      'S': date.getMilliseconds() // 毫秒
+    }
+    format = format.replace(/([yMdhmsqS])+/g, function(all, t) {
+      var v = map[t]
+      if (v !== undefined) {
+        if (all.length > 1) {
+          v = '0' + v
+          v = v.substr(v.length - 2)
+        }
+        return v
+      } else if (t === 'y') {
+        return (date.getFullYear() + '').substr(4 - all.length)
+      }
+      return all
+    })
+    return format
+  },
+
+  isTimeDiffLongEnough: (cache, next) => {
+    const cacheT = new Date(cache.replace(/-/g, '/'))
+    const nextT = new Date(next.replace(/-/g, '/'))
+    return nextT - cacheT >= 60000
+  }
+}
+
+const AsyncTools = {
   debounce: (func, time) => {
     let timer
 
@@ -37,18 +75,10 @@ const Tools = {
       }
       window.requestAnimationFrame(step)
     })
-  },
+  }
+}
 
-  // 字符串删除最后一个字符
-  subLastString: (str) => {
-    // 当前应该删除的字符所占的位数（因为含有emoji）
-    const len = this.isLastStrEmoji(str) ? 2 : 1
-    // 截去需要删除的字符
-    const newStr = str.substring(0, str.length - len)
-    // 返回删除后的字符
-    return newStr
-  },
-
+const CharTools = {
   // 正则判断一个字符的结尾是否是emoji
   isLastStrEmoji: (str) => {
     // 最后两位字符
@@ -73,10 +103,12 @@ const Tools = {
       }
     })
     return str
-  },
+  }
+}
 
+const CopyTools = {
   // 浅拷贝
-  shallowCopy: (obj) => {
+  objShallowClone: (obj) => {
     let newObj = {}
     for (let key in obj) {
       newObj[key] = obj[key]
@@ -84,6 +116,20 @@ const Tools = {
     return newObj
   },
 
+  // 深拷贝
+  objDeepClone: (obj) => {
+    let _obj = JSON.stringify(obj)
+    return JSON.parse(_obj)
+  },
+
+  // 数组拷贝
+  arrShallowClone: (arr) => {
+    return arr.slice(0)
+  }
+}
+
+const RectTools = {
+  // 获取dom基于offsetParent的位置
   getRect: (el) => {
     if (el instanceof window.SVGElement) {
       let rect = el.getBoundingClientRect()
@@ -103,6 +149,27 @@ const Tools = {
     }
   },
 
+  // 获取dom基于屏幕的位置
+  getRectLimitDoc: (el) => {
+    let actualTop = el.offsetTop
+    let actualLeft = el.offsetLeft
+    let current = el.offsetParent
+    while (current !== null) {
+      actualTop += current.offsetTop
+      actualLeft += current.offsetLeft
+      current = current.offsetParent
+    }
+    return {
+      top: actualTop,
+      left: actualLeft,
+      width: el.offsetWidth,
+      height: el.offsetHeight
+    }
+  }
+}
+
+const MsgsFilterTools = {
+  // 机器人消息解析器
   botAnswerfilter: (data) => {
     let msg = {
       content: '',
@@ -140,7 +207,56 @@ const Tools = {
       ]
     }
     return msg
+  },
+
+  // IM消息解析
+  parseMsg: (newMsg) => {
+    var msgItem = newMsg.getElems()[0]
+    var type = msgItem.getType()
+    if (type === 'TIMCustomElem') {
+      var content = msgItem.getContent() // 获取元素对象
+      var desc = JSON.parse(content.getDesc())
+      var msgType = desc.msgType
+      var msgStatus = desc.msgStatus
+      var time = desc.time
+      var nickName = desc.nickName
+      var avatar = desc.avatar
+      var chatType = desc.chatType
+      var ext = JSON.parse(content.getExt())
+      if (ext.imgData) {
+        var imgData = ext.imgData
+      }
+      if (ext.proxyInfo) {
+        var proxyInfo = ext.proxyInfo
+      }
+      if (ext.giftInfo) {
+        var giftInfo = ext.giftInfo
+      }
+    }
+    return {
+      nickName,
+      avatar,
+      imgData,
+      proxyInfo,
+      giftInfo,
+      content: newMsg.toHtml(),
+      isSelfSend: newMsg.getIsSend(),
+      isSystem: newMsg.getFromAccount() === '@TIM#SYSTEM' || false,
+      msgType,
+      msgStatus,
+      chatType,
+      time
+    }
   }
 }
+
+let Tools = {}
+
+Tools.DateTools = Object.create(DateTools)
+Tools.AsyncTools = Object.create(AsyncTools)
+Tools.CharTools = Object.create(CharTools)
+Tools.CopyTools = Object.create(CopyTools)
+Tools.RectTools = Object.create(RectTools)
+Tools.MsgsFilterTools = Object.create(MsgsFilterTools)
 
 export default Tools

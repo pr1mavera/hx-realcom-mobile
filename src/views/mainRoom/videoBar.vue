@@ -9,14 +9,16 @@
     <!-- 最大化 -->
     <div class="full-screen-container" v-show="fullScreen">
       <div class="video-window" :class="server" v-show="!isVideoOverReportShow || !isChangeCamera">
-        <video
+        <video height=100%
           id="remoteVideo"
+          v-if="!videoScreenShotShow"
           autoplay
           playsinline
         ></video>
+        <img width=100% height=100% v-if="videoScreenShotShow" :src="videoScreenShotSrc" class="video-screen-shot">
       </div>
       <div class="video-window" :class="customer" v-show="!isVideoOverReportShow || isChangeCamera">
-        <video
+        <video height=100%
           id="localVideo"
           muted
           autoplay
@@ -72,6 +74,7 @@
             :csName="this.csInfo.csName"
             :time="videoTime"
             @goBackToChat="goBackToChat"
+            @showShare="$emit('showShare')"
           ></video-over-toast>
         </x-dialog>
       </div>
@@ -86,6 +89,7 @@
         ></video>
       </div>
     </div>
+    <canvas id="videoCanvas" v-show="false"></canvas>
   </div>
 </template>
 
@@ -126,6 +130,7 @@ export default {
     // },
     isVideoOverReportShow() {
       return this.hasAssess && this.videoTime !== ''
+      // return true
     },
     customer() {
       return this.isChangeCamera ? 'big' : 'small'
@@ -144,6 +149,8 @@ export default {
   },
   data() {
     return {
+      videoScreenShotShow: false,
+      videoScreenShotSrc: '',
       // 通话开始时间
       startTimeStamp: null,
       // 视频时长
@@ -197,7 +204,9 @@ export default {
       IM.joinGroup(this.roomId, this.userInfo.userId)
       this.initRTC(this.roomId)
     },
-    hangUpVideo() {
+    async hangUpVideo() {
+      // 截取坐席视频
+      await this.getVideoScreenShot()
       // 停止推流
       this.quitRTC()
       // 记录通话时间
@@ -219,6 +228,21 @@ export default {
         // 视频结束
         this.hasAssess = true
       }
+    },
+    getVideoScreenShot() {
+      return new Promise((resolve) => {
+        const canvas = document.getElementById('videoCanvas')
+        var canvasCtx = canvas.getContext('2d')
+        var video = document.getElementById('remoteVideo')
+        canvas.width = video.clientWidth
+        canvas.height = video.clientHeight
+        // 坐原图像的x,y轴坐标，大小，目标图像的x，y轴标，大小。
+        canvasCtx.drawImage(video, 0, 0, video.clientWidth, video.clientHeight)
+        // 把图标base64编码后变成一段url字符串
+        this.videoScreenShotSrc = canvas.toDataURL('image/png')
+        this.videoScreenShotShow = true
+        resolve()
+      })
     },
     goBackToChat() {
       // 退群
@@ -280,15 +304,21 @@ export default {
         z-index: 1;
       }
       video {
-        width: 100%;
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
         height: 100%;
-        object-fit: cover;
         &#remoteVideo {
           background-color: #666;
         }
         &#localVideo {
           background-color: #222;
         }
+      }
+      .video-screen-shot {
+        object-fit: cover;
+        filter: blur(10px);
       }
     }
     .video-components-section {

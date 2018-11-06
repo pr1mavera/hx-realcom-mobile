@@ -111,7 +111,7 @@
     left: 0;
     right: 0;
     margin: auto;
-    z-index: 5000;
+    z-index: 1000;
     width: 7.2rem;
     height: 7.2rem;
     background-color: rgba(0, 0, 0, 0.5);
