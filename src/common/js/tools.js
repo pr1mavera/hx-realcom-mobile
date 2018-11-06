@@ -1,7 +1,7 @@
 import { msgStatus, msgTypes, sessionStatus } from '@/common/js/status'
 
 const DateTools = {
-  formatDate: (date, format) => {
+  formatDate: function(date, format) {
     if (format === undefined) {
       format = date
       date = new Date()
@@ -31,7 +31,7 @@ const DateTools = {
     return format
   },
 
-  isTimeDiffLongEnough: (cache, next) => {
+  isTimeDiffLongEnough: function(cache, next) {
     const cacheT = new Date(cache.replace(/-/g, '/'))
     const nextT = new Date(next.replace(/-/g, '/'))
     return nextT - cacheT >= 60000
@@ -39,7 +39,7 @@ const DateTools = {
 }
 
 const AsyncTools = {
-  debounce: (func, time) => {
+  debounce: function(func, time) {
     let timer
 
     return function(...args) {
@@ -53,7 +53,7 @@ const AsyncTools = {
     }
   },
 
-  sleep: (time) => {
+  sleep: function(time) {
     return new Promise((resolve, reject) => {
       setTimeout(function() {
         resolve()
@@ -61,7 +61,7 @@ const AsyncTools = {
     })
   },
 
-  sleepByAnimation: (time) => {
+  sleepByAnimation: function(time) {
     return new Promise((resolve, reject) => {
       var start = null
       const step = function(timestamp) {
@@ -80,7 +80,7 @@ const AsyncTools = {
 
 const CharTools = {
   // 正则判断一个字符的结尾是否是emoji
-  isLastStrEmoji: (str) => {
+  isLastStrEmoji: function(str) {
     // 最后两位字符
     const lastTwoCharacter = str.substring(str.length - 2, str.length)
     // 转码
@@ -89,7 +89,7 @@ const CharTools = {
   },
 
   // 带emoji字符转编码
-  utf16toEntities: (str) => {
+  utf16toEntities: function(str) {
     var patt = /[\ud800-\udbff][\udc00-\udfff]/g // 检测utf16字符正则
     str = str.replace(patt, function(char) {
       var H, L, code
@@ -108,7 +108,7 @@ const CharTools = {
 
 const CopyTools = {
   // 浅拷贝
-  objShallowClone: (obj) => {
+  objShallowClone: function(obj) {
     let newObj = {}
     for (let key in obj) {
       newObj[key] = obj[key]
@@ -117,20 +117,20 @@ const CopyTools = {
   },
 
   // 深拷贝
-  objDeepClone: (obj) => {
+  objDeepClone: function(obj) {
     let _obj = JSON.stringify(obj)
     return JSON.parse(_obj)
   },
 
   // 数组拷贝
-  arrShallowClone: (arr) => {
+  arrShallowClone: function(arr) {
     return arr.slice(0)
   }
 }
 
 const RectTools = {
   // 获取dom基于offsetParent的位置
-  getRect: (el) => {
+  getRect: function(el) {
     if (el instanceof window.SVGElement) {
       let rect = el.getBoundingClientRect()
       return {
@@ -150,7 +150,7 @@ const RectTools = {
   },
 
   // 获取dom基于屏幕的位置
-  getRectLimitDoc: (el) => {
+  getRectLimitDoc: function(el) {
     let actualTop = el.offsetTop
     let actualLeft = el.offsetLeft
     let current = el.offsetParent
@@ -170,7 +170,7 @@ const RectTools = {
 
 const MsgsFilterTools = {
   // 机器人消息解析器
-  botAnswerfilter: (data) => {
+  botAnswerfilter: function(data) {
     let msg = {
       content: '',
       nickName: data.botName,
@@ -210,7 +210,7 @@ const MsgsFilterTools = {
   },
 
   // IM消息解析
-  parseMsg: (newMsg) => {
+  parseMsg: function(newMsg) {
     var msgItem = newMsg.getElems()[0]
     var type = msgItem.getType()
     if (type === 'TIMCustomElem') {
