@@ -58,10 +58,10 @@ export default {
           })
           // this.enterToLineUp('正在为您转接视频客服，请稍候')
           break
-        case '2': // 就绪状态
+        case '0': // 就绪状态
           // this.alertTip = true
           this.$router.push({path: `/room/line-up/${this.csSelected.csId}`})
-          this.enterToLineUp('正在为您转接视频客服，请稍候')
+          // this.enterToLineUp('正在为您转接视频客服，请稍候')
           break
         case '3':
           this.$vux.alert.show({
