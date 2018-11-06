@@ -50,7 +50,7 @@ export default {
     goToLineUp() {
       // debugger
       switch (this.csSelected.csStatus) {
-        case '0':
+        case '1':
           this.lineUpAlert = false
           // this.$router.push({path: `/room/line-up/${this.csSelected.csId}`})
           this.$vux.alert.show({
