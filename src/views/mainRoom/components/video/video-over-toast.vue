@@ -13,6 +13,7 @@
       <p class="desc">总通话时长</p>
     </div>
     <div class="footer">
+      <button class="share" type="button" @click="$emit('showShare')">分享</button>
       <button class="back" type="button" @click="$emit('goBackToChat')">返回</button>
     </div>
   </div>
@@ -72,7 +73,7 @@ export default {
     }
   }
   .container {
-    min-height: 24rem;
+    min-height: 20rem;
     .title {
       font-size: 2.4rem;
       font-weight: 400;
@@ -95,7 +96,8 @@ export default {
   }
   .footer {
     padding-bottom: 5rem;
-    .back {
+    button {
+      display: block;
       width: 15rem;
       height: 4rem;
       margin: 0 auto;
@@ -104,7 +106,13 @@ export default {
       font-size: 1.4rem;
       color: @text-lighter;
       border-radius: 2rem;
-      background: linear-gradient(90deg, rgba(255, 144, 91, 0.6), rgba(255, 126, 171, 0.6));
+      &.share {
+        background: rgba(100, 100, 100, .3);
+        margin-bottom: 1.6rem;
+      }
+      &.back {
+        background: linear-gradient(90deg, rgba(255, 144, 91, 0.6), rgba(255, 126, 171, 0.6));
+      }
     }
   }
 }

@@ -34,6 +34,7 @@
     top: 0;
     opacity: .85;
     background: #626262;
+    z-index: 6000;
     .step-one {
       text-align: right;
       img {

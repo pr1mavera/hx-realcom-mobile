@@ -33,7 +33,7 @@
     min-height: 100vh;
     position: fixed;
     top: 0;
-    z-index: 2;
+    z-index: 6000;
     background: #F4F4F4;
     .main {
       padding: 10rem 0 0;

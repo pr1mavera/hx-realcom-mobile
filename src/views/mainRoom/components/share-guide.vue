@@ -1,6 +1,6 @@
 <!-- 引导用户分享的弹层 -->
 <template>
-  <div class="container share-guide" @click="hideShare">
+  <div class="container share-guide">
     <div class="step-one">
       <img src="/static/img/ios-guide1.png" style="width: 7.6rem">
     </div>
@@ -12,28 +12,21 @@
 
 <script>
   export default {
-    // name: "share-guide.vue"
     methods: {
-      hideShare: function(event) {
-        const con = document.getElementsByClassName('container')
-        if (con) {
-          // alert('关闭弹框')
-          this.$emit('hideShareGuide')
-        }
-      }
+
     }
   }
 </script>
 
 <style scoped lang="less">
-  .container {
+  .share-guide {
     position: fixed;
     top: 0;
     width: 100%;
     min-height: 100vh;
     opacity: .6;
     background: #646464;
-    z-index: 2;
+    z-index: 6000;
     img {
       vertical-align: middle;
     }

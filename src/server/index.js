@@ -80,6 +80,11 @@ export const viewLabels = async(page, pageSize, csId) => http.get('video', `/vid
 export const viewAllLabels = async(page, pageSize) => http.get('video', `/video/user/labels?page=${page}&pageSize=${pageSize}`)
 
 /**
+ * [getUserInfoByOpenID 获取用户基本信息]
+ */
+export const getShareTicket = url => http.get('video', `/ticket/query`, { url })
+
+/**
  ************************************ chat ************************************
  */
 

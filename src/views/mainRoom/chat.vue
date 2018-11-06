@@ -73,13 +73,11 @@
       @sendImg="sendImgMsgClick"
       @sendGift="sendGiftMsgClick"
     ></extend-bar>
-    <ios-guide v-if="iosGuide" @click.native="toggleGuide(false)"></ios-guide>
-    <low-version v-if="lowVersion" @close="toggleUpgrade(false)"></low-version>
     <!-- 长按 复制 -->
     <div class="copy"
       ref="copyBtn"
       :style="copyButtonRect"
-      @click="clickCopyBtn()">
+      @click="clickCopyBtn">
       <span class="text">复制</span>
     </div>
     <div class="copyMask" v-show="isCopyButtonShow" @touchstart="resetCopyBtn"></div>
@@ -129,8 +127,6 @@ export default {
     'CardItem': () => import('@/views/mainRoom/components/chat/card-item'),
     'FloadButton': () => import('@/views/mainRoom/components/chat/fload-button'),
     'extendBar': () => import('@/views/mainRoom/components/chat/extend-bar'),
-    'IosGuide': () => import('@/views/mainRoom/components/video/ios-guide'),
-    'LowVersion': () => import('@/views/mainRoom/components/video/low-version'),
     'PullDown': () => import('@/views/mainRoom/components/chat/pull-down')
   },
   computed: {
@@ -192,8 +188,6 @@ export default {
       extendBarLaunchOpen: false,
       msgStatus: msgStatus,
       translateX: 0,
-      iosGuide: false,
-      lowVersion: false,
       /* pull-down-load */
       pullDownInitTop: -50,
       beforePullDown: true,
@@ -488,13 +482,6 @@ export default {
       this.$refs.extendBar.giftSectionShow = false
       this.$refs.extendBar.expressSectionShow = false
     },
-    /* *********************************** change chat mode *********************************** */
-    toggleGuide(data) {
-      this.iosGuide = data
-    },
-    toggleUpgrade(data) {
-      this.lowVersion = data
-    },
     /* *********************************** entend bar *********************************** */
     async sendImgMsgClick(file) {
       await this.sendImgMsg(file)
@@ -545,11 +532,11 @@ export default {
           break
         case 'ios-guide':
           // 当前为iOS的微信环境，需跳转至Safari
-          this.toggleGuide(true)
+          this.$emit('showIosGuide')
           break
         case 'low-version':
           // 当前系统版本过低
-          this.toggleUpgrade(true)
+          this.$emit('showLowVersion')
           break
       }
     },

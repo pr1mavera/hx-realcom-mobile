@@ -1,7 +1,7 @@
 import { mapGetters, mapMutations, mapActions } from 'vuex'
 import IM from '@/server/im'
 // import Creator from '@/common/js/msgsLoader'
-import MsgsLoader from '@/common/js/MsgLoader'
+import MsgsLoader from '@/common/js/MsgsLoader'
 // import WebRTCAPI from 'webRTCAPI'
 import { ERR_OK, getUserInfoByOpenID, getLoginInfo, pushSystemMsg, sendMsgToBot, getSessionList, getCsAvatar, onLineQueue, getBotRoamMsgs, requestHistoryMsgs, onLineQueueCancel, chatQueueHeartBeat } from '@/server/index.js'
 import Tools from '@/common/js/tools'

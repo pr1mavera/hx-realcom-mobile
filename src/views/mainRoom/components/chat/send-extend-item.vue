@@ -16,7 +16,7 @@
 export default {
   computed: {
     imgUrl() {
-      return `/static/img/${this.icon}@2x.png`
+      return `/static/img/${this.icon}.png`
     }
   },
   props: {
