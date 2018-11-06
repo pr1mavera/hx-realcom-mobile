@@ -31,7 +31,8 @@ export default {
   computed: {
     ...mapGetters([
       'userInfo',
-      'queueNum'
+      'queueNum',
+      'sessionId'
     ])
   },
   data() {
@@ -53,7 +54,7 @@ export default {
       const msg = {
         csId: this.$route.params.csId
       }
-      RTCSystemMsg.responseVideoQueuesSuccess(msg, this.userInfo)
+      RTCSystemMsg.responseVideoQueuesSuccess(msg, this.userInfo, this.sessionId)
     }
     // 开启心跳
     this.startHeartBeat()

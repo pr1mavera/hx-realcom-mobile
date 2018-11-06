@@ -305,7 +305,7 @@ export const IMMixin = {
           this.setQueueNum(this.queueNum - 1)
           break
         case systemMsgStatus.video_queuesSuccess: // 客户端排队成功（视频）
-          RTCSystemMsg.responseVideoQueuesSuccess(msgsObj, this.userInfo)
+          RTCSystemMsg.responseVideoQueuesSuccess(msgsObj, this.userInfo, this.sessionId)
           // 存客服基本信息
           this.setCsInfo(msgsObj)
           break
@@ -558,7 +558,7 @@ export const RTCSystemMsg = {
   },
 
   /* 响应 客户端排队成功（视频） */
-  responseVideoQueuesSuccess(msgsObj, userInfo) {
+  responseVideoQueuesSuccess(msgsObj, userInfo, sessionId) {
     // 发送系统消息，通知座席端视频接入
     const sessionStorage = window.sessionStorage
     const startTime = parseInt(sessionStorage.getItem('queue_start_time'))
@@ -578,7 +578,7 @@ export const RTCSystemMsg = {
           userPhone: userInfo.userPhone,
           openId: userInfo.userId,
           orign: '官微',
-          robotSessionId: this.sessionId
+          robotSessionId: sessionId
         },
         desc: `${userInfo.userName}排队成功辣`,
         ext: ''
@@ -715,7 +715,8 @@ export const onLineQueueMixin = {
   computed: {
     ...mapGetters([
       'userInfo',
-      'queueNum'
+      'queueNum',
+      'sessionId'
     ])
   },
   methods: {
@@ -780,7 +781,7 @@ export const onLineQueueMixin = {
         const msg = {
           csId: data.csId
         }
-        RTCSystemMsg.responseVideoQueuesSuccess(msg, this.userInfo)
+        RTCSystemMsg.responseVideoQueuesSuccess(msg, this.userInfo, this.sessionId)
       } else {
         // 排队等待
         // 开启心跳
