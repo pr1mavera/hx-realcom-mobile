@@ -576,7 +576,7 @@ export const RTCSystemMsg = {
           userId: userInfo.userId,
           userName: userInfo.userName,
           userPhone: userInfo.userPhone,
-          openId: userInfo.openId,
+          openId: userInfo.userId,
           orign: '官微',
           robotSessionId: this.sessionId
         },
