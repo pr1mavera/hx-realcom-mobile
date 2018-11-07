@@ -341,7 +341,7 @@ export default {
 
         this.curLabelInfo = this.cslist[0]
         this.avatarImg = getCsAvatar(this.curLabelInfo.id)
-        console.log('===========客服列表:' + JSON.stringify(this.cslist))
+        // console.log('===========客服列表:' + JSON.stringify(this.cslist))
       } else {
         console.log('error about query csInfo')
       }

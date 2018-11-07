@@ -44,7 +44,9 @@ export default {
     resetMyCs(list) {
       this.myCs = list
     },
+    // 删除
     removeCs(index) {
+      debugger
       this.myCs.splice(index, 1)
     },
     goToLineUp() {

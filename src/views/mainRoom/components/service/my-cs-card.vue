@@ -1,5 +1,6 @@
 <template>
-  <div class="container my-cs-card">
+  <!---->
+  <div class="container my-cs-card" :class="{'remove-cs': removeStyle}">
     <!-- 关闭按钮 -->
     <span class="close" @click="removeCusSer">
       <svg class="icon" aria-hidden="true" style="width: 1.1rem;height: 1.1rem;fill: #D6D7DC;">
@@ -60,7 +61,7 @@
     },
     data() {
       return {
-        showTips: false
+        removeStyle: false
       }
     },
     computed: {
@@ -81,6 +82,8 @@
       },
       // 确定删除当前客服
       async deleteCsConfirm() {
+        debugger
+        this.removeStyle = true // 删除当前客服的交互
         const userId = this.userInfo.userId
         const cusSerId = this.cusSerId
         const data = {
@@ -88,6 +91,7 @@
           'csId': cusSerId
         }
 
+        debugger
         const res = await removeCs(data)
         if (res.result.code === ERR_OK) {
           this.$emit('removeCs', this.csIndex)
@@ -95,9 +99,7 @@
         } else {
           console.log('error of remove the cusSer:' + JSON.stringify(res))
         }
-        // if (msg) {
-        //   alert(msg)
-        // }
+        this.removeStyle = false // 清除删除当前客服的交互
       },
       onShow() {
         console.log('on show')
@@ -105,7 +107,7 @@
       onHide() {
         console.log('on hide')
       },
-      // 删除客服
+      // 点击‘X’
       removeCusSer() {
         const self = this
         this.$vux.confirm.show({
@@ -115,19 +117,6 @@
           }
         })
       },
-
-      // 获取客服头像
-      // async getAvatar() {
-        // const cusSerId = this.cusSerId
-        // const res = await getCsAvatar(cusSerId)
-        //
-        // if (res) {
-        //   this.avatarImgSrc = res
-        //   console.log('==============您已经成功的获取到了客服的头像' + JSON.stringify(res))
-        // } else {
-        //   console.log('there are some errors about query the avatar of cs' + JSON.stringify(res.result))
-        // }
-      // },
 
       // 点击专属客服头像进入客服的个人中心
       enterSerCenter() {
@@ -197,6 +186,22 @@
           padding-top: .4rem;
         }
       }
+    }
+  }
+  /* 删除客服时的交互 */
+  .remove-cs {
+    animation: removeCs 5s;
+    animation-fill-mode: forwards; // 当动画结束后保留在最后的状态
+  }
+  @keyframes removeCs {
+    from {
+      height: 19rem;
+      opacity: 1;
+    }
+    to {
+      height: 0;
+      opacity: .1;
+      display: none;
     }
   }
 
