@@ -34,7 +34,7 @@
                   <li class="cs-info-list">
                     <span class="title">收到礼物</span>
                     <span class="text">
-                      <label>{{curLabelInfo.giftCount === null ? 0 : curLabelInfo.giftCount}}}份</label>
+                      <label>{{curLabelInfo.giftCount === null ? 0 : curLabelInfo.giftCount}}份</label>
                     </span>
                   </li>
                   <li class="cs-info-list">
@@ -73,7 +73,10 @@
     </div>
     <div class="slide-btn">
       <div class="btn btn-left" @click="hendleChange">切 换</div>
-      <div class="btn btn-right" @click="hendleAdd">添加为专属客服</div>
+      <!--<div class="btn btn-right" @click="hendleAdd">添加为专属客服</div>-->
+      <XButton class="btn btn-right" :gradients="['#FF8C6A', '#FF80A0']" @click.native="hendleAdd" :disabled="addDis">
+        添加为专属客服
+      </XButton>
     </div>
     <div class="fload-tip">
       <div class="tip tip-left" id="fload-tip-left" :class="{'show-fload-tip-left': angle <= -targAngle}">
@@ -99,7 +102,7 @@
 
 <script type="text/ecmascript-6">
 import Tools from '@/common/js/tools'
-import { Badge, Alert, TransferDomDirective as TransferDom } from 'vux'
+import { XButton, Badge, Alert, TransferDomDirective as TransferDom } from 'vux'
 import anime from 'animejs'
 import { ERR_OK, addCs, queryCsInfo, getCsAvatar } from '@/server/index.js'
 import { mapGetters } from 'vuex'
@@ -109,6 +112,7 @@ export default {
     TransferDom
   },
   components: {
+    XButton,
     Badge,
     Alert
   },
@@ -154,7 +158,8 @@ export default {
       floadTipLeftAnimeCache: null,
       floadTipRightAnimeCache: null,
       avatarImg: '',
-      showTip: false
+      showTip: false,
+      addDis: false // 此时‘添加’按钮可点击
     }
   },
   computed: {
@@ -211,9 +216,12 @@ export default {
       await Tools.AsyncTools.sleep(10)
       this.switchCS()
     },
+
+    // 当用户点击‘添加’按钮时触发的事件
     async hendleAdd() {
       // 添加
       this.angle = this.endAngle
+      this.addDis = true // 此时的按钮再次点击无效
       // this.resetAngle()
       // 模拟请求服务，添加专属客服
       await Tools.AsyncTools.sleep(300)
@@ -230,6 +238,7 @@ export default {
       // 数组去重
       Array.from(new Set(temp))
       if (temp.length > 3) {
+        this.addDis = false // 此时‘添加’按钮可以重新点击
         this.showTip = true
         this.curLabelInfo = this.cslist[0]
         return
@@ -239,12 +248,11 @@ export default {
       const userId = this.userInfo.userId
       // 选中客服的ID
       const cuSerId = this.cslist[0].id
-
       const data = {
         'userId': userId,
         'csId': cuSerId
       }
-      console.log('============添加专属客服输入的数据' + JSON.stringify(data) + JSON.stringify(temp.length))
+
       const res = await addCs(data)
       if (res.result.code === ERR_OK) {
         console.log(JSON.stringify(res))
@@ -253,6 +261,7 @@ export default {
         console.log('error about add the cS' + JSON.stringify(res))
       }
       this.resetCurLabelInfo()
+      this.addDis = false // 此时‘添加’按钮可以重新点击
       return 0
     },
     switchCS() {
@@ -325,35 +334,17 @@ export default {
       const listType = '2'
       const res = await queryCsInfo(page, pageSize, userId, listType)
       if (res.result.code === ERR_OK) {
-        console.log('所有客服列表' + JSON.stringify(res.data.csList))
+        // console.log('所有客服列表' + JSON.stringify(res.data.csList))
         // const totalPage = res.data.totalCount
         // (if totalPage === -1) {不计算}else{pages = Math.flower(total / 5)}
         this.cslist = res.data.csList
 
         this.curLabelInfo = this.cslist[0]
-        // this.avatarImg = getImgUrl(this.curLabelInfo.resultUrl)
-        // this.avatarImg = this.getAvatar(this.curLabelInfo.id)
-        // this.getAvatar(this.curLabelInfo.id)
         this.avatarImg = getCsAvatar(this.curLabelInfo.id)
         console.log('===========客服列表:' + JSON.stringify(this.cslist))
       } else {
         console.log('error about query csInfo')
       }
-    },
-
-    // 获取客服头像
-    async getAvatar(cusSerId) {
-      // const cusSerId = this.cusSerId
-      // const res = await getCsAvatar(cusSerId)
-      //
-      // if (res) {
-      //   // debugger
-      //   console.log('==============您已经成功的获取到了客服的头像' + JSON.stringify(res))
-      //   this.avatarImg = res
-      //   return JSON.stringify(res)
-      // } else {
-      //   console.log('there are some errors about query the avatar of cs' + JSON.stringify(res.result))
-      // }
     }
   }
 }
@@ -548,6 +539,7 @@ export default {
         box-shadow: 0 0.5rem 1.2rem 0 rgba(0, 0, 0, .05);
       }
       &.btn-right {
+        width: max-content;
         padding: 0 2rem;
         background: linear-gradient(to right, #FF8C6A, #FF80A0);
         color: @text-lighter;
