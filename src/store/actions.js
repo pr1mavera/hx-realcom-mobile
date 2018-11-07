@@ -53,23 +53,35 @@ export const enterToLineUp = function({ commit, state }, content) {
   commit(types.SET_MSGS, state.msgs.concat(tip))
 }
 
-export const readyToVideoChat = function({ commit, state }) {
+export const queueFinishEnterRoom = function({ commit, state }, mode) {
   commit(types.SET_QUEUE_MODE, queueStatus.queueOver)
-  commit(types.SET_ROOM_MODE, roomStatus.videoChat)
-  const tip = [{
-    content: '视频客服转接成功，祝您沟通愉快！',
-    time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
-    msgStatus: msgStatus.tip,
-    msgType: tipTypes.tip_success
-  }]
-  commit(types.SET_MSGS, state.msgs.concat(tip))
+  if (mode === sessionStatus.video) {
+    commit(types.SET_ROOM_MODE, roomStatus.videoChat)
+    const tip = [{
+      content: '视频客服转接成功，祝您沟通愉快！',
+      time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+      msgStatus: msgStatus.tip,
+      msgType: tipTypes.tip_success
+    }]
+    commit(types.SET_MSGS, state.msgs.concat(tip))
+  } else if (mode === sessionStatus.onLine) {
+    commit(types.SET_ROOM_MODE, roomStatus.menChat)
+    const tip = [{
+      content: '人工客服转接成功，祝您沟通愉快！',
+      time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+      msgStatus: msgStatus.tip,
+      msgType: tipTypes.tip_success
+    }]
+    commit(types.SET_MSGS, state.msgs.concat(tip))
+  }
 }
 
-export const quitVideoChat = function({ commit, state }) {
+export const resetVuexOption = function({ commit, state }, mode) {
   commit(types.SET_CS_INFO, {})
-  commit(types.SET_ROOM_ID, '')
   commit(types.SET_QUEUE_NUM, 0)
   commit(types.SET_QUEUE_MODE, queueStatus.noneQueue)
+  commit(types.SET_ASSESS_STATUS, false)
+  commit(types.SET_SERVER_TIME, '')
   commit(types.SET_ROOM_MODE, roomStatus.AIChat)
   initSession({ commit, state })
   const tip = [{
@@ -79,6 +91,12 @@ export const quitVideoChat = function({ commit, state }) {
     msgType: tipTypes.tip_normal
   }]
   commit(types.SET_MSGS, state.msgs.concat(tip))
+  if (mode === sessionStatus.video) {
+    commit(types.SET_ROOM_ID, '')
+  }
+  // else if (mode === sessionStatus.onLine) {
+  //
+  // }
 }
 
 export const initSession = async function({ commit, state }) {

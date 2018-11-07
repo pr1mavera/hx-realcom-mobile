@@ -35,7 +35,8 @@ export const systemMsgStatus = {
   onLine_queuesReduce: 20, // 在线排队位置
   onLine_queuesSuccess: 21, // 客户端排队成功
   onLine_requestCsEntance: 22, // 座席端人工坐席接入请求
-  onLine_transBaseInfo: 23 // 座席端创建会话传递
+  // onLine_transBaseInfo: 23, //
+  onLine_serverFinish: 24 // 结束会话（在线）
 }
 
 export const msgStatus = {

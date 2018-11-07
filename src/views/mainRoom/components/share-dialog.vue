@@ -1,8 +1,8 @@
 <!-- 转接成功的提示模态框 -->
 <template>
-  <div class="share">
+  <div class="share-dialog">
     <x-dialog v-model="show">
-      <div class="avatar"><img width=100% height=100% :src="avatar"></div>
+      <div class="avatar"><img width=100% height=100% v-lazy="avatar"></div>
       <p class="confirm-bd-subtit">在线服务结束，感谢您的陪伴！</p>
       <button class="share-btn extend-click" @click="$emit('toShare')">去分享</button>
       <button class="close-btn extend-click" @click="$emit('cancelShare')">
@@ -29,7 +29,7 @@
         'csInfo'
       ]),
       avatar() {
-        return getCsAvatar(this.csInfo.csId)
+        return this.csInfo.csId && getCsAvatar(this.csInfo.csId)
         // return 'http://video-servertest.ihxlife.com:8083/api/v1/video/image/csHeader?id=00235530bcdd11e8bac9b72d08583910'
       }
     },
@@ -49,7 +49,7 @@
 <style scoped lang="less">
 @import '~@/common/style/theme.less';
 
-.share {
+.share-dialog {
   .weui-dialog {
     overflow: auto!important;
     .avatar {

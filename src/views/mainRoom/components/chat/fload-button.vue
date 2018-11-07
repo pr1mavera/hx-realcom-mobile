@@ -30,7 +30,7 @@
     <button
       class="item extend-click transition-bezier"
       :disabled="barStatus"
-      @click="assessViewOpen = true"
+      @click="clickAssess"
       :class="[{'visible-when-input': barStatus, 'item-4': !barStatus}]">
       <svg class="icon" aria-hidden="true">
         <use xlink:href="#icon-pingjiashouye"></use>
@@ -39,16 +39,12 @@
     <div v-transfer-dom>
       <alert v-model="showAlert" :title="alertContent" :mask-z-index="1000"></alert>
     </div>
-    <assess
-      :showAssess="assessViewOpen"
-      @handleToCancelAssess="handleToCancelAssess"
-    ></assess>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
 import { Alert, TransferDomDirective as TransferDom } from 'vux'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapMutations } from 'vuex'
 import { roomStatus } from '@/common/js/status'
 
 export default {
@@ -72,8 +68,7 @@ export default {
   data() {
     return {
       showAlert: false,
-      alertContent: '',
-      assessViewOpen: false
+      alertContent: ''
     }
   },
   methods: {
@@ -112,14 +107,23 @@ export default {
           break
       }
     },
-    handleToCancelAssess() {
-      // 用户主动关闭评价
-      this.assessViewOpen = false
-      if (this.videoTime !== '') {
-        // 视频结束
-        this.hasAssess = true
+    clickAssess() {
+      switch (this.roomMode) {
+        case roomStatus.AIChat:
+        this.alertContent = '当前未接通任何坐席，暂不能评价'
+        this.showAlert = true
+          break
+        case roomStatus.videoChat:
+          this.setAssessView(true)
+          break
+        case roomStatus.menChat:
+          this.setAssessView(true)
+          break
       }
-    }
+    },
+    ...mapMutations({
+      setAssessView: 'SET_ASSESS_VIEW'
+    })
   }
 }
 </script>

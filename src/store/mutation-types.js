@@ -21,3 +21,9 @@ export const SET_ROOM_MODE = 'SET_ROOM_MODE'
 export const SET_QUEUE_MODE = 'SET_QUEUE_MODE'
 
 export const SET_QUEUE_NUM = 'SET_QUEUE_NUM'
+
+export const SET_ASSESS_STATUS = 'SET_ASSESS_STATUS'
+
+export const SET_ASSESS_VIEW = 'SET_ASSESS_VIEW'
+
+export const SET_SERVER_TIME = 'SET_SERVER_TIME'

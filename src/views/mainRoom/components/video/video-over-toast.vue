@@ -13,7 +13,7 @@
       <p class="desc">总通话时长</p>
     </div>
     <div class="footer">
-      <button class="share" type="button" @click="$emit('showShare')">分享</button>
+      <button id="onMenuShare" class="share" type="button" @click="$emit('showShare')">分享</button>
       <button class="back" type="button" @click="$emit('goBackToChat')">返回</button>
     </div>
   </div>

@@ -2,7 +2,7 @@
 <template>
   <div class="connect-success">
     <x-dialog v-model="queueSuccess">
-      <div class="avatar"><img width=100% height=100% :src="avatar"></div>
+      <div class="avatar"><img width=100% height=100% v-lazy="avatar"></div>
       <p class="confirm-bd-tit" style="">
           <icon class="icon" type="success"></icon> 转接成功！
       </p>
@@ -35,7 +35,7 @@
         'csInfo'
       ]),
       avatar() {
-        return getCsAvatar(this.csInfo.csId)
+        return this.csInfo.csId && getCsAvatar(this.csInfo.csId)
         // return 'http://video-servertest.ihxlife.com:8083/api/v1/video/image/csHeader?id=00235530bcdd11e8bac9b72d08583910'
       },
       queueSuccess: {
@@ -75,6 +75,7 @@
       img {
         border-radius: 50%;
         vertical-align: middle;
+        object-fit: cover;
       }
     }
     .weui-icon-success {

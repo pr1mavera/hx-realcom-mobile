@@ -29,3 +29,9 @@ export const roomMode = state => state.roomMode
 export const queueMode = state => state.queueMode
 // 排队人数
 export const queueNum = state => state.queueNum
+// 评价状态
+export const hasAssess = state => state.hasAssess
+// 评价开关
+export const isAssessView = state => state.isAssessView
+// 服务时长
+export const serverTime = state => state.serverTime
