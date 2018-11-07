@@ -26,9 +26,9 @@
     <!-- 当没有标签的情况 -->
     <div class="label-none" v-if="btnList.length === 0">
       <svg class="icon" aria-hidden="true">
-        <use xlink:href="#icon-jiahao"></use>
+        <use xlink:href="#icon-meiyou-copy"></use>
       </svg>
-      <span>&nbsp;&nbsp;咦~~我竟然还没有标签呐~</span>
+      <span>&nbsp;&nbsp;~~咦,我竟然还没有标签呐~</span>
     </div>
   </div>
 </template>
@@ -228,8 +228,8 @@
     color: @text-normal;
     justify-content: center;
     .icon {
-      width: 2.4rem;
-      height: 2.4rem;
+      width: 4.8rem;
+      height: 4.8rem;
       fill: @text-light;
       vertical-align: -0.15em;
     }

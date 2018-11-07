@@ -9,6 +9,13 @@
       :text="item.name"
       @click.native.prevent="$emit('selectGift', item)"
     ></send-extend-item>
+    <!-- 当客服还没有收到礼物时 -->
+    <div class="none-gift" v-if="giftMap.length === 0">
+      <svg class="icon" aria-hidden="true">
+        <use xlink:href="#icon-meiyouneirong"></use>
+      </svg>
+      <span>&nbsp;&nbsp;~~咦,我竟然还没有收到礼物~</span>
+    </div>
   </div>
 </template>
 
@@ -124,6 +131,7 @@ export default {
 </script>
 
 <style lang="less">
+@import '~@/common/style/theme.less';
 .send-gift {
   display: flex;
   flex-wrap: wrap;
@@ -134,6 +142,21 @@ export default {
     flex: 25%;
     flex-grow: 0;
     text-align: center;
+  }
+  .none-gift {
+    width: 100%;
+    display: flex;
+    color: @text-normal;
+    justify-content: center;
+    .icon {
+      width: 4.8rem;
+      height: 4.8rem;
+      fill: @text-light;
+      vertical-align: -0.15em;
+    }
+    span {
+      align-self: center;
+    }
   }
 }
 </style>

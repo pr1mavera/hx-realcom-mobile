@@ -20,6 +20,7 @@ Vue.use(ConfirmPlugin)
 Vue.use(LoadingPlugin)
 
 Vue.use(VueLazyload, {
+  error: require('@/common/img/default_img.png'),
   loading: require('@/common/img/default_img.png')
 })
 

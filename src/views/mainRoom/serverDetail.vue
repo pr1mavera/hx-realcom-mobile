@@ -21,15 +21,15 @@
     </div>
     <div class="container-item flex-box">
       <div class="flex-box-item">
-        <p><span style="">{{ cuSerInfo.servYears }}</span>年</p>
+        <p><span style="">{{ cuSerInfo.servYears === null ? 0 : cuSerInfo.servYears }}</span>年</p>
         <p class="tips">服务年限</p>
       </div>
       <div class="flex-box-item">
-        <p><span>{{ cuSerInfo.servTimes }}</span>人</p>
+        <p><span>{{ cuSerInfo.servTimes === null ? 0 : cuSerInfo.servTimes }}</span>人</p>
         <p class="tips">总服务数</p>
       </div>
       <div class="flex-box-item">
-        <p><span>{{ cuSerInfo.servTimes }}</span>次</p>
+        <p><span>{{ cuSerInfo.servTimes === null ? 0 : cuSerInfo.servTimes }}</span>次</p>
         <p class="tips">总服务数</p>
       </div>
     </div>
@@ -37,9 +37,9 @@
     <div class="container-item about-me">
       <p class="container-item-tit">关于我</p>
       <div class="container-item-con ">
-        <div class="about-me-item"><div class="tit">星座</div>{{cuSerInfo.starSign}}</div>
-        <div class="about-me-item"><div class="tit">家乡</div>{{cuSerInfo.hometown}}</div>
-        <div class="about-me-item"><div class="tit">爱好</div>{{cuSerInfo.hobby}}</div>
+        <div class="about-me-item"><div class="tit">星座</div>{{cuSerInfo.starSign === null ? `保密` : cuSerInfo.starSign}}</div>
+        <div class="about-me-item"><div class="tit">家乡</div>{{cuSerInfo.hometown === null ? `保密` : cuSerInfo.hometown}}</div>
+        <div class="about-me-item"><div class="tit">爱好</div>{{cuSerInfo.hobby === null ? `保密` : cuSerInfo.hobby}}</div>
       </div>
     </div>
     <!-- labels  -->
