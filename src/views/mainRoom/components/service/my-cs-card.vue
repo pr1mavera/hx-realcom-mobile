@@ -12,8 +12,8 @@
       </a>
       <div class="info">
         <p class="name">{{this.name}}</p>
-        <p>服务总量 {{this.num}}次</p>
-        <p>收到礼物 {{this.gifts}}份</p>
+        <p>服务总量 {{this.num === null ? 0 : this.num}}次</p>
+        <p>收到礼物 {{this.gifts === null ? 0 : this.gifts}}份</p>
       </div>
     </div>
     <div class="btn-box" style="text-align: center">
@@ -60,7 +60,6 @@
     },
     data() {
       return {
-        // avatarUrl: getImgUrl(this.avatarSrc)
         showTips: false
       }
     },
