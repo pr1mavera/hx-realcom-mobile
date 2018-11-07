@@ -28,7 +28,7 @@
       <svg class="icon" aria-hidden="true">
         <use xlink:href="#icon-jiahao"></use>
       </svg>
-      <span>&nbsp;&nbsp;咦~~我竟然还没有标签~</span>
+      <span>&nbsp;&nbsp;咦~~我竟然还没有标签呐~</span>
     </div>
   </div>
 </template>
