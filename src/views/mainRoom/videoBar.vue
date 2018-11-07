@@ -34,7 +34,7 @@
         </div>
         <video-footer
           @hangUpVideo="hangUpVideo"
-          @handleAssess="assessViewOpen = true"
+          @handleAssess="setAssessView(true)"
           @sendGift="giftSectionShow = true"
           @changeCamera="isChangeCamera = !isChangeCamera"
           @minimizeVideoBar="closeVideoBar"
@@ -62,17 +62,12 @@
           <send-gift :theme="`dark`" @selectGift="selectGift"></send-gift>
         </section>
       </section>
-      <assess
-        :showAssess="assessViewOpen"
-        @handleToCancelAssess="handleToCancelAssess"
-        @assessSuccess="assessSuccess"
-      ></assess>
       <div v-transfer-dom>
         <x-dialog v-model="isVideoOverReportShow" :dialog-style="{'max-width': '100%', width: '100%', height: '100%', 'background-color': 'transparent'}">
           <video-over-toast
             :csAvatarUrl="this.csInfo.csAvatar"
             :csName="this.csInfo.csName"
-            :time="videoTime"
+            :time="this.serverTime"
             @goBackToChat="goBackToChat"
             @showShare="$emit('showShare')"
           ></video-over-toast>
@@ -96,7 +91,7 @@
 <script type="text/ecmascript-6">
 import { mapGetters, mapMutations, mapActions } from 'vuex'
 import { XDialog, TransferDomDirective as TransferDom } from 'vux'
-import { queueStatus } from '@/common/js/status'
+import { queueStatus, sessionStatus } from '@/common/js/status'
 import { RTCRoomMixin, sendMsgsMixin } from '@/common/js/mixin'
 import IM from '@/server/im.js'
 
@@ -129,7 +124,7 @@ export default {
     //   return this.queueMode === queueStatus.queuing || this.queueMode === queueStatus.queueSuccess
     // },
     isVideoOverReportShow() {
-      return this.hasAssess && this.videoTime !== ''
+      return this.hasAssess && this.serverTime !== ''
       // return true
     },
     customer() {
@@ -144,7 +139,9 @@ export default {
       'queueMode',
       'userInfo',
       'csInfo',
-      'roomId'
+      'roomId',
+      'hasAssess',
+      'serverTime'
     ])
   },
   data() {
@@ -153,15 +150,10 @@ export default {
       videoScreenShotSrc: '',
       // 通话开始时间
       startTimeStamp: null,
-      // 视频时长
-      videoTime: '',
       // 是否切换客服跟用户的摄像头位置：[false 客户窗口大窗] / [true 客户窗口小窗]
       isChangeCamera: false,
       // 礼物列表弹层开关：[false 开启 / [true 关闭]
       giftSectionShow: false,
-      // 当前视频评论状态：[false 还没评论] / [true 已评论]
-      hasAssess: false,
-      assessViewOpen: false,
       likesCount: 0
     }
   },
@@ -205,28 +197,21 @@ export default {
       this.initRTC(this.roomId)
     },
     async hangUpVideo() {
+      if (!this.fullScreen) {
+        this.setFullScreen(true)
+      }
       // 截取坐席视频
       await this.getVideoScreenShot()
       // 停止推流
       this.quitRTC()
       // 记录通话时间
-      this.videoTime = this._getVideoTime(this.startTimeStamp)
+      const time = this._getVideoTime(this.startTimeStamp)
+      debugger
+      this.setServerTime(time)
       // 判断当前是否评价过
       if (!this.hasAssess) {
         // 评价流程
-        this.assessViewOpen = true
-      }
-    },
-    assessSuccess() {
-      this.assessViewOpen = false
-      this.hasAssess = true
-    },
-    handleToCancelAssess() {
-      // 用户主动关闭评价
-      this.assessViewOpen = false
-      if (this.videoTime !== '') {
-        // 视频结束
-        this.hasAssess = true
+        this.setAssessView(true)
       }
     },
     getVideoScreenShot() {
@@ -248,13 +233,15 @@ export default {
       // 退群
       IM.quitGroup(this.roomId)
       // action
-      this.quitVideoChat()
+      this.resetVuexOption(sessionStatus.video)
     },
     ...mapMutations({
-      setFullScreen: 'SET_FULL_SCREEN'
+      setFullScreen: 'SET_FULL_SCREEN',
+      setAssessView: 'SET_ASSESS_VIEW',
+      setServerTime: 'SET_SERVER_TIME'
     }),
     ...mapActions([
-      'quitVideoChat'
+      'resetVuexOption'
     ])
   },
   filters: {
@@ -293,6 +280,7 @@ export default {
         width: 100%;
         height: 100%;
         z-index: 0;
+        background-color: #666;
       }
       &.small {
         margin: .5rem .5rem 0 0;
@@ -302,6 +290,7 @@ export default {
         z-index: 200;
         overflow: hidden;
         z-index: 1;
+        background-color: #222;
       }
       video {
         position: absolute;
@@ -309,12 +298,12 @@ export default {
         left: 50%;
         transform: translateX(-50%);
         height: 100%;
-        &#remoteVideo {
-          background-color: #666;
-        }
-        &#localVideo {
-          background-color: #222;
-        }
+        // &#remoteVideo {
+        //   background-color: #666;
+        // }
+        // &#localVideo {
+        //   background-color: #222;
+        // }
       }
       .video-screen-shot {
         object-fit: cover;

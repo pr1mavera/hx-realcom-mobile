@@ -20,7 +20,10 @@ const state = {
   roomMode: roomStatus.AIChat,
   // roomMode: roomStatus.videoChat,
   queueMode: queueStatus.noneQueue,
-  queueNum: 0
+  queueNum: 0,
+  hasAssess: false,
+  isAssessView: false,
+  serverTime: ''
 }
 
 export default state

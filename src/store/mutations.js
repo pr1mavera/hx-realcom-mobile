@@ -36,6 +36,15 @@ const mutations = {
   },
   [types.SET_QUEUE_NUM](state, num) {
     state.queueNum = num
+  },
+  [types.SET_ASSESS_STATUS](state, status) {
+    state.hasAssess = status
+  },
+  [types.SET_ASSESS_VIEW](state, show) {
+    state.isAssessView = show
+  },
+  [types.SET_SERVER_TIME](state, time) {
+    state.serverTime = time
   }
 }
 

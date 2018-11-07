@@ -82,7 +82,7 @@ export const viewAllLabels = async(page, pageSize) => http.get('video', `/video/
 /**
  * [getUserInfoByOpenID 获取用户基本信息]
  */
-export const getShareTicket = url => http.get('video', `/ticket/query`, { url })
+export const getShareTicket = url => http.post('video', `/ticket/query`, { url })
 
 /**
  ************************************ chat ************************************

@@ -300,25 +300,62 @@ export const IMMixin = {
     receiveSystemMsgs(msgs) {
       // 处理系统消息（视频、在线）
       const msgsObj = IM.parseMsgsInSystem(msgs).textMsgs[0]
-      switch (msgsObj.code) {
-        case systemMsgStatus.video_queuesReduce: // 人数减少（视频）
+      debugger
+      switch (+msgsObj.code) {
+        /* ******************************** 视频 ******************************** */
+        // 人数减少（视频）
+        case systemMsgStatus.video_queuesReduce:
           this.setQueueNum(this.queueNum - 1)
           break
-        case systemMsgStatus.video_queuesSuccess: // 客户端排队成功（视频）
+
+        // 客户端排队成功（视频）
+        case systemMsgStatus.video_queuesSuccess:
+          msgsObj.queueSounce = sessionStatus.video
           RTCSystemMsg.responseVideoQueuesSuccess(msgsObj, this.userInfo, this.sessionId)
           // 存客服基本信息
           this.setCsInfo(msgsObj)
           break
-        case systemMsgStatus.video_requestCsEntance: // 座席端视频接入请求（视频）
+
+        // 座席端视频接入请求（视频）
+        case systemMsgStatus.video_requestCsEntance:
 
           break
-        case systemMsgStatus.video_transBaseInfo: // 座席端会话、坐席基本信息传递（视频）
+
+        // 座席端会话、坐席基本信息传递（视频）
+        case systemMsgStatus.video_transBaseInfo:
           const csInfomation = RTCSystemMsg.responseVideoTransBaseInfo(msgsObj)
           this.setCsInfo(csInfomation)
           this.setRoomId(csInfomation.csCode)
           this.setSessionId(msgsObj.sessionId)
           // 设置排队状态
           this.setQueueMode(queueStatus.queueSuccess)
+          break
+
+        /* ******************************** 在线 ******************************** */
+        // 人数减少（在线）
+        case systemMsgStatus.onLine_queuesReduce:
+          this.setQueueNum(msgsObj.num || 1)
+          break
+
+        // 客户端排队成功（在线）
+        case systemMsgStatus.onLine_queuesSuccess:
+          msgsObj.queueSounce = sessionStatus.onLine
+          RTCSystemMsg.responseVideoQueuesSuccess(msgsObj, this.userInfo, this.sessionId)
+          // 存客服基本信息
+          this.setCsInfo(msgsObj)
+          // 排队完成
+          this.queueFinishEnterRoom(sessionStatus.onLine)
+          break
+
+        // 结束会话（在线）
+        case systemMsgStatus.onLine_serverFinish:
+          // assess
+          if (!this.hasAssess) {
+            this.setAssessView(true)
+          } else {
+            // action
+            this.resetVuexOption(sessionStatus.onLine)
+          }
           break
       }
     },
@@ -335,7 +372,9 @@ export const IMMixin = {
       // setFullScreen: 'SET_FULL_SCREEN'
     }),
     ...mapActions([
-      'sendMsgs'
+      'sendMsgs',
+      'queueFinishEnterRoom',
+      'resetVuexOption'
     ])
   }
 }
@@ -564,12 +603,21 @@ export const RTCSystemMsg = {
     const startTime = parseInt(sessionStorage.getItem('queue_start_time'))
     const queueTimeLength = new Date().getTime() - startTime
     sessionStorage.removeItem('queue_start_time')
+    let code = ''
+    switch (msgsObj.queueSounce) {
+      case sessionStatus.video:
+        code = systemMsgStatus.video_requestCsEntance
+        break
+      case sessionStatus.onLine:
+        code = systemMsgStatus.onLine_requestCsEntance
+        break
+    }
     const systemMsg = {
       userId: msgsObj.csId,
       msgBody: {
         data: {
           queueTimeLength,
-          code: systemMsgStatus.video_requestCsEntance,
+          code,
           // code: systemMsgStatus.onLine_requestCsEntance,
           csId: msgsObj.csId,
           csName: msgsObj.csName || msgsObj.csId,
@@ -739,7 +787,7 @@ export const onLineQueueMixin = {
         customerGuid: self.userInfo.userId,
         customerImg: '',
         customerNick: self.userInfo.userName,
-        identity: '4',
+        identity: '3',
         insuranceType: '1',
         origin: '1',
         type: '1'
@@ -776,12 +824,18 @@ export const onLineQueueMixin = {
       }
     },
     afterQueueSuccess(data) {
+      debugger
       if (!data.isTeam) {
         // 排队成功，直接通知坐席
         const msg = {
-          csId: data.csId
+          csId: data.csId,
+          queueSounce: sessionStatus.onLine
         }
         RTCSystemMsg.responseVideoQueuesSuccess(msg, this.userInfo, this.sessionId)
+        // 存客服基本信息
+        this.setCsInfo(msg)
+        // 排队完成
+        this.queueFinishEnterRoom(sessionStatus.onLine)
       } else {
         // 排队等待
         // 开启心跳
@@ -803,10 +857,15 @@ export const onLineQueueMixin = {
       }
     },
     async cancelQueue() {
-      // const res = await onLineQueueCancel({
-      //   chatGuid: this.sessionId,
-      //   customerGuid: this.userInfo.userId
-      // })
+      const res = await onLineQueueCancel({
+        chatGuid: this.sessionId,
+        customerGuid: this.userInfo.userId
+      })
+      if (res.result_code === '200') {
+        console.info('取消排队成功')
+      } else {
+        console.info('取消排队失败')
+      }
     },
     startHeartBeat() {
       this.heart = true

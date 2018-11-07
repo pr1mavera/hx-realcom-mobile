@@ -47,7 +47,7 @@
         <!-- 礼物消息 -->
         <span class="text gift-item" v-if="msg.msgType === msgTypes.msg_gift">
           我送给{{this.csInfo.csName || '客服'}}一个{{msg.giftInfo.name}} !
-          <img class="text-gift" :src="`/static/img/${msg.giftInfo.id}@2x.png`">
+          <img class="text-gift" :src="`/static/img/${msg.giftInfo.id}.png`">
         </span>
         <!-- 留言 -->
         <span class="text" v-if="msg.msgType === msgTypes.msg_leave">客服暂时不在，请<span class="button">点击留言</span>~</span>

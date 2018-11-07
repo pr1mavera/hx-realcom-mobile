@@ -19,7 +19,7 @@
 import { mapGetters, mapMutations, mapActions } from 'vuex'
 import { IMMixin, RTCSystemMsg } from '@/common/js/mixin'
 import { ERR_OK, videoQueue, videoQueueCancel, videoQueueHeartBeat } from '@/server/index.js'
-import { queueStatus } from '@/common/js/status'
+import { queueStatus, sessionStatus } from '@/common/js/status'
 
 export default {
   mixins: [
@@ -52,7 +52,8 @@ export default {
     if (queueNum === 0) {
       // 当前队列无人排队，直接推送排队成功的消息给坐席
       const msg = {
-        csId: this.$route.params.csId
+        csId: this.$route.params.csId,
+        queueSounce: sessionStatus.video
       }
       RTCSystemMsg.responseVideoQueuesSuccess(msg, this.userInfo, this.sessionId)
     }
@@ -125,7 +126,7 @@ export default {
       // 停止心跳
       this.stopHeartBeat()
       this.$router.push({path: `/room/chat?openId=${this.userInfo.openId}`})
-      this.readyToVideoChat()
+      this.queueFinishEnterRoom(sessionStatus.video)
       // this.$emit('ready')
     },
     ...mapMutations({
@@ -134,7 +135,7 @@ export default {
       setQueueNum: 'SET_QUEUE_NUM'
     }),
     ...mapActions([
-      'readyToVideoChat'
+      'queueFinishEnterRoom'
     ])
   }
 }

@@ -4,7 +4,7 @@
     <popup v-model="showAssess" is-transparent>
       <div class="popup-main" style="">
        <div class="avatar">
-         <img :src="avatarImgSrc">
+         <img v-lazy="avatarImgSrc">
        </div>
         <x-icon type="ios-close" @click.native="$emit('handleToCancelAssess')" size="30"></x-icon>
         <div class="eva-part">
@@ -31,13 +31,13 @@
         </div>
       </div>
     </popup>
-    <toast v-model="showFalseTips" type="text" :time="800" width="15rem" is-show-mask :position="position">{{failText}}</toast>
-    <toast v-model="showSucTips" type="text" :time="800" width="15rem" is-show-mask text="评论成功" :position="position"></toast>
+    <!-- <toast v-model="showFalseTips" type="text" :time="800" width="15rem" is-show-mask :position="position">{{failText}}</toast>
+    <toast v-model="showSucTips" type="text" :time="800" width="15rem" is-show-mask text="评论成功" :position="position"></toast> -->
   </div>
 </template>
 
 <script>
-  import { TransferDom, Popup, Rater, XButton, Swiper, SwiperItem, Toast } from 'vux'
+  import { TransferDom, Popup, Rater, XButton } from 'vux'
   import { ERR_OK, saveAssess, getCsAvatar } from '@/server/index.js'
   import { mapGetters } from 'vuex'
   import LabelBtn from '@/views/mainRoom/components/label-btn'
@@ -52,9 +52,6 @@
       Popup,
       Rater,
       XButton,
-      Swiper,
-      SwiperItem,
-      Toast,
       LabelBtn
       // 'LabelBtn': () => import('@/views/mainRoom/components/label-btn')
     },
@@ -84,7 +81,7 @@
         'csInfo'
       ]),
       avatarImgSrc() {
-        return this.csInfo.csId ? getCsAvatar(this.csInfo.csId) : ''
+        return this.csInfo.csId && getCsAvatar(this.csInfo.csId)
       }
     },
     methods: {
@@ -97,6 +94,7 @@
 
       // 保存评论的信息
       async handleToSaveAssess() {
+        this.$emit('assessSuccess')
         const data = {
           'sessionId': this.sessionId,
           // 'sessionId': '00553330cc4a11e886ec19059d7ca77e',
@@ -114,15 +112,11 @@
           this.failText = '啊呀，给个评价呗~'
           this.showFalseTips = true
         } else {
-          // 评价完成
-          this.$emit('assessSuccess')
           if (res.result.code === ERR_OK) {
-            this.showSucTips = true
-            // this.showAssess = false
+            this.$vux.toast.text('评价成功', 'middle')
             console.log('已经保存了你评价的信息')
           } else {
-            this.failText = '啊呀，出错了~'
-            this.showFalseTips = true
+            this.$vux.toast.text('啊呀，出错了~', 'middle')
             console.log('there are some error about' + JSON.stringify(res.result))
           }
         }
@@ -158,14 +152,17 @@
         top: -4rem;
         left: 50%;
         margin-left: -4rem;
+        padding: 0.4rem;
+        box-sizing: border-box;
         border-radius: 50%;
         background: linear-gradient(to right, #FF8C6A, #FF80A0);
         img {
-          width: 6.7rem;
-          height: 6.7rem;
+          width: 100%;
+          height: 100%;
           border-radius: 50%;
-          margin-top: .4rem;
+          // margin-top: .4rem;
           vertical-align: middle;
+          object-fit: cover;
         }
       }
       .eva-part {

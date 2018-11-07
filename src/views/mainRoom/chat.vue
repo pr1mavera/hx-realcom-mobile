@@ -228,7 +228,6 @@ export default {
       await this.initIM()
       beforeEnterVideo()
       this.requestSessionList()
-      // this.readyToVideoChat()
     },
     async _setBotBaseInfo() {
       const res = await getBotInfo()
@@ -627,7 +626,6 @@ export default {
       'initSession',
       'toggleBar',
       'sendMsgs'
-      // 'readyToVideoChat'
     ]),
     // 若ios用户 不在微信内置浏览器中打开该页面 则需要拉取漫游信息
     async getRoamMessage() {

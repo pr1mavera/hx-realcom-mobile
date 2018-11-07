@@ -16,7 +16,7 @@
                 <!-- 我送给{{this.csInfo.csName || '客服'}}一个{{item.giftInfo.name}} -->
               </span>
               <i class="gift-area">
-                <img width=100% height=100% :src="`/static/img/${item.giftInfo.id}@2x.png`">
+                <img width=100% height=100% :src="`/static/img/${item.giftInfo.id}.png`">
               </i>
             </span>
             <span class="text-section" v-if="item.msgType === msgTypes.msg_liked">
