@@ -248,6 +248,12 @@ export const IMMixin = {
       'queueNum'
     ])
   },
+  data() {
+    return {
+      // 通话开始时间
+      startTimeStamp: null
+    }
+  },
   methods: {
     initIM() {
       // const self = this
@@ -349,6 +355,7 @@ export const IMMixin = {
 
         // 结束会话（在线）
         case systemMsgStatus.onLine_serverFinish:
+          this.setServerTime('00:00')
           // assess
           if (!this.hasAssess) {
             this.setAssessView(true)
@@ -368,7 +375,8 @@ export const IMMixin = {
       setCsInfo: 'SET_CS_INFO',
       setRoomId: 'SET_ROOM_ID',
       setSessionId: 'SET_SESSION_ID',
-      setQueueNum: 'SET_QUEUE_NUM'
+      setQueueNum: 'SET_QUEUE_NUM',
+      setServerTime: 'SET_SERVER_TIME'
       // setFullScreen: 'SET_FULL_SCREEN'
     }),
     ...mapActions([
@@ -824,7 +832,6 @@ export const onLineQueueMixin = {
       }
     },
     afterQueueSuccess(data) {
-      debugger
       if (!data.isTeam) {
         // 排队成功，直接通知坐席
         const msg = {

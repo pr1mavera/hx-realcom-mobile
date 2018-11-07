@@ -63,7 +63,8 @@ export const msgTypes = {
   msg_img: '5', // 发送图片
   msg_gift: '6', // 礼物消息
   msg_liked: '7', // 点赞消息
-  msg_card: '8' // 名片消息
+  msg_card: '8', // 名片消息
+  msg_hand_up: '24' // 结束会话（在线）
 }
 
 export const dialogTypes = {

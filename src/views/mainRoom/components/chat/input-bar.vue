@@ -20,8 +20,8 @@
       </div> -->
       <div class="input-content needsclick"
         autofocus
-        placeholder="请输入..."
         contenteditable="true"
+        placeholder="请输入..."
         id="input-content-hook"
         ref="inputContent"
         type="text"
@@ -116,15 +116,15 @@ export default {
         localStorage.setItem('emoji_cache', JSON.stringify(emojiArr))
       }
     },
-    // getInputEditState() {
-    //   return this.$refs.inputContent.getAttribute('contentEditable')
-    // },
-    // removeInputEditState() {
-    //   this.$refs.inputContent.removeAttribute('contentEditable')
-    // },
-    // setInputEditState(tag) {
-    //   this.$refs.inputContent.setAttribute('contentEditable', tag)
-    // },
+    getInputEditState() {
+      return this.$refs.inputContent.getAttribute('contentEditable')
+    },
+    removeInputEditState() {
+      this.$refs.inputContent.removeAttribute('contentEditable')
+    },
+    setInputEditState(tag) {
+      this.$refs.inputContent.setAttribute('contentEditable', tag)
+    },
     getCursortPosition(element) {
       let caretOffset = 0
       const doc = element.ownerDocument || element.document

@@ -206,7 +206,6 @@ export default {
       this.quitRTC()
       // 记录通话时间
       const time = this._getVideoTime(this.startTimeStamp)
-      debugger
       this.setServerTime(time)
       // 判断当前是否评价过
       if (!this.hasAssess) {

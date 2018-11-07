@@ -1,6 +1,6 @@
 <template>
   <div class="label-btn-box">
-    <swiper height="9.5rem" v-if="labelType === 'All'" style="" :show-dots="showDots" dots-class="custom-bottom" dots-position="center">
+    <swiper v-model="currentPage" @on-index-change="changePage" height="9.5rem" v-if="labelType === 'all'" style="" :show-dots="showDots" dots-class="custom-bottom" dots-position="center">
       <swiper-item v-for="(pages, index) in btnList" :key="index">
         <!--{{index}}-->
         <checker v-model="selTags" type="checkbox" default-item-class="tags-default" @on-change="selChanege"
@@ -60,7 +60,7 @@
         selTags: null, // 选中的标签
         isDisabled: '',
         disable: true, // 标签不能选，只是做展示功能
-        currentPage: 1, // 当前页
+        currentPage: 0, // 当前页
         pageList: [1],
         showDots: true
       }
@@ -80,21 +80,27 @@
       // 获取label列表
       getLabelList() {},
 
+      // 清空标签
+      resetLabelList() {
+        this.selTags = null
+        this.changePage(0)
+      },
+
       // 切换轮播页
-      async changePage(index) {
-        this.currentPage = index + 1
-        // debugger
-        // console.log('======================>当前页是' + index)
-        const page = this.currentPage
-        const pageSize = 2
-        // this.disable = false // 标签可以选
-        // debugger
-        const res = await viewAllLabels(page, pageSize)
-        if (res.result.code === ERR_OK) {
-          this.btnList = res.data.labels
-        } else {
-          // console.log('======================= error about query labelTags')
-        }
+      changePage(index) {
+        this.currentPage = index
+        // // debugger
+        // // console.log('======================>当前页是' + index)
+        // const page = this.currentPage
+        // const pageSize = 2
+        // // this.disable = false // 标签可以选
+        // // debugger
+        // const res = await viewAllLabels(page, pageSize)
+        // if (res.result.code === ERR_OK) {
+        //   this.btnList = res.data.labels
+        // } else {
+        //   // console.log('======================= error about query labelTags')
+        // }
       },
 
       // 标签信息查询，获取label列表
