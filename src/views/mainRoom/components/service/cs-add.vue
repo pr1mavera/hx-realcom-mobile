@@ -28,13 +28,13 @@
                   <li class="cs-info-list">
                     <span class="title">服务总量</span>
                     <span class="text">
-                      <label>{{curLabelInfo.servTimes}}次</label>
+                      <label>{{curLabelInfo.servTimes === null ? 0 : curLabelInfo.servTimes}}次</label>
                     </span>
                   </li>
                   <li class="cs-info-list">
                     <span class="title">收到礼物</span>
                     <span class="text">
-                      <label>{{curLabelInfo.giftCount}}次</label>
+                      <label>{{curLabelInfo.giftCount === null ? 0 : curLabelInfo.giftCount}}}份</label>
                     </span>
                   </li>
                   <li class="cs-info-list">

@@ -1,29 +1,35 @@
 <template>
   <div class="label-btn-box">
-  <!--  <checker v-model="selTags" type="checkbox" default-item-class="tags-default"
-             selected-item-class="tags-selected">
-      <checker-item :disabled="disable" :value="item" v-for="(item, index) in btnList"
-                    :key="index"
-                    :text="item.labelName"
-                    :likeNum="item.labelCount"
-      >{{item.labelName}} {{item.labelCount}}</checker-item>
-    </checker>-->
-    <!--<span>当前选中的值为：{{selTags}}</span>-->
-    <swiper height="9.5rem" style="" :show-dots="showDots" dots-class="custom-bottom" dots-position="center">
+    <swiper height="9.5rem" v-if="labelType === 'All'" style="" :show-dots="showDots" dots-class="custom-bottom" dots-position="center">
       <swiper-item v-for="(pages, index) in btnList" :key="index">
         <!--{{index}}-->
         <checker v-model="selTags" type="checkbox" default-item-class="tags-default" @on-change="selChanege"
                  selected-item-class="tags-selected">
-          <checker-item :disabled="disable"
+          <checker-item
                         :value="item" v-for="(item, index) in pages.list"
                         :key="index"
                         :text="item.labelName"
                         :likeNum="item.labelCount"
-          >{{item.labelName}} {{item.labelCount}}
+          >{{item.labelName}}
           </checker-item>
         </checker>
       </swiper-item>
     </swiper>
+    <!--labels for me-->
+    <checker v-if="labelType === 'notAll'" type="checkbox" default-item-class="tags-default">
+      <checker-item :disabled="disable"
+                    v-for="(item, index) in btnList"
+                    :key="index"
+                    :value="item"
+      >{{item.labelName}} {{item.labelCount}}</checker-item>
+    </checker>
+    <!-- 当没有标签的情况 -->
+    <div class="label-none" v-if="btnList.length === 0">
+      <svg class="icon" aria-hidden="true">
+        <use xlink:href="#icon-jiahao"></use>
+      </svg>
+      <span>&nbsp;&nbsp;咦~~我竟然还没有标签呐~</span>
+    </div>
   </div>
 </template>
 
@@ -96,14 +102,14 @@
         const csId = this.$route.query.cusSerId
         // const csId = '123'
 
-        // debugger
         if (this.labelType === 'notAll') {
           const page = 0
           const pageSize = -1
           // 评价当前客服的标签
+
           const res = await viewLabels(page, pageSize, csId)
           if (res.result.code === ERR_OK) {
-            // console.log('=============这是查询到的标签信息:' + JSON.stringify(res.data))
+            console.log('=============这是查询到的我的评价标签信息:' + JSON.stringify(res.data.labels))
             this.showDots = false
             this.btnList = res.data.labels
           } else {
@@ -196,6 +202,7 @@
 </script>
 
 <style scoped lang="less">
+@import '~@/common/style/theme.less';
 .label-btn-box {
   /*未选中状态的样式*/
   .tags-default {
@@ -209,6 +216,20 @@
   .tags-selected {
     color: #ffffff;
     background: #fe959c;
+  }
+  .label-none {
+    display: flex;
+    color: @text-normal;
+    justify-content: center;
+    .icon {
+      width: 2.4rem;
+      height: 2.4rem;
+      fill: @text-light;
+      vertical-align: -0.15em;
+    }
+    span {
+      align-self: center;
+    }
   }
 }
 </style>

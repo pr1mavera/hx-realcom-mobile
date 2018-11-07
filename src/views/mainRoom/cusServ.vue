@@ -51,12 +51,9 @@ export default {
       // debugger
       switch (this.csSelected.csStatus) {
         case '1':
-          this.lineUpAlert = false
-          // this.$router.push({path: `/room/line-up/${this.csSelected.csId}`})
           this.$vux.alert.show({
-            title: '啊呀，这位客服小姐姐还没准备好呢~'
+            title: '啊呀，当前客服还没准备好呢~'
           })
-          // this.enterToLineUp('正在为您转接视频客服，请稍候')
           break
         case '2': // 就绪状态
           // this.alertTip = true
@@ -65,22 +62,22 @@ export default {
           break
         case '3':
           this.$vux.alert.show({
-            title: '啊呀，这位客服小姐姐正在休息呐~'
+            title: '啊呀，当前客服正在休息呐~'
           })
           break
         case '4':
           this.$vus.alert.show({
-            title: '啊呀，这个客服小姐姐不在呢~'
+            title: '啊呀，当前客服不在呢~'
           })
           break
         case '5':
           this.$vux.alert.show({
-            title: '啊呀，这位客服小姐姐好忙啊，不如您先换一位~'
+            title: '啊呀，当前客服忙~'
           })
           break
         default:
           this.$vux.alert.show({
-            title: '啊呀，我不知道这个小姐姐在干啥呢~'
+            title: '啊呀，联系不上当前客服~'
           })
       }
     },

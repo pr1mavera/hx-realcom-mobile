@@ -2,7 +2,7 @@
 <template>
   <div class="serverDetail container">
     <!-- 默认高度为180px, 如果设置aspect-ratio会根据宽度自动计算高度,如 :aspect-ratio="300/375" -->
-    <swiper auto dots-class="custom-bottom" dots-position="center" :aspect-ratio="210/375">
+    <swiper auto dots-class="custom-bottom" dots-position="center" :aspect-ratio="160/375">
       <swiper-item class="swiper-img" v-for="(item, index) in personalDisplay" :key="index">
         <img :src="item" style="width: 100%;object-fit: fill;">
       </swiper-item>
@@ -114,21 +114,6 @@
         } else {
           console.log('======================= error about get cuSerInfo')
         }
-      },
-
-      // 礼物查询
-      async getGifts() {
-        // const page = 0
-        // const pageSize = -1
-        // // const csId = '1'
-        // const csId = this.$route.query.cusSerId
-        //
-        // const res = await viewGifts(page, pageSize, csId)
-        // if (res.result.code === ERR_OK) {
-        //   this.giftsInfo = res.data.gifts
-        // } else {
-        //   console.log('======================= error about query gifts')
-        // }
       }
 
       // 标签信息查询
@@ -152,7 +137,7 @@
 </script>
 
 <style scoped lang="less">
-  @import '../../common/style/theme.less';
+  @import '~@/common/style/theme.less';
 
   .container {
     height: unset;
