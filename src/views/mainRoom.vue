@@ -20,7 +20,7 @@
     <low-version v-if="lowVersion" @click.native="lowVersion = false"></low-version>
     <share-guide v-if="shareGuide" @click.native="shareGuide = false"></share-guide>
     <assess
-      :showAssess="isAssessView"
+      :showAssess="this.isAssessView"
       @handleToCancelAssess="handleToCancelAssess"
       @assessSuccess="assessSuccess"
     ></assess>
@@ -72,6 +72,10 @@ export default {
     assessSuccess() {
       this.setAssessStatus(true)
       this.setAssessView(false)
+      if (this.serverTime !== '' && this.roomMode === roomStatus.menChat) {
+        // action
+        this.resetVuexOption(sessionStatus.onLine)
+      }
     },
     handleToCancelAssess() {
       // 用户主动关闭评价

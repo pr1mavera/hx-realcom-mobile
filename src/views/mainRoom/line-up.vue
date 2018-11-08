@@ -49,13 +49,15 @@ export default {
     this.setQueueMode(queueStatus.queuing)
     window.sessionStorage.setItem('queue_start_time', new Date().getTime())
     const queueNum = await this.initQueue()
-    if (queueNum === 0) {
+    if (+queueNum === 0) {
       // 当前队列无人排队，直接推送排队成功的消息给坐席
       const msg = {
         csId: this.$route.params.csId,
         queueSounce: sessionStatus.video
       }
       RTCSystemMsg.responseVideoQueuesSuccess(msg, this.userInfo, this.sessionId)
+    } else {
+      this.setQueueNum(queueNum)
     }
     // 开启心跳
     this.startHeartBeat()
@@ -109,6 +111,7 @@ export default {
       const res = await videoQueueCancel(this.userInfo.userId, this.$route.params.csId)
       if (res.result.code === ERR_OK) {
         console.log('===============================> 取消排队 啊 取消排队 <===============================')
+        debugger
         if (this.$route.query.goindex === 'true') {
           debugger
           this.$router.push('/')
@@ -125,7 +128,7 @@ export default {
     confirmToVideo() {
       // 停止心跳
       this.stopHeartBeat()
-      this.$router.push({path: `/room/chat?openId=${this.userInfo.openId}`})
+      this.$router.replace({path: `/room/chat?openId=${this.userInfo.openId}`})
       this.queueFinishEnterRoom(sessionStatus.video)
       // this.$emit('ready')
     },

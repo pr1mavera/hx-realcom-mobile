@@ -80,7 +80,7 @@
       @click="clickCopyBtn">
       <span class="text">复制</span>
     </div>
-    <div class="copyMask" v-show="isCopyButtonShow" @touchstart="resetCopyBtn"></div>
+    <!-- <div class="copyMask" v-show="isCopyButtonShow" @touchstart="resetCopyBtn"></div> -->
     <div v-transfer-dom>
       <previewer :list="previewImgList" ref="previewer" :options="previewImgOptions"></previewer>
     </div>
@@ -129,6 +129,16 @@ export default {
     'extendBar': () => import('@/views/mainRoom/components/chat/extend-bar'),
     'PullDown': () => import('@/views/mainRoom/components/chat/pull-down')
   },
+  // beforeRouteLeave(to, from, next) {
+  //   debugger
+  //   // next(false)
+  //   // const answer = window.confirm('Do you really want to leave? you have unsaved changes!')
+  //   // if (answer) {
+  //   //   next()
+  //   // } else {
+  //   //   next(false)//可以通过在这里写逻辑来处理用户点了物理返回之后的操作
+  //   // }
+  // },
   computed: {
     previewImgOptions() {
       const self = this
@@ -376,6 +386,7 @@ export default {
         }
         this.scrollY = Math.abs(Math.round(pos.y))
         // console.log(this.scrollY)
+        this.isCopyButtonShow && this.resetCopyBtn()
       })
     },
     pullingDown() {
@@ -414,20 +425,19 @@ export default {
       }, this.chatScroll.options.bounceTime)
     },
     /* *********************************** inputBar *********************************** */
-    targetInputBuffer() {
-      if (this.inputBarOpen) {
+    async targetInputBuffer() {
+      if (this.inputBarOpen || this.extendBarOpen) {
+        // 软键盘弹出
+        this.resetExtendBar()
         // 软键盘收起
         this.toggleBar(toggleBarStatus.allFold)
         this._inputBlur()
       } else {
-        // 软键盘弹出
-        this.resetExtendBar()
-
         // this.toggleBar(toggleBarStatus.inputBar)
         // self._inputFocus()
-        this.toggleBar(toggleBarStatus.inputBar).then(() => {
-          this._inputFocus()
-        })
+        // this.toggleBar(toggleBarStatus.inputBar)
+        this.setInputBar(true)
+        this._inputFocus()
       }
     },
     _inputFocus() {
@@ -435,7 +445,10 @@ export default {
       // this.$refs.inputBar.setInputEditState('true')
       // document.getElementById('input-content-hook').focus()
       // this.$refs.inputBar.setInputEditState('true')
-      this.inputEle.focus()
+      this.$nextTick(() => {
+        document.getElementById('input-content-hook').focus()
+      })
+      // this.inputEle.focus()
       // 聊天内容滚动到最底部
       this._resolveKeyboard()
     },
@@ -443,8 +456,11 @@ export default {
       console.log('键盘收起辣=========================')
       // this.inputFocPos = this.$refs.inputBar.getCursortPosition(this.inputEle)
       // console.log(this.inputFocPos)
-      this.inputEle.blur()
-      // this.$refs.inputBar.removeInputEditState()
+      // this.inputEle.blur()
+      this.$nextTick(() => {
+        document.getElementById('input-content-hook').blur()
+      })
+      // this.$refs.inputBar.setInputEditState('false')
       this.chatScroll.refresh()
       this.chatScroll.scrollToElement(this.$refs.chatContentEnd, 400)
     },
@@ -453,6 +469,7 @@ export default {
     },
     async chatInputCommit(text) {
       this.inputEle.innerText = ''
+      text = text.replace(/<\/?.+?>/g, '').replace(/&nbsp;/g, '')
       if (text && text.trim()) {
         switch (this.roomMode) {
           case roomStatus.AIChat:
@@ -589,8 +606,9 @@ export default {
     },
     /* *********************************** copy btn *********************************** */
     showCopy(el, msg) {
-      this.targetEleRect = Tools.RectTools.getRect(el)
-      this.copyTextTemp = msg
+      this.targetEleRect = Tools.RectTools.getRectLimitDoc(el)
+      const pureText = msg.replace(/<\/?.+?>/g, '').replace(/&nbsp;/g, '')
+      this.copyTextTemp = pureText
       this.isCopyButtonShow = true
     },
     clickCopyBtn() {

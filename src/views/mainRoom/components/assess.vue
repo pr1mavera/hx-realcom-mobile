@@ -23,7 +23,7 @@
             <!--<swiper-item v-for="(item, index) in btnBoxList" :key="index">-->
             <!--</swiper-item>-->
           <!--</swiper>-->
-          <label-btn :labelType="labelType" @seledLabels="selLabels"></label-btn>
+          <label-btn ref="labelBar" :labelType="labelType" @seledLabels="selLabels"></label-btn>
           <x-button :gradients="['#FF8C6A', '#ff80a0']" @click.native="handleToSaveAssess"
                     style="width: 11rem;margin: 2rem auto 0;">
             提交评价
@@ -115,6 +115,9 @@
           if (res.result.code === ERR_OK) {
             this.$vux.toast.text('评价成功', 'middle')
             console.log('已经保存了你评价的信息')
+            // 清空数据
+            this.$refs.labelBar.resetLabelList()
+            this.stars = 0
           } else {
             // this.$vux.toast.text('啊呀，出错了~', 'middle')
             console.log('there are some error about' + JSON.stringify(res.result))

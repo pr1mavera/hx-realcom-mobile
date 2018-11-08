@@ -11,34 +11,27 @@ export const closeBarBuffer = function({ commit }, { mutationType, delay }) {
   })()
 }
 
-export const toggleBar = function({ dispatch, commit, state }, type) {
+export const toggleBar = async function({ dispatch, commit, state }, type) {
   switch (type) {
     case toggleBarStatus.allFold:
       commit(types.SET_EXTEND_BAR, false)
       commit(types.SET_INPUT_BAR, false)
-      break
+      return 0
     case toggleBarStatus.inputBar:
       if (state.extendBarOpen) {
-        return dispatch('closeBarBuffer', {
-          mutationType: types.SET_EXTEND_BAR,
-          delay: 1000
-        }).then(() => {
-          return new Promise((resolve) => {
-            commit(types.SET_INPUT_BAR, true)
-            resolve()
-          })
-        })
-      } else {
-        return new Promise((resolve) => {
-          commit(types.SET_INPUT_BAR, true)
-          resolve()
-        })
+        // await dispatch('closeBarBuffer', {
+        //   mutationType: types.SET_EXTEND_BAR,
+        //   delay: 1000
+        // })
+        commit(types.SET_EXTEND_BAR, false)
       }
+      commit(types.SET_INPUT_BAR, true)
+      return 0
     case toggleBarStatus.extendBar:
       // 如果当前键盘状态为弹出，则关闭键盘除了修改状态外还需要其他操作，所以判断单独在外面做
       // 这里只修改extendBar的打开状态
       commit(types.SET_EXTEND_BAR, true)
-      break
+      return 0
   }
 }
 
