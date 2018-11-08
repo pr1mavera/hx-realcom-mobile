@@ -107,19 +107,19 @@
         }
         // 异步处理评价保存
         const res = await saveAssess(data)
-        if (this.labels.length === 0) {
-          debugger
-          this.failText = '啊呀，给个评价呗~'
-          this.showFalseTips = true
-        } else {
+        // if (this.labels.length === 0) {
+        //   debugger
+        //   this.failText = '啊呀，给个评价呗~'
+        //   this.showFalseTips = true
+        // } else {
           if (res.result.code === ERR_OK) {
             this.$vux.toast.text('评价成功', 'middle')
             console.log('已经保存了你评价的信息')
           } else {
-            this.$vux.toast.text('啊呀，出错了~', 'middle')
+            // this.$vux.toast.text('啊呀，出错了~', 'middle')
             console.log('there are some error about' + JSON.stringify(res.result))
           }
-        }
+        // }
       }
     }
   }
