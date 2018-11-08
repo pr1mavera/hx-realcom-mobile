@@ -38,19 +38,20 @@ const DateTools = {
   },
 
   isWorkTime: function({ startT, endT }) {
-    var strb = startT.split(':')
+    debugger
+    const strb = startT.split(':')
     if (strb.length !== 2) {
       return false
     }
 
-    var stre = endT.split(':')
+    const stre = endT.split(':')
     if (stre.length !== 2) {
       return false
     }
 
-    var b = new Date()
-    var e = new Date()
-    var n = new Date()
+    let b = new Date()
+    let e = new Date()
+    let n = new Date()
 
     b.setHours(strb[0])
     b.setMinutes(strb[1])

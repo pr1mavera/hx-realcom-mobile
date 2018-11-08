@@ -98,10 +98,11 @@ export default {
       switch (this.roomMode) {
         case roomStatus.AIChat:
           const ZX_workT = this.userInfo.workTimeInfo.filter(item => item.callType === 'ZX')
-          const workT = {
-            startT: ZX_workT.startTime,
-            endT: ZX_workT.endTime
+          let workT = {
+            startT: ZX_workT[0].startTime,
+            endT: ZX_workT[0].endTime
           }
+          debugger
           if (Tools.DateTools.isWorkTime(workT)) {
             this.$emit('enterOnLineLineUp')
           } else {

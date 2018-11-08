@@ -59,8 +59,8 @@ export default {
       // 判断当前是否为工作时间
       const SP_workT = this.userInfo.workTimeInfo.filter(item => item.callType === 'SP')
       const workT = {
-        startT: SP_workT.startTime,
-        endT: SP_workT.endTime
+        startT: SP_workT[0].startTime,
+        endT: SP_workT[0].endTime
       }
       if (!Tools.DateTools.isWorkTime(workT)) {
         this.$vux.alert.show({
