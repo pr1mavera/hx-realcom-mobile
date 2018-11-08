@@ -28,25 +28,25 @@
         const self = this
         let clock = window.setInterval(() => {
           this.totalTime--
-          if (this.totalTime <= 0) {
+          if (this.totalTime === 1) {
             // 倒计时小于0时清除计时器
             window.clearInterval(clock)
             self.goChat()
+          } else if (this.totalTime <= 0) {
+            window.clearInterval(clock)
           }
         }, 1000)
       },
       goChat() {
-        console.log('返回聊天')
-        this.$router.push({
-          path: '/room/chat'
-        })
+        this.$router.back(-1)
+        this.totalTime = 0
       }
     }
     }
 </script>
 
 <style scoped lang="less">
-  @import '../../../common/style/theme.less';
+  @import '~@/common/style/theme.less';
 main {
   width: 100%;
   min-height: 100vh;
