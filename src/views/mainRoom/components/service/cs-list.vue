@@ -96,7 +96,7 @@ export default {
 
     // 删除客服
     removeCs(index) {
-      debugger
+      // debugger
       this.$emit('removeCs', index)
       // this.myCsList.splice(index, 1)
     },

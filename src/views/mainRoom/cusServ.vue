@@ -46,13 +46,13 @@ export default {
     },
     // 删除
     removeCs(index) {
-      debugger
+      // debugger
       this.myCs.splice(index, 1)
     },
     goToLineUp() {
       const status = this.csSelected.csStatus
       // 只有就绪和忙碌可以排队
-      if (status === 1) {
+      if (status === '1') {
         this.$vux.alert.show({
           title: '啊呀，当前客服还没准备好呢~'
         })

@@ -82,7 +82,7 @@
       },
       // 确定删除当前客服
       async deleteCsConfirm() {
-        debugger
+        // debugger
         this.removeStyle = true // 删除当前客服的交互
         const userId = this.userInfo.userId
         const cusSerId = this.cusSerId
@@ -91,7 +91,7 @@
           'csId': cusSerId
         }
 
-        debugger
+        // debugger
         const res = await removeCs(data)
         if (res.result.code === ERR_OK) {
           this.$emit('removeCs', this.csIndex)
@@ -136,7 +136,7 @@
 </script>
 
 <style scoped lang="less">
-  @import '../../../../common/style/theme.less';
+  @import '~@/common/style/theme.less';
   .container {
     /*width: 32.5rem;*/
     width: 86.67%;
@@ -190,7 +190,7 @@
   }
   /* 删除客服时的交互 */
   .remove-cs {
-    animation: removeCs 5s;
+    animation: removeCs 1s;
     animation-fill-mode: forwards; // 当动画结束后保留在最后的状态
   }
   @keyframes removeCs {
