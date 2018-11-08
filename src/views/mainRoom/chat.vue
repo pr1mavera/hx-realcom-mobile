@@ -42,7 +42,7 @@
                   @onClickImgMsg="onClickImgMsg"
                   @enterToMenChat="enterOnLineLineUp"
                   @clickHotQues="chatInputCommit"
-                  @onLineCancelQueue="cancelQueue"
+                  @onLineCancelQueue="onLineCancelQueue"
                 ></component>
               </keep-alive>
             </li>
@@ -642,6 +642,12 @@ export default {
         height: 0
       }
     },
+    async onLineCancelQueue(id) {
+      await this.cancelQueue()
+      // action 删除msgs中排队状态的tips
+      this.deleteTipMsg()
+    },
+    // 删除msgs里面对应时间戳的一条提示消息
     ...mapMutations({
       setBotInfo: 'SET_BOT_INFO',
       setModeToMenChat: 'SET_ROOM_MODE',
@@ -653,7 +659,8 @@ export default {
     ...mapActions([
       'initSession',
       'toggleBar',
-      'sendMsgs'
+      'sendMsgs',
+      'deleteTipMsg'
     ]),
     // 若ios用户 不在微信内置浏览器中打开该页面 则需要拉取漫游信息
     async getRoamMessage() {

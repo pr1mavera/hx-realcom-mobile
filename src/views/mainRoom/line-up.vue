@@ -47,7 +47,6 @@ export default {
   },
   async mounted() {
     this.setQueueMode(queueStatus.queuing)
-    window.sessionStorage.setItem('queue_start_time', new Date().getTime())
     const queueNum = await this.initQueue()
     if (+queueNum === 0) {
       // 当前队列无人排队，直接推送排队成功的消息给坐席
@@ -67,6 +66,7 @@ export default {
       const res = await videoQueue(this.userInfo.userId, this.$route.params.csId, 1)
       if (res.result.code === ERR_OK) {
         console.log('===============================> 排队啊 排队啊 排队啊 <===============================')
+        window.sessionStorage.setItem('queue_start_time', new Date().getTime())
         // return new Promise((resolve) => {
         //   this.setQueueNum(res.data.queueNum)
         //   resolve()
