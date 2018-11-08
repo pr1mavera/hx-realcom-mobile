@@ -190,7 +190,7 @@
   }
   /* 删除客服时的交互 */
   .remove-cs {
-    animation: removeCs 1s;
+    animation: removeCs .6s;
     animation-fill-mode: forwards; // 当动画结束后保留在最后的状态
   }
   @keyframes removeCs {
