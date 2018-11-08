@@ -786,22 +786,23 @@ export const onLineQueueMixin = {
   },
   methods: {
     async enterOnLineLineUp() {
-      // 排队成功，直接通知坐席
-      const msg = {
-        csId: 'webchat1',
-        queueSounce: sessionStatus.onLine
-      }
-      RTCSystemMsg.responseVideoQueuesSuccess(msg, this.userInfo, this.sessionId)
+      // // 排队成功，直接通知坐席
       // window.sessionStorage.setItem('queue_start_time', new Date().getTime())
-      // // 在线转人工流程
-      // // 1. 请求排队
-      // const res = await this.formatOnLineQueueAPI()
-      // // 2. 处理
-      // if (res.code === ERR_OK) {
-      //   this.afterQueueSuccess(res.data)
-      // } else {
-      //   this.botSendLeaveMsg()
+      // const msg = {
+      //   csId: 'webchat1',
+      //   queueSounce: sessionStatus.onLine
       // }
+      // RTCSystemMsg.responseVideoQueuesSuccess(msg, this.userInfo, this.sessionId)
+      // 在线转人工流程
+      // 1. 请求排队
+      const res = await this.formatOnLineQueueAPI()
+      // 2. 处理
+      if (res.code === ERR_OK) {
+        window.sessionStorage.setItem('queue_start_time', new Date().getTime())
+        this.afterQueueSuccess(res.data)
+      } else {
+        this.botSendLeaveMsg()
+      }
     },
     async formatOnLineQueueAPI() {
       const self = this
