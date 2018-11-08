@@ -21,23 +21,22 @@
       </svg>
       {{ myCs.length === 3 ? '查看更多': '添加客服' }}
     </x-button>
-    <div v-transfer-dom>
-      <confirm v-model='alertTip'>
-        <p style="text-align:center;">{{tipCon}}</p>
-      </confirm>
-    </div>
+    <!--<div v-transfer-dom>-->
+      <!--<confirm v-model='alertTip'>-->
+        <!--<p style="text-align:center;">{{tipCon}}</p>-->
+      <!--</confirm>-->
+    <!--</div>-->
   </div>
 </template>
 
 <script type="text/ecmascript-6">
-  import { XButton, Confirm, TransferDomDirective as TransferDom } from 'vux'
+  import { XButton, TransferDomDirective as TransferDom } from 'vux'
   import { mapGetters } from 'vuex'
   import { ERR_OK, queryCsInfo } from '@/server/index.js'
 
 export default {
   components: {
     XButton,
-    Confirm,
     'myCsCard': () => import('@/views/mainRoom/components/service/my-cs-card')
   },
   computed: {
@@ -90,25 +89,14 @@ export default {
       }
     },
 
-    // 获取客服头像
-    // async getAvatar(cusSerId) {
-    //   // const cusSerId = this.cusSerId
-    //   const res = await getCsAvatar(cusSerId)
-    //
-    //   if (res) {
-    //     console.log('==============您已经成功的获取到了客服的头像' + JSON.stringify(res))
-    //     return JSON.stringify(res)
-    //   } else {
-    //     console.log('there are some errors about query the avatar of cs' + JSON.stringify(res.result))
-    //   }
-    // },
-
-    // J进入客服列表页
+    // 进入客服列表页
     addCs() {
       this.$router.push({path: '/room/cusServ/add'})
     },
 
+    // 删除客服
     removeCs(index) {
+      // debugger
       this.$emit('removeCs', index)
       // this.myCsList.splice(index, 1)
     },
