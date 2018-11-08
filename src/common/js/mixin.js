@@ -306,7 +306,6 @@ export const IMMixin = {
     receiveSystemMsgs(msgs) {
       // 处理系统消息（视频、在线）
       const msgsObj = IM.parseMsgsInSystem(msgs).textMsgs[0]
-      debugger
       switch (+msgsObj.code) {
         /* ******************************** 视频 ******************************** */
         // 人数减少（视频）
@@ -348,7 +347,16 @@ export const IMMixin = {
           msgsObj.queueSounce = sessionStatus.onLine
           RTCSystemMsg.responseVideoQueuesSuccess(msgsObj, this.userInfo, this.sessionId)
           // 存客服基本信息
-          this.setCsInfo(msgsObj)
+          // this.setCsInfo(msgsObj)
+          break
+
+        // 座席端会话、坐席基本信息传递（在线）
+        case systemMsgStatus.onLine_transBaseInfo:
+          const csInfo = RTCSystemMsg.responseVideoTransBaseInfo(msgsObj)
+          this.setCsInfo(csInfo)
+          this.setSessionId(msgsObj.sessionId)
+          // 设置排队状态
+          this.setQueueMode(queueStatus.queueSuccess)
           // 排队完成
           this.queueFinishEnterRoom(sessionStatus.onLine)
           break
@@ -376,7 +384,8 @@ export const IMMixin = {
       setRoomId: 'SET_ROOM_ID',
       setSessionId: 'SET_SESSION_ID',
       setQueueNum: 'SET_QUEUE_NUM',
-      setServerTime: 'SET_SERVER_TIME'
+      setServerTime: 'SET_SERVER_TIME',
+      setAssessView: 'SET_ASSESS_VIEW'
       // setFullScreen: 'SET_FULL_SCREEN'
     }),
     ...mapActions([
@@ -777,16 +786,22 @@ export const onLineQueueMixin = {
   },
   methods: {
     async enterOnLineLineUp() {
-      window.sessionStorage.setItem('queue_start_time', new Date().getTime())
-      // 在线转人工流程
-      // 1. 请求排队
-      const res = await this.formatOnLineQueueAPI()
-      // 2. 处理
-      if (res.code === ERR_OK) {
-        this.afterQueueSuccess(res.data)
-      } else {
-        this.botSendLeaveMsg()
+      // 排队成功，直接通知坐席
+      const msg = {
+        csId: 'webchat1',
+        queueSounce: sessionStatus.onLine
       }
+      RTCSystemMsg.responseVideoQueuesSuccess(msg, this.userInfo, this.sessionId)
+      // window.sessionStorage.setItem('queue_start_time', new Date().getTime())
+      // // 在线转人工流程
+      // // 1. 请求排队
+      // const res = await this.formatOnLineQueueAPI()
+      // // 2. 处理
+      // if (res.code === ERR_OK) {
+      //   this.afterQueueSuccess(res.data)
+      // } else {
+      //   this.botSendLeaveMsg()
+      // }
     },
     async formatOnLineQueueAPI() {
       const self = this
@@ -839,10 +854,6 @@ export const onLineQueueMixin = {
           queueSounce: sessionStatus.onLine
         }
         RTCSystemMsg.responseVideoQueuesSuccess(msg, this.userInfo, this.sessionId)
-        // 存客服基本信息
-        this.setCsInfo(msg)
-        // 排队完成
-        this.queueFinishEnterRoom(sessionStatus.onLine)
       } else {
         // 排队等待
         // 开启心跳

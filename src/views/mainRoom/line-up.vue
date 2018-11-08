@@ -49,7 +49,7 @@ export default {
     this.setQueueMode(queueStatus.queuing)
     window.sessionStorage.setItem('queue_start_time', new Date().getTime())
     const queueNum = await this.initQueue()
-    if (queueNum === 0) {
+    if (+queueNum === 0) {
       // 当前队列无人排队，直接推送排队成功的消息给坐席
       const msg = {
         csId: this.$route.params.csId,
