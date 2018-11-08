@@ -303,7 +303,7 @@ export const IMMixin = {
         }
       }
     },
-    receiveSystemMsgs(msgs) {
+    async receiveSystemMsgs(msgs) {
       // 处理系统消息（视频、在线）
       const msgsObj = IM.parseMsgsInSystem(msgs).textMsgs[0]
       switch (+msgsObj.code) {
@@ -353,7 +353,11 @@ export const IMMixin = {
         // 座席端会话、坐席基本信息传递（在线）
         case systemMsgStatus.onLine_transBaseInfo:
           const csInfo = RTCSystemMsg.responseVideoTransBaseInfo(msgsObj)
+          // action 删除msgs中排队状态的tips
+          this.deleteTipMsg()
+          // 设置坐席信息
           this.setCsInfo(csInfo)
+          // 设置会话ID
           this.setSessionId(msgsObj.sessionId)
           // 设置排队状态
           this.setQueueMode(queueStatus.queueSuccess)
@@ -364,6 +368,8 @@ export const IMMixin = {
         // 结束会话（在线）
         case systemMsgStatus.onLine_serverFinish:
           this.setServerTime('00:00')
+          this.$vux.toast.text('当前人工服务已结束', 'middle')
+          await Tools.AsyncTools.sleep(3000)
           // assess
           if (!this.hasAssess) {
             this.setAssessView(true)
@@ -882,6 +888,8 @@ export const onLineQueueMixin = {
       })
       if (res.result_code === '200') {
         console.info('取消排队成功')
+        this.$vux.toast.text('你已经取消排队辣', 'middle')
+        return 0
       } else {
         console.info('取消排队失败')
       }

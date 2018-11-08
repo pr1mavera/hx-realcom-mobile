@@ -35,6 +35,29 @@ const DateTools = {
     const cacheT = new Date(cache.replace(/-/g, '/'))
     const nextT = new Date(next.replace(/-/g, '/'))
     return nextT - cacheT >= 60000
+  },
+
+  isWorkTime: function({ startT, endT }) {
+    var strb = startT.split(':')
+    if (strb.length !== 2) {
+      return false
+    }
+
+    var stre = endT.split(':')
+    if (stre.length !== 2) {
+      return false
+    }
+
+    var b = new Date()
+    var e = new Date()
+    var n = new Date()
+
+    b.setHours(strb[0])
+    b.setMinutes(strb[1])
+    e.setHours(stre[0])
+    e.setMinutes(stre[1])
+
+    return n.getTime() - b.getTime() > 0 && n.getTime() - e.getTime() < 0
   }
 }
 

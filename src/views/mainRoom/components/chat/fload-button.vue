@@ -45,7 +45,8 @@
 <script type="text/ecmascript-6">
 import { Alert, TransferDomDirective as TransferDom } from 'vux'
 import { mapGetters, mapMutations } from 'vuex'
-import { roomStatus } from '@/common/js/status'
+import { roomStatus, msgStatus, msgTypes } from '@/common/js/status'
+import Tools from '@/common/js/tools'
 
 export default {
   directives: {
@@ -62,7 +63,8 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'roomMode'
+      'roomMode',
+      'userInfo'
     ])
   },
   data() {
@@ -95,7 +97,22 @@ export default {
     onLineLineUp() {
       switch (this.roomMode) {
         case roomStatus.AIChat:
-          this.$emit('enterOnLineLineUp')
+          const ZX_workT = this.userInfo.workTimeInfo.filter(item => item.callType === 'ZX')
+          const workT = {
+            startT: ZX_workT.startTime,
+            endT: ZX_workT.endTime
+          }
+          if (Tools.DateTools.isWorkTime(workT)) {
+            this.$emit('enterOnLineLineUp')
+          } else {
+            const msg = {
+              content: '',
+              time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+              msgStatus: msgStatus.msg,
+              msgType: msgTypes.msg_leave
+            }
+            this.sendMsgs(msg)
+          }
           break
         case roomStatus.videoChat:
           this.alertContent = '当前正在视频客服中！！请先退出'
@@ -122,6 +139,7 @@ export default {
       }
     },
     ...mapMutations({
+      sendMsgs: 'SET_MSGS',
       setAssessView: 'SET_ASSESS_VIEW'
     })
   }
