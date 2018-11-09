@@ -9,7 +9,8 @@ const env = process.env.NODE_ENV
 const production = {
   videoPath: '/video-servertest/api/v1',
   webRTCRoomPath: '/room-servertest/api/v1',
-  chatPath: '/chat-servertest/api/v1'
+  chatPath: '/chat-servertest/api/v1',
+  onLine: '/onlinePath'
 }
 
 const development = {

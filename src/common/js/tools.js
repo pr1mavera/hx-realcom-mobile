@@ -38,7 +38,6 @@ const DateTools = {
   },
 
   isWorkTime: function({ startT, endT }) {
-    debugger
     const strb = startT.split(':')
     if (strb.length !== 2) {
       return false

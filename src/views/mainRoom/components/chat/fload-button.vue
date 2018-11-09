@@ -102,7 +102,6 @@ export default {
             startT: ZX_workT[0].startTime,
             endT: ZX_workT[0].endTime
           }
-          debugger
           if (Tools.DateTools.isWorkTime(workT)) {
             this.$emit('enterOnLineLineUp')
           } else {

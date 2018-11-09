@@ -75,14 +75,14 @@ export default {
         this.$vux.alert.show({
           title: '啊呀，当前客服还没准备好呢~'
         })
-      } else if (status === '2' || status === '5') {
+      } else if (status === '3' || status === '5') {
         this.$router.push({path: `/room/line-up/${this.csSelected.csId}`})
         this.enterToLineUp('正在为您转接视频客服，请稍候')
-      } else if (status === '3') {
+      } else if (status === '4') {
         this.$vux.alert.show({
           title: '啊呀，当前客服正在休息呐~'
         })
-      } else if (status === '4') {
+      } else if (status === '2') {
         this.$vux.alert.show({
           title: '啊呀，当前客服不在呢~'
         })
