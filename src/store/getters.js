@@ -1,4 +1,4 @@
-import { msgStatus, msgTypes } from '@/common/js/status'
+import { msgStatus, msgTypes, roomStatus, sessionStatus } from '@/common/js/status'
 // 用户基本信息
 export const userInfo = state => state.userInfo
 // 机器人基本信息
@@ -25,6 +25,17 @@ export const inputBarOpen = state => state.inputBarOpen
 export const fullScreen = state => state.fullScreen
 // 当前会话模式（机器人，人工客服，视频客服）
 export const roomMode = state => state.roomMode
+// 聊天发送对象
+export const sendType = state => {
+  switch (state.roomMode) {
+    case roomStatus.AIChat:
+      return sessionStatus.robot
+    case roomStatus.menChat:
+      return sessionStatus.onLine
+    case roomStatus.videoChat:
+      return sessionStatus.video
+  }
+}
 // 当前排队状态
 export const queueMode = state => state.queueMode
 // 排队人数

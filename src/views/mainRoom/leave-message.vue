@@ -22,7 +22,7 @@
 
 <script type="text/ecmascript-6">
   import { XInput, Cell, Group, XButton } from 'vux'
-  import {leaveMsg} from '@/server/index.js'
+  import { leaveMsg } from '@/server/index.js'
   export default {
     // name: "leave-message.vue"
     components: {
