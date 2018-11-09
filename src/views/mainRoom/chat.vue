@@ -46,6 +46,8 @@
                 ></component>
               </keep-alive>
             </li>
+            <!-- test the leave message-->
+            <!--<li class="chat-content-li" @click="toLeaveMsg">请留言</li>-->
             <li class="chat-content-block chat-content-end" ref="chatContentEnd"></li>
           </ul>
         </div>
@@ -310,6 +312,14 @@ export default {
         }
       }
       this.$refs.previewer.show(curIndex)
+    },
+
+    // 进入留言
+    toLeaveMsg() {
+      this.$router.push({
+        path: '/room/leaveMessage',
+        query: {openId: this.$route.query.openId}
+      })
     },
 
     /* *********************************** better scroll *********************************** */
