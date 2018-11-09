@@ -361,8 +361,10 @@ export const IMMixin = {
           this.setSessionId(msgsObj.sessionId)
           // 设置排队状态
           this.setQueueMode(queueStatus.queueSuccess)
-          // 排队完成
+          // action 排队完成，进入会话
           this.queueFinishEnterRoom(sessionStatus.onLine)
+          // 初始化用户最后响应时间
+          this.updateLastAction()
           break
 
         // 结束会话（在线）
@@ -397,7 +399,8 @@ export const IMMixin = {
     ...mapActions([
       'sendMsgs',
       'queueFinishEnterRoom',
-      'resetVuexOption'
+      'resetVuexOption',
+      'updateLastAction'
     ])
   }
 }
@@ -792,13 +795,14 @@ export const onLineQueueMixin = {
   },
   methods: {
     async enterOnLineLineUp() {
-      // // 排队成功，直接通知坐席
+      // 排队成功，直接通知坐席
       // window.sessionStorage.setItem('queue_start_time', new Date().getTime())
       // const msg = {
-      //   csId: 'webchat1',
+      //   csId: 'webchat9',
       //   queueSounce: sessionStatus.onLine
       // }
       // RTCSystemMsg.responseVideoQueuesSuccess(msg, this.userInfo, this.sessionId)
+
       // 在线转人工流程
       // 1. 请求排队
       const res = await this.formatOnLineQueueAPI()

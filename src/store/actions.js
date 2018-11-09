@@ -1,16 +1,16 @@
 import * as types from './mutation-types'
 import Tools from '@/common/js/tools'
 // import { isTimeDiffLongEnough, formatDate } from '@/common/js/dateConfig.js'
-import { sessionStatus, toggleBarStatus, roomStatus, queueStatus, msgStatus, tipTypes } from '@/common/js/status'
-import { ERR_OK, createSession } from '@/server/index.js'
+import { sessionStatus, toggleBarStatus, roomStatus, queueStatus, msgStatus, dialogTypes, tipTypes, systemMsgStatus } from '@/common/js/status'
+import { ERR_OK, createSession, pushSystemMsg } from '@/server/index.js'
 
-export const closeBarBuffer = function({ commit }, { mutationType, delay }) {
-  return (async function() {
-    commit(mutationType, false)
-    await Tools.AsyncTools.sleep(delay)
-  })()
+// 键盘弹出延迟（弃用）
+export const closeBarBuffer = async function({ commit }, { mutationType, delay }) {
+  commit(mutationType, false)
+  await Tools.AsyncTools.sleep(delay)
 }
 
+// 修改键盘和拓展层的弹出状态，统一接口
 export const toggleBar = async function({ dispatch, commit, state }, type) {
   switch (type) {
     case toggleBarStatus.allFold:
@@ -35,6 +35,7 @@ export const toggleBar = async function({ dispatch, commit, state }, type) {
   }
 }
 
+// 进入排队(人工，视频)时的tips
 export const enterToLineUp = function({ commit, state }, content) {
   commit(types.SET_QUEUE_MODE, queueStatus.queuing)
   const tip = [{
@@ -46,6 +47,7 @@ export const enterToLineUp = function({ commit, state }, content) {
   commit(types.SET_MSGS, state.msgs.concat(tip))
 }
 
+// 人工客服排队完成后，删除消息队列里的排队状态tips
 export const deleteTipMsg = function({ commit, state }) {
   for (let i = state.msgs.length - 1; i >= 0; i--) {
     if (state.msgs[i].msgStatus === msgStatus.tip && state.msgs[i].msgType === tipTypes.tip_line_up) {
@@ -57,6 +59,7 @@ export const deleteTipMsg = function({ commit, state }) {
   }
 }
 
+// 人工（视频）排队完成，接通客服后，修改对应的房间模式
 export const queueFinishEnterRoom = function({ commit, state }, mode) {
   commit(types.SET_QUEUE_MODE, queueStatus.queueOver)
   if (mode === sessionStatus.video) {
@@ -80,6 +83,7 @@ export const queueFinishEnterRoom = function({ commit, state }, mode) {
   }
 }
 
+// 人工（视频）服务结束后，更新 vuex 数据
 export const resetVuexOption = function({ commit, state }, mode) {
   commit(types.SET_CS_INFO, {})
   commit(types.SET_QUEUE_NUM, 0)
@@ -97,12 +101,17 @@ export const resetVuexOption = function({ commit, state }, mode) {
   commit(types.SET_MSGS, state.msgs.concat(tip))
   if (mode === sessionStatus.video) {
     commit(types.SET_ROOM_ID, '')
+  } else
+  if (mode === sessionStatus.onLine) {
+    // 清空定时器
+    clearTimeout(state.userInfo.avtionTimeout)
+    const userInfo = Tools.CopyTools.objShallowClone(state.userInfo)
+    userInfo.avtionTimeout = null
+    commit(types.SET_USER_INFO, userInfo)
   }
-  // else if (mode === sessionStatus.onLine) {
-  //
-  // }
 }
 
+// 创建会话
 export const initSession = async function({ commit, state }) {
   // 创建机器人会话
   const res = await createSession(state.userInfo.userId, state.userInfo.userName, state.userInfo.userPhone, sessionStatus.robot)
@@ -115,6 +124,56 @@ export const initSession = async function({ commit, state }) {
   }
 }
 
+// 系统推送C2C消息到指定用户
+export const systemMsg = async function({ commit, state }, systemMsg) {
+  const res = await pushSystemMsg(systemMsg)
+  if (res.result.code === ERR_OK) {
+    console.log('排队完成，推送系统消息成功')
+    return 0
+  } else {
+    console.log('推送系统消息失败')
+  }
+}
+
+// 更新用户最后活动时间（更新定时器）
+export const updateLastAction = function({ commit, state }) {
+  // 清空原来的定时器
+  state.userInfo.avtionTimeout && clearTimeout(state.userInfo.avtionTimeout)
+
+  // 创建定时器，绑定在 vuex 的 userInfo
+  const avtionTimeout = setTimeout(() => {
+    // 推送超时断开连接提示，至本地消息队列
+    const dialog = {
+      time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+      msgStatus: msgStatus.dialog,
+      msgType: dialogTypes.dialog_disconnect,
+      dialogInfo: {
+        disconnectTime: 5
+      }
+    }
+    commit(types.SET_MSGS, state.msgs.concat(dialog))
+
+    // 用户长时间无响应，主动断开连接
+    const sysMsgs = {
+      userId: state.csInfo.csId,
+      msgBody: {
+        data: {
+          code: systemMsgStatus.onLine_userNoResponse,
+          userId: state.userInfo.userId
+        },
+        desc: `用户长时间无响应`,
+        ext: ''
+      }
+    }
+    systemMsg({ commit, state }, sysMsgs)
+  }, 300000)
+
+  const userInfo = Tools.CopyTools.objShallowClone(state.userInfo)
+  userInfo.avtionTimeout = avtionTimeout
+  commit(types.SET_USER_INFO, userInfo)
+}
+
+// 更新本地消息队列
 export const sendMsgs = async function({ commit, state }, msg) {
   if (msg.msgStatus !== msgStatus.tip) {
     let lastT = null
@@ -134,9 +193,13 @@ export const sendMsgs = async function({ commit, state }, msg) {
         msgStatus: msgStatus.tip,
         msgType: tipTypes.tip_time
       }
-      await commit(types.SET_MSGS, state.msgs.concat([tip]))
+      commit(types.SET_MSGS, state.msgs.concat([tip]))
     }
   }
+  if ((state.roomMode === roomStatus.menChat) && msg.isSelfSend) {
+    // 更新用户最后活动时间（更新定时器）
+    updateLastAction({ commit, state })
+  }
   msg.timestamp = new Date().getTime()
-  await commit(types.SET_MSGS, state.msgs.concat([msg]))
+  commit(types.SET_MSGS, state.msgs.concat([msg]))
 }

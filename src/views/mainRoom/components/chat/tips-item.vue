@@ -44,7 +44,7 @@ export default {
   filters: {
     timeFilter(val) {
       const temp = new Date(val.replace(/-/g, '/'))
-      return Tools.DateTools.formatDate(temp, 'yyyy-MM-dd hh:mm')
+      return Tools.DateTools.formatDate(temp, 'MM-dd hh:mm')
     }
   }
 }

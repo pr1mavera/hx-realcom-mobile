@@ -28,7 +28,7 @@
         <!-- 转人工 -->
         <span class="text" v-if="msg.msgType === msgTypes.msg_no_idea">
           小华智力有限，好像听不太懂您的问题呢，可转
-          <span class="button" @click="enterToMenChat">人工客服</span>
+          <span class="button" @click="enterOnLineLineUp">人工客服</span>
         </span>
         <!-- 热点问题 -->
         <span class="text" v-if="msg.msgType === msgTypes.msg_hot">
@@ -37,7 +37,7 @@
           <span class="text-extend-hot">
             <span class="text-extend">您可能想问：</span>
             <span class="text-extend button" v-for="(item, index) in msg.msgExtend" :key="index" @click="clickHotQues(item.question)">{{item.question}}</span>
-            <!-- <span class="text-extend button" @click="enterToMenChat">人工客服</span> -->
+            <!-- <span class="text-extend button" @click="enterOnLineLineUp">人工客服</span> -->
           </span>
         </span>
         <!-- 图片消息 -->
@@ -88,7 +88,7 @@
       <div class="content chat-content-shadow left-content-style content-extend" v-if="msg.msgType === msgTypes.msg_guess">
         <span class="text">
           <span class="text-extend button" v-for="(item, index) in msg.msgExtend" :key="index" @click="clickHotQues(item.question)">{{item.question}}</span>
-          <!-- <span class="text-extend button" @click="enterToMenChat">人工客服</span> -->
+          <!-- <span class="text-extend button" @click="enterOnLineLineUp">人工客服</span> -->
         </span>
       </div>
     </div>
@@ -147,8 +147,8 @@ export default {
       const e = event || window.event
       window.location.href = `tel:${e.currentTarget.innerText}`
     },
-    enterToMenChat() {
-      this.$emit('enterToMenChat')
+    enterOnLineLineUp() {
+      this.$emit('enterOnLineLineUp')
     },
     clickHotQues(ques) {
       this.$emit('clickHotQues', ques)

@@ -197,9 +197,8 @@ export default {
       this.initRTC(this.roomId)
     },
     async hangUpVideo() {
-      if (!this.fullScreen) {
-        this.setFullScreen(true)
-      }
+      // 恢复全屏
+      !this.fullScreen && this.setFullScreen(true)
       // 截取坐席视频
       await this.getVideoScreenShot()
       // 停止推流
@@ -208,10 +207,7 @@ export default {
       const time = this._getVideoTime(this.startTimeStamp)
       this.setServerTime(time)
       // 判断当前是否评价过
-      if (!this.hasAssess) {
-        // 评价流程
-        this.setAssessView(true)
-      }
+      !this.hasAssess && this.setAssessView(true)
     },
     getVideoScreenShot() {
       return new Promise((resolve) => {
