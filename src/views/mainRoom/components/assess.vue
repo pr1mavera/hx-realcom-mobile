@@ -40,6 +40,7 @@
   import { TransferDom, Popup, Rater, XButton } from 'vux'
   import { ERR_OK, saveAssess, getCsAvatar } from '@/server/index.js'
   import { mapGetters } from 'vuex'
+  import Tools from '@/common/js/tools'
   import LabelBtn from '@/views/mainRoom/components/label-btn'
 
   // const btnList = [
@@ -94,8 +95,7 @@
 
       // 保存评论的信息
       async handleToSaveAssess() {
-        this.$emit('assessSuccess')
-        const data = {
+        const data = Tools.CopyTools.objDeepClone({
           'sessionId': this.sessionId,
           // 'sessionId': '00553330cc4a11e886ec19059d7ca77e',
           'userId': this.userInfo.userId,
@@ -104,7 +104,8 @@
           'csName': this.csInfo.csName,
           'evaluateLevel': this.stars,
           'labels': this.labels
-        }
+        })
+        this.$emit('assessSuccess')
         // 异步处理评价保存
         const res = await saveAssess(data)
         // if (this.labels.length === 0) {

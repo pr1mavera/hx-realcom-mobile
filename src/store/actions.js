@@ -49,7 +49,7 @@ export const enterToLineUp = function({ commit, state }, content) {
 export const deleteTipMsg = function({ commit, state }) {
   for (let i = state.msgs.length - 1; i >= 0; i--) {
     if (state.msgs[i].msgStatus === msgStatus.tip && state.msgs[i].msgType === tipTypes.tip_line_up) {
-      const list = Tools.CopyTools.objShallowClone(state.msgs)
+      const list = Tools.CopyTools.objDeepClone(state.msgs)
       list.splice(i, 1)
       commit(types.SET_MSGS, list)
       break
