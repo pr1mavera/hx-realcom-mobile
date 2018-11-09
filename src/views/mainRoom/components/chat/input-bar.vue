@@ -25,7 +25,7 @@
         id="input-content-hook"
         ref="inputContent"
         type="text"
-        @click="chatFocus"
+        @click="chatFocus($event)"
         @keyup="chatInput($event)"
       ></div>
       <!-- <input v-model="inputText" type="text" ref="invisibleInput" v-show="false"> -->
@@ -34,10 +34,10 @@
       <transition
         @enter="sendBtnEnter"
         @leave="sendBtnLeave">
-        <button id="sendBtn" class="sendBtn" v-if="this.inputBarOpen" @click="chatCommit">发送</button>
+        <button id="sendBtn" class="sendBtn" v-if="isSendBtnShow" @click="chatCommit">发送</button>
       </transition>
       <transition name="send-plus" mode="out-in">
-        <button class="input-bar-item-btn" v-if="!this.inputBarOpen" @click="toggleExtend">
+        <button class="input-bar-item-btn" v-if="!isSendBtnShow" @click="toggleExtend">
           <svg class="icon extend-click" aria-hidden="true" :class="{'extend-Bar-Open': this.extendBarOpen}">
             <use xlink:href="#icon-jiahao"></use>
           </svg>
@@ -64,9 +64,9 @@ export default {
     }
   },
   computed: {
-    // isSendBtnShow() {
-    //   return this.inputBarOpen || this.
-    // },
+    isSendBtnShow() {
+      return this.inputBarOpen || this.extendBarOpen
+    },
     ...mapGetters([
       'extendBarOpen',
       'inputBarOpen'
@@ -82,7 +82,7 @@ export default {
     toggleExtend() {
       this.$emit('toggleExtend')
     },
-    chatFocus() {
+    chatFocus(event) {
       this.$emit('targetInputBuffer')
     },
     chatInput(event) {

@@ -30,7 +30,7 @@
       </div>
       <div class="flex-box-item">
         <p><span>{{ cuSerInfo.servTimes === null ? 0 : cuSerInfo.servTimes }}</span>次</p>
-        <p class="tips">总服务数</p>
+        <p class="tips">为我服务</p>
       </div>
     </div>
     <!-- about me -->

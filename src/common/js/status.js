@@ -36,7 +36,8 @@ export const systemMsgStatus = {
   onLine_queuesSuccess: 21, // 客户端排队成功
   onLine_requestCsEntance: 22, // 座席端人工坐席接入请求
   onLine_transBaseInfo: 23, // 转接成功后人工坐席推送创建会话以及基本信息
-  onLine_serverFinish: 24 // 结束会话（在线）
+  onLine_serverFinish: 24, // 坐席端结束会话（在线）
+  onLine_userNoResponse: 25 // 客户端主动结束会话（在线）
 }
 
 export const msgStatus = {
@@ -68,8 +69,8 @@ export const msgTypes = {
 }
 
 export const dialogTypes = {
-  dialog_success: '1', // 转接成功
-  dialog_disconnect: '0'// 断开连接
+  dialog_disconnect: '0', // 断开连接
+  dialog_success: '1' // 转接成功
 }
 
 export const cardTypes = {

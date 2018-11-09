@@ -40,7 +40,7 @@
                   :msg="msg"
                   @msgLongPress="showCopy"
                   @onClickImgMsg="onClickImgMsg"
-                  @enterToMenChat="enterOnLineLineUp"
+                  @enterOnLineLineUp="enterOnLineLineUp"
                   @clickHotQues="chatInputCommit"
                   @onLineCancelQueue="onLineCancelQueue"
                 ></component>
@@ -129,16 +129,6 @@ export default {
     'extendBar': () => import('@/views/mainRoom/components/chat/extend-bar'),
     'PullDown': () => import('@/views/mainRoom/components/chat/pull-down')
   },
-  // beforeRouteLeave(to, from, next) {
-  //   debugger
-  //   // next(false)
-  //   // const answer = window.confirm('Do you really want to leave? you have unsaved changes!')
-  //   // if (answer) {
-  //   //   next()
-  //   // } else {
-  //   //   next(false)//可以通过在这里写逻辑来处理用户点了物理返回之后的操作
-  //   // }
-  // },
   computed: {
     previewImgOptions() {
       const self = this
