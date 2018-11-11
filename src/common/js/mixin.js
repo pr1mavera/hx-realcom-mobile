@@ -305,7 +305,9 @@ export const IMMixin = {
     },
     async receiveSystemMsgs(msgs) {
       // 处理系统消息（视频、在线）
+
       const msgsObj = IM.parseMsgsInSystem(msgs).textMsgs[0]
+      debugger
       switch (+msgsObj.code) {
         /* ******************************** 视频 ******************************** */
         // 人数减少（视频）
@@ -393,8 +395,8 @@ export const IMMixin = {
       setSessionId: 'SET_SESSION_ID',
       setQueueNum: 'SET_QUEUE_NUM',
       setServerTime: 'SET_SERVER_TIME',
-      setAssessView: 'SET_ASSESS_VIEW'
-      // setFullScreen: 'SET_FULL_SCREEN'
+      setAssessView: 'SET_ASSESS_VIEW',
+      setFullScreen: 'SET_FULL_SCREEN'
     }),
     ...mapActions([
       'sendMsgs',
