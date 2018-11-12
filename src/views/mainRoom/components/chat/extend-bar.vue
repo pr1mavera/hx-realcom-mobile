@@ -8,7 +8,7 @@
               <use :xlink:href="sendGiftIcon"></use>
             </svg>
           </button>
-          <div class="text">礼物</div>
+          <div class="text" :class="{'btn-disable': isRobotChat}">礼物</div>
         </div>
         <div class="extend-bar-button button_2">
           <button class="img" @click="onSendExpressClick">
@@ -24,7 +24,7 @@
               <use :xlink:href="sendImgIcon"></use>
             </svg>
           </button>
-          <div class="text">图片</div>
+          <div class="text" :class="{'btn-disable': isRobotChat}">图片</div>
           <input type="file" ref="sendImgInput" accept="image/*" @change="onSendImgChange" v-show="false"/>
         </div>
       </div>
@@ -210,6 +210,9 @@ export default {
           padding-top: 0.8rem;
           line-height: 1.3rem;
           font-size: 1.3rem;
+          &.btn-disable {
+            opacity: .2;
+          }
         }
       }
     }

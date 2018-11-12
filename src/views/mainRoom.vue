@@ -79,15 +79,25 @@ export default {
     },
     handleToCancelAssess() {
       // 用户主动关闭评价
-      this.setAssessView(false)
-      if (this.serverTime !== '') {
-        // 服务结束
-        this.setAssessStatus(true)
-        // 若当前为人工客服结束，需要手动清空vuex数据
-        if (this.roomMode === roomStatus.menChat) {
-          // action
-          this.resetVuexOption(sessionStatus.onLine)
-        }
+      if (this.serverTime === '') {
+        // 当前视频未结束
+        this.setAssessView(false)
+      } else {
+        // 当前视频已结束
+        const self = this
+        this.$vux.confirm.show({
+          title: '真的要放弃评价嘛？？',
+          onConfirm() {
+            // 服务结束
+            self.setAssessView(false)
+            self.setAssessStatus(true)
+            // 若当前为人工客服结束，需要手动清空vuex数据
+            if (self.roomMode === roomStatus.menChat) {
+              // action
+              self.resetVuexOption(sessionStatus.onLine)
+            }
+          }
+        })
       }
     },
     async toShare() {

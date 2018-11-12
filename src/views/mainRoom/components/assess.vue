@@ -98,7 +98,7 @@
 
       // 保存评论的信息
       async handleToSaveAssess() {
-        if (!this.labels.length) {
+        if (this.labels.length === 0) {
           this.$vux.toast.text('啊呀，给个评价呗~', 'middle')
           return
         }
