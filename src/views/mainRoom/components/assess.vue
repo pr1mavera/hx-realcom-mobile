@@ -38,7 +38,9 @@
 
 <script>
   import { TransferDom, Popup, Rater, XButton } from 'vux'
+  import IM from '@/server/im'
   import { ERR_OK, saveAssess, getCsAvatar } from '@/server/index.js'
+  import { msgStatus, msgTypes } from '@/common/js/status'
   import { mapGetters } from 'vuex'
   import Tools from '@/common/js/tools'
   import LabelBtn from '@/views/mainRoom/components/label-btn'
@@ -79,7 +81,8 @@
       ...mapGetters([
         'sessionId',
         'userInfo',
-        'csInfo'
+        'csInfo',
+        'sendType'
       ]),
       avatarImgSrc() {
         return this.csInfo.csId && getCsAvatar(this.csInfo.csId)
@@ -95,7 +98,11 @@
 
       // 保存评论的信息
       async handleToSaveAssess() {
-        const data = Tools.CopyTools.objDeepClone({
+        if (!this.labels.length) {
+          this.$vux.toast.text('啊呀，给个评价呗~', 'middle')
+          return
+        }
+        const data = Tools.CopyTools.objShallowClone({
           'sessionId': this.sessionId,
           // 'sessionId': '00553330cc4a11e886ec19059d7ca77e',
           'userId': this.userInfo.userId,
@@ -105,25 +112,29 @@
           'evaluateLevel': this.stars,
           'labels': this.labels
         })
+        IM.sendNormalMsg(
+          this.userInfo.userId,
+          this.csInfo.csId,
+          // '123456789',
+          {
+            sessionId: this.sessionId,
+            toUserName: this.csInfo.csName,
+            msg: `${this.userInfo.userName}评价了你`,
+            time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+            nickName: this.userInfo.userName,
+            avatar: this.csInfo.csId,
+            identifier: this.userInfo.userId,
+            msgStatus: msgStatus.msg,
+            msgType: msgTypes.msg_assess,
+            chatType: this.sendType,
+            assessInfo: data,
+            isMsgSync: 2
+          })
+        this.$vux.toast.text('评价成功', 'middle')
         this.$emit('assessSuccess')
-        // 异步处理评价保存
-        const res = await saveAssess(data)
-        // if (this.labels.length === 0) {
-        //   debugger
-        //   this.failText = '啊呀，给个评价呗~'
-        //   this.showFalseTips = true
-        // } else {
-          if (res.result.code === ERR_OK) {
-            this.$vux.toast.text('评价成功', 'middle')
-            console.log('已经保存了你评价的信息')
-            // 清空数据
-            this.$refs.labelBar.resetLabelList()
-            this.stars = 0
-          } else {
-            // this.$vux.toast.text('啊呀，出错了~', 'middle')
-            console.log('there are some error about' + JSON.stringify(res.result))
-          }
-        // }
+        // 清空数据
+        this.$refs.labelBar.resetLabelList()
+        this.stars = 0
       }
     }
   }

@@ -414,7 +414,8 @@ export const sendMsgsMixin = {
       'userInfo',
       'csInfo',
       'roomId',
-      'sessionId'
+      'sessionId',
+      'sendType'
     ])
   },
   methods: {
@@ -428,7 +429,7 @@ export const sendMsgsMixin = {
           time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
           msgStatus: msgStatus.msg,
           msgType: msgTypes.msg_normal,
-          chatType: sessionStatus.robot
+          chatType: this.sendType
         }
         // this.setMsgs(this.msgs.concat([ques]))
         this.sendMsgs(ques)
@@ -467,7 +468,7 @@ export const sendMsgsMixin = {
             identifier: this.userInfo.userId,
             msgStatus: msgStatus.msg,
             msgType: msgTypes.msg_normal,
-            chatType: sessionStatus.video
+            chatType: this.sendType
           })
       })
     },
@@ -489,7 +490,7 @@ export const sendMsgsMixin = {
             identifier: this.userInfo.userId,
             msgStatus: msgStatus.msg,
             msgType: msgTypes.msg_gift,
-            chatType: sessionStatus.video,
+            chatType: this.sendType,
             giftInfo,
             isMsgSync: 2
           })
@@ -511,7 +512,7 @@ export const sendMsgsMixin = {
           identifier: this.userInfo.userId,
           msgStatus: msgStatus.msg,
           msgType: msgTypes.msg_liked,
-          chatType: sessionStatus.video,
+          chatType: this.sendType,
           isMsgSync: 2
         })
     },
@@ -538,7 +539,7 @@ export const sendMsgsMixin = {
           identifier: self.userInfo.userId,
           msgStatus: msgStatus.msg,
           msgType: msgTypes.msg_img,
-          chatType: sessionStatus.video
+          chatType: this.sendType
         }
         // 上传图片
         const resp = await IM.uploadPic(img, {
@@ -797,10 +798,10 @@ export const onLineQueueMixin = {
   },
   methods: {
     async enterOnLineLineUp() {
-      // 排队成功，直接通知坐席
+      // // 排队成功，直接通知坐席
       // window.sessionStorage.setItem('queue_start_time', new Date().getTime())
       // const msg = {
-      //   csId: 'webchat9',
+      //   csId: 'webchat10',
       //   queueSounce: sessionStatus.onLine
       // }
       // RTCSystemMsg.responseVideoQueuesSuccess(msg, this.userInfo, this.sessionId)

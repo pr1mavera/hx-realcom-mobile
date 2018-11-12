@@ -362,6 +362,7 @@ const IM = (() => {
     let imgDataStr = `{}`
     let proxyInfoStr = `{}`
     let giftInfoStr = `{}`
+    let assessInfoStr = `{}`
     if (options.imgData) {
       imgDataStr = JSON.stringify(options.imgData)
     }
@@ -370,6 +371,9 @@ const IM = (() => {
     }
     if (options.giftInfo) {
       giftInfoStr = JSON.stringify(options.giftInfo)
+    }
+    if (options.assessInfo) {
+      assessInfoStr = JSON.stringify(options.assessInfo)
     }
     sendC2CCustomMsg(from_id, to_id, {
       data: options.msg,
@@ -390,7 +394,8 @@ const IM = (() => {
       ext: `{
         "imgData":${imgDataStr},
         "proxyInfo":${proxyInfoStr},
-        "giftInfo":${giftInfoStr}
+        "giftInfo":${giftInfoStr},
+        "assessInfo":${assessInfoStr}
       }`,
       isMsgSync: options.isMsgSync,
       identifier: options.identifier,
