@@ -293,6 +293,7 @@ export default {
         -webkit-user-select: text;
         &.gift-item {
           padding-left: 2rem;
+          display: inline-block;
         }
         .text-gift {
           position: absolute;

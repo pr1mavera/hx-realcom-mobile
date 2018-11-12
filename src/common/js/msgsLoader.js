@@ -36,17 +36,17 @@ const MsgsLoader = {
         // 消息为当前会话最后一页，更新当前会话、分页
         this.roamMsgsIterator.next()
         this.page.resetPage()
-        this.page.updateCurTime(list[0].time)
+        list.length && this.page.updateCurTime(list[0].time)
       } else {
         this.page.updateCurPage()
-        this.page.updateCurTime(list[0].time)
+        list.length && this.page.updateCurTime(list[0].time)
       }
     } else {
       // 拉取历史消息
       list = await this.history.getHistoryMsgs(this.info.id, this.page)
       if (list.length) {
         this.page.updateCurPage()
-        this.page.updateCurTime(list[0].time)
+        list.length && this.page.updateCurTime(list[0].time)
       }
     }
     return list
