@@ -57,12 +57,16 @@
       <send-gift style="height: unset"
       ></send-gift>
     </div>
-    <a class="btn-back" @click="$router.back(-1)">返 回</a>
+    <div class="btn-box">
+      <a class="btn btn-back" @click="$router.back(-1)">返 回</a>
+      <a class="btn btn-lin-up" @click="enterLinUp">立即咨询</a>
+    </div>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
-  import {mapGetters} from 'vuex'
+  import Tools from '@/common/js/tools'
+  import {mapGetters, mapActions} from 'vuex'
   import { Swiper, SwiperItem, XButton, XCircle } from 'vux'
   import { ERR_OK, getCsInfo, csPhoto } from '@/server/index.js'
 
@@ -87,7 +91,8 @@
     },
     computed: {
       ...mapGetters([
-        'csInfo'
+        'csInfo',
+        'userInfo'
       ])
     },
     mounted() {
@@ -114,23 +119,52 @@
         } else {
           console.log('======================= error about get cuSerInfo')
         }
-      }
-
-      // 标签信息查询
-      // async getLabels() {
-      //   const csId = this.cuSerInfo.id
-      //   // const csId = '123'
-      //   const page = 0
-      //   const pageSize = -1
-      //   const res = await viewLabels(page, pageSize, csId)
-      //
-      //   if (res.result.code === ERR_OK) {
-      //     console.log(JSON.stringify(res.data))
-      //     this.labelsInfo = res.data.labels
-      //   } else {
-      //     console.log('======================= error about query labels')
-      //   }
-      // }
+      },
+      enterLinUp() {
+        const self = this
+        this.$vux.confirm.show({
+          title: '您即将转入视频客服',
+          onConfirm() {
+          self.goToLineUp()
+          }
+        })
+      },
+      goToLineUp() {
+        // 判断当前时间是否是在工作时间内
+        const SP_workT = this.userInfo.workTimeInfo.filter(item => item.callType === 'SP')
+        const workT = {
+          startT: SP_workT[0].startTime,
+          endT: SP_workT[0].endTime
+        }
+        if (!Tools.DateTools.isWorkTime(workT)) {
+          this.$vux.alert.show({
+            title: `抱歉，当前为非工作时间，视频客服工作时间为周一至周日${workT.startT}-${workT.endT}，请在工作时间内来询，感谢您的关注！`
+          })
+          return
+        }
+        const status = this.$route.query.csStatus
+        const cuSerId = this.$route.query.cusSerId
+        // 只有就绪和忙碌可以排队
+        if (status === '1') {
+          this.$vux.alert.show({
+            title: '啊呀，当前客服还没准备好呢~'
+          })
+        } else if (status === '3' || status === '5') {
+          this.$router.push({path: `/room/line-up/${cuSerId}`})
+          this.enterToLineUp('正在为您转接视频客服，请稍候')
+        } else if (status === '4') {
+          this.$vux.alert.show({
+            title: '啊呀，当前客服正在休息呐~'
+          })
+        } else if (status === '2') {
+          this.$vux.alert.show({
+            title: '啊呀，当前客服不在呢~'
+          })
+        }
+      },
+      ...mapActions([
+        'enterToLineUp'
+      ])
     }
   }
 
@@ -227,18 +261,25 @@
         }
       }
     }
-    .btn-back {
+    .btn-box {
+      display: flex;
       position: fixed;
       bottom: 0;
-      display: block;
-      width: 100%;
+      width: 100vw;
       height: 5rem;
-      line-height: 5rem;
       font-size: 1.8rem;
       color: @text-lighter;
       text-align: center;
-      margin-top: 2.5rem;
       background: linear-gradient(to right, #FF905B, #FF7EAB);
+      .btn {
+        flex: 1;
+        height: 3.5rem;
+        line-height: 3.5rem;
+        align-self: center;
+      }
+      .btn-lin-up {
+        border-left: 2px solid #ffffff;
+      }
     }
   }
 
