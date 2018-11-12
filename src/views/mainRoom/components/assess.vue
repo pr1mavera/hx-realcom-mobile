@@ -39,7 +39,7 @@
 <script>
   import { TransferDom, Popup, Rater, XButton } from 'vux'
   import IM from '@/server/im'
-  import { ERR_OK, saveAssess, getCsAvatar } from '@/server/index.js'
+  import { getCsAvatar } from '@/server/index.js'
   import { msgStatus, msgTypes } from '@/common/js/status'
   import { mapGetters } from 'vuex'
   import Tools from '@/common/js/tools'

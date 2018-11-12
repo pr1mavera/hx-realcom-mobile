@@ -199,6 +199,8 @@ export default {
     async hangUpVideo() {
       // 恢复全屏
       !this.fullScreen && this.setFullScreen(true)
+      // 恢复摄像头默认位置
+      this.isChangeCamera && (this.isChangeCamera = false)
       // 截取坐席视频
       await this.getVideoScreenShot()
       // 停止推流
