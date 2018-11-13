@@ -42,10 +42,9 @@
     methods: {
       // 保存留言
       async submitMsg() {
-        // 便于测试现未对输入信息进行校验
         // this.submitMsgSuc = true
-        debugger
-        if (this.leaveWordDescription !== '' && this.callNumber !== '') {
+        const reg = /^1(3|4|5|7|8)\d{9}$/
+        if (this.leaveWordDescription !== '' && this.callNumber !== '' && reg.test(this.callNumber)) {
           const now = new Date()
           const year = JSON.stringify(now.getFullYear())
           const month = now.getMonth() + 1 >= 10 ? JSON.stringify(now.getMonth()) : '0' + JSON.stringify(now.getMonth())
@@ -56,19 +55,21 @@
 
           const data = {
             'callNumber': this.callNumber,
+            'contNo': '', // 保单号
+            'customerName': '', // 客户姓名
+            'customerNick': '', // 微信昵称
             'leaveWordDescription': this.leaveWordDescription,
-            // 'leaveWordDate': '2018-11-08 15:58:38',
+            'leaveListenCode': '', // 录音代码
+            // 'replyNo': '',
             'leaveWordDate': year + '-' + month + '-' + day + ' ' + hour + ':' + min + ':' + seconds,
-            'origin': '01', // 1.官微2.凤凰营销（简称为营销）3.官网4.中介公众号（简称为中介）5.龙行银保（简称为银保）
+            'origin': '1', // 1.官微2.凤凰营销（简称为营销）3.官网4.中介公众号（简称为中介）5.龙行银保（简称为银保）
             'leaveWordSource': '04', // 01-在线平台 02-服务箱（小华e家）03- 呼入04 - 虚拟
             'openId': this.$route.query.openId
           }
-          debugger
           const res = await leaveMsg(data)
           debugger
-          if (res) {
-            this.submitMsgSuc = true // 留言保存成功
-            console.log(JSON.stringify(res))
+          if (res.result_code === '200') {
+            this.submitMsgSuc = true // 跳转到留言保存成功,
           }
         } else if (this.leaveWordDescription === '') {
           this.$vux.alert.show({
@@ -76,7 +77,7 @@
           })
         } else {
           this.$vux.alert.show({
-            title: '咦~您还没有填写手机号呢~~'
+            title: '咦~手机号是不是错啦~~'
           })
         }
       }

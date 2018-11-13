@@ -115,7 +115,7 @@
 
           const res = await viewLabels(page, pageSize, csId)
           if (res.result.code === ERR_OK) {
-            console.log('=============这是查询到的我的评价标签信息:' + JSON.stringify(res.data.labels))
+            // console.log('=============这是查询到的我的评价标签信息:' + JSON.stringify(res.data.labels))
             this.showDots = false
             this.btnList = res.data.labels
           } else {

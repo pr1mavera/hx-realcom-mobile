@@ -55,7 +55,7 @@
           <img class="text-gift" :src="`/static/img/${msg.giftInfo.id}.png`">
         </span>
         <!-- 留言 -->
-        <span class="text" v-if="msg.msgType === msgTypes.msg_leave">客服暂时不在，请<span class="button">点击留言</span>~</span>
+        <span class="text" v-if="msg.msgType === msgTypes.msg_leave">客服暂时不在，请<span class="button" @click="leaveMsg">点击留言</span>~</span>
         <!-- 猜问题 -->
         <span class="text" v-if="msg.msgType === msgTypes.msg_guess">我猜您想知道这些问题</span>
         <!-- 名片消息 -->
@@ -160,6 +160,10 @@ export default {
     },
     clickImgMsg() {
       this.$emit('onClickImgMsg', +this.imgId)
+    },
+    // 点击留言按钮
+    leaveMsg() {
+      this.$emit('toLeaveMsg')
     },
     /* *********************************** CopyButton *********************************** */
     showCopyButton() {

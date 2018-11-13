@@ -43,11 +43,10 @@
                   @enterOnLineLineUp="enterOnLineLineUp"
                   @clickHotQues="chatInputCommit"
                   @onLineCancelQueue="onLineCancelQueue"
+                  @toLeaveMsg="toLeaveMsg"
                 ></component>
               </keep-alive>
             </li>
-            <!-- test the leave message-->
-            <!--<li class="chat-content-li" @click="toLeaveMsg">请留言</li>-->
             <li class="chat-content-block chat-content-end" ref="chatContentEnd"></li>
           </ul>
         </div>
