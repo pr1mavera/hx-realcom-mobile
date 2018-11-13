@@ -86,7 +86,7 @@ export default {
         // 当前视频已结束
         const self = this
         this.$vux.confirm.show({
-          title: '真的要放弃评价嘛？？',
+          title: '您真的要放弃评价嘛？？',
           onConfirm() {
             // 服务结束
             self.setAssessView(false)

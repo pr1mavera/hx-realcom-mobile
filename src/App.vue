@@ -24,7 +24,7 @@ export default {
     window.addEventListener('offline', () => {
       this.$vux.toast.show({
         type: 'text',
-        text: '测试你看，断网了 (-_-||)',
+        text: '哎呀，断网了 (-_-||)',
         position: 'top',
         width: '80%',
         time: 5000

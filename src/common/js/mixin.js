@@ -307,7 +307,6 @@ export const IMMixin = {
       // 处理系统消息（视频、在线）
 
       const msgsObj = IM.parseMsgsInSystem(msgs).textMsgs[0]
-      debugger
       switch (+msgsObj.code) {
         /* ******************************** 视频 ******************************** */
         // 人数减少（视频）
@@ -448,7 +447,7 @@ export const sendMsgsMixin = {
           resolve()
           console.log('============================= 我现在来请求 sendMsgToBot 辣 =============================')
         } else {
-          alert('你可能不信，但是机器人崩了')
+          alert('小华开小差去了，暂时不能回答您的问题')
         }
       })
     },
@@ -688,7 +687,7 @@ export const RTCSystemMsg = {
           orign: '官微',
           robotSessionId: sessionId
         },
-        desc: `${userInfo.userName}排队成功辣`,
+        desc: `${userInfo.userName}排队成功`,
         ext: ''
       }
     }
@@ -927,7 +926,7 @@ export const onLineQueueMixin = {
       })
       if (res.result_code === '200') {
         console.info('取消排队成功')
-        this.$vux.toast.text('你已经取消排队辣', 'middle')
+        this.$vux.toast.text('您已经取消排队', 'middle')
         return 0
       } else {
         console.info('取消排队失败')

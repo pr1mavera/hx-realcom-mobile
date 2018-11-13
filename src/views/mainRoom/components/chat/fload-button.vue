@@ -44,7 +44,7 @@
 
 <script type="text/ecmascript-6">
 import { Alert, TransferDomDirective as TransferDom } from 'vux'
-import { mapGetters, mapMutations } from 'vuex'
+import { mapGetters, mapMutations, mapActions } from 'vuex'
 import { roomStatus, msgStatus, msgTypes } from '@/common/js/status'
 import Tools from '@/common/js/tools'
 
@@ -139,9 +139,11 @@ export default {
       }
     },
     ...mapMutations({
-      sendMsgs: 'SET_MSGS',
       setAssessView: 'SET_ASSESS_VIEW'
-    })
+    }),
+    ...mapActions([
+      'sendMsgs'
+    ])
   }
 }
 </script>

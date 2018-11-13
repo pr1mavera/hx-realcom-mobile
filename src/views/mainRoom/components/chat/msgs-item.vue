@@ -28,7 +28,7 @@
         <span class="text" v-if="msg.msgType === msgTypes.msg_liked" v-html="msg.content"></span>
         <!-- 转人工 -->
         <span class="text" v-if="msg.msgType === msgTypes.msg_no_idea">
-          小华智力有限，好像听不太懂您的问题呢，可转
+          小华好像听不太懂您的问题呢，可转
           <span class="button" @click="enterOnLineLineUp">人工客服</span>
         </span>
         <!-- 热点问题 -->
