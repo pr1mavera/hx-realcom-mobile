@@ -6,7 +6,7 @@ import MsgsLoader from '@/common/js/MsgsLoader'
 import { ERR_OK, getUserInfoByOpenID, getLoginInfo, pushSystemMsg, sendMsgToBot, getSessionList, getCsAvatar, onLineQueue, getBotRoamMsgs, requestHistoryMsgs, onLineQueueCancel, chatQueueHeartBeat } from '@/server/index.js'
 import Tools from '@/common/js/tools'
 // import { formatDate } from '@/common/js/dateConfig.js'
-import { queueStatus, sessionStatus, systemMsgStatus, msgStatus, msgTypes, tipTypes } from '@/common/js/status'
+import { roomStatus, queueStatus, sessionStatus, systemMsgStatus, msgStatus, msgTypes, tipTypes } from '@/common/js/status'
 
 export const loginMixin = {
   data() {
@@ -344,6 +344,7 @@ export const IMMixin = {
 
         // 客户端排队成功（在线）
         case systemMsgStatus.onLine_queuesSuccess:
+          this.$router.replace({path: `/room/chat?openId=${this.userInfo.openId}`})
           msgsObj.queueSounce = sessionStatus.onLine
           RTCSystemMsg.responseVideoQueuesSuccess(msgsObj, this.userInfo, this.sessionId)
           // 存客服基本信息
@@ -408,6 +409,7 @@ export const IMMixin = {
 export const sendMsgsMixin = {
   computed: {
     ...mapGetters([
+      'roomMode',
       'botInfo',
       'userInfo',
       'csInfo',
@@ -471,28 +473,25 @@ export const sendMsgsMixin = {
       })
     },
     sendGiftMsg(giftInfo) {
-      return new Promise(resolve => {
-        this.afterSendC2CGiftMsgs(giftInfo)
-        resolve()
-        IM.sendNormalMsg(
-          this.userInfo.userId,
-          this.csInfo.csId,
-          // '123456789',
-          {
-            sessionId: this.sessionId,
-            toUserName: this.csInfo.csName,
-            msg: `${this.userInfo.userName}给你送了一个礼物`,
-            time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
-            nickName: this.userInfo.userName,
-            avatar: this.csInfo.csId,
-            identifier: this.userInfo.userId,
-            msgStatus: msgStatus.msg,
-            msgType: msgTypes.msg_gift,
-            chatType: this.sendType,
-            giftInfo,
-            isMsgSync: 2
-          })
-      })
+      this.afterSendC2CGiftMsgs(giftInfo)
+      IM.sendNormalMsg(
+        this.userInfo.userId,
+        this.csInfo.csId,
+        // '123456789',
+        {
+          sessionId: this.sessionId,
+          toUserName: this.csInfo.csName,
+          msg: `${this.userInfo.userName}给你送了一个礼物`,
+          time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+          nickName: this.userInfo.userName,
+          avatar: this.csInfo.csId,
+          identifier: this.userInfo.userId,
+          msgStatus: msgStatus.msg,
+          msgType: msgTypes.msg_gift,
+          chatType: this.sendType,
+          giftInfo,
+          isMsgSync: 2
+        })
     },
     sendLikeMsg() {
       this.afterSendC2CLikeMsgs()
@@ -549,6 +548,28 @@ export const sendMsgsMixin = {
         await IM.sendNormalMsg(this.userInfo.userId, this.csInfo.csId, customMsgInfo)
       })
     },
+    sendXiaoHuaExpress(url) {
+      this.afterSendXiaoHuaExpress(url)
+      this.roomMode !== roomStatus.AIChat && IM.sendNormalMsg(
+        this.userInfo.userId,
+        this.csInfo.csId,
+        {
+          sessionId: this.sessionId,
+          toUserName: this.csInfo.csName,
+          msg: `小华表情`,
+          time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+          nickName: this.userInfo.userName,
+          avatar: this.csInfo.csId,
+          identifier: this.userInfo.userId,
+          msgStatus: msgStatus.msg,
+          msgType: msgTypes.msg_XH_express,
+          chatType: this.sendType,
+          imgData: {
+            big: url,
+            small: url
+          }
+        })
+    },
     afterSendC2CTextMsgs(text) {
       const self = this
       const msg = {
@@ -558,8 +579,7 @@ export const sendMsgsMixin = {
         isSelfSend: true,
         time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
         msgStatus: msgStatus.msg,
-        msgType: msgTypes.msg_normal,
-        chatType: sessionStatus.video
+        msgType: msgTypes.msg_normal
       }
       this.sendMsgs(msg)
     },
@@ -573,7 +593,6 @@ export const sendMsgsMixin = {
         time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
         msgStatus: msgStatus.msg,
         msgType: msgTypes.msg_gift,
-        chatType: sessionStatus.video,
         giftInfo
       }
       this.sendMsgs(msg)
@@ -587,22 +606,34 @@ export const sendMsgsMixin = {
         isSelfSend: true,
         time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
         msgStatus: msgStatus.msg,
-        msgType: msgTypes.msg_liked,
-        chatType: sessionStatus.video
+        msgType: msgTypes.msg_liked
       }
       this.sendMsgs(msg)
     },
     afterSendC2CImgMsgs(imgData) {
-      const self = this
       const msg = {
-        nickName: self.userInfo.userName,
-        avatar: self.csInfo.csId,
+        nickName: this.userInfo.userName,
+        avatar: this.csInfo.csId,
         isSelfSend: true,
         time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
         msgStatus: msgStatus.msg,
         msgType: msgTypes.msg_img,
-        chatType: sessionStatus.video,
         imgData
+      }
+      this.sendMsgs(msg)
+    },
+    afterSendXiaoHuaExpress(url) {
+      const msg = {
+        time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+        nickName: this.userInfo.userName,
+        avatar: this.csInfo.csId,
+        isSelfSend: true,
+        msgStatus: msgStatus.msg,
+        msgType: msgTypes.msg_XH_express,
+        imgData: {
+          big: url,
+          small: url
+        }
       }
       this.sendMsgs(msg)
     },
@@ -796,24 +827,25 @@ export const onLineQueueMixin = {
   },
   methods: {
     async enterOnLineLineUp() {
-      // 排队成功，直接通知坐席
-      window.sessionStorage.setItem('queue_start_time', new Date().getTime())
-      const msg = {
-        csId: 'webchat2',
-        queueSounce: sessionStatus.onLine
-      }
-      RTCSystemMsg.responseVideoQueuesSuccess(msg, this.userInfo, this.sessionId)
-
-      // // 在线转人工流程
-      // // 1. 请求排队
-      // const res = await this.formatOnLineQueueAPI()
-      // // 2. 处理
-      // if (res.code === ERR_OK) {
-      //   window.sessionStorage.setItem('queue_start_time', new Date().getTime())
-      //   this.afterQueueSuccess(res.data)
-      // } else {
-      //   this.botSendLeaveMsg()
+      this.$router.replace({path: `/room/chat?openId=${this.userInfo.openId}&csId=${this.onLineQueueCsId || 'wait_for_distribution'}`})
+      // // 排队成功，直接通知坐席
+      // window.sessionStorage.setItem('queue_start_time', new Date().getTime())
+      // const msg = {
+      //   csId: 'webchat2',
+      //   queueSounce: sessionStatus.onLine
       // }
+      // RTCSystemMsg.responseVideoQueuesSuccess(msg, this.userInfo, this.sessionId)
+
+      // 在线转人工流程
+      // 1. 请求排队
+      const res = await this.formatOnLineQueueAPI()
+      // 2. 处理
+      if (res.code === ERR_OK) {
+        window.sessionStorage.setItem('queue_start_time', new Date().getTime())
+        this.afterQueueSuccess(res.data)
+      } else {
+        this.botSendLeaveMsg()
+      }
     },
     async formatOnLineQueueAPI() {
       const self = this
@@ -903,12 +935,12 @@ export const onLineQueueMixin = {
       this.heart = true
       this.heartBeatTimer = setInterval(async() => {
         console.warn('====== 在线的 我现在请求心跳 ======')
-        if (!this.heart || !this.$route.params.csId) {
+        if (!this.heart || !this.$route.query.csId) {
           // 非常规退出 & 浏览器回退
           this.stopHeartBeat()
           return
         }
-        this.heartBeatReq = await chatQueueHeartBeat(this.$route.params.csId, this.userInfo.userId)
+        this.heartBeatReq = await chatQueueHeartBeat(this.$route.query.csId, this.userInfo.userId)
         if (this.heartBeatReq.code === ERR_OK) {
           console.info('心跳成功')
           this.heartBeatFailCount = 0

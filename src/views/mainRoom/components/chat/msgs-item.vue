@@ -19,7 +19,8 @@
         :class="[{
           'right-content-style': msg.isSelfSend,
           'left-content-style': !msg.isSelfSend,
-          'padding-for-img': msg.msgType === msgTypes.msg_img
+          'padding-for-img': msg.msgType === msgTypes.msg_img,
+          'padding-for-HX': msg.msgType === msgTypes.msg_XH_express
         }]">
         <!-- 基本消息 -->
         <span class="text" v-if="msg.msgType === msgTypes.msg_normal" v-html="msg.content">{{msg.content}}</span>
@@ -43,6 +44,10 @@
         <!-- 图片消息 -->
         <span class="text text-img" v-if="msg.msgType === msgTypes.msg_img">
           <img class="text-img" :id="imgId" height=100% :src="msg.imgData.small" @click="clickImgMsg">
+        </span>
+        <!-- 小华表情消息 -->
+        <span class="text" v-if="msg.msgType === msgTypes.msg_XH_express">
+          <img class="text-XH" height=100% :src="msg.imgData.small">
         </span>
         <!-- 礼物消息 -->
         <span class="text gift-item" v-if="msg.msgType === msgTypes.msg_gift">
@@ -281,12 +286,25 @@ export default {
           background-color: #f00;
         }
       }
+      &.padding-for-HX {
+        padding: 0;
+        box-shadow: none;
+        background-color: unset;
+        border-radius: 0;
+        .text {
+          display: inline-block;
+          height: 12rem;
+        }
+      }
       .text {
         position: relative;
         line-height: 2rem;
         max-width: 100%;
         word-wrap: break-word;
         -webkit-user-select: text;
+        &.text-XH {
+
+        }
         &.gift-item {
           padding-left: 2rem;
           display: inline-block;

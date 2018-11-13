@@ -66,6 +66,7 @@ export const msgTypes = {
   msg_liked: '7', // 点赞消息
   msg_card: '8', // 名片消息
   msg_assess: '9', // 评价消息
+  msg_XH_express: '10', // 小华表情消息
   msg_hand_up: '24' // 结束会话（在线）
 }
 

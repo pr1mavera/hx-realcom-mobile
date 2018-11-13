@@ -5,7 +5,7 @@
     <send-extend-item
       v-for="(item, index) in giftMap"
       :key="index"
-      :icon="item.id"
+      :icon="`/static/img/gift/${item.id}.png`"
       :text="item.name"
       @click.native.prevent="$emit('selectGift', item)"
     ></send-extend-item>

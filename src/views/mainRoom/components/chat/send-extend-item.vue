@@ -2,11 +2,8 @@
   <div class="send-extend-item">
     <div class="item-icon">
       <div class="item-icon-bg bg-image">
-        <img width=100% height=100% class="giftImg" :src="imgUrl">
+        <img width=100% height=100% class="giftImg" :src="icon">
       </div>
-      <svg class="icon extend-click" aria-hidden="true">
-        <use xlink:href="#icon-wode"></use>
-      </svg>
     </div>
     <div class="text">{{this.text}}</div>
   </div>
@@ -14,11 +11,6 @@
 
 <script type="text/ecmascript-6">
 export default {
-  computed: {
-    imgUrl() {
-      return `/static/img/${this.icon}.png`
-    }
-  },
   props: {
     mode: {
       type: String

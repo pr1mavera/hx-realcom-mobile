@@ -74,6 +74,7 @@
       @deleteBtn="onDeleteBtnClick"
       @sendImg="sendImgMsgClick"
       @sendGift="sendGiftMsgClick"
+      @sendXiaoHua="sendXiaoHuaExpress"
     ></extend-bar>
     <!-- 长按 复制 -->
     <div class="copy"

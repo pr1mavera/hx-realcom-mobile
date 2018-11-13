@@ -66,12 +66,21 @@
         </swiper>
       </div>
       <div class="xiaohua-express" v-if="currIndex === 2">
-        <send-extend-item
-          v-for="(item, index) in express[2].list"
-          :key="index"
-          :mode="item.mode"
-          :icon="item.icon"
-        ></send-extend-item>
+        <swiper dots-position="center">
+          <swiper-item v-for="(page, index) in express[2].list" :key="index">
+            <ul>
+              <li
+                class="swiper-item-li"
+                v-for="(item, index) in page.pageList"
+                :key="`xiaohua_${index}`"
+                @click="$emit('sendXiaoHua', `/static/img/express/${item.id}.gif`)">
+                <send-extend-item
+                  :icon="`/static/img/express/${item.id}.gif`"
+                ></send-extend-item>
+              </li>
+            </ul>
+          </swiper-item>
+        </swiper>
       </div>
     </div>
   </div>
@@ -115,40 +124,66 @@ export default {
           name: 'xiaohua',
           list: [
             {
-              icon: 'caomeidangao',
-              text: ''
+              id: 'chang_qing_shu'
             },
             {
-              icon: 'caomeidangao',
-              text: ''
+              id: 'fu_lin_men'
+            },
+            {
+              id: 'jia_you'
+            },
+            {
+              id: 'ke_hu_li_yi_zhi_shang'
+            },
+            {
+              id: 'me_me_da'
+            },
+            {
+              id: 'xie_xie'
+            },
+            {
+              id: 'ye_ji_chang_hong'
+            },
+            {
+              id: 'zan'
+            },
+            {
+              id: 'zao_shang_hao'
             }
           ]
         }
       ]
     }
   },
-  mounted() {
+  created() {
     this.$nextTick(() => {
-      this._normalizeEmojiList()
       this._setEmojiHistory()
+      this.express[1].list = this._normalizeExpressList({
+        baseList: emojiMap,
+        row: 3,
+        col: 8
+      })
+      this.express[2].list = this._normalizeExpressList({
+        baseList: this.express[2].list,
+        row: 2,
+        col: 4
+      })
     })
   },
   methods: {
-    _normalizeEmojiList() {
-      const row = 3 // 行
-      const col = 8 // 列
+    _normalizeExpressList({ baseList, row, col }) {
       const singleNum = row * col // 一页的表情个数
-      const totalPage = (emojiMap.length / singleNum >>> 0) + 1 // 页数
-      const map = emojiMap
+      const totalPage = (baseList.length / singleNum >>> 0) + 1 // 页数
+      let newList = []
       for (let i = 0; i < totalPage; i++) {
-        const list = map.slice(i * singleNum, (i + 1) * singleNum)
+        const list = baseList.slice(i * singleNum, (i + 1) * singleNum)
         const temp = {
           page: i + 1,
           pageList: list
         }
-        this.express[1].list.push(temp)
+        newList.push(temp)
       }
-      console.dir(this.express[1].list)
+      return newList
     },
     _setEmojiHistory() {
       const localStorage = window.localStorage
@@ -295,7 +330,7 @@ export default {
         }
       }
     }
-    .emoji-swiper {
+    .emoji-swiper, .xiaohua-express {
       width: 100%;
       height: 100%;
       .vux-slider {
@@ -304,47 +339,55 @@ export default {
         .vux-swiper {
           width: 100%;
           height: 100%!important;
-          .vux-swiper-item {
-            width: 100%;
-            height: 100%;
-            padding: 1.8rem 2.6rem;
-            box-sizing: border-box;
-            ul {
-              display: flex;
-              justify-content: flex-start;
-              flex-wrap: wrap;
-              .swiper-item-li {
-                // width: 2.4rem;
-                // height: 2.4rem;
-                font-size: 2.4rem;
-                padding-bottom: 1rem;
-                flex-basis: 12.5%;
-                text-align: center;
-              }
-            }
-          }
         }
-        .vux-indicator {
-          .vux-icon-dot {
-            &.active {
-              background-color: @text-light;
-              width: 0.8rem;
-              height: 0.8rem;
-              border-radius: 50%;
-            }
+      }
+    }
+    .emoji-swiper {
+      .vux-swiper-item {
+        width: 100%;
+        height: 100%;
+        padding: 1.8rem 2.6rem;
+        box-sizing: border-box;
+        ul {
+          display: flex;
+          justify-content: flex-start;
+          flex-wrap: wrap;
+          .swiper-item-li {
+            font-size: 2.4rem;
+            padding-bottom: 1rem;
+            flex-basis: 12.5%;
+            text-align: center;
           }
         }
       }
     }
     .xiaohua-express {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: flex-start;
-      padding: 2.4rem 1.8rem;
-      .send-extend-item {
-        height: 8.6rem;
-        flex-basis: 25%;
-        text-align: center;
+      .vux-swiper-item {
+        width: 100%;
+        height: 100%;
+        padding: 1.8rem 2.2rem;
+        box-sizing: border-box;
+        ul {
+          display: flex;
+          justify-content: flex-start;
+          flex-wrap: wrap;
+          .swiper-item-li {
+            font-size: 2.4rem;
+            padding-bottom: 1.4rem;
+            flex-basis: 25%;
+            text-align: center;
+          }
+        }
+      }
+    }
+    .vux-indicator {
+      .vux-icon-dot {
+        &.active {
+          background-color: @text-light;
+          width: 0.8rem;
+          height: 0.8rem;
+          border-radius: 50%;
+        }
       }
     }
   }

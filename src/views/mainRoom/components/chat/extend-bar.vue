@@ -32,8 +32,8 @@
     <section class="extend-bar-section send-gift-section" v-show="giftSectionShow">
       <send-gift :theme="`light`" @selectGift="selectGift"></send-gift>
     </section>
-    <section class="extend-bar-section send-express-section" v-if="expressSectionShow">
-      <send-express @selectEmojiWithCode="selectEmojiWithCode" @deleteBtn="$emit('deleteBtn')"></send-express>
+    <section class="extend-bar-section send-express-section" v-show="expressSectionShow">
+      <send-express @selectEmojiWithCode="selectEmojiWithCode" @deleteBtn="$emit('deleteBtn')" @sendXiaoHua="sendXiaoHua"></send-express>
     </section>
   </div>
 </template>
@@ -72,6 +72,9 @@ export default {
   methods: {
     selectEmojiWithCode(code) {
       this.$emit('selectEmojiWithCode', code)
+    },
+    sendXiaoHua(url) {
+      this.$emit('sendXiaoHua', url)
     },
     selectGift(type) {
       this.$emit('sendGift', type)
