@@ -23,6 +23,7 @@
 <script type="text/ecmascript-6">
   import { XInput, Cell, Group, XButton } from 'vux'
   import { leaveMsg } from '@/server/index.js'
+  import {mapGetters} from 'vuex'
   export default {
     // name: "leave-message.vue"
     components: {
@@ -39,6 +40,11 @@
         submitMsgSuc: false
       }
     },
+    computed: {
+      ...mapGetters([
+        'userInfo'
+      ])
+    },
     methods: {
       // 保存留言
       async submitMsg() {
@@ -54,15 +60,15 @@
           const seconds = now.getSeconds() >= 10 ? JSON.stringify(now.getSeconds()) : '0' + JSON.stringify(now.getSeconds())
 
           const data = {
+            'customerNick': '', // 微信昵称
+            'customerName': this.userInfo.userName, // 客户姓名
             'callNumber': this.callNumber,
             'contNo': '', // 保单号
-            'customerName': '', // 客户姓名
-            'customerNick': '', // 微信昵称
-            'leaveWordDescription': this.leaveWordDescription,
             'leaveListenCode': '', // 录音代码
-            // 'replyNo': '',
+            'leaveWordDescription': this.leaveWordDescription,
             'leaveWordDate': year + '-' + month + '-' + day + ' ' + hour + ':' + min + ':' + seconds,
-            'origin': '1', // 1.官微2.凤凰营销（简称为营销）3.官网4.中介公众号（简称为中介）5.龙行银保（简称为银保）
+            // 'origin': '1', // 1.官微2.凤凰营销（简称为营销）3.官网4.中介公众号（简称为中介）5.龙行银保（简称为银保）
+            'leaveWordChannel': '1',
             'leaveWordSource': '04', // 01-在线平台 02-服务箱（小华e家）03- 呼入04 - 虚拟
             'openId': this.$route.query.openId
           }
