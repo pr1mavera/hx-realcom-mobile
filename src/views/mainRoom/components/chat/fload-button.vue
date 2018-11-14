@@ -6,7 +6,7 @@
       @click="callPhone"
       :class="[{'visible-when-input': barStatus, 'item-1': !barStatus}]">
       <svg class="icon" aria-hidden="true">
-        <use xlink:href="#icon-dianhuakefu"></use>
+        <use xlink:href="#icon-dianhua"></use>
       </svg>
     </button>
     <button
@@ -15,7 +15,7 @@
       @click="videoLineUp"
       :class="[{'visible-when-input': barStatus, 'item-2': !barStatus}]">
       <svg class="icon" aria-hidden="true">
-        <use xlink:href="#icon-shipinkefu"></use>
+        <use xlink:href="#icon-shipin"></use>
       </svg>
     </button>
     <button
@@ -24,7 +24,7 @@
       @click="onLineLineUp"
       :class="[{'visible-when-input': barStatus, 'item-3': !barStatus}]">
       <svg class="icon" aria-hidden="true">
-        <use xlink:href="#icon-zhuanshukefu"></use>
+        <use xlink:href="#icon-zhuanrengongVIP"></use>
       </svg>
     </button>
     <button
@@ -33,7 +33,7 @@
       @click="clickAssess"
       :class="[{'visible-when-input': barStatus, 'item-4': !barStatus}]">
       <svg class="icon" aria-hidden="true">
-        <use xlink:href="#icon-pingjiashouye"></use>
+        <use xlink:href="#icon-pingjia1"></use>
       </svg>
     </button>
     <div v-transfer-dom>

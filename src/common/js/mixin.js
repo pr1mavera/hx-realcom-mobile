@@ -941,7 +941,7 @@ export const onLineQueueMixin = {
           this.stopHeartBeat()
           return
         }
-        this.heartBeatReq = await chatQueueHeartBeat(this.$route.query.csId, this.userInfo.userId)
+        this.heartBeatReq = await chatQueueHeartBeat(this.userInfo.userId)
         if (this.heartBeatReq.code === ERR_OK) {
           console.info('心跳成功')
           this.heartBeatFailCount = 0

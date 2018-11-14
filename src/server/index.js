@@ -139,7 +139,7 @@ export const onLineQueueCancel = data => http.post('onLine', '/webchat/queue/v1/
 /**
  * [chatQueueHeartBeat 客户端排队心跳]
  */
-export const chatQueueHeartBeat = data => http.post('onLine', '/webchat/queue/v1/heartbeat', data)
+export const chatQueueHeartBeat = chatGuid => http.post('onLine', '/webchat/queue/v1/heartbeat', { chatGuid })
 
 // 留言common/leaveword/v1/add
 export const leaveMsg = async(data) => http.post('onLine', '/common/leaveword/v1/add', data)
