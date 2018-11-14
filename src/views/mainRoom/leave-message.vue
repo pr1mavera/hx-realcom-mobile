@@ -1,10 +1,7 @@
 <template>
   <div class="container">
     <div class="header">
-      <img class="avatar" src="/static/img/leaveMsg/leaveMsgAvatar@2x.png"
-           srcset="/static/img/leaveMsg/leaveMsgAvatar.png 1x,
-                /static/img/leaveMsg/leaveMsgAvatar@2x.png 2x,
-                /static/img/leaveMsg/leaveMsgAvatar@3x.png 3x">
+      <img class="avatar" src="/static/img/leaveMsg/leaveMsgAvatar.png">
       <p>客服暂时不在线，偷偷告诉他</p>
     </div>
     <section>
@@ -73,9 +70,10 @@
             'openId': this.$route.query.openId
           }
           const res = await leaveMsg(data)
-          debugger
           if (res.result_code === '200') {
             this.submitMsgSuc = true // 跳转到留言保存成功,
+          } else {
+            console.log('there are some error about leave message' + JSON.stringify(res))
           }
         } else if (this.leaveWordDescription === '') {
           this.$vux.alert.show({
