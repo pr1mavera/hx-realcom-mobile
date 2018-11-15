@@ -32,7 +32,7 @@
     <section class="extend-bar-section send-gift-section" v-show="giftSectionShow">
       <send-gift :theme="`light`" @selectGift="selectGift"></send-gift>
     </section>
-    <section class="extend-bar-section send-express-section" v-show="expressSectionShow">
+    <section class="extend-bar-section send-express-section" v-if="expressSectionShow">
       <send-express @selectEmojiWithCode="selectEmojiWithCode" @deleteBtn="$emit('deleteBtn')" @sendXiaoHua="sendXiaoHua"></send-express>
     </section>
   </div>

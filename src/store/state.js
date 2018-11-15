@@ -13,6 +13,7 @@ const state = {
   },
   roomId: null,
   sessionId: null,
+  chatGuid: null,
   msgs: [],
   extendBarOpen: false,
   inputBarOpen: false,

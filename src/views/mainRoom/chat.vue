@@ -468,6 +468,9 @@ export default {
       console.log(text)
     },
     async chatInputCommit(text) {
+      this.toggleBar(toggleBarStatus.allFold)
+      this.resetExtendBar()
+      this._inputBlur()
       this.inputEle.innerText = ''
       text = text.replace(/<\/?.+?>/g, '').replace(/&nbsp;/g, '')
       if (text && text.trim()) {
@@ -489,8 +492,6 @@ export default {
           title: '消息为空'
         })
       }
-      this.setInputBar(false)
-      this._inputBlur()
       console.log(`submit ==> ${text}`)
     },
     resetExtendBar() {

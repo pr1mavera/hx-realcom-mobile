@@ -21,7 +21,7 @@
                 </div>
               </div>
               <div class="video-btn">
-                <button class="button" @click.self="clickToLineUp(curLabelInfo.status, curLabelInfo.id)">视频咨询</button>
+                <button class="button" @click.self="clickToLineUp(curLabelInfo)">视频咨询</button>
               </div>
               <div class="cs-info">
                 <ul>
@@ -174,8 +174,8 @@ export default {
     this.getCsList()
   },
   methods: {
-    clickToLineUp(status, csId) {
-      this.$emit('goToLineUp', status, csId)
+    clickToLineUp(cs) {
+      this.$emit('goToLineUp', cs)
     },
     startSlide(event) {
       const e = event.targetTouches[0]
