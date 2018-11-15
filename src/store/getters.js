@@ -9,6 +9,8 @@ export const csInfo = state => state.csInfo
 export const roomId = state => state.roomId
 // 会话房间ID（包括机器人，人工客服，视频客服）
 export const sessionId = state => state.sessionId
+// 人工客服排队ID
+export const chatGuid = state => state.chatGuid
 // 聊天信息队列
 export const msgs = state => state.msgs
 // 视频界面的信息队列

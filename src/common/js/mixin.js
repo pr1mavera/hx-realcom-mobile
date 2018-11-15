@@ -243,6 +243,7 @@ export const IMMixin = {
       'csInfo',
       'roomId',
       'sessionId',
+      'chatGuid',
       'msgs',
       'videoMsgs',
       'queueNum'
@@ -347,7 +348,7 @@ export const IMMixin = {
         case systemMsgStatus.onLine_queuesSuccess:
           this.$router.replace({path: `/room/chat?openId=${this.userInfo.openId}`})
           msgsObj.queueSounce = sessionStatus.onLine
-          RTCSystemMsg.responseVideoQueuesSuccess(msgsObj, this.userInfo, this.sessionId)
+          RTCSystemMsg.responseVideoQueuesSuccess(msgsObj, this.userInfo, this.chatGuid)
           // 存客服基本信息
           // this.setCsInfo(msgsObj)
           break
@@ -823,7 +824,8 @@ export const onLineQueueMixin = {
     ...mapGetters([
       'userInfo',
       'queueNum',
-      'sessionId'
+      'sessionId',
+      'chatGuid'
     ])
   },
   methods: {
@@ -849,12 +851,13 @@ export const onLineQueueMixin = {
       }
     },
     async formatOnLineQueueAPI() {
-      const self = this
+      // 初始化人工客服排队ID，存vuex
+      this.setChatGuid(new Date().getTime())
       const option = {
-        chatGuid: self.sessionId,
-        customerGuid: self.userInfo.userId,
+        chatGuid: this.chatGuid,
+        customerGuid: this.userInfo.userId,
         customerImg: '',
-        customerNick: self.userInfo.userName,
+        customerNick: this.userInfo.userName,
         identity: '3',
         insuranceType: '1',
         origin: '1',
@@ -898,7 +901,7 @@ export const onLineQueueMixin = {
           csId: data.csId,
           queueSounce: sessionStatus.onLine
         }
-        RTCSystemMsg.responseVideoQueuesSuccess(msg, this.userInfo, this.sessionId)
+        RTCSystemMsg.responseVideoQueuesSuccess(msg, this.userInfo, this.chatGuid)
       } else {
         // 排队等待
         // 开启心跳
@@ -921,12 +924,13 @@ export const onLineQueueMixin = {
     },
     async cancelQueue() {
       const res = await onLineQueueCancel({
-        chatGuid: this.sessionId,
+        chatGuid: this.chatGuid,
         customerGuid: this.userInfo.userId
       })
       if (res.result_code === '200') {
         console.info('取消排队成功')
         this.$vux.toast.text('您已经取消排队', 'middle')
+        this.stopHeartBeat()
         return 0
       } else {
         console.info('取消排队失败')
@@ -941,8 +945,8 @@ export const onLineQueueMixin = {
           this.stopHeartBeat()
           return
         }
-        this.heartBeatReq = await chatQueueHeartBeat(this.userInfo.userId)
-        if (this.heartBeatReq.code === ERR_OK) {
+        this.heartBeatReq = await chatQueueHeartBeat(this.chatGuid)
+        if (this.heartBeatReq.result_code === '200') {
           console.info('心跳成功')
           this.heartBeatFailCount = 0
         } else {
@@ -984,7 +988,8 @@ export const onLineQueueMixin = {
       setCsInfo: 'SET_CS_INFO',
       sendMsgs: 'SET_MSGS',
       setQueueMode: 'SET_QUEUE_MODE',
-      setQueueNum: 'SET_QUEUE_NUM'
+      setQueueNum: 'SET_QUEUE_NUM',
+      setChatGuid: 'SET_CHAT_GUID'
     }),
     ...mapActions([
       'enterToLineUp'

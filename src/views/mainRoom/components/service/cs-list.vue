@@ -3,13 +3,8 @@
     <my-cs-card
       v-for="(item, index) in myCs"
       :key="index"
-      :cusSerId="item.id"
-      :avatarSrc="item.id"
-      :name="item.nickName"
-      :num="item.servTimes"
-      :gifts="item.giftCount"
+      :currentCs="item"
       :csIndex="index"
-      :csStatus="item.status"
       @clickToLineUp="clickToLineUp"
       @removeCs="removeCs"
     ></my-cs-card>
@@ -101,8 +96,8 @@ export default {
       this.$emit('removeCs', index)
       // this.myCsList.splice(index, 1)
     },
-    clickToLineUp(status, csId) {
-      this.$emit('goToLineUp', status, csId)
+    clickToLineUp(cs) {
+      this.$emit('goToLineUp', cs)
     }
   }
 }

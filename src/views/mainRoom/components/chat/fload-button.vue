@@ -36,24 +36,16 @@
         <use xlink:href="#icon-pingjia1"></use>
       </svg>
     </button>
-    <div v-transfer-dom>
-      <alert v-model="showAlert" :title="alertContent" :mask-z-index="1000"></alert>
-    </div>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
-import { Alert, TransferDomDirective as TransferDom } from 'vux'
 import { mapGetters, mapMutations, mapActions } from 'vuex'
 import { roomStatus, msgStatus, msgTypes } from '@/common/js/status'
 import Tools from '@/common/js/tools'
 
 export default {
-  directives: {
-    TransferDom
-  },
   components: {
-    Alert,
     'Assess': () => import('@/views/mainRoom/components/assess')
   },
   props: {
@@ -69,8 +61,7 @@ export default {
   },
   data() {
     return {
-      showAlert: false,
-      alertContent: ''
+
     }
   },
   methods: {
@@ -84,12 +75,21 @@ export default {
           this.$emit('enterVideoLineUp')
           break
         case roomStatus.videoChat:
-          this.alertContent = '当前已经在视频中！！'
-          this.showAlert = true
+          this.$vux.alert.show({
+            title: '当前已经在视频服务中！！'
+          })
           break
         case roomStatus.menChat:
-          this.alertContent = '当前正在人工客服中！！请先退出'
-          this.showAlert = true
+          this.$vux.alert.show({
+            title: '您当前正在人工服务中！！请先退出'
+          })
+          // this.$vux.confirm.show({
+          //   title: '您当前正在视频服务中，确认需要退出并进入人工客服嘛？',
+          //   onConfirm() {
+          //     // 进入专属客服
+          //     self.$emit('enterVideoLineUp')
+          //   }
+          // })
           break
       }
     },
@@ -101,6 +101,8 @@ export default {
           let workT = {
             startT: ZX_workT[0].startTime,
             endT: ZX_workT[0].endTime
+            // startT: '01:00',
+            // endT: '02:00'
           }
           if (Tools.DateTools.isWorkTime(workT)) {
             this.$emit('enterOnLineLineUp')
@@ -115,12 +117,14 @@ export default {
           }
           break
         case roomStatus.videoChat:
-          this.alertContent = '当前正在视频客服中！！请先退出'
-          this.showAlert = true
+          this.$vux.alert.show({
+            title: '前正在视频服务中！！请先退出'
+          })
           break
         case roomStatus.menChat:
-          this.alertContent = '当前已经在人工客服中！！'
-          this.showAlert = true
+          this.$vux.alert.show({
+            title: '当前已经在人工服务中！！'
+          })
           break
       }
     },

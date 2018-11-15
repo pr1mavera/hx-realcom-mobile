@@ -28,16 +28,12 @@ export default {
   data() {
     return {
       myCs: [],
-      csSelected: {
-        csId: '',
-        csStatus: '' // 1-签入，2-就绪, 3-小憩, 4-签出, 5-忙碌
-      }
+      csSelected: {}
     }
   },
   methods: {
-    showConfirm(status, csId) {
-      this.csSelected.csId = csId
-      this.csSelected.csStatus = status
+    showConfirm(cs) {
+      this.csSelected = cs
       const self = this
       // debugger
       this.$vux.confirm.show({
@@ -69,14 +65,14 @@ export default {
         return
       }
 
-      const status = this.csSelected.csStatus
+      const status = this.csSelected.status
       // 只有就绪和忙碌可以排队
       if (status === '1') {
         this.$vux.alert.show({
           title: '啊呀，当前客服暂时还还没准备好呢~'
         })
       } else if (status === '3' || status === '5') {
-        this.$router.push({path: `/room/line-up/${this.csSelected.csId}`})
+        this.$router.push({path: `/room/line-up?csId=${this.csSelected.id}&csName=${this.csSelected.nickName}`})
         this.enterToLineUp('正在为您转接视频客服，请稍候')
       } else if (status === '4') {
         this.$vux.alert.show({

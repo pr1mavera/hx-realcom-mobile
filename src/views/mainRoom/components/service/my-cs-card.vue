@@ -12,9 +12,9 @@
         <img v-lazy="avatarImgSrc" :key="avatarImgSrc">
       </a>
       <div class="info">
-        <p class="name">{{this.name}}</p>
-        <p>服务总量 {{this.num === null ? 0 : this.num}}次</p>
-        <p>收到礼物 {{this.gifts === null ? 0 : this.gifts}}份</p>
+        <p class="name">{{currentCs.nickName}}</p>
+        <p>服务总量 {{currentCs.servTimes || 0}}次</p>
+        <p>收到礼物 {{currentCs.giftCount || 0}}份</p>
       </div>
     </div>
     <div class="btn-box" style="text-align: center">
@@ -37,26 +37,11 @@
       XButton
     },
     props: {
-      cusSerId: {
-        type: String
-      },
-      avatarSrc: {
-        type: String
-      },
-      name: {
-        type: String
-      },
-      num: {
-        type: Number
-      },
-      gifts: {
-        type: Number
+      currentCs: {
+        type: Object
       },
       csIndex: {
         type: Number
-      },
-      csStatus: {
-        type: String
       }
     },
     data() {
@@ -66,7 +51,7 @@
     },
     computed: {
       avatarImgSrc() {
-        return getCsAvatar(this.avatarSrc)
+        return getCsAvatar(this.currentCs.id)
       },
       ...mapGetters([
         'userInfo'
@@ -85,7 +70,7 @@
         // debugger
         this.removeStyle = true // 删除当前客服的交互
         const userId = this.userInfo.userId
-        const cusSerId = this.cusSerId
+        const cusSerId = this.currentCs.id
         const data = {
           'userId': userId,
           'csId': cusSerId
@@ -122,11 +107,14 @@
       enterSerCenter() {
         this.$router.push({
           path: '/room/serverDetail',
-          query: {cusSerId: this.cusSerId, csStatus: this.csStatus}
+          query: {
+            cusSerId: this.currentCs.id,
+            csStatus: this.currentCs.status
+          }
         })
       },
       clickToLineUp() {
-        this.$emit('clickToLineUp', this.csStatus || '0', this.cusSerId)
+        this.$emit('clickToLineUp', this.currentCs)
       },
       ...mapMutations({
         setQueueMode: 'SET_QUEUE_MODE'

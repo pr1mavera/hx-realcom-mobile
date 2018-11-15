@@ -51,7 +51,7 @@ export default {
     if (+queueNum === 0) {
       // 当前队列无人排队，直接推送排队成功的消息给坐席
       const msg = {
-        csId: this.$route.params.csId,
+        csId: this.$route.query.csId,
         queueSounce: sessionStatus.video
       }
       RTCSystemMsg.responseVideoQueuesSuccess(msg, this.userInfo, this.sessionId)
@@ -63,14 +63,29 @@ export default {
   },
   methods: {
     async initQueue() {
-      const res = await videoQueue(this.userInfo.userId, this.$route.params.csId, 1)
+      // const data = {
+      //   userId: this.userInfo.userId,
+      //   userName: this.userInfo.userName,
+      //   csId: this.$route.query.csId,
+      //   csName: this.$route.query.csName,
+      //   nickName: this.userInfo.userName,
+      //   toCsFlag: true,
+      //   origin: 'WE',
+      //   userPriority: this.userInfo.userPriority
+      // }
+      const res = await videoQueue(
+        this.userInfo.userId,
+        this.userInfo.userName,
+        this.$route.query.csId,
+        this.$route.query.csName,
+        this.userInfo.userName,
+        true,
+        'WE',
+        this.userInfo.userPriority
+      )
       if (res.result.code === ERR_OK) {
         console.log('===============================> 排队啊 排队啊 排队啊 <===============================')
         window.sessionStorage.setItem('queue_start_time', new Date().getTime())
-        // return new Promise((resolve) => {
-        //   this.setQueueNum(res.data.queueNum)
-        //   resolve()
-        // })
         return res.data.queueNum
       } else {
         console.log('error in videoQueue')

@@ -33,7 +33,7 @@ export default new Router({
           component: chat
         },
         {
-          path: '/room/line-up/:csId',
+          path: '/room/line-up',
           name: 'line-up',
           component: lineUp
         },
