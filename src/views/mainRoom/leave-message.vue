@@ -1,10 +1,7 @@
 <template>
   <div class="container">
     <div class="header">
-      <img class="avatar" src="/static/img/leaveMsg/leaveMsgAvatar@2x.png"
-           srcset="/static/img/leaveMsg/leaveMsgAvatar.png 1x,
-                /static/img/leaveMsg/leaveMsgAvatar@2x.png 2x,
-                /static/img/leaveMsg/leaveMsgAvatar@3x.png 3x">
+      <img class="avatar" src="/static/img/leaveMsg/leaveMsgAvatar.png">
       <p>客服暂时不在线，偷偷告诉他</p>
     </div>
     <section>
@@ -23,6 +20,7 @@
 <script type="text/ecmascript-6">
   import { XInput, Cell, Group, XButton } from 'vux'
   import { leaveMsg } from '@/server/index.js'
+  import {mapGetters} from 'vuex'
   export default {
     // name: "leave-message.vue"
     components: {
@@ -39,6 +37,11 @@
         submitMsgSuc: false
       }
     },
+    computed: {
+      ...mapGetters([
+        'userInfo'
+      ])
+    },
     methods: {
       // 保存留言
       async submitMsg() {
@@ -54,22 +57,23 @@
           const seconds = now.getSeconds() >= 10 ? JSON.stringify(now.getSeconds()) : '0' + JSON.stringify(now.getSeconds())
 
           const data = {
+            'customerNick': '', // 微信昵称
+            'customerName': this.userInfo.userName, // 客户姓名
             'callNumber': this.callNumber,
             'contNo': '', // 保单号
-            'customerName': '', // 客户姓名
-            'customerNick': '', // 微信昵称
-            'leaveWordDescription': this.leaveWordDescription,
             'leaveListenCode': '', // 录音代码
-            // 'replyNo': '',
+            'leaveWordDescription': this.leaveWordDescription,
             'leaveWordDate': year + '-' + month + '-' + day + ' ' + hour + ':' + min + ':' + seconds,
-            'origin': '1', // 1.官微2.凤凰营销（简称为营销）3.官网4.中介公众号（简称为中介）5.龙行银保（简称为银保）
+            // 'origin': '1', // 1.官微2.凤凰营销（简称为营销）3.官网4.中介公众号（简称为中介）5.龙行银保（简称为银保）
+            'leaveWordChannel': '1',
             'leaveWordSource': '04', // 01-在线平台 02-服务箱（小华e家）03- 呼入04 - 虚拟
             'openId': this.$route.query.openId
           }
           const res = await leaveMsg(data)
-          debugger
           if (res.result_code === '200') {
             this.submitMsgSuc = true // 跳转到留言保存成功,
+          } else {
+            console.log('there are some error about leave message' + JSON.stringify(res))
           }
         } else if (this.leaveWordDescription === '') {
           this.$vux.alert.show({
