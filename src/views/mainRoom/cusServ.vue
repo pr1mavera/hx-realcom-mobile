@@ -73,7 +73,7 @@ export default {
       // 只有就绪和忙碌可以排队
       if (status === '1') {
         this.$vux.alert.show({
-          title: '啊呀，当前客服还没准备好呢~'
+          title: '啊呀，当前客服暂时还还没准备好呢~'
         })
       } else if (status === '3' || status === '5') {
         this.$router.push({path: `/room/line-up/${this.csSelected.csId}`})
@@ -84,7 +84,7 @@ export default {
         })
       } else if (status === '2') {
         this.$vux.alert.show({
-          title: '啊呀，当前客服不在呢~'
+          title: '啊呀，当前客服暂时不在呢~'
         })
       }
       // debugger
