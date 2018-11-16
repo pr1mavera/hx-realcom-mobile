@@ -1,6 +1,7 @@
 // import webim from 'webim'
 /* eslint-disable */
 import webim from '@/server/webim'
+import { ERR_OK, pushSystemMsg } from '@/server/index.js'
 const IM = (() => {
   function login(loginInfo, listeners, succ, fail) {
     webim.login(
@@ -197,31 +198,25 @@ const IM = (() => {
       var content = msgItem.getContent() // 获取元素对象
       var data = JSON.parse(content.getData())
       var desc = content.getDesc()
-      // 配置参数
-      var code = data.code
-      var userId = data.userId
-      var csId = data.csId
-      var openId = data.openId
-      var userName = data.userName
-      var csName = data.csName
-      var userPhone = data.userPhone
-      var sessionId = data.sessionId
-      var likesCount = data.likesCount
-      var csCode = data.csCode
-      var robotSessionId = data.robotSessionId
     }
     return {
-      code,
-      userId,
-      csId,
-      openId,
-      userName,
-      csName,
-      userPhone,
-      sessionId,
-      likesCount,
-      csCode,
-      robotSessionId,
+      code: data.code,
+      csId: data.csId,
+      csAvatar: data.csAvatar,
+      csName: data.csName,
+      likesCount: data.likesCount,
+      csCode: data.csCode,
+      chatGuid: data.chatGuid,
+      userId: data.userId,
+      userAvatar: data.userAvatar,
+      userName: data.userName,
+      userPhone: data.userPhone,
+      openId: data.userId,
+      origin: data.origin,
+      robotSessionId: data.robotSessionId,
+      accessId: data.accessId,
+      queueStartTime: data.queueStartTime,
+      queueEndTime: data.queueEndTime,
       desc
     }
   }
@@ -525,6 +520,17 @@ const IM = (() => {
     })
   }
 
+  /* ********************************* 腾讯请求漫游消息接口 ********************************* */
+  async function sendSystemMsg(systemMsg) {
+    const res = await pushSystemMsg(systemMsg)
+    if (res.result.code === ERR_OK) {
+      console.log('排队完成，推送系统消息成功')
+      return 0
+    } else {
+      console.log('推送系统消息失败')
+    }
+  }
+
   return {
     login,
     logout,
@@ -540,7 +546,8 @@ const IM = (() => {
     parseMsgsInSystem,
     uploadPic,
     sendPic,
-    getIMRoamMsgs
+    getIMRoamMsgs,
+    sendSystemMsg
   }
 })()
 

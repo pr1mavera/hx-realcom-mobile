@@ -7,7 +7,6 @@
         </div>
       <div class="tips">
         <p class="tips-top">当前还有<label class="num">{{this.queueNum}}</label>人排队.</p>
-        <!-- <p class="tips-bottom">预计需要等待{{times}}分钟</p> -->
       </div>
       <a type="reset" class="btn-cancel" @click="clickToCancelLineUp">取 消</a>
       <connect-success ref="connectSuccess" @confirmToVideo="confirmToVideo"></connect-success>
@@ -17,9 +16,10 @@
 
 <script type="text/ecmascript-6">
 import { mapGetters, mapMutations, mapActions } from 'vuex'
-import { IMMixin, RTCSystemMsg } from '@/common/js/mixin'
+import { IMMixin } from '@/common/js/mixin'
+import IM from '@/server/im'
 import { ERR_OK, videoQueue, videoQueueCancel, videoQueueHeartBeat } from '@/server/index.js'
-import { queueStatus, sessionStatus } from '@/common/js/status'
+import { queueStatus, sessionStatus, systemMsgStatus } from '@/common/js/status'
 
 export default {
   mixins: [
@@ -37,8 +37,6 @@ export default {
   },
   data() {
     return {
-      times: 1,
-      videoQueueNum: 0,
       heart: false, // 判断心跳变量
       heartBeatTimer: 0,
       heartBeatReq: null,
@@ -47,16 +45,21 @@ export default {
   },
   async mounted() {
     this.setQueueMode(queueStatus.queuing)
-    const queueNum = await this.initQueue()
-    if (+queueNum === 0) {
+    const res = await this.initQueue()
+    if (+res.queueNum === 0) {
       // 当前队列无人排队，直接推送排队成功的消息给坐席
       const msg = {
+        code: systemMsgStatus.video_requestCsEntance,
         csId: this.$route.query.csId,
-        queueSounce: sessionStatus.video
+        csName: this.$route.query.csName,
+        accessId: res.accessId,
+        startTime: res.startTime,
+        endTime: res.endTime
       }
-      RTCSystemMsg.responseVideoQueuesSuccess(msg, this.userInfo, this.sessionId)
+      const config = await this.configQueueSuccess(msg)
+      IM.sendSystemMsg(config)
     } else {
-      this.setQueueNum(queueNum)
+      this.setQueueNum(+res.queueNum)
     }
     // 开启心跳
     this.startHeartBeat()
@@ -86,7 +89,7 @@ export default {
       if (res.result.code === ERR_OK) {
         console.log('===============================> 排队啊 排队啊 排队啊 <===============================')
         window.sessionStorage.setItem('queue_start_time', new Date().getTime())
-        return res.data.queueNum
+        return res.data
       } else {
         console.log('error in videoQueue')
       }
@@ -137,9 +140,6 @@ export default {
         console.log('error in videoQueueCancel')
       }
     },
-    queueListReduce() {
-      this.videoQueueNum -= 1
-    },
     confirmToVideo() {
       // 停止心跳
       this.stopHeartBeat()
@@ -153,6 +153,7 @@ export default {
       setQueueNum: 'SET_QUEUE_NUM'
     }),
     ...mapActions([
+      'configQueueSuccess',
       'queueFinishEnterRoom'
     ])
   }
