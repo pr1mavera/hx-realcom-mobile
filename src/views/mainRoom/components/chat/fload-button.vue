@@ -178,8 +178,9 @@ export default {
     clickAssess() {
       switch (this.roomMode) {
         case roomStatus.AIChat:
-        this.alertContent = '当前未接通任何坐席，暂不能评价'
-        this.showAlert = true
+          this.$vux.alert.show({
+            title: '当前未接通任何坐席，暂不能评价'
+          })
           break
         case roomStatus.videoChat:
           this.setAssessView(true)
