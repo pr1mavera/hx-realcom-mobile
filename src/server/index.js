@@ -16,11 +16,6 @@ export const wxConfig = url => http.get('video', `/wxConfig?url=${url}`)
 export const getLoginInfo = userId => http.get('RTCRoom', `/im/account/login?userId=${userId}`)
 
 /**
- * [pushSystemMsg 推送系统消息]
- */
-export const pushSystemMsg = data => http.post('RTCRoom', '/im/msg/push', data)
-
-/**
  * [syncGroupC2CMsg 拉取漫游消息]
  */
 export const syncGroupC2CMsg = data => http.post('RTCRoom', '/syncGroupC2CMsg', data)
@@ -144,3 +139,12 @@ export const chatQueueHeartBeat = chatGuid => http.post('onLine', '/webchat/queu
 
 // 留言common/leaveword/v1/add
 export const leaveMsg = async(data) => http.post('onLine', '/common/leaveword/v1/add', data)
+
+/**
+ ************************************ systemMsg ************************************
+ */
+
+/**
+ * [pushSystemMsg 推送系统消息]
+ */
+export const pushSystemMsg = data => http.post('RTCRoom', '/im/msg/push', data)

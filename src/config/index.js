@@ -21,10 +21,12 @@ const development = {
   chatPath: 'http://chat-servertest.ihxlife.com/api/v1',
   // chatPath: 'http://192.168.8.108:7001/api/v1',
   onLine: 'http://114.251.3.100:1500'
-  // videoPath: 'http://192.168.8.102:8080/api/v1',
-  // webRTCRoomPath: 'http://192.168.8.102:8082/api/v1',
-  // chatPath: 'http://192.168.8.102:8083/api/v1',
-  // onLine: 'http://114.251.3.100:1500/webchat/queue/v1'
+
+  // videoPath: 'http://112.74.159.153:8081/api/v1',
+  // webRTCRoomPath: 'http://112.74.159.153:8083/api/v1',
+  // systemMsgPath: 'http://112.74.159.153:8082/api/v1',
+  // chatPath: 'http://112.74.159.153:8081/api/v1',
+  // onLine: 'http://114.251.3.100:1500'
 }
 
 const location = env === 'production' ? production : development
