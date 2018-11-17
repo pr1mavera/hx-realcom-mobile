@@ -102,22 +102,16 @@ export default {
           const self = this
           this.$vux.confirm.show({
             title: '您当前正在视频服务中，确认需要退出并进入人工客服嘛？',
-            onConfirm() {
+            async onConfirm() {
               // 设置评价状态
               self.setAssessStatus(true)
               // 用户主动断开人工客服
               const sysMsgs = {
-                userId: self.csInfo.csId,
-                msgBody: {
-                  data: {
-                    code: systemMsgStatus.onLine_userNoResponse,
-                    userId: self.userInfo.userId
-                  },
-                  desc: `用户长时间无响应`,
-                  ext: ''
-                }
+                code: systemMsgStatus.onLine_userNoResponse,
+                csId: self.csInfo.csId
               }
-              IM.sendSystemMsg(sysMsgs)
+              const onlineConfig = await self.configQueueSuccess(sysMsgs)
+              IM.sendSystemMsg(onlineConfig)
               // 进入专属客服
               self.$emit('enterVideoLineUp')
             }
@@ -148,7 +142,7 @@ export default {
             // 当前不在工作时间
             if (this.notWorkTimeClicked) {
               // 用户重复点击
-              // this.showTips(3, '请勿重复点击')
+              this.showTips(3, '请勿重复点击')
               return 0
             } else {
               // 用户第一次点击
@@ -214,7 +208,8 @@ export default {
       setAssessStatus: 'SET_ASSESS_STATUS'
     }),
     ...mapActions([
-      'sendMsgs'
+      'sendMsgs',
+      'configQueueSuccess'
     ])
   }
 }

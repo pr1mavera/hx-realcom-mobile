@@ -362,7 +362,6 @@ export const IMMixin = {
           this.$router.replace({path: `/room/chat?openId=${this.userInfo.openId}`})
           const onlineQueueSuccMsg = {
             code: systemMsgStatus.onLine_requestCsEntance,
-            chatGuid: this.chatGuid,
             csId: msgsObj.csId,
             startTime: msgsObj.queueStartTime,
             endTime: msgsObj.queueEndTime
@@ -786,6 +785,7 @@ export const onLineQueueMixin = {
   },
   computed: {
     ...mapGetters([
+      'msgs',
       'userInfo',
       'queueNum',
       'sessionId',
@@ -795,28 +795,29 @@ export const onLineQueueMixin = {
   methods: {
     async enterOnLineLineUp() {
       this.$router.replace({path: `/room/chat?openId=${this.userInfo.openId}&csId=${this.onLineQueueCsId || 'wait_for_distribution'}`})
-      // // 排队成功，直接通知坐席
-      // const msg = {
-      //   code: systemMsgStatus.onLine_requestCsEntance,
-      //   chatGuid: new Date().getTime(),
-      //   csId: 'webchat7',
-      //   csName: 'webchat7',
-      //   startTime: '',
-      //   endTime: ''
-      // }
-      // const config = await this.configQueueSuccess(msg)
-      // IM.sendSystemMsg(config)
-
-      // 在线转人工流程
-      // 1. 请求排队
-      const res = await this.formatOnLineQueueAPI()
-      // 2. 处理
-      if (res.code === ERR_OK) {
-        window.sessionStorage.setItem('queue_start_time', new Date().getTime())
-        this.afterQueueSuccess(res.data)
-      } else {
-        this.botSendLeaveMsg()
+      // 排队成功，直接通知坐席
+      this.setChatGuid(new Date().getTime())
+      const msg = {
+        code: systemMsgStatus.onLine_requestCsEntance,
+        chatGuid: this.chatGuid,
+        csId: 'webchat7',
+        csName: 'webchat7',
+        startTime: '',
+        endTime: ''
       }
+      const config = await this.configQueueSuccess(msg)
+      IM.sendSystemMsg(config)
+
+      // // 在线转人工流程
+      // // 1. 请求排队
+      // const res = await this.formatOnLineQueueAPI()
+      // // 2. 处理
+      // if (res.code === ERR_OK) {
+      //   window.sessionStorage.setItem('queue_start_time', new Date().getTime())
+      //   this.afterQueueSuccess(res.data)
+      // } else {
+      //   this.botSendLeaveMsg()
+      // }
     },
     async formatOnLineQueueAPI() {
       // 初始化人工客服排队ID，存vuex
@@ -870,7 +871,6 @@ export const onLineQueueMixin = {
         // 排队成功，直接通知坐席
         const msg = {
           code: systemMsgStatus.onLine_requestCsEntance,
-          chatGuid: this.chatGuid,
           csId: data.csId,
           csName: data.csName,
           startTime: data.startTime,
@@ -942,6 +942,16 @@ export const onLineQueueMixin = {
       }
     },
     botSendLeaveMsg() {
+      // 最后一条msg消息是否为留言消息，是则return，否则发送留言消息
+      for (let i = this.msgs.length - 1; i > 0; i--) {
+        if (this.msgs[i].msgStatus === msgStatus.msg) {
+           if (this.msgs[i].msgType === msgTypes.msg_leave) {
+             return
+           } else {
+             break
+           }
+        }
+      }
       const msg = {
         nickName: this.botInfo.botName,
         content: '当前人工客服忙碌',

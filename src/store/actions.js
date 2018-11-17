@@ -54,7 +54,7 @@ export const configQueueSuccess = function({ state }, msgsObj) {
     msgBody: {
       data: {
         code: msgsObj.code,
-        chatGuid: msgsObj.chatGuid || '',
+        chatGuid: state.chatGuid,
         csId: msgsObj.csId,
         csName: msgsObj.csName || msgsObj.csId,
         userId: state.userInfo.userId,
@@ -68,7 +68,7 @@ export const configQueueSuccess = function({ state }, msgsObj) {
         queueStartTime: msgsObj.startTime,
         queueEndTime: msgsObj.endTime
       },
-      desc: `${state.userInfo.userName}人工排队成功`,
+      desc: '',
       ext: ''
     }
   }
@@ -168,7 +168,7 @@ export const updateLastAction = function({ commit, state }) {
   state.userInfo.avtionTimeout && clearTimeout(state.userInfo.avtionTimeout)
 
   // 创建定时器，绑定在 vuex 的 userInfo
-  const avtionTimeout = setTimeout(() => {
+  const avtionTimeout = setTimeout(async() => {
     // 推送超时断开连接提示，至本地消息队列
     const dialog = {
       time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
@@ -182,17 +182,11 @@ export const updateLastAction = function({ commit, state }) {
 
     // 用户长时间无响应，主动断开连接
     const sysMsgs = {
-      userId: state.csInfo.csId,
-      msgBody: {
-        data: {
-          code: systemMsgStatus.onLine_userNoResponse,
-          userId: state.userInfo.userId
-        },
-        desc: `用户长时间无响应`,
-        ext: ''
-      }
+      code: systemMsgStatus.onLine_userNoResponse,
+      csId: state.csInfo.csId
     }
-    systemMsg({ commit, state }, sysMsgs)
+    const onlineConfig = await configQueueSuccess(sysMsgs)
+    systemMsg({ commit, state }, onlineConfig)
   }, 300000)
 
   const userInfo = Tools.CopyTools.objShallowClone(state.userInfo)
