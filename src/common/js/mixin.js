@@ -241,6 +241,7 @@ export const IMMixin = {
     ...mapGetters([
       'userInfo',
       'csInfo',
+      'roomMode',
       'roomId',
       'sessionId',
       'chatGuid',
@@ -453,6 +454,9 @@ export const IMMixin = {
       }
     },
     receiveCustomMsgs(msgs) {
+      if (this.roomMode === roomStatus.AIChat) {
+        return
+      }
       const msgsObj = IM.parseMsgs(msgs).textMsgs[0]
       this.sendMsgs(msgsObj)
     },
@@ -889,22 +893,22 @@ export const onLineQueueMixin = {
       const res = await onLineQueue(option)
       const data = res.data
       if (res.result_code === '200') {
-        if (data.online) {
-          // 发送正在转接提示
-          this.beforeQueue('正在为您转接在线客服，请稍候')
-          // 排队中
-          return {
-            code: '0',
-            data: {
-              num: data.teamNum,
-              csId: data.userCode || '',
-              csName: data.userName || '',
-              isTeam: data.team,
-              startTime: data.queueStartTime,
-              endTime: data.queueEndTime
-            }
+        // if (data.online) {
+        // 发送正在转接提示
+        this.beforeQueue('正在为您转接在线客服，请稍候')
+        // 排队中
+        return {
+          code: '0',
+          data: {
+            num: data.teamNum,
+            csId: data.userCode || '',
+            csName: data.userName || '',
+            isTeam: data.team,
+            startTime: data.queueStartTime,
+            endTime: data.queueEndTime
           }
         }
+        // }
       } else {
         console.log('===== 排队出错 辣 =====')
         const tip = {
