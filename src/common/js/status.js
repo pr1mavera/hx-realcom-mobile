@@ -14,8 +14,7 @@ export const queueStatus = { // 排队状态
   noneQueue: 0, // 未排队
   queuing: 1, // 排队中
   queueSuccess: 2, // 排队成功
-  queueOver: 3, // 排队结束
-  canselQueue: 4 // 取消排队
+  queueOver: 3 // 排队结束
 }
 
 export const sessionStatus = {
@@ -31,13 +30,15 @@ export const systemMsgStatus = {
   video_queuesSuccess: 1, // 客户端排队成功
   video_requestCsEntance: 2, // 座席端视频接入请求
   video_transBaseInfo: 3, // 座席端创建会话传递
+  video_csInitSessionIdFail: 4, // 坐席端创建会话失败（视频）
   // 20 - ~ 在线
   onLine_queuesReduce: 20, // 在线排队位置(system -> 用户)
   onLine_queuesSuccess: 21, // 客户端排队成功(system -> 用户)
   onLine_requestCsEntance: 22, // 座席端人工坐席接入请求(用户 -> 坐席)
   onLine_transBaseInfo: 23, // 转接成功后人工坐席推送创建会话以及基本信息(坐席 -> 用户)
   onLine_serverFinish: 24, // 坐席端结束会话（在线）(坐席 -> 用户)
-  onLine_userNoResponse: 25 // 客户端主动结束会话（在线）(用户 -> 坐席)
+  onLine_userNoResponse: 25, // 客户端主动结束会话（在线）(用户 -> 坐席)
+  onLine_csInitSessionIdFail: 26 // 坐席端创建会话失败（在线）
 }
 
 export const msgStatus = {

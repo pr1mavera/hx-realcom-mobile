@@ -74,7 +74,7 @@ export default {
       this.setAssessView(false)
       if (this.serverTime !== '' && this.roomMode === roomStatus.menChat) {
         // action
-        this.resetVuexOption(sessionStatus.onLine)
+        this.afterServerFinish(sessionStatus.onLine)
       }
     },
     handleToCancelAssess() {
@@ -94,7 +94,7 @@ export default {
             // 若当前为人工客服结束，需要手动清空vuex数据
             if (self.roomMode === roomStatus.menChat) {
               // action
-              self.resetVuexOption(sessionStatus.onLine)
+              self.afterServerFinish(sessionStatus.onLine)
             }
           }
         })
@@ -180,7 +180,7 @@ export default {
       setAssessView: 'SET_ASSESS_VIEW'
     }),
     ...mapActions([
-      'resetVuexOption'
+      'afterServerFinish'
     ])
   }
 }

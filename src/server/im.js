@@ -520,12 +520,11 @@ const IM = (() => {
     })
   }
 
-  /* ********************************* 腾讯请求漫游消息接口 ********************************* */
+  /* ********************************* 推送系统消息接口 ********************************* */
   async function sendSystemMsg(systemMsg) {
     const res = await pushSystemMsg(systemMsg)
     if (res.result.code === ERR_OK) {
       console.log('排队完成，推送系统消息成功')
-      return 0
     } else {
       console.log('推送系统消息失败')
     }

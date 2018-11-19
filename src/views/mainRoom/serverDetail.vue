@@ -151,7 +151,7 @@
           })
         } else if (status === '3' || status === '5') {
           this.$router.push({path: `/room/line-up/${cuSerId}`})
-          this.enterToLineUp('正在为您转接视频客服，请稍候')
+          this.beforeQueue('正在为您转接视频客服，请稍候')
         } else if (status === '4') {
           this.$vux.alert.show({
             title: '啊呀，当前客服正在休息呐~'
@@ -163,7 +163,7 @@
         }
       },
       ...mapActions([
-        'enterToLineUp'
+        'beforeQueue'
       ])
     }
   }

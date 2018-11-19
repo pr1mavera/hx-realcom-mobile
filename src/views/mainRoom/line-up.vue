@@ -6,7 +6,8 @@
           <img src="/static/img/lineing.png">
         </div>
       <div class="tips">
-        <p class="tips-top">当前还有<label class="num">{{this.queueNum}}</label>人排队.</p>
+        <p class="tips-top" v-if="isQueuingTextShow">当前还有<label class="num">{{this.queueNum}}</label>人排队.</p>
+        <p class="tips-top" v-else>排队成功，正在为您转接视频客服</p>
       </div>
       <a type="reset" class="btn-cancel" @click="clickToCancelLineUp">取 消</a>
       <connect-success ref="connectSuccess" @confirmToVideo="confirmToVideo"></connect-success>
@@ -37,6 +38,7 @@ export default {
   },
   data() {
     return {
+      isQueuingTextShow: true,
       heart: false, // 判断心跳变量
       heartBeatTimer: 0,
       heartBeatReq: null,
@@ -48,6 +50,7 @@ export default {
     const res = await this.initQueue()
     if (+res.queueNum === 0) {
       // 当前队列无人排队，直接推送排队成功的消息给坐席
+      this.isQueuingTextShow = true
       const msg = {
         code: systemMsgStatus.video_requestCsEntance,
         csId: this.$route.query.csId,
@@ -57,7 +60,7 @@ export default {
         endTime: res.endTime
       }
       const config = await this.configQueueSuccess(msg)
-      IM.sendSystemMsg(config)
+      await IM.sendSystemMsg(config)
     } else {
       this.setQueueNum(+res.queueNum)
     }
@@ -144,7 +147,7 @@ export default {
       // 停止心跳
       this.stopHeartBeat()
       this.$router.replace({path: `/room/chat?openId=${this.userInfo.openId}`})
-      this.queueFinishEnterRoom(sessionStatus.video)
+      this.afterQueueSuccess(sessionStatus.video)
       // this.$emit('ready')
     },
     ...mapMutations({
@@ -154,7 +157,7 @@ export default {
     }),
     ...mapActions([
       'configQueueSuccess',
-      'queueFinishEnterRoom'
+      'afterQueueSuccess'
     ])
   }
 }

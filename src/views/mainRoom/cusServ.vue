@@ -73,7 +73,7 @@ export default {
         })
       } else if (status === '3' || status === '5') {
         this.$router.push({path: `/room/line-up?csId=${this.csSelected.id}&csName=${this.csSelected.nickName}`})
-        this.enterToLineUp('正在为您转接视频客服，请稍候')
+        this.beforeQueue('正在为您转接视频客服，请稍候')
       } else if (status === '4') {
         this.$vux.alert.show({
           title: '啊呀，当前客服正在休息呐~'
@@ -93,7 +93,7 @@ export default {
       //   case '2': // 就绪状态
       //     // this.alertTip = true
       //     this.$router.push({path: `/room/line-up/${this.csSelected.csId}`})
-      //     // this.enterToLineUp('正在为您转接视频客服，请稍候')
+      //     // this.beforeQueue('正在为您转接视频客服，请稍候')
       //     break
       //   case '3':
       //     this.$vux.alert.show({
@@ -117,7 +117,7 @@ export default {
       // }
     },
     ...mapActions([
-      'enterToLineUp'
+      'beforeQueue'
     ])
   }
 }

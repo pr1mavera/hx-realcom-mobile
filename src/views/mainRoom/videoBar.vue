@@ -20,6 +20,7 @@
       <div class="video-window" :class="customer" v-show="!isVideoOverReportShow || isChangeCamera">
         <video height=100%
           id="localVideo"
+          v-if="!videoScreenShotShow"
           muted
           autoplay
           playsinline
@@ -118,7 +119,7 @@ export default {
     //   return this.roomMode === roomStatus.videoChat
     // },
     isMiniBarOpen() {
-      return !this.fullScreen && this.queueMode === queueStatus.queueOver
+      return (!this.fullScreen && this.queueMode === queueStatus.queueOver) && !this.videoScreenShotShow
     },
     // isLineUpShow() {
     //   return this.queueMode === queueStatus.queuing || this.queueMode === queueStatus.queueSuccess
@@ -230,7 +231,7 @@ export default {
       // 退群
       IM.quitGroup(this.roomId)
       // action
-      this.resetVuexOption(sessionStatus.video)
+      this.afterServerFinish(sessionStatus.video)
     },
     ...mapMutations({
       setFullScreen: 'SET_FULL_SCREEN',
@@ -238,7 +239,7 @@ export default {
       setServerTime: 'SET_SERVER_TIME'
     }),
     ...mapActions([
-      'resetVuexOption'
+      'afterServerFinish'
     ])
   },
   filters: {

@@ -222,6 +222,11 @@ export default {
       this._initPullDownRefresh()
     })
   },
+  activated() {
+    this.$nextTick(() => {
+      this.chatScroll.refresh()
+    })
+  },
   methods: {
     async login() {
       const query = this.$route.query
