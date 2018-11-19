@@ -241,6 +241,7 @@ export const IMMixin = {
     ...mapGetters([
       'userInfo',
       'csInfo',
+      'roomMode',
       'roomId',
       'sessionId',
       'chatGuid',
@@ -252,8 +253,8 @@ export const IMMixin = {
   },
   data() {
     return {
-      // 通话开始时间
-      startTimeStamp: null
+      transferTimer: null,
+      transferTimeOut: 30000
     }
   },
   methods: {
@@ -318,6 +319,7 @@ export const IMMixin = {
 
         // 客户端排队成功（视频）
         case systemMsgStatus.video_queuesSuccess:
+          this.isQueuingTextShow = true
           const videoQueueSuccMsg = {
             code: systemMsgStatus.video_requestCsEntance,
             csId: this.$route.query.csId,
@@ -327,7 +329,19 @@ export const IMMixin = {
             endTime: msgsObj.endTime
           }
           const videoConfig = await this.configQueueSuccess(videoQueueSuccMsg)
-          IM.sendSystemMsg(videoConfig)
+          await IM.sendSystemMsg(videoConfig)
+          // 客服转接定时器
+          this.transferTimer = setTimeout(async() => {
+            this.$vux.toast.text('转接失败，请重试', 'middle')
+            await Tools.AsyncTools.sleep(2000)
+            if (this.$route.query.goindex === 'true') {
+              this.$router.push('/')
+            } else {
+              this.$router.back(-1)
+            }
+            // 转接失败
+            this.lineUpFailed()
+          }, this.transferTimeOut)
           break
 
         // 座席端视频接入请求（视频）
@@ -337,6 +351,9 @@ export const IMMixin = {
 
         // 座席端会话、坐席基本信息传递（视频）
         case systemMsgStatus.video_transBaseInfo:
+          // 清空定时器
+          this.transferTimer && clearTimeout(this.transferTimer)
+
           const csInfo_video = {
             csId: msgsObj.csId,
             csAvatar: getCsAvatar(msgsObj.csId),
@@ -344,14 +361,30 @@ export const IMMixin = {
             likesCount: msgsObj.likesCount,
             csCode: msgsObj.csCode
           }
+          // 视频坐席基本信息
           this.setCsInfo(csInfo_video)
+          // 设置房间ID
           this.setRoomId(csInfo_video.csCode)
+          // 设置会话ID
           this.setSessionId(msgsObj.sessionId)
           // 设置排队状态
           this.setQueueMode(queueStatus.queueSuccess)
           break
 
-        /* ******************************** 在线 ******************************** */
+        // 坐席端创建会话失败（视频）
+        case systemMsgStatus.video_csInitSessionIdFail:
+          this.$vux.toast.text('转接失败，请重试', 'middle')
+          await Tools.AsyncTools.sleep(2000)
+          if (this.$route.query.goindex === 'true') {
+            this.$router.push('/')
+          } else {
+            this.$router.back(-1)
+          }
+          // 转接失败
+          this.lineUpFailed()
+          break
+
+        /* ********************************************* 在线 ********************************************* */
         // 人数减少（在线）
         case systemMsgStatus.onLine_queuesReduce:
           this.setQueueNum(msgsObj.num || 1)
@@ -367,11 +400,19 @@ export const IMMixin = {
             endTime: msgsObj.queueEndTime
           }
           const onlineConfig = await this.configQueueSuccess(onlineQueueSuccMsg)
-          IM.sendSystemMsg(onlineConfig)
+          await IM.sendSystemMsg(onlineConfig)
+          // 客服转接定时器
+          this.transferTimer = setTimeout(() => {
+            // 转接失败
+            this.lineUpFailed()
+          }, this.transferTimeOut)
           break
 
         // 座席端会话、坐席基本信息传递（在线）
         case systemMsgStatus.onLine_transBaseInfo:
+          // 清空定时器
+          this.transferTimer && clearTimeout(this.transferTimer)
+
           const csInfo_onLine = {
             csId: msgsObj.csId,
             csAvatar: getCsAvatar(msgsObj.csId),
@@ -386,8 +427,8 @@ export const IMMixin = {
           // 设置排队状态
           this.setQueueMode(queueStatus.noneQueue)
           // action 排队完成，进入会话
-          this.queueFinishEnterRoom(sessionStatus.onLine)
-          // 初始化用户最后响应时间
+          this.afterQueueSuccess(sessionStatus.onLine)
+          // action 初始化用户最后响应时间
           this.updateLastAction()
           break
 
@@ -401,14 +442,29 @@ export const IMMixin = {
             this.setAssessView(true)
           } else {
             // action
-            this.resetVuexOption(sessionStatus.onLine)
+            this.afterServerFinish(sessionStatus.onLine)
           }
+          break
+
+        // 坐席端创建会话失败（在线）
+        case systemMsgStatus.onLine_csInitSessionIdFail:
+          // 转接失败
+          this.lineUpFailed()
           break
       }
     },
     receiveCustomMsgs(msgs) {
+      if (this.roomMode === roomStatus.AIChat) {
+        return
+      }
       const msgsObj = IM.parseMsgs(msgs).textMsgs[0]
       this.sendMsgs(msgsObj)
+    },
+    lineUpFailed() {
+      // 清空定时器
+      this.transferTimer && clearTimeout(this.transferTimer)
+      // 转接失败
+      this.afterQueueFailed()
     },
     ...mapMutations({
       setQueueMode: 'SET_QUEUE_MODE',
@@ -423,9 +479,10 @@ export const IMMixin = {
     ...mapActions([
       'sendMsgs',
       'configQueueSuccess',
-      'queueFinishEnterRoom',
-      'resetVuexOption',
-      'updateLastAction'
+      'afterQueueSuccess',
+      'afterServerFinish',
+      'updateLastAction',
+      'afterQueueFailed'
     ])
   }
 }
@@ -795,62 +852,63 @@ export const onLineQueueMixin = {
   methods: {
     async enterOnLineLineUp() {
       this.$router.replace({path: `/room/chat?openId=${this.userInfo.openId}&csId=${this.onLineQueueCsId || 'wait_for_distribution'}`})
-      // 排队成功，直接通知坐席
-      this.setChatGuid(new Date().getTime())
-      const msg = {
-        code: systemMsgStatus.onLine_requestCsEntance,
-        chatGuid: this.chatGuid,
-        csId: 'webchat7',
-        csName: 'webchat7',
-        startTime: '',
-        endTime: ''
-      }
-      const config = await this.configQueueSuccess(msg)
-      IM.sendSystemMsg(config)
-
-      // // 在线转人工流程
-      // // 1. 请求排队
-      // const res = await this.formatOnLineQueueAPI()
-      // // 2. 处理
-      // if (res.code === ERR_OK) {
-      //   window.sessionStorage.setItem('queue_start_time', new Date().getTime())
-      //   this.afterQueueSuccess(res.data)
-      // } else {
-      //   this.botSendLeaveMsg()
+      // // 排队成功，直接通知坐席
+      // this.setChatGuid(new Date().getTime())
+      // const msg = {
+      //   code: systemMsgStatus.onLine_requestCsEntance,
+      //   chatGuid: this.chatGuid,
+      //   csId: 'webchat2',
+      //   csName: 'webchat2',
+      //   startTime: '',
+      //   endTime: ''
       // }
+      // const config = await this.configQueueSuccess(msg)
+      // await IM.sendSystemMsg(config)
+
+      // 在线转人工流程
+      // 1. 请求排队
+      const res = await this.formatOnLineQueueAPI()
+      // 2. 处理
+      if (res.code === ERR_OK) {
+        window.sessionStorage.setItem('queue_start_time', new Date().getTime())
+        this.handleQueueRes(res.data)
+      } else {
+        this.botSendLeaveMsg()
+      }
     },
     async formatOnLineQueueAPI() {
       // 初始化人工客服排队ID，存vuex
       this.setChatGuid(new Date().getTime())
       const option = {
-        chatGuid: this.chatGuid,
+        chatGuid: `${this.chatGuid}`,
         customerGuid: this.userInfo.userId,
         customerImg: '',
         customerNick: this.userInfo.userName,
         identity: this.userInfo.userGrade,
         robotSessionId: this.sessionId,
-        origin: 'WE',
-        type: '1'
+        origin: '1',
+        callType: 'ZX',
+        type: '2'
       }
       const res = await onLineQueue(option)
       const data = res.data
       if (res.result_code === '200') {
-        if (data.online) {
-          // 发送正在转接提示
-          this.enterToLineUp('正在为您转接在线客服，请稍候')
-          // 排队中
-          return {
-            code: '0',
-            data: {
-              num: data.teamNum,
-              csId: data.userCode || '',
-              csName: data.userName || '',
-              isTeam: data.team,
-              startTime: data.queueStartTime,
-              endTime: data.queueEndTime
-            }
+        // if (data.online) {
+        // 发送正在转接提示
+        this.beforeQueue('正在为您转接在线客服，请稍候')
+        // 排队中
+        return {
+          code: '0',
+          data: {
+            num: data.teamNum,
+            csId: data.userCode || '',
+            csName: data.userName || '',
+            isTeam: data.team,
+            startTime: data.queueStartTime,
+            endTime: data.queueEndTime
           }
         }
+        // }
       } else {
         console.log('===== 排队出错 辣 =====')
         const tip = {
@@ -866,7 +924,7 @@ export const onLineQueueMixin = {
         data: '请留言'
       }
     },
-    async afterQueueSuccess(data) {
+    async handleQueueRes(data) {
       if (!data.isTeam) {
         // 排队成功，直接通知坐席
         const msg = {
@@ -877,7 +935,7 @@ export const onLineQueueMixin = {
           endTime: data.endTime
         }
         const config = await this.configQueueSuccess(msg)
-        IM.sendSystemMsg(config)
+        await IM.sendSystemMsg(config)
       } else {
         // 排队等待
         // 开启心跳
@@ -979,7 +1037,7 @@ export const onLineQueueMixin = {
       setChatGuid: 'SET_CHAT_GUID'
     }),
     ...mapActions([
-      'enterToLineUp',
+      'beforeQueue',
       'configQueueSuccess'
     ])
   }

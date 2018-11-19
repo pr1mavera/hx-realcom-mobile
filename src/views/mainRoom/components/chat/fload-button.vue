@@ -111,7 +111,8 @@ export default {
                 csId: self.csInfo.csId
               }
               const onlineConfig = await self.configQueueSuccess(sysMsgs)
-              IM.sendSystemMsg(onlineConfig)
+              await IM.sendSystemMsg(onlineConfig)
+              await Tools.AsyncTools.sleep(3000)
               // 进入专属客服
               self.$emit('enterVideoLineUp')
             }

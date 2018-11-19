@@ -36,7 +36,7 @@ export const toggleBar = async function({ dispatch, commit, state }, type) {
 }
 
 // 进入排队(人工，视频)时的tips
-export const enterToLineUp = function({ commit, state }, content) {
+export const beforeQueue = function({ commit, state }, content) {
   commit(types.SET_QUEUE_MODE, queueStatus.queuing)
   const tip = [{
     content,
@@ -45,6 +45,43 @@ export const enterToLineUp = function({ commit, state }, content) {
     msgType: tipTypes.tip_normal
   }]
   commit(types.SET_MSGS, state.msgs.concat(tip))
+}
+
+// 人工（视频）排队完成，接通客服后，修改对应的房间模式
+export const afterQueueSuccess = function({ commit, state }, mode) {
+  commit(types.SET_QUEUE_MODE, queueStatus.queueOver)
+  if (mode === sessionStatus.video) {
+    commit(types.SET_ROOM_MODE, roomStatus.videoChat)
+    const tip = [{
+      content: `视频客服${state.csInfo.csName}转接成功，祝您沟通愉快！`,
+      time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+      msgStatus: msgStatus.tip,
+      msgType: tipTypes.tip_success
+    }]
+    commit(types.SET_MSGS, state.msgs.concat(tip))
+  } else if (mode === sessionStatus.onLine) {
+    commit(types.SET_ROOM_MODE, roomStatus.menChat)
+    const tip = [{
+      content: `人工客服${state.csInfo.csName}转接成功，祝您沟通愉快！`,
+      time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+      msgStatus: msgStatus.tip,
+      msgType: tipTypes.tip_success
+    }]
+    commit(types.SET_MSGS, state.msgs.concat(tip))
+  }
+}
+
+// 排队失败
+export const afterQueueFailed = function({ commit, state }) {
+  commit(types.SET_QUEUE_MODE, queueStatus.noneQueue)
+  commit(types.SET_QUEUE_NUM, 0)
+  const tip = {
+    content: '转接失败',
+    time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+    msgStatus: msgStatus.tip,
+    msgType: tipTypes.tip_fail
+  }
+  commit(types.SET_MSGS, state.msgs.concat([tip]))
 }
 
 // 配置排队成功后给坐席推送接入信息
@@ -86,32 +123,8 @@ export const deleteTipMsg = function({ commit, state }) {
   }
 }
 
-// 人工（视频）排队完成，接通客服后，修改对应的房间模式
-export const queueFinishEnterRoom = function({ commit, state }, mode) {
-  commit(types.SET_QUEUE_MODE, queueStatus.noneQueue)
-  if (mode === sessionStatus.video) {
-    commit(types.SET_ROOM_MODE, roomStatus.videoChat)
-    const tip = [{
-      content: `视频客服${state.csInfo.csName}转接成功，祝您沟通愉快！`,
-      time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
-      msgStatus: msgStatus.tip,
-      msgType: tipTypes.tip_success
-    }]
-    commit(types.SET_MSGS, state.msgs.concat(tip))
-  } else if (mode === sessionStatus.onLine) {
-    commit(types.SET_ROOM_MODE, roomStatus.menChat)
-    const tip = [{
-      content: `人工客服${state.csInfo.csName}转接成功，祝您沟通愉快！`,
-      time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
-      msgStatus: msgStatus.tip,
-      msgType: tipTypes.tip_success
-    }]
-    commit(types.SET_MSGS, state.msgs.concat(tip))
-  }
-}
-
 // 人工（视频）服务结束后，更新 vuex 数据
-export const resetVuexOption = function({ commit, state }, mode) {
+export const afterServerFinish = function({ commit, state }, mode) {
   commit(types.SET_CS_INFO, {})
   commit(types.SET_QUEUE_NUM, 0)
   commit(types.SET_QUEUE_MODE, queueStatus.noneQueue)
@@ -131,9 +144,9 @@ export const resetVuexOption = function({ commit, state }, mode) {
   } else
   if (mode === sessionStatus.onLine) {
     // 清空定时器
-    clearTimeout(state.userInfo.avtionTimeout)
+    clearTimeout(state.userInfo.actionTimeout)
     const userInfo = Tools.CopyTools.objShallowClone(state.userInfo)
-    userInfo.avtionTimeout = null
+    userInfo.actionTimeout = null
     commit(types.SET_USER_INFO, userInfo)
   }
 }
@@ -165,10 +178,10 @@ export const systemMsg = async function({ commit, state }, systemMsg) {
 // 更新用户最后活动时间（更新定时器）
 export const updateLastAction = function({ commit, state }) {
   // 清空原来的定时器
-  state.userInfo.avtionTimeout && clearTimeout(state.userInfo.avtionTimeout)
+  state.userInfo.actionTimeout && clearTimeout(state.userInfo.actionTimeout)
 
   // 创建定时器，绑定在 vuex 的 userInfo
-  const avtionTimeout = setTimeout(async() => {
+  const actionTimeout = setTimeout(async() => {
     // 推送超时断开连接提示，至本地消息队列
     const dialog = {
       time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
@@ -190,7 +203,7 @@ export const updateLastAction = function({ commit, state }) {
   }, 300000)
 
   const userInfo = Tools.CopyTools.objShallowClone(state.userInfo)
-  userInfo.avtionTimeout = avtionTimeout
+  userInfo.actionTimeout = actionTimeout
   commit(types.SET_USER_INFO, userInfo)
 }
 
