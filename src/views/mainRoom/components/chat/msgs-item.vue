@@ -52,10 +52,10 @@
         <!-- 礼物消息 -->
         <span class="text gift-item" v-if="msg.msgType === msgTypes.msg_gift">
           我送给{{this.csInfo.csName || '客服'}}一个{{msg.giftInfo.name}} !
-          <img class="text-gift" :src="`/static/img/${msg.giftInfo.id}.png`">
+          <img class="text-gift" :src="`/static/img/gift/${msg.giftInfo.id}.png`">
         </span>
         <!-- 留言 -->
-        <span class="text" v-if="msg.msgType === msgTypes.msg_leave">客服暂时不在，请<span class="button" @click="leaveMsg">点击留言</span>~</span>
+        <span class="text" v-if="msg.msgType === msgTypes.msg_leave">{{msg.content}}，请<span class="button" @click="leaveMsg">点击留言</span>~</span>
         <!-- 猜问题 -->
         <span class="text" v-if="msg.msgType === msgTypes.msg_guess">我猜您想知道这些问题</span>
         <!-- 名片消息 -->
@@ -129,7 +129,7 @@ export default {
         case sessionStatus.video:
           return getCsAvatar(this.msg.avatar)
         case sessionStatus.onLine:
-          return '/static/img/chat/xiaohua@2x.png'
+          return getCsAvatar(this.msg.avatar)
         default:
           return '/static/img/chat/xiaohua@2x.png'
       }

@@ -3,7 +3,7 @@ import IM from '@/server/im'
 // import Creator from '@/common/js/msgsLoader'
 import MsgsLoader from '@/common/js/MsgsLoader'
 // import WebRTCAPI from 'webRTCAPI'
-import { ERR_OK, getUserInfoByOpenID, getLoginInfo, pushSystemMsg, sendMsgToBot, getSessionList, getCsAvatar, onLineQueue, getBotRoamMsgs, requestHistoryMsgs, onLineQueueCancel, chatQueueHeartBeat } from '@/server/index.js'
+import { ERR_OK, getUserInfoByOpenID, getLoginInfo, sendMsgToBot, getSessionList, getCsAvatar, onLineQueue, getBotRoamMsgs, requestHistoryMsgs, onLineQueueCancel, chatQueueHeartBeat } from '@/server/index.js'
 import Tools from '@/common/js/tools'
 // import { formatDate } from '@/common/js/dateConfig.js'
 import { roomStatus, queueStatus, sessionStatus, systemMsgStatus, msgStatus, msgTypes, tipTypes } from '@/common/js/status'
@@ -246,7 +246,8 @@ export const IMMixin = {
       'chatGuid',
       'msgs',
       'videoMsgs',
-      'queueNum'
+      'queueNum',
+      'hasAssess'
     ])
   },
   data() {
@@ -317,10 +318,16 @@ export const IMMixin = {
 
         // 客户端排队成功（视频）
         case systemMsgStatus.video_queuesSuccess:
-          msgsObj.queueSounce = sessionStatus.video
-          RTCSystemMsg.responseVideoQueuesSuccess(msgsObj, this.userInfo, this.sessionId)
-          // 存客服基本信息
-          this.setCsInfo(msgsObj)
+          const videoQueueSuccMsg = {
+            code: systemMsgStatus.video_requestCsEntance,
+            csId: this.$route.query.csId,
+            csName: this.$route.query.csName,
+            accessId: msgsObj.accessId,
+            startTime: msgsObj.startTime,
+            endTime: msgsObj.endTime
+          }
+          const videoConfig = await this.configQueueSuccess(videoQueueSuccMsg)
+          IM.sendSystemMsg(videoConfig)
           break
 
         // 座席端视频接入请求（视频）
@@ -330,9 +337,15 @@ export const IMMixin = {
 
         // 座席端会话、坐席基本信息传递（视频）
         case systemMsgStatus.video_transBaseInfo:
-          const csInfomation = RTCSystemMsg.responseVideoTransBaseInfo(msgsObj)
-          this.setCsInfo(csInfomation)
-          this.setRoomId(csInfomation.csCode)
+          const csInfo_video = {
+            csId: msgsObj.csId,
+            csAvatar: getCsAvatar(msgsObj.csId),
+            csName: msgsObj.csName,
+            likesCount: msgsObj.likesCount,
+            csCode: msgsObj.csCode
+          }
+          this.setCsInfo(csInfo_video)
+          this.setRoomId(csInfo_video.csCode)
           this.setSessionId(msgsObj.sessionId)
           // 设置排队状态
           this.setQueueMode(queueStatus.queueSuccess)
@@ -347,23 +360,31 @@ export const IMMixin = {
         // 客户端排队成功（在线）
         case systemMsgStatus.onLine_queuesSuccess:
           this.$router.replace({path: `/room/chat?openId=${this.userInfo.openId}`})
-          msgsObj.queueSounce = sessionStatus.onLine
-          RTCSystemMsg.responseVideoQueuesSuccess(msgsObj, this.userInfo, this.chatGuid)
-          // 存客服基本信息
-          // this.setCsInfo(msgsObj)
+          const onlineQueueSuccMsg = {
+            code: systemMsgStatus.onLine_requestCsEntance,
+            csId: msgsObj.csId,
+            startTime: msgsObj.queueStartTime,
+            endTime: msgsObj.queueEndTime
+          }
+          const onlineConfig = await this.configQueueSuccess(onlineQueueSuccMsg)
+          IM.sendSystemMsg(onlineConfig)
           break
 
         // 座席端会话、坐席基本信息传递（在线）
         case systemMsgStatus.onLine_transBaseInfo:
-          const csInfo = RTCSystemMsg.responseVideoTransBaseInfo(msgsObj)
+          const csInfo_onLine = {
+            csId: msgsObj.csId,
+            csAvatar: getCsAvatar(msgsObj.csId),
+            csName: msgsObj.csName
+          }
           // action 删除msgs中排队状态的tips
           this.deleteTipMsg()
           // 设置坐席信息
-          this.setCsInfo(csInfo)
+          this.setCsInfo(csInfo_onLine)
           // 设置会话ID
           this.setSessionId(msgsObj.sessionId)
           // 设置排队状态
-          this.setQueueMode(queueStatus.queueSuccess)
+          this.setQueueMode(queueStatus.noneQueue)
           // action 排队完成，进入会话
           this.queueFinishEnterRoom(sessionStatus.onLine)
           // 初始化用户最后响应时间
@@ -401,6 +422,7 @@ export const IMMixin = {
     }),
     ...mapActions([
       'sendMsgs',
+      'configQueueSuccess',
       'queueFinishEnterRoom',
       'resetVuexOption',
       'updateLastAction'
@@ -581,7 +603,8 @@ export const sendMsgsMixin = {
         isSelfSend: true,
         time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
         msgStatus: msgStatus.msg,
-        msgType: msgTypes.msg_normal
+        msgType: msgTypes.msg_normal,
+        chatType: this.sendType
       }
       this.sendMsgs(msg)
     },
@@ -595,6 +618,7 @@ export const sendMsgsMixin = {
         time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
         msgStatus: msgStatus.msg,
         msgType: msgTypes.msg_gift,
+        chatType: this.sendType,
         giftInfo
       }
       this.sendMsgs(msg)
@@ -608,7 +632,8 @@ export const sendMsgsMixin = {
         isSelfSend: true,
         time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
         msgStatus: msgStatus.msg,
-        msgType: msgTypes.msg_liked
+        msgType: msgTypes.msg_liked,
+        chatType: this.sendType
       }
       this.sendMsgs(msg)
     },
@@ -620,6 +645,7 @@ export const sendMsgsMixin = {
         time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
         msgStatus: msgStatus.msg,
         msgType: msgTypes.msg_img,
+        chatType: this.sendType,
         imgData
       }
       this.sendMsgs(msg)
@@ -632,6 +658,7 @@ export const sendMsgsMixin = {
         isSelfSend: true,
         msgStatus: msgStatus.msg,
         msgType: msgTypes.msg_XH_express,
+        chatType: this.sendType,
         imgData: {
           big: url,
           small: url
@@ -642,70 +669,6 @@ export const sendMsgsMixin = {
     ...mapActions([
       'sendMsgs'
     ])
-  }
-}
-
-export const RTCSystemMsg = {
-  async systemMsg(systemMsg) {
-    const res = await pushSystemMsg(systemMsg)
-    if (res.result.code === ERR_OK) {
-      console.log('排队完成，推送系统消息成功')
-      return 0
-    } else {
-      console.log('推送系统消息失败')
-    }
-  },
-
-  /* 响应 客户端排队成功（视频） */
-  responseVideoQueuesSuccess(msgsObj, userInfo, sessionId) {
-    // 发送系统消息，通知座席端视频接入
-    const sessionStorage = window.sessionStorage
-    const startTime = parseInt(sessionStorage.getItem('queue_start_time'))
-    const queueTimeLength = new Date().getTime() - startTime
-    sessionStorage.removeItem('queue_start_time')
-    let code = ''
-    switch (msgsObj.queueSounce) {
-      case sessionStatus.video:
-        code = systemMsgStatus.video_requestCsEntance
-        break
-      case sessionStatus.onLine:
-        code = systemMsgStatus.onLine_requestCsEntance
-        break
-    }
-    const systemMsg = {
-      userId: msgsObj.csId,
-      msgBody: {
-        data: {
-          queueTimeLength,
-          code,
-          // code: systemMsgStatus.onLine_requestCsEntance,
-          csId: msgsObj.csId,
-          csName: msgsObj.csName || msgsObj.csId,
-          userId: userInfo.userId,
-          userName: userInfo.userName,
-          userPhone: userInfo.userPhone,
-          openId: userInfo.userId,
-          orign: '官微',
-          robotSessionId: sessionId
-        },
-        desc: `${userInfo.userName}排队成功`,
-        ext: ''
-      }
-    }
-    this.systemMsg(systemMsg)
-  },
-
-  /* 响应 座席端会话、坐席基本信息传递（视频） */
-  responseVideoTransBaseInfo(msgsObj) {
-    // 存csName & sessionId
-    const csInfoTemp = {
-      csId: msgsObj.csId,
-      csAvatar: getCsAvatar(msgsObj.csId),
-      csName: msgsObj.csName,
-      likesCount: msgsObj.likesCount,
-      csCode: msgsObj.csCode
-    }
-    return csInfoTemp
   }
 }
 
@@ -822,6 +785,7 @@ export const onLineQueueMixin = {
   },
   computed: {
     ...mapGetters([
+      'msgs',
       'userInfo',
       'queueNum',
       'sessionId',
@@ -831,24 +795,29 @@ export const onLineQueueMixin = {
   methods: {
     async enterOnLineLineUp() {
       this.$router.replace({path: `/room/chat?openId=${this.userInfo.openId}&csId=${this.onLineQueueCsId || 'wait_for_distribution'}`})
-      // // 排队成功，直接通知坐席
-      // window.sessionStorage.setItem('queue_start_time', new Date().getTime())
-      // const msg = {
-      //   csId: 'webchat2',
-      //   queueSounce: sessionStatus.onLine
-      // }
-      // RTCSystemMsg.responseVideoQueuesSuccess(msg, this.userInfo, this.sessionId)
-
-      // 在线转人工流程
-      // 1. 请求排队
-      const res = await this.formatOnLineQueueAPI()
-      // 2. 处理
-      if (res.code === ERR_OK) {
-        window.sessionStorage.setItem('queue_start_time', new Date().getTime())
-        this.afterQueueSuccess(res.data)
-      } else {
-        this.botSendLeaveMsg()
+      // 排队成功，直接通知坐席
+      this.setChatGuid(new Date().getTime())
+      const msg = {
+        code: systemMsgStatus.onLine_requestCsEntance,
+        chatGuid: this.chatGuid,
+        csId: 'webchat7',
+        csName: 'webchat7',
+        startTime: '',
+        endTime: ''
       }
+      const config = await this.configQueueSuccess(msg)
+      IM.sendSystemMsg(config)
+
+      // // 在线转人工流程
+      // // 1. 请求排队
+      // const res = await this.formatOnLineQueueAPI()
+      // // 2. 处理
+      // if (res.code === ERR_OK) {
+      //   window.sessionStorage.setItem('queue_start_time', new Date().getTime())
+      //   this.afterQueueSuccess(res.data)
+      // } else {
+      //   this.botSendLeaveMsg()
+      // }
     },
     async formatOnLineQueueAPI() {
       // 初始化人工客服排队ID，存vuex
@@ -858,15 +827,15 @@ export const onLineQueueMixin = {
         customerGuid: this.userInfo.userId,
         customerImg: '',
         customerNick: this.userInfo.userName,
-        identity: '3',
-        insuranceType: '1',
-        origin: '1',
+        identity: this.userInfo.userGrade,
+        robotSessionId: this.sessionId,
+        origin: 'WE',
         type: '1'
       }
       const res = await onLineQueue(option)
       const data = res.data
       if (res.result_code === '200') {
-        if (data.workTIme) {
+        if (data.online) {
           // 发送正在转接提示
           this.enterToLineUp('正在为您转接在线客服，请稍候')
           // 排队中
@@ -875,7 +844,10 @@ export const onLineQueueMixin = {
             data: {
               num: data.teamNum,
               csId: data.userCode || '',
-              isTeam: data.team
+              csName: data.userName || '',
+              isTeam: data.team,
+              startTime: data.queueStartTime,
+              endTime: data.queueEndTime
             }
           }
         }
@@ -894,14 +866,18 @@ export const onLineQueueMixin = {
         data: '请留言'
       }
     },
-    afterQueueSuccess(data) {
+    async afterQueueSuccess(data) {
       if (!data.isTeam) {
         // 排队成功，直接通知坐席
         const msg = {
+          code: systemMsgStatus.onLine_requestCsEntance,
           csId: data.csId,
-          queueSounce: sessionStatus.onLine
+          csName: data.csName,
+          startTime: data.startTime,
+          endTime: data.endTime
         }
-        RTCSystemMsg.responseVideoQueuesSuccess(msg, this.userInfo, this.chatGuid)
+        const config = await this.configQueueSuccess(msg)
+        IM.sendSystemMsg(config)
       } else {
         // 排队等待
         // 开启心跳
@@ -931,6 +907,7 @@ export const onLineQueueMixin = {
         console.info('取消排队成功')
         this.$vux.toast.text('您已经取消排队', 'middle')
         this.stopHeartBeat()
+        this.setQueueMode(queueStatus.noneQueue)
         return 0
       } else {
         console.info('取消排队失败')
@@ -965,9 +942,19 @@ export const onLineQueueMixin = {
       }
     },
     botSendLeaveMsg() {
+      // 最后一条msg消息是否为留言消息，是则return，否则发送留言消息
+      for (let i = this.msgs.length - 1; i > 0; i--) {
+        if (this.msgs[i].msgStatus === msgStatus.msg) {
+           if (this.msgs[i].msgType === msgTypes.msg_leave) {
+             return
+           } else {
+             break
+           }
+        }
+      }
       const msg = {
         nickName: this.botInfo.botName,
-        content: '',
+        content: '当前人工客服忙碌',
         time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
         isSelfSend: false,
         msgStatus: msgStatus.msg,
@@ -992,7 +979,8 @@ export const onLineQueueMixin = {
       setChatGuid: 'SET_CHAT_GUID'
     }),
     ...mapActions([
-      'enterToLineUp'
+      'enterToLineUp',
+      'configQueueSuccess'
     ])
   }
 }

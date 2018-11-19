@@ -47,6 +47,33 @@ export const enterToLineUp = function({ commit, state }, content) {
   commit(types.SET_MSGS, state.msgs.concat(tip))
 }
 
+// 配置排队成功后给坐席推送接入信息
+export const configQueueSuccess = function({ state }, msgsObj) {
+  return {
+    userId: msgsObj.csId,
+    msgBody: {
+      data: {
+        code: msgsObj.code,
+        chatGuid: state.chatGuid,
+        csId: msgsObj.csId,
+        csName: msgsObj.csName || msgsObj.csId,
+        userId: state.userInfo.userId,
+        userAvatar: '',
+        userName: state.userInfo.userName,
+        userPhone: state.userInfo.userPhone,
+        openId: state.userInfo.userId,
+        origin: 'WE',
+        robotSessionId: state.sessionId,
+        accessId: msgsObj.accessId || '',
+        queueStartTime: msgsObj.startTime,
+        queueEndTime: msgsObj.endTime
+      },
+      desc: '',
+      ext: ''
+    }
+  }
+}
+
 // 人工客服排队完成后，删除消息队列里的排队状态tips
 export const deleteTipMsg = function({ commit, state }) {
   for (let i = state.msgs.length - 1; i >= 0; i--) {
@@ -61,11 +88,11 @@ export const deleteTipMsg = function({ commit, state }) {
 
 // 人工（视频）排队完成，接通客服后，修改对应的房间模式
 export const queueFinishEnterRoom = function({ commit, state }, mode) {
-  commit(types.SET_QUEUE_MODE, queueStatus.queueOver)
+  commit(types.SET_QUEUE_MODE, queueStatus.noneQueue)
   if (mode === sessionStatus.video) {
     commit(types.SET_ROOM_MODE, roomStatus.videoChat)
     const tip = [{
-      content: '视频客服转接成功，祝您沟通愉快！',
+      content: `视频客服${state.csInfo.csName}转接成功，祝您沟通愉快！`,
       time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
       msgStatus: msgStatus.tip,
       msgType: tipTypes.tip_success
@@ -74,7 +101,7 @@ export const queueFinishEnterRoom = function({ commit, state }, mode) {
   } else if (mode === sessionStatus.onLine) {
     commit(types.SET_ROOM_MODE, roomStatus.menChat)
     const tip = [{
-      content: '人工客服转接成功，祝您沟通愉快！',
+      content: `人工客服${state.csInfo.csName}转接成功，祝您沟通愉快！`,
       time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
       msgStatus: msgStatus.tip,
       msgType: tipTypes.tip_success
@@ -93,7 +120,7 @@ export const resetVuexOption = function({ commit, state }, mode) {
   commit(types.SET_ROOM_MODE, roomStatus.AIChat)
   initSession({ commit, state })
   const tip = [{
-    content: '服务结束，期待与您的下次对话！',
+    content: '客服已结束本次会话，如需继续咨询，请重新联系客服',
     time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
     msgStatus: msgStatus.tip,
     msgType: tipTypes.tip_normal
@@ -141,7 +168,7 @@ export const updateLastAction = function({ commit, state }) {
   state.userInfo.avtionTimeout && clearTimeout(state.userInfo.avtionTimeout)
 
   // 创建定时器，绑定在 vuex 的 userInfo
-  const avtionTimeout = setTimeout(() => {
+  const avtionTimeout = setTimeout(async() => {
     // 推送超时断开连接提示，至本地消息队列
     const dialog = {
       time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
@@ -155,17 +182,11 @@ export const updateLastAction = function({ commit, state }) {
 
     // 用户长时间无响应，主动断开连接
     const sysMsgs = {
-      userId: state.csInfo.csId,
-      msgBody: {
-        data: {
-          code: systemMsgStatus.onLine_userNoResponse,
-          userId: state.userInfo.userId
-        },
-        desc: `用户长时间无响应`,
-        ext: ''
-      }
+      code: systemMsgStatus.onLine_userNoResponse,
+      csId: state.csInfo.csId
     }
-    systemMsg({ commit, state }, sysMsgs)
+    const onlineConfig = await configQueueSuccess(sysMsgs)
+    systemMsg({ commit, state }, onlineConfig)
   }, 300000)
 
   const userInfo = Tools.CopyTools.objShallowClone(state.userInfo)

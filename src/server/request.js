@@ -20,6 +20,8 @@ const hostFilter = hostType => {
       return conf.videoPath
     case 'RTCRoom':
       return conf.webRTCRoomPath
+    case 'systemMsg':
+      return conf.systemMsgPath
     case 'chat':
       return conf.chatPath
     case 'onLine':

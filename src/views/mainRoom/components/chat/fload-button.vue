@@ -1,5 +1,8 @@
 <template>
   <div class="fload-button">
+    <div class="popover" :style="tipsPos" :class="{'tipsShow': tipsShow}">
+      <span class="text">{{tipsText}}</span>
+    </div>
     <button
       class="item extend-click transition-bezier"
       :disabled="barStatus"
@@ -41,8 +44,9 @@
 
 <script type="text/ecmascript-6">
 import { mapGetters, mapMutations, mapActions } from 'vuex'
-import { roomStatus, msgStatus, msgTypes } from '@/common/js/status'
+import { systemMsgStatus, roomStatus, queueStatus, msgStatus, msgTypes } from '@/common/js/status'
 import Tools from '@/common/js/tools'
+import IM from '@/server/im'
 
 export default {
   components: {
@@ -54,14 +58,23 @@ export default {
     }
   },
   computed: {
+    tipsPos() {
+      return `transform: translateY(${(this.tipsIndex - 1) * 5.6}rem)`
+    },
     ...mapGetters([
       'roomMode',
-      'userInfo'
+      'userInfo',
+      'csInfo',
+      'queueMode'
     ])
   },
   data() {
     return {
-
+      notWorkTimeClicked: false,
+      tipsTimer: null,
+      tipsIndex: 0,
+      tipsText: '',
+      tipsShow: false
     }
   },
   methods: {
@@ -70,6 +83,9 @@ export default {
     },
     // 视频客服
     videoLineUp() {
+      if (this.queueMode === queueStatus.queuing) {
+        return
+      }
       switch (this.roomMode) {
         case roomStatus.AIChat:
           this.$emit('enterVideoLineUp')
@@ -80,21 +96,34 @@ export default {
           })
           break
         case roomStatus.menChat:
-          this.$vux.alert.show({
-            title: '您当前正在人工服务中！！请先退出'
-          })
-          // this.$vux.confirm.show({
-          //   title: '您当前正在视频服务中，确认需要退出并进入人工客服嘛？',
-          //   onConfirm() {
-          //     // 进入专属客服
-          //     self.$emit('enterVideoLineUp')
-          //   }
+          // this.$vux.alert.show({
+          //   title: '您当前正在人工服务中！！请先退出'
           // })
+          const self = this
+          this.$vux.confirm.show({
+            title: '您当前正在视频服务中，确认需要退出并进入人工客服嘛？',
+            async onConfirm() {
+              // 设置评价状态
+              self.setAssessStatus(true)
+              // 用户主动断开人工客服
+              const sysMsgs = {
+                code: systemMsgStatus.onLine_userNoResponse,
+                csId: self.csInfo.csId
+              }
+              const onlineConfig = await self.configQueueSuccess(sysMsgs)
+              IM.sendSystemMsg(onlineConfig)
+              // 进入专属客服
+              self.$emit('enterVideoLineUp')
+            }
+          })
           break
       }
     },
     // 在线客服
     onLineLineUp() {
+      if (this.queueMode === queueStatus.queuing) {
+        return
+      }
       switch (this.roomMode) {
         case roomStatus.AIChat:
           const ZX_workT = this.userInfo.workTimeInfo.filter(item => item.callType === 'ZX')
@@ -105,15 +134,27 @@ export default {
             // endT: '02:00'
           }
           if (Tools.DateTools.isWorkTime(workT)) {
+            // 当前在工作时间
             this.$emit('enterOnLineLineUp')
+            // 重置非工作时间用户点击
+            this.notWorkTimeClicked = false
           } else {
-            const msg = {
-              content: '',
-              time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
-              msgStatus: msgStatus.msg,
-              msgType: msgTypes.msg_leave
+            // 当前不在工作时间
+            if (this.notWorkTimeClicked) {
+              // 用户重复点击
+              this.showTips(3, '请勿重复点击')
+              return 0
+            } else {
+              // 用户第一次点击
+              const msg = {
+                content: `抱歉，当前为非工作时间，人工客服工作时间为周一至周日${workT.startT}-${workT.endT}`,
+                time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+                msgStatus: msgStatus.msg,
+                msgType: msgTypes.msg_leave
+              }
+              this.sendMsgs(msg)
+              this.notWorkTimeClicked = true
             }
-            this.sendMsgs(msg)
           }
           break
         case roomStatus.videoChat:
@@ -131,8 +172,9 @@ export default {
     clickAssess() {
       switch (this.roomMode) {
         case roomStatus.AIChat:
-        this.alertContent = '当前未接通任何坐席，暂不能评价'
-        this.showAlert = true
+          this.$vux.alert.show({
+            title: '当前未接通任何坐席，暂不能评价'
+          })
           break
         case roomStatus.videoChat:
           this.setAssessView(true)
@@ -142,11 +184,32 @@ export default {
           break
       }
     },
+    showTips(index, text) {
+      if (this.tipsTimer) {
+        // 防止重复
+        return 0
+      } else {
+        // showTips
+        this.tipsIndex = index
+        this.tipsText = text
+        this.tipsShow = true
+
+        this.tipsTimer = setTimeout(() => {
+          // 关闭提示
+          this.tipsShow = false
+          // 重置
+          this.tipsTimer && clearTimeout(this.tipsTimer)
+          this.tipsTimer = null
+        }, 3000)
+      }
+    },
     ...mapMutations({
-      setAssessView: 'SET_ASSESS_VIEW'
+      setAssessView: 'SET_ASSESS_VIEW',
+      setAssessStatus: 'SET_ASSESS_STATUS'
     }),
     ...mapActions([
-      'sendMsgs'
+      'sendMsgs',
+      'configQueueSuccess'
     ])
   }
 }
@@ -191,6 +254,42 @@ export default {
       width: 100%;
       height: 100%;
       // fill: @theme;
+    }
+  }
+  .popover {
+    position: absolute;
+    top: 0;
+    right: 4.4rem;
+    z-index: 5000;
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+    &.tipsShow {
+      opacity: 1;
+    }
+    .text {
+      display: inline-block;
+      line-height: 1.4rem;
+      padding: 1rem 1.3rem;
+      background-color: #000;
+      border-radius: .7rem;
+      color: #fff;
+      font-size: 1.3rem;
+      white-space:nowrap;
+      &::after {
+        content: '';
+        display: block;
+        width: 0;
+        height: 0;
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        right: 0;
+        margin: auto;
+        transform: translateX(100%);
+        border-width: 0.8rem 0 0.8rem 0.8rem;
+        border-style: solid;
+        border-color: transparent transparent transparent #000;
+      }
     }
   }
 }
