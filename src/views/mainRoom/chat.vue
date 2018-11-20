@@ -188,6 +188,7 @@ export default {
       scrollY: 0,
       inputEle: null,
       inputFocPos: 0,
+      inputBarTimer: null,
       // inputObserver: null,
       extendBarLaunchOpen: false,
       msgStatus: msgStatus,
@@ -454,6 +455,9 @@ export default {
       // this.$refs.inputBar.setInputEditState('true')
       this.$nextTick(() => {
         document.getElementById('input-content-hook').focus()
+        this.inputBarTimer = setTimeout(function() {
+          document.body.scrollTop = document.body.scrollHeight
+        }, 100)
       })
       // this.inputEle.focus()
       // 聊天内容滚动到最底部
@@ -466,6 +470,7 @@ export default {
       // this.inputEle.blur()
       this.$nextTick(() => {
         document.getElementById('input-content-hook').blur()
+        clearTimeout(this.inputBarTimer)
       })
       // this.$refs.inputBar.setInputEditState('false')
       this.chatScroll.refresh()
