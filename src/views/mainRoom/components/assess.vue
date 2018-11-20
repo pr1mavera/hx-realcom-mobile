@@ -39,7 +39,7 @@
 <script>
   import { TransferDom, Popup, Rater, XButton } from 'vux'
   import IM from '@/server/im'
-  import { getCsAvatar } from '@/server/index.js'
+  import { ERR_OK, getCsAvatar, saveAssess } from '@/server/index.js'
   import { msgStatus, msgTypes } from '@/common/js/status'
   import { mapGetters } from 'vuex'
   import Tools from '@/common/js/tools'
@@ -102,7 +102,23 @@
           this.$vux.toast.text('啊呀，给个评价呗~', 'middle')
           return
         }
+        const data = Tools.CopyTools.objShallowClone({
+          'sessionId': this.sessionId,
+          // 'sessionId': '00553330cc4a11e886ec19059d7ca77e',
+          'userId': this.userInfo.userId,
+          'userName': this.userInfo.userName,
+          'csId': this.csInfo.csId,
+          'csName': this.csInfo.csName,
+          'evaluateLevel': this.stars,
+          'labels': this.labels
+        })
         this.$emit('assessSuccess')
+        const res = await saveAssess(data)
+        if (res.result.code === ERR_OK) {
+          this.$vux.toast.text('评价成功', 'middle')
+        } else {
+          this.$vux.toast.text('评价失败', 'middle')
+        }
         // const data = Tools.CopyTools.objShallowClone({
         //   'sessionId': this.sessionId,
         //   // 'sessionId': '00553330cc4a11e886ec19059d7ca77e',
