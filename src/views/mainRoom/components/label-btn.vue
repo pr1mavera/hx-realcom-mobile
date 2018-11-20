@@ -143,6 +143,9 @@
       },
       labelPagination(list) {
         let map = []
+        if (list.length === 0) {
+          return map
+        }
         list.sort((a, b) => b.labelName.length - a.labelName.length) // 原标签数组逆序排列
 
         // 初始化双向队列

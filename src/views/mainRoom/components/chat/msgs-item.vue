@@ -22,6 +22,15 @@
           'padding-for-img': msg.msgType === msgTypes.msg_img,
           'padding-for-HX': msg.msgType === msgTypes.msg_XH_express
         }]">
+        <!-- 消息状态 -->
+        <div class="msg-status" v-if="msg.isSelfSend">
+          <inline-loading v-if="msg.status === 'pending'"></inline-loading>
+          <div class="failed" v-if="msg.status === 'failed'" @click="$emit('resendMsgs', msg)">
+            <svg class="icon extend-click" aria-hidden="true">
+              <use xlink:href="#icon-gantanhao"></use>
+            </svg>
+          </div>
+        </div>
         <!-- 基本消息 -->
         <span class="text" v-if="msg.msgType === msgTypes.msg_normal" v-html="msg.content">{{msg.content}}</span>
         <!-- 点赞消息 -->
@@ -109,8 +118,12 @@
 import { mapGetters } from 'vuex'
 import { msgTypes, sessionStatus } from '@/common/js/status'
 import { getCsAvatar } from '@/server/index.js'
+import { InlineLoading } from 'vux'
 
 export default {
+  components: {
+    InlineLoading
+  },
   props: {
     msg: {
       type: Object
@@ -228,7 +241,7 @@ export default {
     }
   }
   .content-box {
-    // position: relative;
+    position: relative;
     width: calc(~'100% - 6.6rem');
     font-size: 1.4rem;
     display: flex;
@@ -245,7 +258,7 @@ export default {
       line-height: 1.8rem;
     }
     .content {
-      // position: absolute;
+      position: relative;
       // top: 2.3rem;
       display: inline-block;
       width: auto;
@@ -253,6 +266,24 @@ export default {
       padding: 0.9rem 1.2rem;
       margin-bottom: 1.4rem;
       box-sizing: border-box;
+      .msg-status {
+        position: absolute;
+        left: -4.2rem;
+        top: 0;
+        width: 1.8rem;
+        height: 1.8rem;
+        margin: 1rem 1.2rem;
+        align-items: flex-end;
+        .failed {
+          width: 100%;
+          height: 100%;
+          .icon {
+            width: 100%;
+            height: 100%;
+            fill: #f00;
+          }
+        }
+      }
       &.left-content-style {
         border-radius: 0.4rem 1.5rem 1.5rem 1.5rem;
         color: @text-normal;

@@ -8,36 +8,40 @@
       :disabled="barStatus"
       @click="callPhone"
       :class="[{'visible-when-input': barStatus, 'item-1': !barStatus}]">
-      <svg class="icon" aria-hidden="true">
+      <!-- <svg class="icon" aria-hidden="true">
         <use xlink:href="#icon-dianhua"></use>
-      </svg>
+      </svg> -->
+      <img width=100% height=100% src="/static/img/chat/fb_phone.png">
     </button>
     <button
       class="item extend-click transition-bezier"
       :disabled="barStatus"
       @click="videoLineUp"
       :class="[{'visible-when-input': barStatus, 'item-2': !barStatus}]">
-      <svg class="icon" aria-hidden="true">
+      <!-- <svg class="icon" aria-hidden="true">
         <use xlink:href="#icon-shipin"></use>
-      </svg>
+      </svg> -->
+      <img width=100% height=100% src="/static/img/chat/fb_video.png">
     </button>
     <button
       class="item extend-click transition-bezier"
       :disabled="barStatus"
       @click="onLineLineUp"
       :class="[{'visible-when-input': barStatus, 'item-3': !barStatus}]">
-      <svg class="icon" aria-hidden="true">
+      <!-- <svg class="icon" aria-hidden="true">
         <use xlink:href="#icon-zhuanrengongVIP"></use>
-      </svg>
+      </svg> -->
+      <img width=100% height=100% :src='`/static/img/chat/fb_${isVip}.png`'>
     </button>
     <button
       class="item extend-click transition-bezier"
       :disabled="barStatus"
       @click="clickAssess"
       :class="[{'visible-when-input': barStatus, 'item-4': !barStatus}]">
-      <svg class="icon" aria-hidden="true">
+      <!-- <svg class="icon" aria-hidden="true">
         <use xlink:href="#icon-pingjia1"></use>
-      </svg>
+      </svg> -->
+      <img width=100% height=100% src="/static/img/chat/fb_assess.png">
     </button>
   </div>
 </template>
@@ -58,6 +62,9 @@ export default {
     }
   },
   computed: {
+    isVip() {
+      return +this.userInfo.userGrade <= 3 ? 'chat_vip' : 'chat'
+    },
     tipsPos() {
       return `transform: translateY(${(this.tipsIndex - 1) * 5.6}rem)`
     },
@@ -110,7 +117,7 @@ export default {
                 code: systemMsgStatus.onLine_userNoResponse,
                 csId: self.csInfo.csId
               }
-              const onlineConfig = await self.configQueueSuccess(sysMsgs)
+              const onlineConfig = await self.configSendSystemMsg(sysMsgs)
               await IM.sendSystemMsg(onlineConfig)
               await Tools.AsyncTools.sleep(3000)
               // 进入专属客服
@@ -210,7 +217,7 @@ export default {
     }),
     ...mapActions([
       'sendMsgs',
-      'configQueueSuccess'
+      'configSendSystemMsg'
     ])
   }
 }

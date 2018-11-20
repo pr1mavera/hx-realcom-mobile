@@ -221,7 +221,7 @@ const IM = (() => {
     }
   }
 
-  function sendC2CCustomMsg(from_id, to_id, msgInfo, callback) {
+  function sendC2CCustomMsg(from_id, to_id, msgInfo, succ_cb, fail_cb) {
     if (!from_id) {
       console.error("您还没有登录，暂不能聊天")
       return
@@ -256,9 +256,10 @@ const IM = (() => {
 
     webim.sendMsg(msg, (resp) => {
       console.log('发C2C自定义消息成功');
-      callback && callback();
+      succ_cb && succ_cb();
     }, function (err) {
       console.log('发C2C自定义消息失败:', err);
+      fail_cb && fail_cb();
     });
   }
 
@@ -397,6 +398,8 @@ const IM = (() => {
       nickName: options.nickName
     }, function() {
       success && success()
+    }, function() {
+      fail && fail()
     })
   }
 

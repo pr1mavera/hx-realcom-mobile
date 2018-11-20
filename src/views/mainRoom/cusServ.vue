@@ -17,6 +17,7 @@
 <script type="text/ecmascript-6">
 import { mapGetters, mapActions } from 'vuex'
 import Tools from '@/common/js/tools'
+import { getCsStatus } from '@/server/index.js'
 
 export default {
   name: 'cus-serv',
@@ -51,7 +52,7 @@ export default {
       // debugger
       this.myCs.splice(index, 1)
     },
-    goToLineUp() {
+    async goToLineUp() {
       // 判断当前是否为工作时间
       const SP_workT = this.userInfo.workTimeInfo.filter(item => item.callType === 'SP')
       const workT = {
@@ -65,20 +66,21 @@ export default {
         return
       }
 
-      const status = this.csSelected.status
+      const res = await getCsStatus(this.csSelected.id)
+      const status = res.data.status || this.csSelected.status
       // 只有就绪和忙碌可以排队
-      if (status === '1') {
+      if (+status === 1) {
         this.$vux.alert.show({
-          title: '啊呀，当前客服暂时还还没准备好呢~'
+          title: '啊呀，当前客服暂时还没准备好呢~'
         })
-      } else if (status === '3' || status === '5') {
+      } else if (status === 3 || status === 5) {
         this.$router.push({path: `/room/line-up?csId=${this.csSelected.id}&csName=${this.csSelected.nickName}`})
         this.beforeQueue('正在为您转接视频客服，请稍候')
-      } else if (status === '4') {
+      } else if (status === 4) {
         this.$vux.alert.show({
           title: '啊呀，当前客服正在休息呐~'
         })
-      } else if (status === '2') {
+      } else if (status === 2) {
         this.$vux.alert.show({
           title: '啊呀，当前客服暂时不在呢~'
         })

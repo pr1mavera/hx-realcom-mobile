@@ -1,8 +1,9 @@
 import * as types from './mutation-types'
 import Tools from '@/common/js/tools'
+import IM from '@/server/im'
 // import { isTimeDiffLongEnough, formatDate } from '@/common/js/dateConfig.js'
 import { sessionStatus, toggleBarStatus, roomStatus, queueStatus, msgStatus, dialogTypes, tipTypes, systemMsgStatus } from '@/common/js/status'
-import { ERR_OK, createSession, pushSystemMsg } from '@/server/index.js'
+import { ERR_OK, createSession } from '@/server/index.js'
 
 // 键盘弹出延迟（弃用）
 export const closeBarBuffer = async function({ commit }, { mutationType, delay }) {
@@ -85,7 +86,7 @@ export const afterQueueFailed = function({ commit, state }) {
 }
 
 // 配置排队成功后给坐席推送接入信息
-export const configQueueSuccess = function({ state }, msgsObj) {
+export const configSendSystemMsg = function({ state }, msgsObj) {
   return {
     userId: msgsObj.csId,
     msgBody: {
@@ -164,17 +165,6 @@ export const initSession = async function({ commit, state }) {
   }
 }
 
-// 系统推送C2C消息到指定用户
-export const systemMsg = async function({ commit, state }, systemMsg) {
-  const res = await pushSystemMsg(systemMsg)
-  if (res.result.code === ERR_OK) {
-    console.log('排队完成，推送系统消息成功')
-    return 0
-  } else {
-    console.log('推送系统消息失败')
-  }
-}
-
 // 更新用户最后活动时间（更新定时器）
 export const updateLastAction = function({ commit, state }) {
   // 清空原来的定时器
@@ -182,6 +172,14 @@ export const updateLastAction = function({ commit, state }) {
 
   // 创建定时器，绑定在 vuex 的 userInfo
   const actionTimeout = setTimeout(async() => {
+    // 用户长时间无响应，主动断开连接
+    const sysMsgs = {
+      code: systemMsgStatus.onLine_userNoResponse,
+      csId: state.csInfo.csId
+    }
+    const onlineConfig = await configSendSystemMsg({ state }, sysMsgs)
+    IM.sendSystemMsg(onlineConfig)
+
     // 推送超时断开连接提示，至本地消息队列
     const dialog = {
       time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
@@ -192,14 +190,6 @@ export const updateLastAction = function({ commit, state }) {
       }
     }
     commit(types.SET_MSGS, state.msgs.concat(dialog))
-
-    // 用户长时间无响应，主动断开连接
-    const sysMsgs = {
-      code: systemMsgStatus.onLine_userNoResponse,
-      csId: state.csInfo.csId
-    }
-    const onlineConfig = await configQueueSuccess(sysMsgs)
-    systemMsg({ commit, state }, onlineConfig)
   }, 300000)
 
   const userInfo = Tools.CopyTools.objShallowClone(state.userInfo)
@@ -234,6 +224,5 @@ export const sendMsgs = async function({ commit, state }, msg) {
     // 更新用户最后活动时间（更新定时器）
     updateLastAction({ commit, state })
   }
-  msg.timestamp = new Date().getTime()
   commit(types.SET_MSGS, state.msgs.concat([msg]))
 }
