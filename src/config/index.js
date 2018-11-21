@@ -8,15 +8,15 @@
 const env = process.env.NODE_ENV
 const production = {
   // int
-  videoPath: '/video-servertest/api/v1',
-  webRTCRoomPath: '/room-servertest/api/v1',
-  chatPath: '/chat-servertest/api/v1',
-  onlinePath: '/onlinePath'
+  // videoPath: '/video-servertest/api/v1',
+  // webRTCRoomPath: '/room-servertest/api/v1',
+  // chatPath: '/chat-servertest/api/v1',
+  // onlinePath: '/onlinePath'
   // uat
-  // userPath: '/user-server/api/v1', // 用户服务,整合video-server,chat-server
-  // webRTCRoomPath: '/room-server/api/v1', // 房间服务
-  // onlinePath: '/onlinePath', // 在线服务,
-  // TMPath: '/tm-server/api/v1' // 腾讯消息服务
+  userPath: '/user-server/api/v1', // 用户服务,整合video-server,chat-server
+  webRTCRoomPath: '/room-server/api/v1', // 房间服务
+  onlinePath: '/onlinePath', // 在线服务,
+  TMPath: '/tm-server/api/v1' // 腾讯消息服务
 }
 
 const development = {
