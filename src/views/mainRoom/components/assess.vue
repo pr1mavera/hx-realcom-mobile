@@ -102,16 +102,15 @@
           this.$vux.toast.text('啊呀，给个评价呗~', 'middle')
           return
         }
-        const data = Tools.CopyTools.objShallowClone({
-          'sessionId': this.sessionId,
-          // 'sessionId': '00553330cc4a11e886ec19059d7ca77e',
-          'userId': this.userInfo.userId,
-          'userName': this.userInfo.userName,
-          'csId': this.csInfo.csId,
-          'csName': this.csInfo.csName,
-          'evaluateLevel': this.stars,
-          'labels': this.labels
-        })
+        const data = {
+          sessionId: this.sessionId,
+          userId: this.userInfo.userId,
+          userName: this.userInfo.userName,
+          csId: this.csInfo.csId,
+          csName: this.csInfo.csName,
+          evaluateLevel: this.stars,
+          labels: this.labels
+        }
         this.$emit('assessSuccess')
         const res = await saveAssess(data)
         if (res.result.code === ERR_OK) {

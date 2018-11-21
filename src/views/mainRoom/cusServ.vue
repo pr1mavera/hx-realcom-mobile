@@ -67,7 +67,7 @@ export default {
       }
 
       const res = await getCsStatus(this.csSelected.id)
-      const status = +res.data.status || +this.csSelected.status
+      const status = Number(res.data.status || this.csSelected.status)
       // 只有就绪和忙碌可以排队
       switch (true) {
         case status === 1:

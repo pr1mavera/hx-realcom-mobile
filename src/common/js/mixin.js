@@ -547,6 +547,9 @@ export const sendMsgsMixin = {
         this.afterSendC2CTextMsgs(timestamp, text)
       }
 
+      // 重置消息状态
+      this.setMsgStatus(timestamp, 'pending')
+
       IM.sendNormalMsg(
         this.userInfo.userId,
         this.csInfo.csId,
@@ -575,6 +578,9 @@ export const sendMsgsMixin = {
         timestamp = new Date().getTime()
         this.afterSendC2CGiftMsgs(timestamp, giftInfo)
       }
+
+      // 重置消息状态
+      this.setMsgStatus(timestamp, 'pending')
 
       IM.sendNormalMsg(
         this.userInfo.userId,
@@ -607,6 +613,9 @@ export const sendMsgsMixin = {
         this.afterSendC2CLikeMsgs(timestamp)
       }
 
+      // 重置消息状态
+      this.setMsgStatus(timestamp, 'pending')
+
       IM.sendNormalMsg(
         this.userInfo.userId,
         this.csInfo.csId,
@@ -631,61 +640,40 @@ export const sendMsgsMixin = {
       )
     },
     sendImgMsg(img, timestamp) {
-      if (timestamp) {
-        // 重发
-        const info = {
-          msg: '图片消息',
-          time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
-          nickName: self.userInfo.userName,
-          avatar: self.csInfo.csId,
-          toUserName: self.csInfo.csName,
-          sessionId: self.sessionId,
-          identifier: self.userInfo.userId,
-          msgStatus: msgStatus.msg,
-          msgType: msgTypes.msg_img,
-          chatType: this.sendType,
-          imgData: img
-        }
-        IM.sendNormalMsg(
-          this.userInfo.userId,
-          this.csInfo.csId,
-          info, () => {
-            this.setMsgStatus(timestamp, 'succ')
-          }, () => {
-            this.setMsgStatus(timestamp, 'failed')
-          }
-        )
-        return
-      }
-      return new Promise(async(resolve) => {
+      if (!timestamp) {
         const _URL = window.URL || window.webkitURL
         const imgSrc = _URL.createObjectURL(img)
+        // 配置图片本地显示
+        timestamp = new Date().getTime()
         const imgData = {
           big: imgSrc,
           small: imgSrc
         }
-        // 配置图片本地显示
-        this.afterSendC2CImgMsgs(new Date().getTime(), imgData)
+        this.afterSendC2CImgMsgs(timestamp, imgData, img)
+      }
+      return new Promise(async(resolve) => {
+        // 重置消息状态
+        this.setMsgStatus(timestamp, 'pending')
         resolve()
-
         // IM 封装上传/发送图片
-        const self = this
         const info = {
           msg: '图片消息',
           time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
-          nickName: self.userInfo.userName,
-          avatar: self.csInfo.csId,
-          toUserName: self.csInfo.csName,
-          sessionId: self.sessionId,
-          identifier: self.userInfo.userId,
+          nickName: this.userInfo.userName,
+          avatar: this.csInfo.csId,
+          toUserName: this.csInfo.csName,
+          sessionId: this.sessionId,
+          identifier: this.userInfo.userId,
           msgStatus: msgStatus.msg,
           msgType: msgTypes.msg_img,
           chatType: this.sendType
         }
         // 上传图片
-        const resp = await IM.uploadPic(img, {
+        let resp = await IM.uploadPic(img, {
           sendUserId: this.userInfo.userId,
           toUserId: this.csInfo.csId
+        }, () => {
+          this.setMsgStatus(timestamp, 'failed')
         })
         // 发送图片
         const customMsgInfo = IM.formatImgMsgOption(resp, info)
@@ -706,6 +694,9 @@ export const sendMsgsMixin = {
         timestamp = new Date().getTime()
         this.afterSendXiaoHuaExpress(timestamp, url)
       }
+
+      // 重置消息状态
+      this.setMsgStatus(timestamp, 'pending')
 
       this.roomMode !== roomStatus.AIChat && IM.sendNormalMsg(
         this.userInfo.userId,
@@ -781,7 +772,8 @@ export const sendMsgsMixin = {
       }
       this.sendMsgs(msg)
     },
-    afterSendC2CImgMsgs(timestamp, imgData) {
+    afterSendC2CImgMsgs(timestamp, imgData, file_Obj) {
+      const fileObj = Tools.CopyTools.objDeepClone(file_Obj)
       const msg = {
         nickName: this.userInfo.userName,
         avatar: this.csInfo.csId,
@@ -792,6 +784,7 @@ export const sendMsgsMixin = {
         msgStatus: msgStatus.msg,
         msgType: msgTypes.msg_img,
         chatType: this.sendType,
+        fileObj,
         imgData
       }
       this.sendMsgs(msg)
@@ -987,7 +980,7 @@ export const onLineQueueMixin = {
       this.setChatGuid(new Date().getTime())
       const option = {
         chatGuid: `${this.chatGuid}`,
-        customerGuid: this.userInfo.userId,
+        customerGuid: `${this.userInfo.userId}`,
         customerImg: '',
         customerNick: this.userInfo.userName,
         identity: this.userInfo.userGrade,
@@ -1064,10 +1057,10 @@ export const onLineQueueMixin = {
     },
     async cancelQueue() {
       const res = await onLineQueueCancel({
-        chatGuid: this.chatGuid,
+        customerGuid: `${this.userInfo.userId}`,
+        chatGuid: `${this.chatGuid}`,
         origin: 'WE',
-        callType: 'ZX',
-        customerGuid: this.userInfo.userId
+        callType: 'ZX'
       })
       if (res.result_code === '200') {
         console.info('取消排队成功')
@@ -1090,7 +1083,7 @@ export const onLineQueueMixin = {
         }
         this.heartBeatReq = await chatQueueHeartBeat({
           customerGuid: `${this.userInfo.userId}`,
-          chatGuid: this.chatGuid,
+          chatGuid: `${this.chatGuid}`,
           origin: 'WE',
           callType: 'ZX'
         })

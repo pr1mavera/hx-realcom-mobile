@@ -214,6 +214,7 @@ const IM = (() => {
       openId: data.userId,
       origin: data.origin,
       robotSessionId: data.robotSessionId,
+      sessionId: data.sessionId,
       accessId: data.accessId,
       queueStartTime: data.queueStartTime,
       queueEndTime: data.queueEndTime,
@@ -426,7 +427,7 @@ const IM = (() => {
   }
 
   // 上传照片
-  function uploadPic(img, extInfo) {
+  function uploadPic(img, extInfo, fail) {
     var businessType // 业务类型，1-发群图片，2-向好友发图片
     // if (selType === SessionType.C2C) { // 向好友发图片
     //     businessType = webim.UPLOAD_PIC_BUSSINESS_TYPE.C2C_MSG
@@ -450,8 +451,9 @@ const IM = (() => {
           console.log('上传成功发送图片')
           resolve(resp)
         },
-        (err) => {
-          alert(err.ErrorInfo)
+        () => {
+          console.log('上传失败')
+          fail && fail()
         }
       )
     })

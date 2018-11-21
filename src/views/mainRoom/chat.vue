@@ -524,7 +524,8 @@ export default {
           this.sendLikeMsg(msg.timestamp)
           break
         case msgTypes.msg_img: // 图片消息
-          this.sendImgMsg(msg.imgData, msg.timestamp)
+          const img = new File([msg.fileObj], 'xiao_hua_niu_bi.jpg', { type: 'image/jpeg' })
+          this.sendImgMsg(img, msg.timestamp)
           break
         case msgTypes.msg_XH_express: // 小华表情消息
           this.sendXiaoHuaExpress(msg.imgData.big, msg.timestamp)

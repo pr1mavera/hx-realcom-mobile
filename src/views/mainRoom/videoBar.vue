@@ -194,7 +194,7 @@ export default {
       this.setFullScreen(false)
     },
     readyToVideo() {
-      IM.joinGroup(this.roomId, this.userInfo.userId)
+      // IM.joinGroup(this.roomId, this.userInfo.userId)
       this.initRTC(this.roomId)
     },
     async hangUpVideo() {
@@ -229,7 +229,7 @@ export default {
     },
     goBackToChat() {
       // 退群
-      IM.quitGroup(this.roomId)
+      // IM.quitGroup(this.roomId)
       // action
       this.afterServerFinish(sessionStatus.video)
     },

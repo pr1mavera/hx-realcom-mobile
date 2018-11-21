@@ -313,7 +313,7 @@ export default {
       }
       &.padding-for-img {
         padding: 0;
-        overflow: hidden;
+        // overflow: hidden;
         box-shadow: none;
         .text {
           display: inline-block;

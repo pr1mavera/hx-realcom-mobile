@@ -123,7 +123,7 @@ export const createSession = (userId, userName, userPhone, chatType) => http.pos
  // export const requestHistoryMsgs = (userId) => http.get('chat', `/chat/history?userId=${userId}`)
 
 // 评价信息保存
-export const saveAssess = async(data) => http.post('video', `/video/user/evaluate`, data)
+export const saveAssess = data => http.post('video', `/video/user/evaluate`, data)
 
 /**
  ************************************ onLine ************************************
@@ -156,9 +156,9 @@ export const leaveMsg = async(data) => http.post('onLine', '/common/leaveword/v1
  */
 export const pushSystemMsg = data => http.post('RTCRoom', '/im/msg/push', data)
 
-// /**
-//  ************************************ uat ************************************
-// */
+/**
+ ************************************ uat ************************************
+*/
 /**
  ************************************ RTCRoom ************************************
  */
