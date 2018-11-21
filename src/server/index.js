@@ -158,10 +158,10 @@ export const pushSystemMsg = data => http.post('RTCRoom', '/im/msg/push', data)
 
 // /**
 //  ************************************ uat ************************************
-//  */
-// /**
-//  ************************************ RTCRoom ************************************
-//  */
+// */
+/**
+ ************************************ RTCRoom ************************************
+ */
 //
 // /**
 //  * [videoQueue 客户端视频排队]
@@ -178,6 +178,11 @@ export const pushSystemMsg = data => http.post('RTCRoom', '/im/msg/push', data)
 //  * [videoQueueHeartBeat 客户端排队心跳]
 //  */
 // export const videoQueueHeartBeat = (roomId, userId) => http.post('RTCRoom', '/comm/room/heartbeat', { roomId, userId, beatType: 0 })
+//
+// /**
+//  * [getCsStatus 获取当前客服状态]
+//  */
+// export const getCsStatus = csId => http.get('RTCRoom', `/video/room/status?csId=${csId}`)
 //
 // /**
 //  ************************************ video ************************************
