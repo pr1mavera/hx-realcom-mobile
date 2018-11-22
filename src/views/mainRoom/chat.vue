@@ -44,6 +44,7 @@
                   @clickHotQues="chatInputCommit"
                   @onLineCancelQueue="onLineCancelQueue"
                   @toLeaveMsg="toLeaveMsg"
+                  @resendMsgs="resendMsgs"
                 ></component>
               </keep-alive>
             </li>
@@ -101,7 +102,7 @@ import Tools from '@/common/js/tools'
 import { loginMixin, IMMixin, sendMsgsMixin, getMsgsMixin, onLineQueueMixin } from '@/common/js/mixin'
 import { beforeEnterVideo } from '@/common/js/beforeEnterVideo'
 // eslint-disable-next-line
-import { roomStatus, queueStatus, toggleBarStatus, msgStatus, msgTypes, tipTypes, dialogTypes, cardTypes } from '@/common/js/status'
+import { roomStatus, queueStatus, sessionStatus, toggleBarStatus, msgStatus, msgTypes, tipTypes, dialogTypes, cardTypes } from '@/common/js/status'
 import { ERR_OK, getImgUrl, getBotInfo, syncGroupC2CMsg } from '@/server/index.js'
 import { Previewer, TransferDom } from 'vux'
 
@@ -188,6 +189,7 @@ export default {
       scrollY: 0,
       inputEle: null,
       inputFocPos: 0,
+      inputBarTimer: null,
       // inputObserver: null,
       extendBarLaunchOpen: false,
       msgStatus: msgStatus,
@@ -454,6 +456,9 @@ export default {
       // this.$refs.inputBar.setInputEditState('true')
       this.$nextTick(() => {
         document.getElementById('input-content-hook').focus()
+        this.inputBarTimer = setTimeout(function() {
+          document.body.scrollTop = document.body.scrollHeight
+        }, 100)
       })
       // this.inputEle.focus()
       // 聊天内容滚动到最底部
@@ -466,6 +471,7 @@ export default {
       // this.inputEle.blur()
       this.$nextTick(() => {
         document.getElementById('input-content-hook').blur()
+        clearTimeout(this.inputBarTimer)
       })
       // this.$refs.inputBar.setInputEditState('false')
       this.chatScroll.refresh()
@@ -500,6 +506,31 @@ export default {
         })
       }
       console.log(`submit ==> ${text}`)
+    },
+    resendMsgs(msg) {
+      if (msg.chatType === sessionStatus.robot) {
+        // 机器人消息
+        this.sendTextMsgToBot(msg.content, msg.timestamp)
+        return
+      }
+      switch (msg.msgType) {
+        case msgTypes.msg_normal: // 普通消息
+          this.sendC2CMsgs(msg.content, msg.timestamp)
+          break
+        case msgTypes.msg_gift: // 礼物消息
+          this.sendGiftMsg(msg.giftInfo, msg.timestamp)
+          break
+        case msgTypes.msg_liked: // 点赞消息
+          this.sendLikeMsg(msg.timestamp)
+          break
+        case msgTypes.msg_img: // 图片消息
+          const img = new File([msg.fileObj], 'xiao_hua_niu_bi.jpg', { type: 'image/jpeg' })
+          this.sendImgMsg(img, msg.timestamp)
+          break
+        case msgTypes.msg_XH_express: // 小华表情消息
+          this.sendXiaoHuaExpress(msg.imgData.big, msg.timestamp)
+          break
+      }
     },
     resetExtendBar() {
       this.extendBarLaunchOpen = false

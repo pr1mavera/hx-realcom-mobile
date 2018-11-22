@@ -328,7 +328,7 @@ export const IMMixin = {
             startTime: msgsObj.startTime,
             endTime: msgsObj.endTime
           }
-          const videoConfig = await this.configQueueSuccess(videoQueueSuccMsg)
+          const videoConfig = await this.configSendSystemMsg(videoQueueSuccMsg)
           await IM.sendSystemMsg(videoConfig)
           // 客服转接定时器
           this.transferTimer = setTimeout(async() => {
@@ -399,7 +399,7 @@ export const IMMixin = {
             startTime: msgsObj.queueStartTime,
             endTime: msgsObj.queueEndTime
           }
-          const onlineConfig = await this.configQueueSuccess(onlineQueueSuccMsg)
+          const onlineConfig = await this.configSendSystemMsg(onlineQueueSuccMsg)
           await IM.sendSystemMsg(onlineConfig)
           // 客服转接定时器
           this.transferTimer = setTimeout(() => {
@@ -458,6 +458,7 @@ export const IMMixin = {
         return
       }
       const msgsObj = IM.parseMsgs(msgs).textMsgs[0]
+      msgsObj.timestamp = new Date().getTime()
       this.sendMsgs(msgsObj)
     },
     lineUpFailed() {
@@ -478,7 +479,7 @@ export const IMMixin = {
     }),
     ...mapActions([
       'sendMsgs',
-      'configQueueSuccess',
+      'configSendSystemMsg',
       'afterQueueSuccess',
       'afterServerFinish',
       'updateLastAction',
@@ -500,23 +501,30 @@ export const sendMsgsMixin = {
     ])
   },
   methods: {
-    sendTextMsgToBot(question) {
+    sendTextMsgToBot(question, timestamp) {
       return new Promise(async(resolve) => {
-        // 保存用户输入
-        const ques = {
-          nickName: this.userInfo.userName,
-          content: question,
-          isSelfSend: true,
-          time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
-          msgStatus: msgStatus.msg,
-          msgType: msgTypes.msg_normal,
-          chatType: this.sendType
+        if (!timestamp) {
+          // 没有时间戳，说明为第一次发送（若有，则为重发）
+          timestamp = new Date().getTime()
+          // 保存用户输入
+          const ques = {
+            nickName: this.userInfo.userName,
+            content: question,
+            isSelfSend: true,
+            time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+            timestamp: timestamp,
+            status: 'pending',
+            msgStatus: msgStatus.msg,
+            msgType: msgTypes.msg_normal,
+            chatType: this.sendType
+          }
+          this.sendMsgs(ques)
         }
-        // this.setMsgs(this.msgs.concat([ques]))
-        this.sendMsgs(ques)
+
         // 获取机器人返回
         const res = await sendMsgToBot(question, this.sessionId, this.userInfo.userId, this.userInfo.userName)
         if (res.result.code === ERR_OK) {
+          this.setMsgStatus(timestamp, 'succ')
           // 此处将用户的输入保存至vuex
           const data = res.data.answer.data
           data.botName = this.botInfo.botName
@@ -528,33 +536,52 @@ export const sendMsgsMixin = {
           console.log('============================= 我现在来请求 sendMsgToBot 辣 =============================')
         } else {
           alert('小华开小差去了，暂时不能回答您的问题')
+          this.setMsgStatus(timestamp, 'failed')
         }
       })
     },
-    sendC2CMsgs(text) {
-      return new Promise(resolve => {
-        this.afterSendC2CTextMsgs(text)
-        resolve()
-        IM.sendNormalMsg(
-          this.userInfo.userId,
-          this.csInfo.csId,
-          // '123456789',
-          {
-            sessionId: this.sessionId,
-            toUserName: this.csInfo.csName,
-            msg: text,
-            time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
-            nickName: this.userInfo.userName,
-            avatar: this.csInfo.csId,
-            identifier: this.userInfo.userId,
-            msgStatus: msgStatus.msg,
-            msgType: msgTypes.msg_normal,
-            chatType: this.sendType
-          })
-      })
+    sendC2CMsgs(text, timestamp) {
+      if (!timestamp) {
+        // 没有时间戳，说明为第一次发送（若有，则为重发）
+        timestamp = new Date().getTime()
+        this.afterSendC2CTextMsgs(timestamp, text)
+      }
+
+      // 重置消息状态
+      this.setMsgStatus(timestamp, 'pending')
+
+      IM.sendNormalMsg(
+        this.userInfo.userId,
+        this.csInfo.csId,
+        // '123456789',
+        {
+          sessionId: this.sessionId,
+          toUserName: this.csInfo.csName,
+          msg: text,
+          time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+          nickName: this.userInfo.userName,
+          avatar: this.csInfo.csId,
+          identifier: this.userInfo.userId,
+          msgStatus: msgStatus.msg,
+          msgType: msgTypes.msg_normal,
+          chatType: this.sendType
+        }, () => {
+          this.setMsgStatus(timestamp, 'succ')
+        }, () => {
+          this.setMsgStatus(timestamp, 'failed')
+        }
+      )
     },
-    sendGiftMsg(giftInfo) {
-      this.afterSendC2CGiftMsgs(giftInfo)
+    sendGiftMsg(giftInfo, timestamp) {
+      if (!timestamp) {
+        // 没有时间戳，说明为第一次发送（若有，则为重发）
+        timestamp = new Date().getTime()
+        this.afterSendC2CGiftMsgs(timestamp, giftInfo)
+      }
+
+      // 重置消息状态
+      this.setMsgStatus(timestamp, 'pending')
+
       IM.sendNormalMsg(
         this.userInfo.userId,
         this.csInfo.csId,
@@ -572,10 +599,23 @@ export const sendMsgsMixin = {
           chatType: this.sendType,
           giftInfo,
           isMsgSync: 2
-        })
+        }, () => {
+          this.setMsgStatus(timestamp, 'succ')
+        }, () => {
+          this.setMsgStatus(timestamp, 'failed')
+        }
+      )
     },
-    sendLikeMsg() {
-      this.afterSendC2CLikeMsgs()
+    sendLikeMsg(timestamp) {
+      if (!timestamp) {
+        // 没有时间戳，说明为第一次发送（若有，则为重发）
+        timestamp = new Date().getTime()
+        this.afterSendC2CLikeMsgs(timestamp)
+      }
+
+      // 重置消息状态
+      this.setMsgStatus(timestamp, 'pending')
+
       IM.sendNormalMsg(
         this.userInfo.userId,
         this.csInfo.csId,
@@ -592,45 +632,72 @@ export const sendMsgsMixin = {
           msgType: msgTypes.msg_liked,
           chatType: this.sendType,
           isMsgSync: 2
-        })
+        }, () => {
+          this.setMsgStatus(timestamp, 'succ')
+        }, () => {
+          this.setMsgStatus(timestamp, 'failed')
+        }
+      )
     },
-    sendImgMsg(img) {
-      return new Promise(async(resolve) => {
+    sendImgMsg(img, timestamp) {
+      if (!timestamp) {
         const _URL = window.URL || window.webkitURL
         const imgSrc = _URL.createObjectURL(img)
+        // 配置图片本地显示
+        timestamp = new Date().getTime()
         const imgData = {
           big: imgSrc,
           small: imgSrc
         }
-        // 配置图片本地显示
-        this.afterSendC2CImgMsgs(imgData)
+        this.afterSendC2CImgMsgs(timestamp, imgData, img)
+      }
+      return new Promise(async(resolve) => {
+        // 重置消息状态
+        this.setMsgStatus(timestamp, 'pending')
         resolve()
         // IM 封装上传/发送图片
-        const self = this
         const info = {
           msg: '图片消息',
           time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
-          nickName: self.userInfo.userName,
-          avatar: self.csInfo.csId,
-          toUserName: self.csInfo.csName,
-          sessionId: self.sessionId,
-          identifier: self.userInfo.userId,
+          nickName: this.userInfo.userName,
+          avatar: this.csInfo.csId,
+          toUserName: this.csInfo.csName,
+          sessionId: this.sessionId,
+          identifier: this.userInfo.userId,
           msgStatus: msgStatus.msg,
           msgType: msgTypes.msg_img,
           chatType: this.sendType
         }
         // 上传图片
-        const resp = await IM.uploadPic(img, {
+        let resp = await IM.uploadPic(img, {
           sendUserId: this.userInfo.userId,
           toUserId: this.csInfo.csId
+        }, () => {
+          this.setMsgStatus(timestamp, 'failed')
         })
         // 发送图片
         const customMsgInfo = IM.formatImgMsgOption(resp, info)
-        await IM.sendNormalMsg(this.userInfo.userId, this.csInfo.csId, customMsgInfo)
+        await IM.sendNormalMsg(
+          this.userInfo.userId,
+          this.csInfo.csId,
+          customMsgInfo, () => {
+            this.setMsgStatus(timestamp, 'succ')
+          }, () => {
+            this.setMsgStatus(timestamp, 'failed')
+          }
+        )
       })
     },
-    sendXiaoHuaExpress(url) {
-      this.afterSendXiaoHuaExpress(url)
+    sendXiaoHuaExpress(url, timestamp) {
+      if (!timestamp) {
+        // 没有时间戳，说明为第一次发送（若有，则为重发）
+        timestamp = new Date().getTime()
+        this.afterSendXiaoHuaExpress(timestamp, url)
+      }
+
+      // 重置消息状态
+      this.setMsgStatus(timestamp, 'pending')
+
       this.roomMode !== roomStatus.AIChat && IM.sendNormalMsg(
         this.userInfo.userId,
         this.csInfo.csId,
@@ -649,9 +716,14 @@ export const sendMsgsMixin = {
             big: url,
             small: url
           }
-        })
+        }, () => {
+          this.setMsgStatus(timestamp, 'succ')
+        }, () => {
+          this.setMsgStatus(timestamp, 'failed')
+        }
+      )
     },
-    afterSendC2CTextMsgs(text) {
+    afterSendC2CTextMsgs(timestamp, text) {
       const self = this
       const msg = {
         nickName: self.userInfo.userName,
@@ -659,13 +731,15 @@ export const sendMsgsMixin = {
         content: text,
         isSelfSend: true,
         time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+        timestamp: timestamp,
+        status: 'pending',
         msgStatus: msgStatus.msg,
         msgType: msgTypes.msg_normal,
         chatType: this.sendType
       }
       this.sendMsgs(msg)
     },
-    afterSendC2CGiftMsgs(giftInfo) {
+    afterSendC2CGiftMsgs(timestamp, giftInfo) {
       const self = this
       const msg = {
         nickName: self.userInfo.userName,
@@ -673,6 +747,8 @@ export const sendMsgsMixin = {
         content: `${self.userInfo.userName}给你送了一个礼物`,
         isSelfSend: true,
         time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+        timestamp: timestamp,
+        status: 'pending',
         msgStatus: msgStatus.msg,
         msgType: msgTypes.msg_gift,
         chatType: this.sendType,
@@ -680,7 +756,7 @@ export const sendMsgsMixin = {
       }
       this.sendMsgs(msg)
     },
-    afterSendC2CLikeMsgs() {
+    afterSendC2CLikeMsgs(timestamp) {
       const self = this
       const msg = {
         nickName: self.userInfo.userName,
@@ -688,28 +764,36 @@ export const sendMsgsMixin = {
         content: `我${self.userInfo.userName}给你点赞`,
         isSelfSend: true,
         time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+        timestamp: timestamp,
+        status: 'pending',
         msgStatus: msgStatus.msg,
         msgType: msgTypes.msg_liked,
         chatType: this.sendType
       }
       this.sendMsgs(msg)
     },
-    afterSendC2CImgMsgs(imgData) {
+    afterSendC2CImgMsgs(timestamp, imgData, file_Obj) {
+      const fileObj = Tools.CopyTools.objDeepClone(file_Obj)
       const msg = {
         nickName: this.userInfo.userName,
         avatar: this.csInfo.csId,
         isSelfSend: true,
         time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+        timestamp: timestamp,
+        status: 'pending',
         msgStatus: msgStatus.msg,
         msgType: msgTypes.msg_img,
         chatType: this.sendType,
+        fileObj,
         imgData
       }
       this.sendMsgs(msg)
     },
-    afterSendXiaoHuaExpress(url) {
+    afterSendXiaoHuaExpress(timestamp, url) {
       const msg = {
         time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+        timestamp: timestamp,
+        status: 'pending',
         nickName: this.userInfo.userName,
         avatar: this.csInfo.csId,
         isSelfSend: true,
@@ -723,6 +807,21 @@ export const sendMsgsMixin = {
       }
       this.sendMsgs(msg)
     },
+    setMsgStatus(timestamp, status) {
+      for (let i = this.msgs.length - 1; i > 0; i--) {
+        if (this.msgs[i].timestamp && this.msgs[i].timestamp === timestamp) {
+          let msgsList = Tools.CopyTools.arrShallowClone(this.msgs)
+          let currMsg = Tools.CopyTools.objDeepClone(this.msgs[i])
+          currMsg.status = status
+          msgsList.splice(i, 1, currMsg)
+          this.setMsgs(msgsList)
+          break
+        }
+      }
+    },
+    ...mapMutations({
+      setMsgs: 'SET_MSGS'
+    }),
     ...mapActions([
       'sendMsgs'
     ])
@@ -857,12 +956,12 @@ export const onLineQueueMixin = {
       // const msg = {
       //   code: systemMsgStatus.onLine_requestCsEntance,
       //   chatGuid: this.chatGuid,
-      //   csId: 'webchat2',
-      //   csName: 'webchat2',
+      //   csId: 'webchat6',
+      //   csName: 'webchat6',
       //   startTime: '',
       //   endTime: ''
       // }
-      // const config = await this.configQueueSuccess(msg)
+      // const config = await this.configSendSystemMsg(msg)
       // await IM.sendSystemMsg(config)
 
       // 在线转人工流程
@@ -881,12 +980,12 @@ export const onLineQueueMixin = {
       this.setChatGuid(new Date().getTime())
       const option = {
         chatGuid: `${this.chatGuid}`,
-        customerGuid: this.userInfo.userId,
+        customerGuid: `${this.userInfo.userId}`,
         customerImg: '',
         customerNick: this.userInfo.userName,
         identity: this.userInfo.userGrade,
         robotSessionId: this.sessionId,
-        origin: '1',
+        origin: 'WE',
         callType: 'ZX',
         type: '2'
       }
@@ -934,7 +1033,7 @@ export const onLineQueueMixin = {
           startTime: data.startTime,
           endTime: data.endTime
         }
-        const config = await this.configQueueSuccess(msg)
+        const config = await this.configSendSystemMsg(msg)
         await IM.sendSystemMsg(config)
       } else {
         // 排队等待
@@ -958,8 +1057,10 @@ export const onLineQueueMixin = {
     },
     async cancelQueue() {
       const res = await onLineQueueCancel({
-        chatGuid: this.chatGuid,
-        customerGuid: this.userInfo.userId
+        customerGuid: `${this.userInfo.userId}`,
+        chatGuid: `${this.chatGuid}`,
+        origin: 'WE',
+        callType: 'ZX'
       })
       if (res.result_code === '200') {
         console.info('取消排队成功')
@@ -980,7 +1081,12 @@ export const onLineQueueMixin = {
           this.stopHeartBeat()
           return
         }
-        this.heartBeatReq = await chatQueueHeartBeat(this.chatGuid)
+        this.heartBeatReq = await chatQueueHeartBeat({
+          customerGuid: `${this.userInfo.userId}`,
+          chatGuid: `${this.chatGuid}`,
+          origin: 'WE',
+          callType: 'ZX'
+        })
         if (this.heartBeatReq.result_code === '200') {
           console.info('心跳成功')
           this.heartBeatFailCount = 0
@@ -1038,7 +1144,7 @@ export const onLineQueueMixin = {
     }),
     ...mapActions([
       'beforeQueue',
-      'configQueueSuccess'
+      'configSendSystemMsg'
     ])
   }
 }

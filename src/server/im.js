@@ -214,6 +214,7 @@ const IM = (() => {
       openId: data.userId,
       origin: data.origin,
       robotSessionId: data.robotSessionId,
+      sessionId: data.sessionId,
       accessId: data.accessId,
       queueStartTime: data.queueStartTime,
       queueEndTime: data.queueEndTime,
@@ -221,7 +222,7 @@ const IM = (() => {
     }
   }
 
-  function sendC2CCustomMsg(from_id, to_id, msgInfo, callback) {
+  function sendC2CCustomMsg(from_id, to_id, msgInfo, succ_cb, fail_cb) {
     if (!from_id) {
       console.error("您还没有登录，暂不能聊天")
       return
@@ -256,9 +257,10 @@ const IM = (() => {
 
     webim.sendMsg(msg, (resp) => {
       console.log('发C2C自定义消息成功');
-      callback && callback();
+      succ_cb && succ_cb();
     }, function (err) {
       console.log('发C2C自定义消息失败:', err);
+      fail_cb && fail_cb();
     });
   }
 
@@ -397,6 +399,8 @@ const IM = (() => {
       nickName: options.nickName
     }, function() {
       success && success()
+    }, function() {
+      fail && fail()
     })
   }
 
@@ -423,7 +427,7 @@ const IM = (() => {
   }
 
   // 上传照片
-  function uploadPic(img, extInfo) {
+  function uploadPic(img, extInfo, fail) {
     var businessType // 业务类型，1-发群图片，2-向好友发图片
     // if (selType === SessionType.C2C) { // 向好友发图片
     //     businessType = webim.UPLOAD_PIC_BUSSINESS_TYPE.C2C_MSG
@@ -447,8 +451,9 @@ const IM = (() => {
           console.log('上传成功发送图片')
           resolve(resp)
         },
-        (err) => {
-          alert(err.ErrorInfo)
+        () => {
+          console.log('上传失败')
+          fail && fail()
         }
       )
     })

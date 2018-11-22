@@ -59,7 +59,7 @@ export default {
         startTime: res.startTime,
         endTime: res.endTime
       }
-      const config = await this.configQueueSuccess(msg)
+      const config = await this.configSendSystemMsg(msg)
       await IM.sendSystemMsg(config)
     } else {
       this.setQueueNum(+res.queueNum)
@@ -156,7 +156,7 @@ export default {
       setQueueNum: 'SET_QUEUE_NUM'
     }),
     ...mapActions([
-      'configQueueSuccess',
+      'configSendSystemMsg',
       'afterQueueSuccess'
     ])
   }

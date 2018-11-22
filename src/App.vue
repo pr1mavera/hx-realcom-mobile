@@ -10,6 +10,8 @@
 
 <script>
 import deviceConfig from './config/device'
+// import { mapGetters, mapMutations } from 'vuex'
+// import Tools from '@/common/js/tools'
 // import wxConfig from './config/wechat'
 
 export default {
@@ -18,6 +20,11 @@ export default {
     'MainRoom': () => import('@/views/mainRoom'),
     'Share': () => import('@/views/share')
   },
+  // computed: {
+    // ...mapGetters([
+    //   'msgs'
+    // ])
+  // },
   created() {
     deviceConfig()
     // wxConfig()
@@ -29,15 +36,24 @@ export default {
         width: '80%',
         time: 5000
       })
+      // let msgsList = Tools.CopyTools.arrShallowClone(this.msgs)
+      // msgsList.forEach((item) => {
+      //   if (item.status === 'pending') {
+      //     let newMsg = Tools.CopyTools.objDeepClone(item)
+      //     newMsg.status = 'failed'
+      //     item = newMsg
+      //   }
+      // })
+      // this.setMsgs(msgsList)
     }, true)
   },
   activated() {
     this.$setgoindex()
-  }
-  // watch: {
-  //   $route() {
-  //     wxConfig()
-  //   }
+  },
+  // methods: {
+  //   ...mapMutations({
+  //     setMsgs: 'SET_MSGS'
+  //   })
   // }
 }
 

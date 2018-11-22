@@ -141,8 +141,29 @@ const CopyTools = {
 
   // 深拷贝
   objDeepClone: function(obj) {
-    let _obj = JSON.stringify(obj)
-    return JSON.parse(_obj)
+    // return JSON.parse(JSON.stringify(obj))
+    if (typeof obj === 'object') {
+      if (Array.isArray(obj)) {
+        var newArr = []
+        for (var i = 0; i < obj.length; i++) newArr.push(obj[i])
+        return newArr
+      } else {
+        var newObj = Object.create(obj)
+        for (var key in obj) {
+          const self = this
+          Object.defineProperty(newObj, key, {
+            configurable: true,
+            writable: true,
+            enumerable: true,
+            value: self.objDeepClone(obj[key])
+          })
+          // newObj[key] = this.objDeepClone(obj[key])
+        }
+        return newObj
+      }
+    } else {
+      return obj
+    }
   },
 
   // 数组拷贝
