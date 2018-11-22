@@ -49,7 +49,7 @@ export default {
   },
   activated() {
     this.$setgoindex()
-  },
+  }
   // methods: {
   //   ...mapMutations({
   //     setMsgs: 'SET_MSGS'

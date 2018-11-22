@@ -28,11 +28,10 @@
 </template>
 
 <script type="text/ecmascript-6">
-import wx from 'weixin-js-sdk'
+// import wx from 'weixin-js-sdk'
 import { mapGetters, mapMutations, mapActions } from 'vuex'
 import { roomStatus, sessionStatus } from '@/common/js/status'
-// import GoShare from '@/common/js/share'
-import { ERR_OK, getShareTicket } from '@/server/index.js'
+import GoShare from '@/common/js/share'
 
 export default {
   components: {
@@ -49,7 +48,7 @@ export default {
       shareGuide: false,
       iosGuide: false,
       lowVersion: false,
-      shareUrl: 'https://vnap-webrtctest.ihxlife.com/'
+      shareUrl: 'https://video-uat.ihxlife.com:8080/video/room/chat?openId=o23yMh5_T67jbkdj36HvgfGvKtsf'
     }
   },
   computed: {
@@ -95,6 +94,7 @@ export default {
             if (self.roomMode === roomStatus.menChat) {
               // action
               self.afterServerFinish(sessionStatus.onLine)
+              this.toShare()
             }
           }
         })
@@ -103,78 +103,80 @@ export default {
     async toShare() {
       this.isShareView = false
       this.shareGuide = true
-      await this.initShare()
-      this.clickShare()
+      GoShare(this.shareUrl)
+      // await this.initShare()
+      // this.clickShare()
     },
-    async initShare() {
-      const res = await getShareTicket(this.shareUrl)
-      if (res.result.code === ERR_OK) {
-        const jssdk = res.data
-        // const self = this
-        wx.config({
-          debug: false,
-          appId: jssdk.appId,
-          timestamp: parseInt(jssdk.timestamp),
-          nonceStr: jssdk.nonceStr,
-          signature: jssdk.signature,
-          jsApiList: [
-            'onMenuShareTimeline',
-            'onMenuShareAppMessage'
-          ]
-        })
-        return 0
-        // const optionData = {
-        //   title: '田老师红烧肉盖饭',
-        //   desc: '田老师红烧肉盖饭',
-        //   link: self.shareUrl,
-        //   imgUrl: 'https://tup.iheima.com/sport.png'
-        // }
-        // GoShare(optionData)
-      } else {
-        console.log('getShareTicket error')
-      }
-    },
-    clickShare() {
-      const optionData = {
-        title: '田老师红烧肉盖饭',
-        desc: '田老师红烧肉盖饭',
-        link: this.shareUrl,
-        imgUrl: 'https://tup.iheima.com/sport.png'
-      }
-      wx.ready(function() {
-        const thatopts = optionData
-        alert('showMenuItems')
-        wx.showMenuItems({
-          menuList: ['menuItem:share:appMessage', 'menuItem:share:timeline'] // 要显示的菜单项，所有menu项见附录3
-        })
-        document.querySelector('#onMenuShareAppMessage').onclick = function() {
-          wx.onMenuShareTimeline({
-            title: thatopts.title, // 分享标题
-            desc: thatopts.desc, // 分享描述
-            link: thatopts.link, // 分享链接
-            imgUrl: thatopts.imgUrl, // 分享图标
-            success: function() {
-              alert('成功')
-            },
-            cancel: function() {
-              alert('失败')
-            }
-          })
-          wx.onMenuShareAppMessage({
-            title: thatopts.title, // 分享标题
-            desc: thatopts.desc, // 分享描述
-            link: thatopts.link, // 分享链接
-            imgUrl: thatopts.imgUrl, // 分享图标
-            success: function() {
-              alert('成功')
-            },
-            cancel: function() {
-              alert('失败')
-            }
-          })
-        }
-      })
-    },
+    // async initShare() {
+    //   const res = await getShareTicket(this.shareUrl)
+    //   if (res.result.code === ERR_OK) {
+    //     const jssdk = res.data
+    //     const self = this
+    //     wx.config({
+    //       debug: false,
+    //       appId: jssdk.appId,
+    //       timestamp: parseInt(jssdk.timestamp),
+    //       nonceStr: jssdk.nonceStr,
+    //       signature: jssdk.signature,
+    //       jsApiList: [
+    //         'onMenuShareTimeline',
+    //         'onMenuShareAppMessage'
+    //       ]
+    //     })
+    //     console.log('我特娘的配置完微信数据啦！！')
+    //     // return 0
+    //     const optionData = {
+    //       title: '田老师红烧肉盖饭',
+    //       desc: '田老师红烧肉盖饭',
+    //       link: self.shareUrl,
+    //       imgUrl: 'https://tup.iheima.com/sport.png'
+    //     }
+    //     GoShare(optionData)
+    //   } else {
+    //     console.log('getShareTicket error')
+    //   }
+    // },
+    // clickShare() {
+    //   const optionData = {
+    //     title: '田老师红烧肉盖饭',
+    //     desc: '田老师红烧肉盖饭',
+    //     link: this.shareUrl,
+    //     imgUrl: 'https://tup.iheima.com/sport.png'
+    //   }
+    //   wx.ready(function() {
+    //     const thatopts = optionData
+    //     alert('showMenuItems')
+    //     wx.showMenuItems({
+    //       menuList: ['menuItem:share:appMessage', 'menuItem:share:timeline'] // 要显示的菜单项，所有menu项见附录3
+    //     })
+    //     document.querySelector('#onMenuShareAppMessage').onclick = function() {
+    //       wx.onMenuShareTimeline({
+    //         title: thatopts.title, // 分享标题
+    //         desc: thatopts.desc, // 分享描述
+    //         link: thatopts.link, // 分享链接
+    //         imgUrl: thatopts.imgUrl, // 分享图标
+    //         success: function() {
+    //           alert('成功')
+    //         },
+    //         cancel: function() {
+    //           alert('失败')
+    //         }
+    //       })
+    //       wx.onMenuShareAppMessage({
+    //         title: thatopts.title, // 分享标题
+    //         desc: thatopts.desc, // 分享描述
+    //         link: thatopts.link, // 分享链接
+    //         imgUrl: thatopts.imgUrl, // 分享图标
+    //         success: function() {
+    //           alert('成功')
+    //         },
+    //         cancel: function() {
+    //           alert('失败')
+    //         }
+    //       })
+    //     }
+    //   })
+    // },
     ...mapMutations({
       setAssessStatus: 'SET_ASSESS_STATUS',
       setAssessView: 'SET_ASSESS_VIEW'

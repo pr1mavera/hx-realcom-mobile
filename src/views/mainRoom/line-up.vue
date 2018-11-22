@@ -38,6 +38,7 @@ export default {
   },
   data() {
     return {
+      accessId: null,
       isQueuingTextShow: true,
       heart: false, // 判断心跳变量
       heartBeatTimer: 0,
@@ -77,7 +78,8 @@ export default {
       //   nickName: this.userInfo.userName,
       //   toCsFlag: true,
       //   origin: 'WE',
-      //   userPriority: this.userInfo.userPriority
+      //   userPriority: this.userInfo.userPriority,
+      //   robotSessionId: this.sessionId
       // }
       const res = await videoQueue(
         this.userInfo.userId,
@@ -87,11 +89,13 @@ export default {
         this.userInfo.userName,
         true,
         'WE',
-        this.userInfo.userPriority
+        this.userInfo.userPriority,
+        this.sessionId
       )
       if (res.result.code === ERR_OK) {
         console.log('===============================> 排队啊 排队啊 排队啊 <===============================')
         window.sessionStorage.setItem('queue_start_time', new Date().getTime())
+        this.accessId = res.data.accessId
         return res.data
       } else {
         console.log('error in videoQueue')
@@ -129,7 +133,7 @@ export default {
       // 停止心跳
       this.stopHeartBeat()
       // 取消排队
-      const res = await videoQueueCancel(this.userInfo.userId, this.$route.params.csId)
+      const res = await videoQueueCancel(this.userInfo.userId, this.$route.params.csId, this.accessId)
       if (res.result.code === ERR_OK) {
         console.log('===============================> 取消排队 啊 取消排队 <===============================')
         debugger

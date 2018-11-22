@@ -15,7 +15,7 @@ export const wxConfig = url => http.get('video', `/wxConfig?url=${url}`)
 /**
  * [getLoginInfo 获取用户登录信息]
  */
-export const getLoginInfo = userId => http.get('RTCRoom', `/im/account/login?userId=${userId}`)
+export const getLoginInfo = (userId, userType) => http.get('RTCRoom', `/im/account/login?userId=${userId}&userType=${userType}`)
 
 /**
  * [syncGroupC2CMsg 拉取漫游消息]
@@ -25,7 +25,7 @@ export const syncGroupC2CMsg = data => http.post('RTCRoom', '/syncGroupC2CMsg', 
 /**
  * [videoQueue 客户端视频排队]
  */
- export const videoQueue = (userId, userName, csId, csName, nickName, toCsFlag, origin, priority) => http.post('RTCRoom', '/video/user/queue', { userId, userName, csId, csName, nickName, toCsFlag, origin, priority })
+ export const videoQueue = (userId, userName, csId, csName, nickName, toCsFlag, origin, priority, robotSessionId) => http.post('RTCRoom', '/video/user/queue', { userId, userName, csId, csName, nickName, toCsFlag, origin, priority, robotSessionId })
  // export const videoQueue = date => http.post('RTCRoom', '/video/user/queue', date)
 
 /**
@@ -156,17 +156,17 @@ export const leaveMsg = async(data) => http.post('onLine', '/common/leaveword/v1
  */
 export const pushSystemMsg = data => http.post('RTCRoom', '/im/msg/push', data)
 
-/**
- ************************************ uat ************************************
-*/
-/**
- ************************************ RTCRoom ************************************
- */
+// /**
+//  ************************************ uat ************************************
+// */
+// /**
+//  ************************************ RTCRoom ************************************
+//  */
 //
 // /**
 //  * [videoQueue 客户端视频排队]
 //  */
-// export const videoQueue = (userId, userName, csId, csName, nickName, toCsFlag, origin, priority) => http.post('RTCRoom', '/video/user/queue', { userId, userName, csId, csName, nickName, toCsFlag, origin, priority })
+// export const videoQueue = (userId, userName, csId, csName, nickName, toCsFlag, origin, priority, robotSessionId) => http.post('RTCRoom', '/video/user/queue', { userId, userName, csId, csName, nickName, toCsFlag, origin, priority, robotSessionId })
 // // export const videoQueue = date => http.post('RTCRoom', '/video/user/queue', date)
 //
 // /**
@@ -283,7 +283,7 @@ export const pushSystemMsg = data => http.post('RTCRoom', '/im/msg/push', data)
 // /**
 //  * [chatQueueHeartBeat 客户端排队心跳]
 //  */
-// export const chatQueueHeartBeat = chatGuid => http.post('onLine', '/webchat/queue/v1/heartbeat', { chatGuid })
+// export const chatQueueHeartBeat = data => http.post('onLine', '/webchat/queue/v1/heartbeat', data)
 //
 // // 留言common/leaveword/v1/add
 // export const leaveMsg = async(data) => http.post('onLine', '/common/leaveword/v1/add', data)
@@ -300,7 +300,7 @@ export const pushSystemMsg = data => http.post('RTCRoom', '/im/msg/push', data)
 // /**
 //  * [getLoginInfo 获取用户登录信息]
 //  */
-// export const getLoginInfo = userId => http.get('TM', `/im/account/login?userId=${userId}`)
+// export const getLoginInfo = (userId, userType) => http.get('TM', `/im/account/login?userId=${userId}&userType=${userType}`)
 //
 // /**
 //  * [syncGroupC2CMsg 拉取漫游消息]

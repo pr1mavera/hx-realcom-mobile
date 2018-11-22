@@ -94,7 +94,7 @@ import { mapGetters, mapMutations, mapActions } from 'vuex'
 import { XDialog, TransferDomDirective as TransferDom } from 'vux'
 import { queueStatus, sessionStatus } from '@/common/js/status'
 import { RTCRoomMixin, sendMsgsMixin } from '@/common/js/mixin'
-import IM from '@/server/im.js'
+// import IM from '@/server/im.js'
 
 export default {
   directives: {
