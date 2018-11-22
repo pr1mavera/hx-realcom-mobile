@@ -32,6 +32,9 @@
         <p><span>{{ cuSerInfo.servTimes === null ? 0 : cuSerInfo.servTimes }}</span>次</p>
         <p class="tips">为我服务</p>
       </div>
+      <div class="flex-box-item">
+        <p class="tips" @click="$emit('showShare')">偷偷的分享</p>
+      </div>
     </div>
     <!-- about me -->
     <div class="container-item about-me">

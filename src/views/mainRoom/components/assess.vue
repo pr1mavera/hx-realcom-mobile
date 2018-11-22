@@ -102,52 +102,56 @@
           this.$vux.toast.text('啊呀，给个评价呗~', 'middle')
           return
         }
-        const data = {
-          sessionId: this.sessionId,
-          userId: this.userInfo.userId,
-          userName: this.userInfo.userName,
-          csId: this.csInfo.csId,
-          csName: this.csInfo.csName,
-          evaluateLevel: this.stars,
-          labels: this.labels
-        }
+
+        // const data = {
+        //   sessionId: this.sessionId,
+        //   userId: this.userInfo.userId,
+        //   userName: this.userInfo.userName,
+        //   csId: this.csInfo.csId,
+        //   csName: this.csInfo.csName,
+        //   evaluateLevel: this.stars,
+        //   labels: this.labels
+        // }
+        const data = Tools.CopyTools.objShallowClone({
+          'sessionId': this.sessionId,
+          // 'sessionId': '00553330cc4a11e886ec19059d7ca77e',
+          'userId': this.userInfo.userId,
+          'userName': this.userInfo.userName,
+          'csId': this.csInfo.csId,
+          'csName': this.csInfo.csName,
+          'evaluateLevel': this.stars,
+          'labels': this.labels
+        })
         this.$emit('assessSuccess')
+
+        // 发送评价消息，告诉坐席
+        IM.sendNormalMsg(
+          this.userInfo.userId,
+          this.csInfo.csId,
+          // '123456789',
+          {
+            sessionId: this.sessionId,
+            toUserName: this.csInfo.csName,
+            msg: `${this.userInfo.userName}评价了你`,
+            time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+            nickName: this.userInfo.userName,
+            avatar: this.csInfo.csId,
+            identifier: this.userInfo.userId,
+            msgStatus: msgStatus.msg,
+            msgType: msgTypes.msg_assess,
+            chatType: this.sendType,
+            assessInfo: data,
+            isMsgSync: 2
+          })
+
+        // 调用评价接口，告诉服务
         const res = await saveAssess(data)
         if (res.result.code === ERR_OK) {
           this.$vux.toast.text('评价成功', 'middle')
         } else {
           this.$vux.toast.text('评价失败', 'middle')
         }
-        // const data = Tools.CopyTools.objShallowClone({
-        //   'sessionId': this.sessionId,
-        //   // 'sessionId': '00553330cc4a11e886ec19059d7ca77e',
-        //   'userId': this.userInfo.userId,
-        //   'userName': this.userInfo.userName,
-        //   'csId': this.csInfo.csId,
-        //   'csName': this.csInfo.csName,
-        //   'evaluateLevel': this.stars,
-        //   'labels': this.labels
-        // })
-        // IM.sendNormalMsg(
-        //   this.userInfo.userId,
-        //   this.csInfo.csId,
-        //   // '123456789',
-        //   {
-        //     sessionId: this.sessionId,
-        //     toUserName: this.csInfo.csName,
-        //     msg: `${this.userInfo.userName}评价了你`,
-        //     time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
-        //     nickName: this.userInfo.userName,
-        //     avatar: this.csInfo.csId,
-        //     identifier: this.userInfo.userId,
-        //     msgStatus: msgStatus.msg,
-        //     msgType: msgTypes.msg_assess,
-        //     chatType: this.sendType,
-        //     assessInfo: data,
-        //     isMsgSync: 2
-        //   })
-        // this.$vux.toast.text('评价成功', 'middle')
-        // this.$emit('assessSuccess')
+
         // 清空数据
         this.$refs.labelBar.resetLabelList()
         this.stars = 0

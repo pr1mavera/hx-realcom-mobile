@@ -37,7 +37,7 @@ export const loginMixin = {
       }
     },
     async getUserInfo() {
-      const res = await getLoginInfo(this.userInfo.userId)
+      const res = await getLoginInfo(this.userInfo.userId, 1)
       if (res.result.code === ERR_OK) {
         console.log('============================= 我现在来请求 getUserInfo 辣 =============================')
         return new Promise((resolve) => {
@@ -443,6 +443,7 @@ export const IMMixin = {
           } else {
             // action
             this.afterServerFinish(sessionStatus.onLine)
+            this.$emit('showShare')
           }
           break
 
@@ -497,7 +498,8 @@ export const sendMsgsMixin = {
       'csInfo',
       'roomId',
       'sessionId',
-      'sendType'
+      'sendType',
+      'msgs'
     ])
   },
   methods: {
@@ -951,29 +953,29 @@ export const onLineQueueMixin = {
   methods: {
     async enterOnLineLineUp() {
       this.$router.replace({path: `/room/chat?openId=${this.userInfo.openId}&csId=${this.onLineQueueCsId || 'wait_for_distribution'}`})
-      // // 排队成功，直接通知坐席
-      // this.setChatGuid(new Date().getTime())
-      // const msg = {
-      //   code: systemMsgStatus.onLine_requestCsEntance,
-      //   chatGuid: this.chatGuid,
-      //   csId: 'webchat6',
-      //   csName: 'webchat6',
-      //   startTime: '',
-      //   endTime: ''
-      // }
-      // const config = await this.configSendSystemMsg(msg)
-      // await IM.sendSystemMsg(config)
-
-      // 在线转人工流程
-      // 1. 请求排队
-      const res = await this.formatOnLineQueueAPI()
-      // 2. 处理
-      if (res.code === ERR_OK) {
-        window.sessionStorage.setItem('queue_start_time', new Date().getTime())
-        this.handleQueueRes(res.data)
-      } else {
-        this.botSendLeaveMsg()
+      // 排队成功，直接通知坐席
+      this.setChatGuid(new Date().getTime())
+      const msg = {
+        code: systemMsgStatus.onLine_requestCsEntance,
+        chatGuid: this.chatGuid,
+        csId: 'webchat7',
+        csName: 'webchat7',
+        startTime: '',
+        endTime: ''
       }
+      const config = await this.configSendSystemMsg(msg)
+      await IM.sendSystemMsg(config)
+
+      // // 在线转人工流程
+      // // 1. 请求排队
+      // const res = await this.formatOnLineQueueAPI()
+      // // 2. 处理
+      // if (res.code === ERR_OK) {
+      //   window.sessionStorage.setItem('queue_start_time', new Date().getTime())
+      //   this.handleQueueRes(res.data)
+      // } else {
+      //   this.botSendLeaveMsg()
+      // }
     },
     async formatOnLineQueueAPI() {
       // 初始化人工客服排队ID，存vuex
