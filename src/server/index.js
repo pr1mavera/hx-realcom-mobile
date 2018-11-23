@@ -123,20 +123,20 @@ export const saveAssess = async(data) => http.post('user', `/video/user/evaluate
 /**
  * [onLineQueue 客户端在线排队]
  */
-export const onLineQueue = data => http.post('onLine', '/webchat/queue/v1/queueup', data)
+export const onLineQueue = data => http.post('user', '/webchat/queue/v1/queueup', data)
 
 /**
  * [onLineQueueCancel 客户端在线取消排队]
  */
-export const onLineQueueCancel = data => http.post('onLine', '/webchat/queue/v1/cancelqueue', data)
+export const onLineQueueCancel = data => http.post('user', '/webchat/queue/v1/cancelqueue', data)
 
 /**
  * [chatQueueHeartBeat 客户端排队心跳]
  */
-export const chatQueueHeartBeat = data => http.post('onLine', '/webchat/queue/v1/heartbeat', data)
+export const chatQueueHeartBeat = data => http.post('user', '/webchat/queue/v1/heartbeat', data)
 
 // 留言common/leaveword/v1/add
-export const leaveMsg = async(data) => http.post('onLine', '/common/leaveword/v1/add', data)
+export const leaveMsg = async(data) => http.post('user', '/common/leaveword/v1/add', data)
 
 /**
  ************************************ systemMsg ************************************

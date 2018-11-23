@@ -52,7 +52,8 @@
         </span>
         <!-- 图片消息 -->
         <span class="text text-img" v-if="msg.msgType === msgTypes.msg_img">
-          <img class="text-img" :id="imgId" height=100% :src="msg.imgData.small" @click="clickImgMsg">
+          <img class="text-img-cell" :id="imgId" height=100% :src="msg.imgData.small" @click="clickImgMsg"
+          :class="[{'right-img-style': msg.isSelfSend, 'left-img-style': !msg.isSelfSend}]">
         </span>
         <!-- 小华表情消息 -->
         <span class="text" v-if="msg.msgType === msgTypes.msg_XH_express">
@@ -318,7 +319,7 @@ export default {
         .text {
           display: inline-block;
           height: 12rem;
-          background-color: #f00;
+          // background-color: #f00;
         }
       }
       &.padding-for-HX {
@@ -352,8 +353,18 @@ export default {
           left: -4.5rem;
           margin: auto;
         }
-        .text-img {
-          vertical-align: middle;
+        &.text-img {
+          .text-img-cell {
+            vertical-align: middle;
+            max-width: 100%;
+            object-fit: cover;
+            &.left-img-style {
+              border-radius: 0.4rem 1.5rem 1.5rem 1.5rem;
+            }
+            &.right-img-style {
+              border-radius: 1.5rem 0.4rem 1.5rem 1.5rem;
+            }
+          }
         }
         .button {
           color: rgb(82, 144, 239);

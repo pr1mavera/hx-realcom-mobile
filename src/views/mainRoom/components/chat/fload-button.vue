@@ -31,7 +31,7 @@
       <!-- <svg class="icon" aria-hidden="true">
         <use xlink:href="#icon-zhuanrengongVIP"></use>
       </svg> -->
-      <img width=100% height=100% :src='`/static/img/chat/fb_${isVip}.png`'>
+      <img width=100% height=100% :src='`/static/img/chat/fb_${iconByUserGrade}.png`'>
     </button>
     <button
       class="item extend-click transition-bezier"
@@ -63,7 +63,10 @@ export default {
   },
   computed: {
     isVip() {
-      return +this.userInfo.userGrade <= 3 ? 'chat_vip' : 'chat'
+      return +this.userInfo.userGrade <= 3
+    },
+    iconByUserGrade() {
+      return this.isVip ? 'chat_vip' : 'chat'
     },
     tipsPos() {
       return `transform: translateY(${(this.tipsIndex - 1) * 5.6}rem)`
@@ -91,6 +94,10 @@ export default {
     // 视频客服
     videoLineUp() {
       if (this.queueMode === queueStatus.queuing) {
+        return
+      }
+      if (!this.isVip) {
+        this.showTips(2, '此功能只对VIP客户开放')
         return
       }
       switch (this.roomMode) {

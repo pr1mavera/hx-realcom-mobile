@@ -234,9 +234,9 @@ export default {
       const query = this.$route.query
       await this.loginByOpenID(query.openId)
       await this.getUserInfo()
-      await this.initSession()
-      await this._setBotBaseInfo()
-      await this.initIM()
+      this.initSession()
+      this._setBotBaseInfo()
+      this.initIM()
       beforeEnterVideo()
       this.requestSessionList()
     },

@@ -562,7 +562,7 @@ export const sendMsgsMixin = {
           msg: text,
           time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
           nickName: this.userInfo.userName,
-          avatar: this.csInfo.csId,
+          avatar: this.userInfo.userId,
           identifier: this.userInfo.userId,
           msgStatus: msgStatus.msg,
           msgType: msgTypes.msg_normal,
@@ -594,7 +594,7 @@ export const sendMsgsMixin = {
           msg: `${this.userInfo.userName}给你送了一个礼物`,
           time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
           nickName: this.userInfo.userName,
-          avatar: this.csInfo.csId,
+          avatar: this.userInfo.userId,
           identifier: this.userInfo.userId,
           msgStatus: msgStatus.msg,
           msgType: msgTypes.msg_gift,
@@ -628,7 +628,7 @@ export const sendMsgsMixin = {
           msg: `我${this.userInfo.userName}给你点赞`,
           time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
           nickName: this.userInfo.userName,
-          avatar: this.csInfo.csId,
+          avatar: this.userInfo.userId,
           identifier: this.userInfo.userId,
           msgStatus: msgStatus.msg,
           msgType: msgTypes.msg_liked,
@@ -662,7 +662,7 @@ export const sendMsgsMixin = {
           msg: '图片消息',
           time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
           nickName: this.userInfo.userName,
-          avatar: this.csInfo.csId,
+          avatar: this.userInfo.userId,
           toUserName: this.csInfo.csName,
           sessionId: this.sessionId,
           identifier: this.userInfo.userId,
@@ -709,7 +709,7 @@ export const sendMsgsMixin = {
           msg: `小华表情`,
           time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
           nickName: this.userInfo.userName,
-          avatar: this.csInfo.csId,
+          avatar: this.userInfo.userId,
           identifier: this.userInfo.userId,
           msgStatus: msgStatus.msg,
           msgType: msgTypes.msg_XH_express,
@@ -726,10 +726,9 @@ export const sendMsgsMixin = {
       )
     },
     afterSendC2CTextMsgs(timestamp, text) {
-      const self = this
       const msg = {
-        nickName: self.userInfo.userName,
-        avatar: self.csInfo.csId,
+        nickName: this.userInfo.userName,
+        avatar: this.userInfo.userId,
         content: text,
         isSelfSend: true,
         time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
@@ -742,11 +741,10 @@ export const sendMsgsMixin = {
       this.sendMsgs(msg)
     },
     afterSendC2CGiftMsgs(timestamp, giftInfo) {
-      const self = this
       const msg = {
-        nickName: self.userInfo.userName,
-        avatar: self.csInfo.csId,
-        content: `${self.userInfo.userName}给你送了一个礼物`,
+        nickName: this.userInfo.userName,
+        avatar: this.userInfo.userId,
+        content: `${this.userInfo.userName}给你送了一个礼物`,
         isSelfSend: true,
         time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
         timestamp: timestamp,
@@ -759,11 +757,10 @@ export const sendMsgsMixin = {
       this.sendMsgs(msg)
     },
     afterSendC2CLikeMsgs(timestamp) {
-      const self = this
       const msg = {
-        nickName: self.userInfo.userName,
-        avatar: self.csInfo.csId,
-        content: `我${self.userInfo.userName}给你点赞`,
+        nickName: this.userInfo.userName,
+        avatar: this.userInfo.userId,
+        content: `我${this.userInfo.userName}给你点赞`,
         isSelfSend: true,
         time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
         timestamp: timestamp,
@@ -778,7 +775,7 @@ export const sendMsgsMixin = {
       const fileObj = Tools.CopyTools.objDeepClone(file_Obj)
       const msg = {
         nickName: this.userInfo.userName,
-        avatar: this.csInfo.csId,
+        avatar: this.userInfo.userId,
         isSelfSend: true,
         time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
         timestamp: timestamp,
@@ -797,7 +794,7 @@ export const sendMsgsMixin = {
         timestamp: timestamp,
         status: 'pending',
         nickName: this.userInfo.userName,
-        avatar: this.csInfo.csId,
+        avatar: this.userInfo.userId,
         isSelfSend: true,
         msgStatus: msgStatus.msg,
         msgType: msgTypes.msg_XH_express,
@@ -992,8 +989,8 @@ export const onLineQueueMixin = {
         type: '2'
       }
       const res = await onLineQueue(option)
-      const data = res.data
-      if (res.result_code === '200') {
+      const data = res.data.data
+      if (res.data.result_code === '200') {
         // if (data.online) {
         // 发送正在转接提示
         this.beforeQueue('正在为您转接在线客服，请稍候')
@@ -1064,7 +1061,7 @@ export const onLineQueueMixin = {
         origin: 'WE',
         callType: 'ZX'
       })
-      if (res.result_code === '200') {
+      if (res.data.result_code === '200') {
         console.info('取消排队成功')
         this.$vux.toast.text('您已经取消排队', 'middle')
         this.stopHeartBeat()
@@ -1089,7 +1086,7 @@ export const onLineQueueMixin = {
           origin: 'WE',
           callType: 'ZX'
         })
-        if (this.heartBeatReq.result_code === '200') {
+        if (this.heartBeatReq.data.result_code === '200') {
           console.info('心跳成功')
           this.heartBeatFailCount = 0
         } else {

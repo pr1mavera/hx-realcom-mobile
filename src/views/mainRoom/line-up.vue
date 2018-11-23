@@ -105,12 +105,12 @@ export default {
       this.heart = true
       this.heartBeatTimer = setInterval(async() => {
         console.warn('====== 我现在请求心跳 ======')
-        if (!this.heart || !this.$route.params.csId) {
+        if (!this.heart || !this.$route.query.csId) {
           // 非常规退出 & 浏览器回退
           this.stopHeartBeat()
           return
         }
-        this.heartBeatReq = await videoQueueHeartBeat(this.$route.params.csId, this.userInfo.userId)
+        this.heartBeatReq = await videoQueueHeartBeat(this.$route.query.csId, this.userInfo.userId)
         if (this.heartBeatReq.code === ERR_OK) {
           console.info('心跳成功')
           this.heartBeatFailCount = 0
@@ -133,7 +133,7 @@ export default {
       // 停止心跳
       this.stopHeartBeat()
       // 取消排队
-      const res = await videoQueueCancel(this.userInfo.userId, this.$route.params.csId, this.accessId)
+      const res = await videoQueueCancel(this.userInfo.userId, this.$route.query.csId, this.accessId)
       if (res.result.code === ERR_OK) {
         console.log('===============================> 取消排队 啊 取消排队 <===============================')
         debugger
