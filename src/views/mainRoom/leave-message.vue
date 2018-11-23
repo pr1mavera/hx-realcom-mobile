@@ -45,6 +45,7 @@
     methods: {
       // 保存留言
       async submitMsg() {
+        debugger
         // this.submitMsgSuc = true
         const reg = /^1(3|4|5|7|8)\d{9}$/
         if (this.leaveWordDescription !== '' && this.callNumber !== '' && reg.test(this.callNumber)) {
@@ -65,8 +66,8 @@
             'leaveWordDescription': this.leaveWordDescription,
             'leaveWordDate': year + '-' + month + '-' + day + ' ' + hour + ':' + min + ':' + seconds,
             // 'origin': '1', // 1.官微2.凤凰营销（简称为营销）3.官网4.中介公众号（简称为中介）5.龙行银保（简称为银保）
-            'leaveWordChannel': '1',
-            'leaveWordSource': '04', // 01-在线平台 02-服务箱（小华e家）03- 呼入04 - 虚拟
+            'leaveWordChannel': 'WE',
+            'leaveWordSource': '01', // 01-在线平台 02-服务箱（小华e家）03- 呼入04 - 虚拟
             'openId': this.$route.query.openId
           }
           const res = await leaveMsg(data)
