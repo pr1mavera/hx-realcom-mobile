@@ -71,7 +71,7 @@
             'openId': this.$route.query.openId
           }
           const res = await leaveMsg(data)
-          if (res.result_code === '200') {
+          if (res.data.result_code === '200') {
             this.submitMsgSuc = true // 跳转到留言保存成功,
           } else {
             console.log('there are some error about leave message' + JSON.stringify(res))

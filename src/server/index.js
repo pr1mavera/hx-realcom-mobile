@@ -51,6 +51,9 @@ export const csPhoto = id => http.url('user', `/video/image/csPhoto?id=${id}`)
  */
 export const getUserInfoByOpenID = openID => http.get('user', `/video/user?openId=${openID}`)
 
+// 评价信息保存
+export const saveAssess = async(data) => http.post('user', `/video/user/evaluate`, data)
+
 // 获取客服信息
 export const queryCsInfo = async(page, pageSize, userId, listType) => http.get('user', `/video/user/cs/query?page=${page}&pageSize=${pageSize}&userId=${userId}&listType=${listType}`)
 
@@ -113,9 +116,6 @@ export const getBotRoamMsgs = (sessionId, page, pageSize) => http.get('user', `/
 export const requestHistoryMsgs = (userId, page, pageSize) => http.get('user', `/chat/history?page=${page}&pageSize=${pageSize}&userId=${userId}`)
 // export const requestHistoryMsgs = (userId) => http.get('chat', `/chat/history?userId=${userId}`)
 
-// 评价信息保存
-export const saveAssess = async(data) => http.post('user', `/video/user/evaluate`, data)
-
 /**
  ************************************ onLine ************************************
  */
@@ -136,7 +136,7 @@ export const onLineQueueCancel = data => http.post('onLine', '/webchat/queue/v1/
 export const chatQueueHeartBeat = data => http.post('onLine', '/webchat/queue/v1/heartbeat', data)
 
 // 留言common/leaveword/v1/add
-export const leaveMsg = async(data) => http.post('onLine', '/common/leaveword/v1/add', data)
+export const leaveMsg = async(data) => http.post('user', '/common/leaveword/v1/add', data)
 
 /**
  ************************************ systemMsg ************************************
