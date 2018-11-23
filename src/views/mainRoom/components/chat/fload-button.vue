@@ -250,7 +250,7 @@ export default {
       margin-bottom: 0;
     }
     &.visible-when-input {
-      transform: translateY(-3rem);
+      transform: translateY(-15rem);
       opacity: 0;
     }
     &.item-1 {

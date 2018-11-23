@@ -254,7 +254,7 @@ export const IMMixin = {
   data() {
     return {
       transferTimer: null,
-      transferTimeOut: 30000
+      transferTimeOut: 10000
     }
   },
   methods: {
@@ -331,7 +331,9 @@ export const IMMixin = {
           const videoConfig = await this.configSendSystemMsg(videoQueueSuccMsg)
           await IM.sendSystemMsg(videoConfig)
           // 客服转接定时器
+          debugger
           this.transferTimer = setTimeout(async() => {
+            debugger
             this.$vux.toast.text('转接失败，请重试', 'middle')
             await Tools.AsyncTools.sleep(2000)
             if (this.$route.query.goindex === 'true') {
