@@ -45,7 +45,6 @@
     methods: {
       // 保存留言
       async submitMsg() {
-        debugger
         // this.submitMsgSuc = true
         const reg = /^1(3|4|5|7|8)\d{9}$/
         if (this.leaveWordDescription !== '' && this.callNumber !== '' && reg.test(this.callNumber)) {
