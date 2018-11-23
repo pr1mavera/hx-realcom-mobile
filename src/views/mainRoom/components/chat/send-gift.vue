@@ -118,8 +118,8 @@ export default {
       const csId = '1' // 测试数据
 
       const res = await viewGifts(page, pageSize, csId)
-      debugger
-      console.log('==============>这里是礼物列表啊啊' + JSON.stringify(res))
+      // debugger
+      // console.log('==============>这里是礼物列表啊啊' + JSON.stringify(res))
       if (res.result.code === ERR_OK) {
         this.giftMap = res.data.gifts
       } else {

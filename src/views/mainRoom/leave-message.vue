@@ -65,12 +65,12 @@
             'leaveWordDescription': this.leaveWordDescription,
             'leaveWordDate': year + '-' + month + '-' + day + ' ' + hour + ':' + min + ':' + seconds,
             // 'origin': '1', // 1.官微2.凤凰营销（简称为营销）3.官网4.中介公众号（简称为中介）5.龙行银保（简称为银保）
-            'leaveWordChannel': '1',
-            'leaveWordSource': '04', // 01-在线平台 02-服务箱（小华e家）03- 呼入04 - 虚拟
+            'leaveWordChannel': 'WE',
+            'leaveWordSource': '01', // 01-在线平台 02-服务箱（小华e家）03- 呼入04 - 虚拟
             'openId': this.$route.query.openId
           }
           const res = await leaveMsg(data)
-          if (res.result_code === '200') {
+          if (res.data.result_code === '200') {
             this.submitMsgSuc = true // 跳转到留言保存成功,
           } else {
             console.log('there are some error about leave message' + JSON.stringify(res))
