@@ -48,23 +48,23 @@ const shareJs = async function(shareUrl) {
   wx.ready(function() {
     alert('wx ====== ready')
     const thatopts = options
-    wx.hideAllNonBaseMenuItem()
+    // wx.hideAllNonBaseMenuItem()
+    // // wx.showMenuItems({
+    // //   menuList: ['menuItem:share:appMessage', 'menuItem:share:timeline'] // 要显示的菜单项，所有menu项见附录3
+    // // })
     // wx.showMenuItems({
-    //   menuList: ['menuItem:share:appMessage', 'menuItem:share:timeline'] // 要显示的菜单项，所有menu项见附录3
+    //   menuList: [
+    //     'menuItem:readMode', // 闃呰妯″紡
+    //     'menuItem:share:timeline', // 鍒嗕韩鍒版湅鍙嬪湀
+    //     'menuItem:copyUrl' // 澶嶅埗閾炬帴
+    //   ],
+    //   success: function(res) {
+    //     alert('批量显示菜单')
+    //   },
+    //   fail: function(res) {
+    //     alert(JSON.stringify(res))
+    //   }
     // })
-    wx.showMenuItems({
-      menuList: [
-        'menuItem:readMode', // 闃呰妯″紡
-        'menuItem:share:timeline', // 鍒嗕韩鍒版湅鍙嬪湀
-        'menuItem:copyUrl' // 澶嶅埗閾炬帴
-      ],
-      success: function(res) {
-        alert('批量显示菜单')
-      },
-      fail: function(res) {
-        alert(JSON.stringify(res))
-      }
-    })
     wx.onMenuShareTimeline({
       title: thatopts.title, // 分享标题
       desc: thatopts.desc, // 分享描述
@@ -76,8 +76,8 @@ const shareJs = async function(shareUrl) {
       success: function() {
         alert('成功')
       },
-      cancel: function() {
-        alert('失败')
+      fail: function(res) {
+        alert('失败', JSON.stringify(res))
       }
     })
     wx.onMenuShareAppMessage({
@@ -91,8 +91,8 @@ const shareJs = async function(shareUrl) {
       success: function() {
         alert('成功')
       },
-      cancel: function() {
-        alert('失败')
+      fail: function(res) {
+        alert('失败', JSON.stringify(res))
       }
     })
   })
