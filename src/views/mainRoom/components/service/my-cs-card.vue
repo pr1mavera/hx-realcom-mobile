@@ -80,7 +80,7 @@
         const res = await removeCs(data)
         if (res.result.code === ERR_OK) {
           this.$emit('removeCs', this.csIndex)
-          console.log(JSON.stringify(res))
+          // console.log(JSON.stringify(res))
         } else {
           console.log('error of remove the cusSer:' + JSON.stringify(res))
         }
