@@ -62,6 +62,24 @@ export default {
       }
       const config = await this.configSendSystemMsg(msg)
       await IM.sendSystemMsg(config)
+
+      // 客服转接定时器
+      const video_csReqTransFail_msg = {
+        code: systemMsgStatus.video_csReqTransFail,
+        csId: msg.csId
+      }
+      this.reqTransTimeout({
+        msg: video_csReqTransFail_msg,
+        toast: this.$vux.toast,
+        delay: 30000
+      }).then(() => {
+        if (this.$route.query.goindex === 'true') {
+          this.$router.push('/')
+        } else {
+          this.$router.back(-1)
+        }
+        this.afterQueueFailed()
+      })
     } else {
       this.setQueueNum(+res.queueNum)
     }
@@ -161,7 +179,9 @@ export default {
     }),
     ...mapActions([
       'configSendSystemMsg',
-      'afterQueueSuccess'
+      'afterQueueSuccess',
+      'reqTransTimeout',
+      'afterQueueFailed'
     ])
   }
 }

@@ -96,8 +96,9 @@ export const configSendSystemMsg = function({ state }, msgsObj) {
         csId: msgsObj.csId,
         csName: msgsObj.csName || msgsObj.csId,
         userId: state.userInfo.userId,
-        userAvatar: '',
+        userAvatar: state.userInfo.avatar,
         userName: state.userInfo.userName,
+        nickName: state.userInfo.nickName,
         userPhone: state.userInfo.userPhone,
         openId: state.userInfo.userId,
         origin: 'WE',
@@ -163,6 +164,29 @@ export const initSession = async function({ commit, state }) {
   } else {
     console.log('============================= 会话创建失败 辣 =============================')
   }
+}
+
+// 排队成功定时器，一定时间内坐席没转接则提示转接失败
+export const reqTransTimeout = function({ commit, state }, { msg, toast, delay = 0 }) {
+  return new Promise((resolve) => {
+    const timer = setTimeout(async() => {
+      // 坐席长时间未转接，推送消息到坐席转接失败
+      if (msg) {
+        const onlineConfig = await configSendSystemMsg({ state }, msg)
+        IM.sendSystemMsg(onlineConfig)
+      }
+      // 本地提示转接失败
+      toast.text('转接失败，请重试', 'middle')
+      await Tools.AsyncTools.sleep(2000)
+      // 回调
+      resolve()
+      // 清空定时器
+      timer && clearTimeout(timer)
+    }, delay)
+    const userInfo = Tools.CopyTools.objShallowClone(state.userInfo)
+    userInfo.transTimeout = timer
+    commit(types.SET_USER_INFO, userInfo)
+  })
 }
 
 // 更新用户最后活动时间（更新定时器）

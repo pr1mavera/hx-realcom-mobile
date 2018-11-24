@@ -210,6 +210,7 @@ const IM = (() => {
       userId: data.userId,
       userAvatar: data.userAvatar,
       userName: data.userName,
+      nickName: data.nickName,
       userPhone: data.userPhone,
       openId: data.userId,
       origin: data.origin,

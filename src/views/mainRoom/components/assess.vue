@@ -112,7 +112,7 @@
         //   evaluateLevel: this.stars,
         //   labels: this.labels
         // }
-        const data = Tools.CopyTools.objShallowClone({
+        const data = Tools.CopyTools.objDeepClone({
           'sessionId': this.sessionId,
           // 'sessionId': '00553330cc4a11e886ec19059d7ca77e',
           'userId': this.userInfo.userId,
