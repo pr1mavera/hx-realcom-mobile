@@ -127,15 +127,15 @@
         // 发送评价消息，告诉坐席
         IM.sendNormalMsg(
           this.userInfo.userId,
-          this.csInfo.csId,
+          data.csId,
           // '123456789',
           {
             sessionId: this.sessionId,
-            toUserName: this.csInfo.csName,
+            toUserName: data.csName,
             msg: `${this.userInfo.userName}评价了你`,
             time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
             nickName: this.userInfo.userName,
-            avatar: this.csInfo.csId,
+            avatar: data.csId,
             identifier: this.userInfo.userId,
             msgStatus: msgStatus.msg,
             msgType: msgTypes.msg_assess,

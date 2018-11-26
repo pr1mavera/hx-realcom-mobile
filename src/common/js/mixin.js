@@ -314,12 +314,13 @@ export const IMMixin = {
         /* ******************************** 视频 ******************************** */
         // 人数减少（视频）
         case systemMsgStatus.video_queuesReduce:
-          this.setQueueNum(this.queueNum - 1)
+          const video_num = this.queueNum - 1
+          this.setQueueNum(video_num)
           break
 
         // 客户端排队成功（视频）
         case systemMsgStatus.video_queuesSuccess:
-          this.isQueuingTextShow = true
+          this.isQueuingTextShow = false
           const videoQueueSuccMsg = {
             code: systemMsgStatus.video_requestCsEntance,
             csId: this.$route.query.csId,
@@ -392,7 +393,8 @@ export const IMMixin = {
         /* ********************************************* 在线 ********************************************* */
         // 人数减少（在线）
         case systemMsgStatus.onLine_queuesReduce:
-          this.setQueueNum(msgsObj.num || 1)
+          const online_num = this.queueNum - 1
+          this.setQueueNum(online_num)
           break
 
         // 客户端排队成功（在线）
@@ -782,7 +784,7 @@ export const sendMsgsMixin = {
       this.sendMsgs(msg)
     },
     afterSendC2CImgMsgs(timestamp, imgData, file_Obj) {
-      const fileObj = Tools.CopyTools.objDeepClone(file_Obj)
+      const fileObj = Tools.CopyTools.objWithTypeDeepClone(file_Obj)
       const msg = {
         nickName: this.userInfo.userName,
         avatar: this.userInfo.userId,

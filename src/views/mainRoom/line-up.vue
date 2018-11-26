@@ -51,7 +51,7 @@ export default {
     const res = await this.initQueue()
     if (+res.queueNum === 0) {
       // 当前队列无人排队，直接推送排队成功的消息给坐席
-      this.isQueuingTextShow = true
+      this.isQueuingTextShow = false
       const msg = {
         code: systemMsgStatus.video_requestCsEntance,
         csId: this.$route.query.csId,

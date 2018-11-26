@@ -94,7 +94,7 @@ export default {
             if (self.roomMode === roomStatus.menChat) {
               // action
               self.afterServerFinish(sessionStatus.onLine)
-              this.toShare()
+              self.toShare()
             }
           }
         })

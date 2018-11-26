@@ -141,6 +141,26 @@ const CopyTools = {
 
   // 深拷贝
   objDeepClone: function(obj) {
+    return JSON.parse(JSON.stringify(obj))
+    // if (typeof obj === 'object') {
+    //   if (Array.isArray(obj)) {
+    //     var newArr = []
+    //     for (var i = 0; i < obj.length; i++) newArr.push(obj[i])
+    //     return newArr
+    //   } else {
+    //     var newObj = {}
+    //     for (var key in obj) {
+    //       newObj[key] = this.objDeepClone(obj[key])
+    //     }
+    //     return newObj
+    //   }
+    // } else {
+    //   return obj
+    // }
+  },
+
+  // 深拷贝自定义对象
+  objWithTypeDeepClone: function(obj) {
     // return JSON.parse(JSON.stringify(obj))
     if (typeof obj === 'object') {
       if (Array.isArray(obj)) {
@@ -157,7 +177,6 @@ const CopyTools = {
             enumerable: true,
             value: self.objDeepClone(obj[key])
           })
-          // newObj[key] = this.objDeepClone(obj[key])
         }
         return newObj
       }
