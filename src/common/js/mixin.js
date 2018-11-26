@@ -784,7 +784,8 @@ export const sendMsgsMixin = {
       this.sendMsgs(msg)
     },
     afterSendC2CImgMsgs(timestamp, imgData, file_Obj) {
-      const fileObj = Tools.CopyTools.objWithTypeDeepClone(file_Obj)
+      // const fileObj = Tools.CopyTools.objWithTypeDeepClone(file_Obj)
+      const fileObj = new File([file_Obj], file_Obj.name, { type: file_Obj.type })
       const msg = {
         nickName: this.userInfo.userName,
         avatar: this.userInfo.userId,

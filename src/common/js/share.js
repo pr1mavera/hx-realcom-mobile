@@ -46,7 +46,7 @@ const shareJs = async function(shareUrl) {
   }
   // options = Object.assign({}, defaults, options)
   wx.ready(function() {
-    alert('wx ====== ready')
+    // alert('wx ====== ready')
     const thatopts = options
     // wx.hideAllNonBaseMenuItem()
     // // wx.showMenuItems({
@@ -71,13 +71,13 @@ const shareJs = async function(shareUrl) {
       link: thatopts.link, // 分享链接
       imgUrl: thatopts.imgUrl, // 分享图标
       trigger: function(res) {
-        alert('trigger', res)
+        // alert('trigger', res)
       },
       success: function() {
-        alert('成功')
+        // alert('成功')
       },
       fail: function(res) {
-        alert('失败', JSON.stringify(res))
+        // alert('失败', JSON.stringify(res))
       }
     })
     wx.onMenuShareAppMessage({
@@ -86,13 +86,13 @@ const shareJs = async function(shareUrl) {
       link: thatopts.link, // 分享链接
       imgUrl: thatopts.imgUrl, // 分享图标
       trigger: function(res) {
-        alert('trigger', res)
+        // alert('trigger', res)
       },
       success: function() {
-        alert('成功')
+        // alert('成功')
       },
       fail: function(res) {
-        alert('失败', JSON.stringify(res))
+        // alert('失败', JSON.stringify(res))
       }
     })
   })
