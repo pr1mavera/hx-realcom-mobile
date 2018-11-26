@@ -475,9 +475,11 @@ export const IMMixin = {
       if (this.roomMode === roomStatus.AIChat) {
         return
       }
-      const msgsObj = IM.parseMsgs(msgs).textMsgs[0]
-      msgsObj.timestamp = new Date().getTime()
-      this.sendMsgs(msgsObj)
+      const msgsObjs = IM.parseMsgs(msgs).textMsgs
+      msgsObjs.forEach(item => {
+        item.timestamp = new Date().getTime()
+        this.sendMsgs(item)
+      })
     },
     ...mapMutations({
       setQueueMode: 'SET_QUEUE_MODE',
