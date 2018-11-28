@@ -65,6 +65,9 @@ export default {
   mounted() {
     this.$nextTick(() => {
       // this.initShare()
+      // document.getElementsByTagName('a').addEventListener('click', (e) => {
+      //   debugger
+      // }, false)
     })
   },
   methods: {

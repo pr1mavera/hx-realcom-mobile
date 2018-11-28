@@ -471,6 +471,7 @@ export default {
       // this.inputEle.blur()
       this.$nextTick(() => {
         document.getElementById('input-content-hook').blur()
+        document.body.scrollTop = 0
         clearTimeout(this.inputBarTimer)
       })
       // this.$refs.inputBar.setInputEditState('false')
@@ -682,8 +683,7 @@ export default {
       setModeToMenChat: 'SET_ROOM_MODE',
       setMsgs: 'SET_MSGS',
       setInputBar: 'SET_INPUT_BAR',
-      setExtendBar: 'SET_EXTEND_BAR',
-      setQueueMode: 'SET_QUEUE_MODE'
+      setExtendBar: 'SET_EXTEND_BAR'
     }),
     ...mapActions([
       'initSession',

@@ -20,7 +20,7 @@ import { mapGetters, mapMutations, mapActions } from 'vuex'
 import { IMMixin } from '@/common/js/mixin'
 import IM from '@/server/im'
 import { ERR_OK, videoQueue, videoQueueCancel, videoQueueHeartBeat } from '@/server/index.js'
-import { queueStatus, sessionStatus, systemMsgStatus } from '@/common/js/status'
+import { roomStatus, queueStatus, sessionStatus, systemMsgStatus } from '@/common/js/status'
 
 export default {
   mixins: [
@@ -47,7 +47,10 @@ export default {
     }
   },
   async mounted() {
-    this.setQueueMode(queueStatus.queuing)
+    this.setQueueMode({
+      mode: roomStatus.AIChat,
+      status: queueStatus.queuing
+    })
     const res = await this.initQueue()
     if (+res.queueNum === 0) {
       // 当前队列无人排队，直接推送排队成功的消息给坐席
@@ -169,8 +172,7 @@ export default {
       // 停止心跳
       this.stopHeartBeat()
       this.$router.replace({path: `/room/chat?openId=${this.userInfo.openId}`})
-      this.afterQueueSuccess(sessionStatus.video)
-      // this.$emit('ready')
+      this.afterQueueSuccess(roomStatus.videoChat)
     },
     ...mapMutations({
       setUserInfo: 'SET_USER_INFO',

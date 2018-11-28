@@ -14,11 +14,11 @@
             <use xlink:href="#icon-liwu"></use>
           </svg>
         </button>
-        <button class="footer-btn footer-btn-star extend-click" @click="$emit('handleAssess')">
+        <!-- <button class="footer-btn footer-btn-star extend-click" @click="$emit('handleAssess')">
           <svg class="icon" aria-hidden="true">
             <use xlink:href="#icon-pingjia"></use>
           </svg>
-        </button>
+        </button> -->
         <button class="footer-btn footer-btn-switch extend-click" @click="$emit('changeCamera')">
           <svg class="icon" aria-hidden="true">
             <use xlink:href="#icon-qiehuanshexiangtou"></use>

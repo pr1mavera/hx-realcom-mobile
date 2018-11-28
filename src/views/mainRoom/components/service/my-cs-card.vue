@@ -28,7 +28,7 @@
 <script>
   import { XButton } from 'vux'
   import { ERR_OK, removeCs, getCsAvatar } from '@/server/index.js'
-  import { mapGetters, mapMutations } from 'vuex'
+  import { mapGetters } from 'vuex'
   // import { queueStatus } from '@/common/js/status'
   // import {} from '@/server/index.js'
 
@@ -115,10 +115,7 @@
       },
       clickToLineUp() {
         this.$emit('clickToLineUp', this.currentCs)
-      },
-      ...mapMutations({
-        setQueueMode: 'SET_QUEUE_MODE'
-      })
+      }
     }
   }
 </script>

@@ -18,6 +18,7 @@
 import { mapGetters, mapActions } from 'vuex'
 import Tools from '@/common/js/tools'
 import { getCsStatus } from '@/server/index.js'
+import { roomStatus } from '@/common/js/status'
 
 export default {
   name: 'cus-serv',
@@ -77,7 +78,10 @@ export default {
           break
         case status === 3 || status === 5:
           this.$router.push({path: `/room/line-up?csId=${this.csSelected.id}&csName=${this.csSelected.nickName}`})
-          this.beforeQueue('正在为您转接视频客服，请稍候')
+          this.beforeQueue({
+            mode: roomStatus.videoChat,
+            content: '正在为您转接视频客服，请稍候'
+          })
           break
         case status === 4:
           this.$vux.alert.show({

@@ -119,7 +119,7 @@ export default {
     //   return this.roomMode === roomStatus.videoChat
     // },
     isMiniBarOpen() {
-      return (!this.fullScreen && this.queueMode === queueStatus.queueOver) && !this.videoScreenShotShow
+      return (!this.fullScreen && this.queueMode.status === queueStatus.queueOver) && !this.videoScreenShotShow
     },
     // isLineUpShow() {
     //   return this.queueMode === queueStatus.queuing || this.queueMode === queueStatus.queueSuccess

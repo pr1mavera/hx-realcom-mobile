@@ -43,7 +43,7 @@
 
         },
         get() {
-          return this.queueMode === queueStatus.queueSuccess
+          return this.queueMode.status === queueStatus.queueSuccess
         }
       }
     },

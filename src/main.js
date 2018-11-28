@@ -34,6 +34,10 @@ Vue.prototype.$setgoindex = () => {
   }
 }
 
+Vue.prototype.targetLink = (src) => {
+  alert(`打开${src}`)
+}
+
 FastClick.prototype.onTouchEnd = function(event) {
   if (event.target.hasAttribute('type') && event.target.getAttribute('type') === 'file') {
     return false

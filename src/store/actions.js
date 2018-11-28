@@ -37,8 +37,11 @@ export const toggleBar = async function({ dispatch, commit, state }, type) {
 }
 
 // 进入排队(人工，视频)时的tips
-export const beforeQueue = function({ commit, state }, content) {
-  commit(types.SET_QUEUE_MODE, queueStatus.queuing)
+export const beforeQueue = function({ commit, state }, { mode, content }) {
+  commit(types.SET_QUEUE_MODE, {
+    mode,
+    status: queueStatus.queuing
+  })
   const tip = [{
     content,
     time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
@@ -50,31 +53,40 @@ export const beforeQueue = function({ commit, state }, content) {
 
 // 人工（视频）排队完成，接通客服后，修改对应的房间模式
 export const afterQueueSuccess = function({ commit, state }, mode) {
-  commit(types.SET_QUEUE_MODE, queueStatus.queueOver)
-  if (mode === sessionStatus.video) {
+  // 排队状态
+  commit(types.SET_QUEUE_MODE, {
+    mode,
+    status: queueStatus.queueOver
+  })
+  let tip = []
+  if (mode === roomStatus.videoChat) {
+    // 房间状态
     commit(types.SET_ROOM_MODE, roomStatus.videoChat)
-    const tip = [{
+    tip.push({
       content: `视频客服${state.csInfo.csName}转接成功，祝您沟通愉快！`,
       time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
       msgStatus: msgStatus.tip,
       msgType: tipTypes.tip_success
-    }]
-    commit(types.SET_MSGS, state.msgs.concat(tip))
-  } else if (mode === sessionStatus.onLine) {
+    })
+  } else if (mode === roomStatus.menChat) {
+    // 房间状态
     commit(types.SET_ROOM_MODE, roomStatus.menChat)
-    const tip = [{
+    tip.push({
       content: `人工客服${state.csInfo.csName}转接成功，祝您沟通愉快！`,
       time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
       msgStatus: msgStatus.tip,
       msgType: tipTypes.tip_success
-    }]
-    commit(types.SET_MSGS, state.msgs.concat(tip))
+    })
   }
+  commit(types.SET_MSGS, state.msgs.concat(tip))
 }
 
 // 排队失败
 export const afterQueueFailed = function({ commit, state }) {
-  commit(types.SET_QUEUE_MODE, queueStatus.noneQueue)
+  commit(types.SET_QUEUE_MODE, {
+    mode: roomStatus.AIChat,
+    status: queueStatus.noneQueue
+  })
   commit(types.SET_QUEUE_NUM, 0)
   const tip = {
     content: '转接失败',
@@ -129,7 +141,10 @@ export const deleteTipMsg = function({ commit, state }) {
 export const afterServerFinish = function({ commit, state }, mode) {
   commit(types.SET_CS_INFO, {})
   commit(types.SET_QUEUE_NUM, 0)
-  commit(types.SET_QUEUE_MODE, queueStatus.noneQueue)
+  commit(types.SET_QUEUE_MODE, {
+    mode: roomStatus.AIChat,
+    status: queueStatus.noneQueue
+  })
   commit(types.SET_ASSESS_STATUS, false)
   commit(types.SET_SERVER_TIME, '')
   commit(types.SET_ROOM_MODE, roomStatus.AIChat)

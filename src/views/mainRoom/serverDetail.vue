@@ -69,9 +69,10 @@
 
 <script type="text/ecmascript-6">
   import Tools from '@/common/js/tools'
-  import {mapGetters, mapActions} from 'vuex'
+  import { mapGetters, mapActions } from 'vuex'
   import { Swiper, SwiperItem, XButton, XCircle } from 'vux'
   import { ERR_OK, getCsInfo, csPhoto } from '@/server/index.js'
+  import { roomStatus } from '@/common/js/status'
 
   // 顶部轮播图的列表
   // const displayList = []
@@ -154,7 +155,10 @@
           })
         } else if (status === '3' || status === '5') {
           this.$router.push({path: `/room/line-up/${cuSerId}`})
-          this.beforeQueue('正在为您转接视频客服，请稍候')
+          this.beforeQueue({
+            mode: roomStatus.videoChat,
+            content: '正在为您转接视频客服，请稍候'
+          })
         } else if (status === '4') {
           this.$vux.alert.show({
             title: '啊呀，当前客服正在休息呐~'

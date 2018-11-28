@@ -28,6 +28,7 @@ export const loginMixin = {
         console.log('============================= 我现在来请求 loginByOpenID 辣 =============================')
         return new Promise((resolve) => {
           // 存vuex userInfo
+          !res.data.userInfo.openId && (res.data.userInfo.openId = this.$route.query.openId)
           res.data.userInfo.avatar = res.data.wxUserInfo ? res.data.wxUserInfo.headImgUrl : ''
           res.data.userInfo.nickName = res.data.wxUserInfo ? res.data.wxUserInfo.nickName : ''
           this.setUserInfo(res.data.userInfo)
@@ -375,7 +376,10 @@ export const IMMixin = {
           // 设置会话ID
           this.setSessionId(msgsObj.sessionId)
           // 设置排队状态
-          this.setQueueMode(queueStatus.queueSuccess)
+          this.setQueueMode({
+            mode: roomStatus.videoChat,
+            status: queueStatus.queueSuccess
+          })
           break
 
         // 坐席端创建会话失败（视频）
@@ -440,9 +444,12 @@ export const IMMixin = {
           // 设置会话ID
           this.setSessionId(msgsObj.sessionId)
           // 设置排队状态
-          this.setQueueMode(queueStatus.noneQueue)
+          this.setQueueMode({
+            mode: roomStatus.menChat,
+            status: queueStatus.noneQueue
+          })
           // action 排队完成，进入会话
-          this.afterQueueSuccess(sessionStatus.onLine)
+          this.afterQueueSuccess(roomStatus.menChat)
           // action 初始化用户最后响应时间
           this.updateLastAction()
           break
@@ -852,7 +859,7 @@ export const getMsgsMixin = {
     }
   },
   methods: {
-    /* ********************************* 获取当天会话列表 ********************************* */
+    /* 获取当天会话列表 */
     async requestSessionList() {
       const res = await getSessionList(this.userInfo.userId)
       if (res.result.code === ERR_OK) {
@@ -865,43 +872,27 @@ export const getMsgsMixin = {
         console.log('error in getHistoryMsgs')
       }
     },
-    // async requestMsgsMixin() {
-    //   if (!this.MsgsLoader) {
-    //     // 初始化
-    //     let sessions = []
-    //     this.sessionList.forEach(item => {
-    //       if (item.chatCount) {
-    //         sessions.push(Creator.createSession(item))
-    //       }
-    //     })
-    //     let SessionList = Creator.createSessionList(sessions)
-    //     this.MsgsLoader = Creator.createMsgsLoader(this.userInfo, SessionList)
-    //   }
-    //   const newMsgs = await this.MsgsLoader.getMsgs()
-    //   if (newMsgs && newMsgs.length) {
-    //     const list = this.MsgsLoader.timeTipsFormat(newMsgs)
-    //     this.historyMsgs = list.concat(this.historyMsgs)
-    //   } else {
-    //     // 没有更多数据
-    //     this.pulldownResult = '别拉了，没有更多消息了！！！'
-    //   }
-    // },
+    /* 初始化 */
+    initMsgLoader() {
+      const MsgLoader = Object.create(MsgsLoader)
+      this.MsgsLoader = MsgLoader.init({
+        info: {
+          id: this.userInfo.userId
+        }, // 用户信息（必须）
+        sessions: this.sessionList, // 当日会话列表（必须）
+        getHistoryMsgsAPI: this.getHistoryMsgsAPI, // 查询历史消息接口（必须）
+        getBotAPI: this.getBotAPI, // 查询机器人漫游消息接口（必须）
+        getVideoAPI: this.getVideoAPI, // 查询IM漫游消息接口（必须）
+        pageSize: 15 // 单页条数（非必须，默认为5）
+      })
+    },
+    /* 拉取消息（漫游消息，历史消息） */
     async requestMsgsMixin() {
-      if (!this.MsgsLoader) {
-        // 初始化
-        const MsgLoader = Object.create(MsgsLoader)
-        this.MsgsLoader = MsgLoader.init({
-          info: {
-            id: this.userInfo.userId
-          }, // 用户信息（必须）
-          sessions: this.sessionList, // 当日会话列表（必须）
-          getHistoryMsgsAPI: this.getHistoryMsgsAPI, // 查询历史消息接口（必须）
-          getBotAPI: this.getBotAPI, // 查询机器人漫游消息接口（必须）
-          getVideoAPI: this.getVideoAPI, // 查询IM漫游消息接口（必须）
-          pageSize: 15 // 单页条数（非必须，默认为5）
-        })
-      }
+      // 初始化
+      !this.MsgsLoader && this.initMsgLoader()
+      // 拉取消息
       const newMsgs = await this.MsgsLoader.getMsgs()
+
       if (newMsgs && newMsgs.length) {
         const list = this.MsgsLoader.timeTipsFormat(newMsgs)
         this.historyMsgs = list.concat(this.historyMsgs)
@@ -1008,7 +999,10 @@ export const onLineQueueMixin = {
       if (res.data.result_code === '200') {
         // if (data.online) {
         // 发送正在转接提示
-        this.beforeQueue('正在为您转接在线客服，请稍候')
+        this.beforeQueue({
+          mode: roomStatus.menChat,
+          content: '正在为您转接在线客服，请稍候'
+        })
         // 排队中
         return {
           code: '0',
@@ -1079,7 +1073,10 @@ export const onLineQueueMixin = {
         }
         this.sendMsgs(msg)
         // 设置排队状态
-        this.setQueueMode(queueStatus.queuing)
+        this.setQueueMode({
+          mode: roomStatus.menChat,
+          status: queueStatus.queuing
+        })
       }
     },
     async cancelQueue() {
@@ -1093,7 +1090,10 @@ export const onLineQueueMixin = {
         console.info('取消排队成功')
         this.$vux.toast.text('您已经取消排队', 'middle')
         this.stopHeartBeat()
-        this.setQueueMode(queueStatus.noneQueue)
+        this.setQueueMode({
+          mode: roomStatus.AIChat,
+          status: queueStatus.noneQueue
+        })
         return 0
       } else {
         console.info('取消排队失败')

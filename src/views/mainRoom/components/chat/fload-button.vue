@@ -8,9 +8,6 @@
       :disabled="barStatus"
       @click="callPhone"
       :class="[{'visible-when-input': barStatus, 'item-1': !barStatus}]">
-      <!-- <svg class="icon" aria-hidden="true">
-        <use xlink:href="#icon-dianhua"></use>
-      </svg> -->
       <img width=100% height=100% src="/static/img/chat/fb_phone.png">
     </button>
     <button
@@ -18,9 +15,6 @@
       :disabled="barStatus"
       @click="videoLineUp"
       :class="[{'visible-when-input': barStatus, 'item-2': !barStatus}]">
-      <!-- <svg class="icon" aria-hidden="true">
-        <use xlink:href="#icon-shipin"></use>
-      </svg> -->
       <img width=100% height=100% src="/static/img/chat/fb_video.png">
     </button>
     <button
@@ -28,21 +22,15 @@
       :disabled="barStatus"
       @click="onLineLineUp"
       :class="[{'visible-when-input': barStatus, 'item-3': !barStatus}]">
-      <!-- <svg class="icon" aria-hidden="true">
-        <use xlink:href="#icon-zhuanrengongVIP"></use>
-      </svg> -->
       <img width=100% height=100% :src='`/static/img/chat/fb_${iconByUserGrade}.png`'>
     </button>
-    <button
+    <!-- <button
       class="item extend-click transition-bezier"
       :disabled="barStatus"
       @click="clickAssess"
       :class="[{'visible-when-input': barStatus, 'item-4': !barStatus}]">
-      <!-- <svg class="icon" aria-hidden="true">
-        <use xlink:href="#icon-pingjia1"></use>
-      </svg> -->
       <img width=100% height=100% src="/static/img/chat/fb_assess.png">
-    </button>
+    </button> -->
   </div>
 </template>
 
@@ -93,14 +81,17 @@ export default {
     },
     // 视频客服
     videoLineUp() {
-      if (this.queueMode === queueStatus.queuing) {
-        return
-      }
-      if (!this.isVip) {
+      if (!this.isVip) { // 非VIP客户
         this.showTips(2, '此功能只对VIP客户开放')
         return
       }
-      switch (this.roomMode) {
+
+      if (this.queueMode.status === queueStatus.queuing && this.queueMode.mode === roomStatus.menChat) { // 排队中
+        this.onlineServ2Video('您当前正在在线人工排队中，确认需要取消排队并进入视频客服吗？')
+        return
+      }
+
+      switch (this.roomMode) { // 服务中
         case roomStatus.AIChat:
           this.$emit('enterVideoLineUp')
           break
@@ -113,33 +104,17 @@ export default {
           // this.$vux.alert.show({
           //   title: '您当前正在人工服务中！！请先退出'
           // })
-          const self = this
-          this.$vux.confirm.show({
-            title: '您当前正在视频服务中，确认需要退出并进入人工客服嘛？',
-            async onConfirm() {
-              // 设置评价状态
-              self.setAssessStatus(true)
-              // 用户主动断开人工客服
-              const sysMsgs = {
-                code: systemMsgStatus.onLine_userNoResponse,
-                csId: self.csInfo.csId
-              }
-              const onlineConfig = await self.configSendSystemMsg(sysMsgs)
-              await IM.sendSystemMsg(onlineConfig)
-              await Tools.AsyncTools.sleep(3000)
-              // 进入专属客服
-              self.$emit('enterVideoLineUp')
-            }
-          })
+          this.onlineServ2Video('您当前正在在线人工咨询中，确认需要退出并进入视频客服吗？')
           break
       }
     },
     // 在线客服
     onLineLineUp() {
-      if (this.queueMode === queueStatus.queuing) {
+      if (this.queueMode.status === queueStatus.queuing) { // 排队中
         return
       }
-      switch (this.roomMode) {
+
+      switch (this.roomMode) { // 服务中
         case roomStatus.AIChat:
           const ZX_workT = this.userInfo.workTimeInfo.filter(item => item.callType === 'ZX')
           let workT = {
@@ -183,6 +158,26 @@ export default {
           })
           break
       }
+    },
+    onlineServ2Video(tip) {
+      const self = this
+      this.$vux.confirm.show({
+        title: tip,
+        async onConfirm() {
+          // 设置评价状态
+          self.setAssessStatus(true)
+          // 用户主动断开人工客服
+          const sysMsgs = {
+            code: systemMsgStatus.onLine_userNoResponse,
+            csId: self.csInfo.csId
+          }
+          const onlineConfig = await self.configSendSystemMsg(sysMsgs)
+          await IM.sendSystemMsg(onlineConfig)
+          await Tools.AsyncTools.sleep(3000)
+          // 进入专属客服
+          self.$emit('enterVideoLineUp')
+        }
+      })
     },
     clickAssess() {
       switch (this.roomMode) {
