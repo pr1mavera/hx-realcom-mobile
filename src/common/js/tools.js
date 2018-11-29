@@ -241,8 +241,8 @@ const MsgsFilterTools = {
     const regHref = /href="(.*?)"/g
     // eslint-disable-next-line
     const regUrl = /((http|ftp|https):\/\/)?[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#])?/g
-    // return answer.replace(regHref, `href="javascript:;" onclick=alert('${answer.match(regUrl)[0]}')`)
-    return answer.replace(regHref, `href="javascript:;"`)
+    return answer.replace(regHref, `href="javascript:;" onclick="return false;"`)
+    // return answer.replace(regHref, `href="javascript:;"`) answer.match(regUrl)[0] store.commit('SET_ASSESS_VIEW', true)
   },
 
   // 机器人消息解析器
@@ -261,8 +261,8 @@ const MsgsFilterTools = {
         msg.msgType = msgTypes.msg_no_idea
       } else {
         // normal
-        msg.content = this.transA2Button(data.info[0].answer)
-        // msg.content = data.info[0].answer
+        // msg.content = this.transA2Button(data.info[0].answer)
+        msg.content = data.info[0].answer
         msg.msgType = msgTypes.msg_normal
       }
     } else if (data.info.length === 3) {
@@ -271,18 +271,18 @@ const MsgsFilterTools = {
       msg.msgExtend = [
         {
           question: data.info[0].question,
-          // answer: data.info[0].answer
-          answer: this.transA2Button(data.info[0].answer)
+          answer: data.info[0].answer
+          // answer: this.transA2Button(data.info[0].answer)
         },
         {
           question: data.info[1].question,
-          // answer: data.info[1].answer
-          answer: this.transA2Button(data.info[1].answer)
+          answer: data.info[1].answer
+          // answer: this.transA2Button(data.info[1].answer)
         },
         {
           question: data.info[2].question,
-          // answer: data.info[2].answer
-          answer: this.transA2Button(data.info[2].answer)
+          answer: data.info[2].answer
+          // answer: this.transA2Button(data.info[2].answer)
         }
       ]
     }

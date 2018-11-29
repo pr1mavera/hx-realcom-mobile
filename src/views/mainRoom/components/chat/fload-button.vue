@@ -149,7 +149,7 @@ export default {
           break
         case roomStatus.videoChat:
           this.$vux.alert.show({
-            title: '前正在视频服务中！！请先退出'
+            title: '您正在视频咨询中，如需转在线人工客服，需先结束视频通话。'
           })
           break
         case roomStatus.menChat:

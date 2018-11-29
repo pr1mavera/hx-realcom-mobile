@@ -253,6 +253,7 @@ export default {
 
 <style lang="less">
 @import '~@/common/style/theme.less';
+@import '~@/common/style/mixin.less';
 
 .video-bar {
   .line-up {
@@ -302,6 +303,9 @@ export default {
         // &#localVideo {
         //   background-color: #222;
         // }
+        &::-webkit-media-controls {
+          display:none !important;
+        }
       }
       .video-screen-shot {
         object-fit: cover;
@@ -448,6 +452,9 @@ export default {
         width: 100%;
         height: 100%;
         object-fit: cover;
+        &::-webkit-media-controls {
+          display:none !important;
+        }
       }
     }
   }

@@ -5,6 +5,7 @@
         @showIosGuide="iosGuide = true"
         @showLowVersion="lowVersion = true"
         @showShare="isShareView = true"
+        @showIframe="showIframe"
       ></router-view>
     </keep-alive>
     <videoBar class="video-bar"
@@ -24,6 +25,9 @@
       @handleToCancelAssess="handleToCancelAssess"
       @assessSuccess="assessSuccess"
     ></assess>
+    <section class="iframe-section" v-if="iframeView">
+      <iframe-bar :iframeSrc="iframeSrc" @closeIframe="iframeView = false"></iframe-bar>
+    </section>
   </div>
 </template>
 
@@ -40,7 +44,8 @@ export default {
     'IosGuide': () => import('@/views/mainRoom/components/video/ios-guide'),
     'LowVersion': () => import('@/views/mainRoom/components/video/low-version'),
     'ShareGuide': () => import('@/views/mainRoom/components/share-guide'),
-    'Assess': () => import('@/views/mainRoom/components/assess')
+    'Assess': () => import('@/views/mainRoom/components/assess'),
+    'iframeBar': () => import('@/views/mainRoom/components/iframe-bar')
   },
   data() {
     return {
@@ -48,7 +53,10 @@ export default {
       shareGuide: false,
       iosGuide: false,
       lowVersion: false,
-      shareUrl: 'https://video-uat.ihxlife.com:8080/video/room/chat?openId=o23yMh5_T67jbkdj36HvgfGvKtsf'
+      shareUrl: 'https://video-uat.ihxlife.com:8080/video/room/chat?openId=o23yMh5_T67jbkdj36HvgfGvKtsf',
+      // iframe
+      iframeView: false,
+      iframeSrc: ''
     }
   },
   computed: {
@@ -110,6 +118,10 @@ export default {
       // await this.initShare()
       // this.clickShare()
     },
+    showIframe({ link, cliendX, cliendY }) {
+      this.iframeView = true
+      this.iframeSrc = link
+    },
     ...mapMutations({
       setAssessStatus: 'SET_ASSESS_STATUS',
       setAssessView: 'SET_ASSESS_VIEW'
@@ -123,6 +135,7 @@ export default {
 
 <style lang="less">
 .main-room {
+  position: relative;
   width: 100%;
   height: 100%;
   .router-view {
@@ -136,6 +149,16 @@ export default {
     top: 0;
     left: 0;
     z-index: 101;
+  }
+  .iframe-section {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: auto;
+    z-index: 10;
+    background-color: rgba(0, 0, 0, 0.1);
   }
 }
 </style>

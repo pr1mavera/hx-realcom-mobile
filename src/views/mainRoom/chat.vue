@@ -27,6 +27,7 @@
                   :msg="item"
                   @msgLongPress="showCopy"
                   @onClickImgMsg="onClickImgMsg"
+                  @targetLink="targetLink"
                 ></component>
               </keep-alive>
             </li>
@@ -45,6 +46,7 @@
                   @onLineCancelQueue="onLineCancelQueue"
                   @toLeaveMsg="toLeaveMsg"
                   @resendMsgs="resendMsgs"
+                  @targetLink="targetLink"
                 ></component>
               </keep-alive>
             </li>
@@ -321,6 +323,22 @@ export default {
         }
       }
       this.$refs.previewer.show(curIndex)
+    },
+    targetLink(event) {
+      const e = event || window.event
+      e.preventDefault()
+      const target = e.target
+      // eslint-disable-next-line
+      const regUrl = /((http|ftp|https):\/\/)?[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#])?/g
+      if (target.href && target.href.match(regUrl)) {
+        const link = target.href.match(regUrl)[0]
+        this.$emit('showIframe', {
+          link,
+          cliendX: e.cliendX,
+          cliendY: e.cliendY
+        })
+      }
+      return false
     },
 
     // 进入留言
