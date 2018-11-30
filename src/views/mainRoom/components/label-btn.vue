@@ -106,7 +106,7 @@
       // 标签信息查询，获取label列表
       async getLabels() {
         const csId = this.$route.query.cusSerId
-        // const csId = '123'
+        // const csId = '123456'
 
         if (this.labelType === 'notAll') {
           const page = 0
@@ -114,6 +114,7 @@
           // 评价当前客服的标签
 
           const res = await viewLabels(page, pageSize, csId)
+          debugger
           if (res.result.code === ERR_OK) {
             // console.log('=============这是查询到的我的评价标签信息:' + JSON.stringify(res.data.labels))
             this.showDots = false
