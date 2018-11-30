@@ -333,9 +333,9 @@ export default {
       if (target.href && target.href.match(regUrl)) {
         const link = target.href.match(regUrl)[0]
         this.$emit('showIframe', {
-          link,
-          cliendX: e.cliendX,
-          cliendY: e.cliendY
+          link
+          // clientX: e.clientX,
+          // clientY: e.clientY
         })
       }
       return false
@@ -506,19 +506,20 @@ export default {
       this.inputEle.innerText = ''
       text = text.replace(/<\/?.+?>/g, '').replace(/&nbsp;/g, '')
       if (text && text.trim()) {
-        switch (this.roomMode) {
-          case roomStatus.AIChat:
-            await this.sendTextMsgToBot(text)
-            // await this.sendC2CMsgs(text)
-            break
-          case roomStatus.menChat:
-            await this.sendC2CMsgs(text)
-            break
-          case roomStatus.videoChat:
-            // this.sendTextMsg(text)
-            await this.sendC2CMsgs(text)
-            break
-        }
+        this.roomMode === roomStatus.AIChat ? await this.sendTextMsgToBot(text) : await this.sendC2CMsgs(text)
+        // switch (this.roomMode) {
+        //   case roomStatus.AIChat:
+        //     await this.sendTextMsgToBot(text)
+        //     // await this.sendC2CMsgs(text)
+        //     break
+        //   case roomStatus.menChat:
+        //     await this.sendC2CMsgs(text)
+        //     break
+        //   case roomStatus.videoChat:
+        //     // this.sendTextMsg(text)
+        //     await this.sendC2CMsgs(text)
+        //     break
+        // }
       } else {
         this.$vux.alert.show({
           title: '消息为空'

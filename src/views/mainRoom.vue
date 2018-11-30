@@ -1,7 +1,7 @@
 <template>
   <div class="main-room">
     <keep-alive :include="['chat', 'cus-serv']">
-      <router-view class="router-view"
+      <router-view class="router-view" id="router-view"
         @showIosGuide="iosGuide = true"
         @showLowVersion="lowVersion = true"
         @showShare="isShareView = true"
@@ -25,9 +25,11 @@
       @handleToCancelAssess="handleToCancelAssess"
       @assessSuccess="assessSuccess"
     ></assess>
-    <section class="iframe-section" v-if="iframeView">
-      <iframe-bar :iframeSrc="iframeSrc" @closeIframe="iframeView = false"></iframe-bar>
-    </section>
+    <transition @enter="showIframeEnter" @leave="showIframeLeave">
+      <section class="iframe-section" id="iframe-section" v-if="iframeView">
+        <iframe-bar class="iframe-bar" :iframeSrc="iframeSrc" @closeIframe="iframeView = false"></iframe-bar>
+      </section>
+    </transition>
   </div>
 </template>
 
@@ -36,6 +38,7 @@
 import { mapGetters, mapMutations, mapActions } from 'vuex'
 import { roomStatus, sessionStatus } from '@/common/js/status'
 import GoShare from '@/common/js/share'
+import anime from 'animejs'
 
 export default {
   components: {
@@ -56,7 +59,11 @@ export default {
       shareUrl: 'https://video-uat.ihxlife.com:8080/video/room/chat?openId=o23yMh5_T67jbkdj36HvgfGvKtsf',
       // iframe
       iframeView: false,
-      iframeSrc: ''
+      iframeSrc: '',
+      iframePos: {
+        clientX: 0,
+        clientY: 0
+      }
     }
   },
   computed: {
@@ -118,9 +125,68 @@ export default {
       // await this.initShare()
       // this.clickShare()
     },
-    showIframe({ link, cliendX, cliendY }) {
+    showIframe({ link, clientX, clientY }) {
       this.iframeView = true
       this.iframeSrc = link
+      // this.iframeSrc = 'http://www.baidu.com'
+      // this.iframePos = {
+      //   clientX,
+      //   clientY
+      // }
+    },
+    showIframeEnter(el, done) {
+      const showIframeframes = anime.timeline()
+      showIframeframes.add({
+        targets: '#router-view',
+        scale: [1, 0.92],
+        duration: 200,
+        easing: 'easeOutQuint',
+        offset: 0
+      }).add({
+        targets: '#iframe-section',
+        backdropFilter: [blur(0), blur('4px')],
+        opacity: [0, 1],
+        duration: 300,
+        easing: 'easeOutQuint',
+        offset: 0
+      }).add({
+        targets: '#iframe-section .iframe-bar',
+        // translateX: [this.iframePos.clientX, 0],
+        // translateY: [this.iframePos.clientY, 0],
+        opacity: [0, 1],
+        scale: [0, 1],
+        duration: 300,
+        easing: 'easeOutQuint',
+        offset: 0
+      })
+      showIframeframes.complete = done
+    },
+    showIframeLeave(el, done) {
+      const showIframeframes = anime.timeline()
+      showIframeframes.add({
+        targets: '#router-view',
+        scale: [0.92, 1],
+        duration: 200,
+        easing: 'easeInOutQuad',
+        offset: 0
+      }).add({
+        targets: '#iframe-section',
+        backdropFilter: [blur('4px'), blur(0)],
+        opacity: [1, 0],
+        duration: 300,
+        easing: 'easeInOutQuad',
+        offset: 0
+      }).add({
+        targets: '#iframe-section .iframe-bar',
+        // translateX: [0, this.iframePos.clientX],
+        // translateY: [0, this.iframePos.clientX],
+        opacity: [1, 0],
+        scale: [1, 0],
+        duration: 300,
+        easing: 'easeInOutQuad',
+        offset: 0
+      })
+      showIframeframes.complete = done
     },
     ...mapMutations({
       setAssessStatus: 'SET_ASSESS_STATUS',
@@ -158,7 +224,12 @@ export default {
     right: 0;
     margin: auto;
     z-index: 10;
+    backdrop-filter: blur(5px);
     background-color: rgba(0, 0, 0, 0.1);
+    // .iframe-bar {
+    //   transform: scale(0);
+    //   transition: transform .3s ease;
+    // }
   }
 }
 </style>

@@ -63,7 +63,7 @@ export const afterQueueSuccess = function({ commit, state }, mode) {
     // 房间状态
     commit(types.SET_ROOM_MODE, roomStatus.videoChat)
     tip.push({
-      content: `视频客服${state.csInfo.csName}转接成功，祝您沟通愉快！`,
+      content: `视频客服${state.csInfo.csId}转接成功，祝您沟通愉快！`,
       time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
       msgStatus: msgStatus.tip,
       msgType: tipTypes.tip_success
@@ -72,7 +72,7 @@ export const afterQueueSuccess = function({ commit, state }, mode) {
     // 房间状态
     commit(types.SET_ROOM_MODE, roomStatus.menChat)
     tip.push({
-      content: `人工客服${state.csInfo.csName}转接成功，祝您沟通愉快！`,
+      content: `人工客服${state.csInfo.csId}转接成功，祝您沟通愉快！`,
       time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
       msgStatus: msgStatus.tip,
       msgType: tipTypes.tip_success
