@@ -5,6 +5,7 @@ const shareJs = async function(shareUrl) {
   // const res = await getShareTicket(shareUrl)
   getShareTicket(shareUrl).then((res) => {
     const jssdk = res.data
+    console.log(res.data)
     wx.config({
       debug: false,
       appId: jssdk.appId,
@@ -48,51 +49,55 @@ const shareJs = async function(shareUrl) {
   wx.ready(function() {
     // alert('wx ====== ready')
     const thatopts = options
-    // wx.hideAllNonBaseMenuItem()
-    // // wx.showMenuItems({
-    // //   menuList: ['menuItem:share:appMessage', 'menuItem:share:timeline'] // 要显示的菜单项，所有menu项见附录3
-    // // })
+   // wx.hideAllNonBaseMenuItem()
     // wx.showMenuItems({
-    //   menuList: [
-    //     'menuItem:readMode', // 闃呰妯″紡
-    //     'menuItem:share:timeline', // 鍒嗕韩鍒版湅鍙嬪湀
-    //     'menuItem:copyUrl' // 澶嶅埗閾炬帴
-    //   ],
-    //   success: function(res) {
-    //     alert('批量显示菜单')
+    //   menuList: ['menuItem:share:appMessage', 'menuItem:share:timeline'] // 要显示的菜单项，所有menu项见附录3
+    // })
+    wx.showMenuItems({
+      menuList: [
+        'menuItem:share:appMessage',
+        'menuItem:share:timeline'
+      ],
+      success: function(res) {
+        console.log('批量显示菜单')
+        // alert('批量显示菜单')
+      },
+      fail: function(res) {
+        console.log('批量显示菜单失败:' + JSON.stringify(res))
+        // alert(JSON.stringify(res))
+      }
+    })
+    // 分享给朋友
+    // wx.onMenuShareAppMessage({
+    //   title: thatopts.title, // 分享标题
+    //   desc: thatopts.desc, // 分享描述
+    //   link: thatopts.link, // 分享链接
+    //   imgUrl: thatopts.imgUrl, // 分享图标
+    //   trigger: function(res) {
+    //     console.log('onMenuShareAppMessage触发失败:' + JSON.stringify(res))
+    //     // alert('trigger', res)
+    //   },
+    //   success: function() {
+    //     console.log('onMenuShareAppMessage分享成功')
     //   },
     //   fail: function(res) {
-    //     alert(JSON.stringify(res))
+    //     console.log('onMenuShareAppMessage分享失败:' + JSON.stringify(res))
     //   }
     // })
+    // 分享到朋友圈
     wx.onMenuShareTimeline({
       title: thatopts.title, // 分享标题
       desc: thatopts.desc, // 分享描述
       link: thatopts.link, // 分享链接
       imgUrl: thatopts.imgUrl, // 分享图标
       trigger: function(res) {
-        // alert('trigger', res)
+        console.log('onMenuShareTimeline触发失败:' + JSON.stringify(res))
       },
       success: function() {
-        // alert('成功')
+        console.log('onMenuShareTimeline分享成功')
       },
       fail: function(res) {
-        // alert('失败', JSON.stringify(res))
-      }
-    })
-    wx.onMenuShareAppMessage({
-      title: thatopts.title, // 分享标题
-      desc: thatopts.desc, // 分享描述
-      link: thatopts.link, // 分享链接
-      imgUrl: thatopts.imgUrl, // 分享图标
-      trigger: function(res) {
-        // alert('trigger', res)
-      },
-      success: function() {
-        // alert('成功')
-      },
-      fail: function(res) {
-        // alert('失败', JSON.stringify(res))
+        console.log('onMenuShareTimeline分享失败:' + JSON.stringify(res))
       }
     })
   })
