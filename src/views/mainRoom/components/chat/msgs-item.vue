@@ -32,7 +32,7 @@
           </div>
         </div>
         <!-- 基本消息 -->
-        <span class="text" v-if="msg.msgType === msgTypes.msg_normal" v-html="msg.content">{{msg.content}}</span>
+        <span class="text" v-if="msg.msgType === msgTypes.msg_normal" v-html="msg.content" @click="$emit('targetLink', $event)">{{msg.content}}</span>
         <!-- 点赞消息 -->
         <span class="text" v-if="msg.msgType === msgTypes.msg_liked" v-html="msg.content"></span>
         <!-- 转人工 -->

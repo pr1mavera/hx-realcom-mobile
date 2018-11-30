@@ -20,7 +20,7 @@ import { mapGetters, mapMutations, mapActions } from 'vuex'
 import { IMMixin } from '@/common/js/mixin'
 import IM from '@/server/im'
 import { ERR_OK, videoQueue, videoQueueCancel, videoQueueHeartBeat } from '@/server/index.js'
-import { roomStatus, queueStatus, sessionStatus, systemMsgStatus } from '@/common/js/status'
+import { roomStatus, queueStatus, systemMsgStatus } from '@/common/js/status'
 
 export default {
   mixins: [
