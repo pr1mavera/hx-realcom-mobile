@@ -58,6 +58,7 @@
     <div class="container-item">
       <p class="container-item-tit">我的小幸福</p>
       <send-gift style="height: unset"
+                 :giftType="giftType"
       ></send-gift>
     </div>
     <div class="btn-box">
@@ -90,7 +91,8 @@
      return {
        personalDisplay: [],
        cuSerInfo: [],
-       labelType: 'notAll'
+       labelType: 'notAll',
+       giftType: 'notAll'
      }
     },
     computed: {

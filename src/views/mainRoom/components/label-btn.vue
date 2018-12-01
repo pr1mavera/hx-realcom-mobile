@@ -37,7 +37,7 @@
   import { mapGetters } from 'vuex'
   import Queue from '@/common/js/Queue'
   import { Checker, CheckerItem, Swiper, SwiperItem } from 'vux'
-  import { ERR_OK, viewLabels, viewAllLabels } from '@/server/index.js'
+  import { ERR_OK, viewLabels } from '@/server/index.js'
 
   export default {
     // name: "label-btn.vue"
@@ -105,16 +105,17 @@
 
       // 标签信息查询，获取label列表
       async getLabels() {
-        const csId = this.$route.query.cusSerId
-        // const csId = '123456'
+        var csId = ''
 
+        // debugger
         if (this.labelType === 'notAll') {
           const page = 0
           const pageSize = -1
+          const csId = this.$route.query.cusSerId
           // 评价当前客服的标签
 
           const res = await viewLabels(page, pageSize, csId)
-          debugger
+          // debugger
           if (res.result.code === ERR_OK) {
             // console.log('=============这是查询到的我的评价标签信息:' + JSON.stringify(res.data.labels))
             this.showDots = false
@@ -127,8 +128,8 @@
           const page = 1
           const pageSize = -1
           this.disable = false // 标签可以选
+          const res = await viewLabels(page, pageSize, csId)
           // debugger
-          const res = await viewAllLabels(page, pageSize)
           if (res.result.code === ERR_OK) {
             // console.log('=============这是当前页查询到所有的标签信息:' + JSON.stringify(res))
             // const pages = Math.ceil(res.data.totalCount[0].counts / pageSize) // 总页数

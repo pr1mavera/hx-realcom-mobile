@@ -5,8 +5,8 @@
     <send-extend-item
       v-for="(item, index) in giftMap"
       :key="index"
-      :icon="`/static/img/gift/${item.id}.png`"
-      :text="item.name"
+      :icon="`/static/img/gift/${item.giftId}.png`"
+      :text="item.giftName + ' ' + (item.giftCount === undefined ? '' : item.giftCount)"
       @click.native.prevent="$emit('selectGift', item)"
     ></send-extend-item>
     <!-- 当客服还没有收到礼物时 -->
@@ -20,6 +20,7 @@
 </template>
 
 <script type="text/ecmascript-6">
+import {mapGetters} from 'vuex'
 import {ERR_OK, getImgUrl, viewGifts} from '@/server/index.js'
 export default {
   components: {
@@ -32,6 +33,9 @@ export default {
     giftsInfo: {
       type: Array
       // 数组默认值需从一个工厂函数获取
+    },
+    giftType: {
+      type: String
     }
   },
   computed: {
@@ -44,7 +48,10 @@ export default {
         color: ${this.curTheme.textColor};
         height: ${this.curTheme.height};
       `
-    }
+    },
+    ...mapGetters([
+      'csInfo'
+    ])
   },
   data() {
     return {
@@ -97,35 +104,21 @@ export default {
     }
   },
   mounted() {
-    // this.getGiftsInfo()
+    this.getGiftsInfo()
   },
   methods: {
     // 获取礼物列表
     async getGiftsInfo() {
-      // 个人中心获取的礼物的展示
-      // if (this.giftsInfo !== undefined) {
-      //   // this.giftMap = this.giftsInfo
-      //   console.log('================ 收到的礼物列表在此：' + JSON.stringify(this.giftsInfo))
-      //   const giftsInfo = this.giftsInfo
-      //   for (var i in giftsInfo) {
-      //     const text = (giftsInfo[i].giftName + ' ' + giftsInfo[i].giftCount)
-      //     const giftPic = getImgUrl(giftsInfo[i].giftUrl)
-      //
-      //     this.giftMap = this.myGifts.push({url: 'caomeidangao', name: text})
-      //     // this.giftMap = myGetGifts
-      //     console.log('====================  我的礼物列表：' + JSON.stringify({url: giftPic, name: text}))
-      //   }
-      // }
-
-      // 未分页
-      // http://192.168.8.108:7001/api/v1/video/user/gifts?page=0&pageSize=-1&csId=1
       const page = 0
       const pageSize = -1
-      const csId = '1' // 测试数据
+      var csId = ''
+      // const csId = this.csInfo.csId
 
+      if (this.giftType === 'notAll') {
+        csId = this.$route.query.cusSerId
+      }
       const res = await viewGifts(page, pageSize, csId)
       // debugger
-      // console.log('==============>这里是礼物列表啊啊' + JSON.stringify(res))
       if (res.result.code === ERR_OK) {
         this.giftMap = res.data.gifts
       } else {
