@@ -56,7 +56,7 @@ export default {
       // 当前队列无人排队，直接推送排队成功的消息给坐席
       this.isQueuingTextShow = false
       const msg = {
-        code: systemMsgStatus.video_requestCsEntance,
+        code: systemMsgStatus.VIDEO_REQUEST_CS_ENTENCE,
         csId: this.$route.query.csId,
         csName: this.$route.query.csName,
         accessId: res.accessId,
@@ -67,12 +67,12 @@ export default {
       await IM.sendSystemMsg(config)
 
       // 客服转接定时器
-      const video_csReqTransFail_msg = {
-        code: systemMsgStatus.video_csReqTransFail,
+      const VIDEO_CS_REQ_TRANS_FAIL_msg = {
+        code: systemMsgStatus.VIDEO_CS_REQ_TRANS_FAIL,
         csId: msg.csId
       }
       this.reqTransTimeout({
-        msg: video_csReqTransFail_msg,
+        msg: VIDEO_CS_REQ_TRANS_FAIL_msg,
         toast: this.$vux.toast,
         delay: 30000
       }).then(() => {
