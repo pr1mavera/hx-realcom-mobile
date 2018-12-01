@@ -63,27 +63,33 @@ export default {
       giftMap: [
         {
           id: 'gift_car',
-          name: '豪华跑车'
+          name: '豪华跑车',
+          duration: 2.2
         },
         {
           id: 'gift_wing',
-          name: '天使翅膀'
+          name: '天使翅膀',
+          duration: 2.2
         },
         {
           id: 'gift_rocket',
-          name: '土豪火箭'
+          name: '土豪火箭',
+          duration: 2.2
         },
         {
           id: 'gift_earphones',
-          name: '镶钻耳麦'
+          name: '镶钻耳麦',
+          duration: 2.2
         },
         {
           id: 'gift_island',
-          name: '优享海岛'
+          name: '优享海岛',
+          duration: 2.2
         },
         {
           id: 'gift_cake',
-          name: '草莓蛋糕'
+          name: '草莓蛋糕',
+          duration: 2.2
         }
       ],
       myGifts: [],

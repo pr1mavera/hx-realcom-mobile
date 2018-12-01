@@ -314,16 +314,16 @@ export const IMMixin = {
       switch (+msgsObj.code) {
         /* ******************************** 视频 ******************************** */
         // 人数减少（视频）
-        case systemMsgStatus.video_queuesReduce:
+        case systemMsgStatus.VIDEO_QUEUES_REDUCE:
           const video_num = this.queueNum - 1
           this.setQueueNum(video_num)
           break
 
         // 客户端排队成功（视频）
-        case systemMsgStatus.video_queuesSuccess:
+        case systemMsgStatus.VIDEO_QUEUES_SUCCESS:
           this.isQueuingTextShow = false
           const videoQueueSuccMsg = {
-            code: systemMsgStatus.video_requestCsEntance,
+            code: systemMsgStatus.VIDEO_REQUEST_CS_ENTENCE,
             csId: this.$route.query.csId,
             csName: this.$route.query.csName,
             accessId: msgsObj.accessId,
@@ -334,12 +334,12 @@ export const IMMixin = {
           await IM.sendSystemMsg(videoConfig)
 
           // 客服转接定时器
-          const video_csReqTransFail_msg = {
-            code: systemMsgStatus.video_csReqTransFail,
+          const VIDEO_CS_REQ_TRANS_FAIL_msg = {
+            code: systemMsgStatus.VIDEO_CS_REQ_TRANS_FAIL,
             csId: videoQueueSuccMsg.csId
           }
           this.reqTransTimeout({
-            msg: video_csReqTransFail_msg,
+            msg: VIDEO_CS_REQ_TRANS_FAIL_msg,
             toast: this.$vux.toast,
             delay: 30000
           }).then(() => {
@@ -353,12 +353,12 @@ export const IMMixin = {
           break
 
         // 座席端视频接入请求（视频）
-        case systemMsgStatus.video_requestCsEntance:
+        case systemMsgStatus.VIDEO_REQUEST_CS_ENTENCE:
 
           break
 
         // 座席端会话、坐席基本信息传递（视频）
-        case systemMsgStatus.video_transBaseInfo:
+        case systemMsgStatus.VIDEO_TRANS_BASE_INFO:
           // 清空转接定时器
           this.userInfo.transTimeout && clearTimeout(this.userInfo.transTimeout)
 
@@ -383,8 +383,11 @@ export const IMMixin = {
           break
 
         // 坐席端创建会话失败（视频）
-        case systemMsgStatus.video_csInitSessionIdFail:
-          this.reqTransTimeout().then(() => {
+        case systemMsgStatus.VIDEO_CS_INIT_SESSIONID_FAIL:
+          this.reqTransTimeout({
+            msg: null,
+            toast: this.$vux.toast
+          }).then(() => {
             if (this.$route.query.goindex === 'true') {
               this.$router.push('/')
             } else {
@@ -396,16 +399,16 @@ export const IMMixin = {
 
         /* ********************************************* 在线 ********************************************* */
         // 人数减少（在线）
-        case systemMsgStatus.onLine_queuesReduce:
+        case systemMsgStatus.ONLINE_QUEUES_REDUCE:
           const online_num = this.queueNum - 1
           this.setQueueNum(online_num)
           break
 
         // 客户端排队成功（在线）
-        case systemMsgStatus.onLine_queuesSuccess:
+        case systemMsgStatus.ONLINE_QUEUES_SUCCESS:
           this.$router.replace({path: `/room/chat?openId=${this.userInfo.openId}`})
           const onlineQueueSuccMsg = {
-            code: systemMsgStatus.onLine_requestCsEntance,
+            code: systemMsgStatus.ONLINE_REQUEST_CS_ENTANCE,
             csId: msgsObj.csId,
             startTime: msgsObj.queueStartTime,
             endTime: msgsObj.queueEndTime
@@ -414,12 +417,12 @@ export const IMMixin = {
           await IM.sendSystemMsg(onlineConfig)
 
           // 客服转接定时器
-          const online_csReqTransFail_msg = {
-            code: systemMsgStatus.online_csReqTransFail,
+          const ONLINE_CS_REQ_TRANS_FAIL_msg = {
+            code: systemMsgStatus.ONLINE_CS_REQ_TRANS_FAIL,
             csId: onlineQueueSuccMsg.csId
           }
           this.reqTransTimeout({
-            msg: online_csReqTransFail_msg,
+            msg: ONLINE_CS_REQ_TRANS_FAIL_msg,
             toast: this.$vux.toast,
             delay: 30000
           }).then(() => {
@@ -428,7 +431,7 @@ export const IMMixin = {
           break
 
         // 座席端会话、坐席基本信息传递（在线）
-        case systemMsgStatus.onLine_transBaseInfo:
+        case systemMsgStatus.ONLINE_TRANS_BASE_INFO:
           // 清空转接定时器
           this.userInfo.transTimeout && clearTimeout(this.userInfo.transTimeout)
 
@@ -455,7 +458,7 @@ export const IMMixin = {
           break
 
         // 结束会话（在线）
-        case systemMsgStatus.onLine_serverFinish:
+        case systemMsgStatus.ONLINE_SERVER_FINISH:
           this.setServerTime('00:00')
           this.$vux.toast.text('当前人工服务已结束', 'middle')
           await Tools.AsyncTools.sleep(3000)
@@ -470,9 +473,12 @@ export const IMMixin = {
           break
 
         // 坐席端创建会话失败（在线）
-        case systemMsgStatus.onLine_csInitSessionIdFail:
+        case systemMsgStatus.ONLINE_CS_INIT_SESSIONID_FAIL:
           // 转接失败
-          this.reqTransTimeout().then(() => {
+          this.reqTransTimeout({
+            msg: null,
+            toast: this.$vux.toast
+          }).then(() => {
             this.afterQueueFailed()
           })
           break
@@ -959,7 +965,7 @@ export const onLineQueueMixin = {
       // // 排队成功，直接通知坐席
       // this.setChatGuid(new Date().getTime())
       // const msg = {
-      //   code: systemMsgStatus.onLine_requestCsEntance,
+      //   code: systemMsgStatus.ONLINE_REQUEST_CS_ENTANCE,
       //   chatGuid: this.chatGuid,
       //   csId: 'webchat7',
       //   csName: 'webchat7',
@@ -1035,7 +1041,7 @@ export const onLineQueueMixin = {
       if (!data.isTeam) {
         // 排队成功，直接通知坐席
         const msg = {
-          code: systemMsgStatus.onLine_requestCsEntance,
+          code: systemMsgStatus.ONLINE_REQUEST_CS_ENTANCE,
           csId: data.csId,
           csName: data.csName,
           startTime: data.startTime,
@@ -1045,13 +1051,13 @@ export const onLineQueueMixin = {
         await IM.sendSystemMsg(config)
 
         // 客服转接定时器
-        const online_csReqTransFail_msg = {
-          code: systemMsgStatus.online_csReqTransFail,
+        const ONLINE_CS_REQ_TRANS_FAIL_msg = {
+          code: systemMsgStatus.ONLINE_CS_REQ_TRANS_FAIL,
           toast: this.$vux.toast,
           csId: msg.csId
         }
         this.reqTransTimeout({
-          msg: online_csReqTransFail_msg,
+          msg: ONLINE_CS_REQ_TRANS_FAIL_msg,
           delay: 30000
         }).then(() => {
           this.afterQueueFailed()

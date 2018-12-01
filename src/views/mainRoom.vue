@@ -6,6 +6,7 @@
         @showLowVersion="lowVersion = true"
         @showShare="isShareView = true"
         @showIframe="showIframe"
+        @showGiftAnime="showGiftAnime"
       ></router-view>
     </keep-alive>
     <videoBar class="video-bar"
@@ -30,6 +31,11 @@
         <iframe-bar class="iframe-bar" :iframeSrc="iframeSrc" @closeIframe="iframeView = false"></iframe-bar>
       </section>
     </transition>
+    <transition name="fade">
+      <section class="gift-section" v-if="giftAnimeView">
+        <img :src="giftSrc">
+      </section>
+    </transition>
   </div>
 </template>
 
@@ -37,6 +43,7 @@
 // import wx from 'weixin-js-sdk'
 import { mapGetters, mapMutations, mapActions } from 'vuex'
 import { roomStatus, sessionStatus } from '@/common/js/status'
+import Tools from '@/common/js/tools'
 import GoShare from '@/common/js/share'
 import anime from 'animejs'
 
@@ -63,7 +70,10 @@ export default {
       iframePos: {
         clientX: 0,
         clientY: 0
-      }
+      },
+      // gift
+      giftAnimeView: false,
+      giftSrc: null
     }
   },
   computed: {
@@ -188,6 +198,20 @@ export default {
       })
       showIframeframes.complete = done
     },
+    async showGiftAnime(giftInfo) {
+      this.showGiftView(giftInfo.id)
+      const duration = (+giftInfo.duration) * 1000
+      await Tools.AsyncTools.sleep(duration)
+      this.resetGiftView()
+    },
+    showGiftView(id) {
+      this.giftAnimeView = true
+      this.giftSrc = `/static/img/gift/${id}.gif`
+    },
+    resetGiftView() {
+      this.giftAnimeView = false
+      this.giftSrc = null
+    },
     ...mapMutations({
       setAssessStatus: 'SET_ASSESS_STATUS',
       setAssessView: 'SET_ASSESS_VIEW'
@@ -230,6 +254,31 @@ export default {
     //   transform: scale(0);
     //   transition: transform .3s ease;
     // }
+  }
+  .gift-section {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: auto;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    background-color: rgba(0, 0, 0, 0.2);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+  .fade-enter-active, .fade-leave-active {
+    backdrop-filter: blur(2px);
+    transition: all .3s;
+  }
+  .fade-enter, .fade-leave-to {
+    opacity: 0;
+    backdrop-filter: blur(0);
   }
 }
 </style>

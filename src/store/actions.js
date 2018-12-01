@@ -213,7 +213,7 @@ export const updateLastAction = function({ commit, state }) {
   const actionTimeout = setTimeout(async() => {
     // 用户长时间无响应，主动断开连接
     const sysMsgs = {
-      code: systemMsgStatus.onLine_userNoResponse,
+      code: systemMsgStatus.ONLINE_USER_NO_RESPONSE,
       csId: state.csInfo.csId
     }
     const onlineConfig = await configSendSystemMsg({ state }, sysMsgs)

@@ -358,7 +358,7 @@ export default {
         click: true,
         // autoBlur: false,
         probeType: 3,
-        swipeBounceTime: 200,
+        // swipeBounceTime: 200,
         bounceTime: 400,
         bindToWrapper: true,
         pullDownRefresh: {
@@ -563,6 +563,7 @@ export default {
       this.toggleExtendBar()
     },
     async sendGiftMsgClick(giftInfo) {
+      this.$emit('showGiftAnime', giftInfo)
       await this.sendGiftMsg(giftInfo)
       this.toggleExtendBar()
     },
