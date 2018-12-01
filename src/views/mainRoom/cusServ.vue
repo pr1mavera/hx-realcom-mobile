@@ -5,6 +5,7 @@
       @resetMyCs="resetMyCs"
       @removeCs="removeCs"
       @goToLineUp="showConfirm"
+      @clickToLineUp = "showConfirm"
     ></router-view>
     <!--<div v-transfer-dom>-->
       <!--<confirm v-model='alertTip'>-->
@@ -17,7 +18,8 @@
 <script type="text/ecmascript-6">
 import { mapGetters, mapActions } from 'vuex'
 import Tools from '@/common/js/tools'
-import { getCsStatus } from '@/server/index.js'
+
+import {getCsStatus} from '@/server/index.js'
 import { roomStatus } from '@/common/js/status'
 
 export default {
@@ -37,7 +39,6 @@ export default {
     showConfirm(cs) {
       this.csSelected = cs
       const self = this
-      // debugger
       this.$vux.confirm.show({
         title: '您即将转入视频客服',
         onConfirm() {
@@ -53,6 +54,8 @@ export default {
       // debugger
       this.myCs.splice(index, 1)
     },
+
+    // 进入视频客服
     async goToLineUp() {
       // 判断当前是否为工作时间
       const SP_workT = this.userInfo.workTimeInfo.filter(item => item.callType === 'SP')
@@ -67,6 +70,7 @@ export default {
         return
       }
 
+      // debugger
       const res = await getCsStatus(this.csSelected.id)
       const status = Number(res.data.status || this.csSelected.status)
       // 只有就绪和忙碌可以排队
@@ -94,38 +98,6 @@ export default {
           })
           break
       }
-      // debugger
-      // switch (this.csSelected.csStatus) {
-      //   case '1':
-      //     this.$vux.alert.show({
-      //       title: '啊呀，当前客服还没准备好呢~'
-      //     })
-      //     break
-      //   case '2': // 就绪状态
-      //     // this.alertTip = true
-      //     this.$router.push({path: `/room/line-up/${this.csSelected.csId}`})
-      //     // this.beforeQueue('正在为您转接视频客服，请稍候')
-      //     break
-      //   case '3':
-      //     this.$vux.alert.show({
-      //       title: '啊呀，当前客服正在休息呐~'
-      //     })
-      //     break
-      //   case '4':
-      //     this.$vus.alert.show({
-      //       title: '啊呀，当前客服不在呢~'
-      //     })
-      //     break
-      //   case '5':
-      //     this.$vux.alert.show({
-      //       title: '啊呀，当前客服忙~'
-      //     })
-      //     break
-      //   default:
-      //     this.$vux.alert.show({
-      //       title: '啊呀，联系不上当前客服~'
-      //     })
-      // }
     },
     ...mapActions([
       'beforeQueue'

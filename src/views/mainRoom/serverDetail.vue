@@ -63,20 +63,16 @@
     </div>
     <div class="btn-box">
       <a class="btn btn-back" @click="$router.back(-1)">返 回</a>
-      <a class="btn btn-lin-up" @click="enterLinUp">立即咨询</a>
+      <a class="btn btn-lin-up" v-if="enterVideo" @click="enterLinUp">立即咨询</a>
     </div>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
-  import Tools from '@/common/js/tools'
-  import { mapGetters, mapActions } from 'vuex'
+  // import Tools from '@/common/js/tools'
+  import { mapGetters } from 'vuex'
   import { Swiper, SwiperItem, XButton, XCircle } from 'vux'
   import { ERR_OK, getCsInfo, csPhoto } from '@/server/index.js'
-  import { roomStatus } from '@/common/js/status'
-
-  // 顶部轮播图的列表
-  // const displayList = []
 
   export default {
     components: {
@@ -96,20 +92,23 @@
      }
     },
     computed: {
+      enterVideo() {
+        return this.$route.query.csStatus
+        /*
+        * 人工客服query中为传CSStatus该值
+        * 视频客服跳转过来带有该字段
+        * */
+      },
       ...mapGetters([
-        'csInfo',
-        'userInfo'
+        'csInfo'
       ])
     },
     mounted() {
       this.getCsInfo()
-      // this.getGifts()
-      // this.getLabels()
     },
     methods: {
       // 获取客服信息
       async getCsInfo() {
-        // const cuSerId = '123456789'
         const cuSerId = this.$route.query.cusSerId
         // console.log('=================================' + JSON.stringify(this.csInfo))
         const res = await getCsInfo(cuSerId)
@@ -126,54 +125,15 @@
           console.log('======================= error about get cuSerInfo')
         }
       },
+
+      // 点击视频客服
       enterLinUp() {
-        const self = this
-        this.$vux.confirm.show({
-          title: '您即将转入视频客服',
-          onConfirm() {
-          self.goToLineUp()
-          }
-        })
-      },
-      goToLineUp() {
-        // 判断当前时间是否是在工作时间内
-        const SP_workT = this.userInfo.workTimeInfo.filter(item => item.callType === 'SP')
-        const workT = {
-          startT: SP_workT[0].startTime,
-          endT: SP_workT[0].endTime
+        const csData = {
+          id: this.$route.query.cusSerId,
+          status: this.$route.query.csStatus
         }
-        if (!Tools.DateTools.isWorkTime(workT)) {
-          this.$vux.alert.show({
-            title: `抱歉，当前为非工作时间，视频客服工作时间为周一至周日${workT.startT}-${workT.endT}，请在工作时间内来询，感谢您的关注！`
-          })
-          return
-        }
-        const status = this.$route.query.csStatus
-        const cuSerId = this.$route.query.cusSerId
-        // 只有就绪和忙碌可以排队
-        if (status === '1') {
-          this.$vux.alert.show({
-            title: '啊呀，当前客服暂时还没准备好呢~'
-          })
-        } else if (status === '3' || status === '5') {
-          this.$router.push({path: `/room/line-up/${cuSerId}`})
-          this.beforeQueue({
-            mode: roomStatus.videoChat,
-            content: '正在为您转接视频客服，请稍候'
-          })
-        } else if (status === '4') {
-          this.$vux.alert.show({
-            title: '啊呀，当前客服正在休息呐~'
-          })
-        } else if (status === '2') {
-          this.$vux.alert.show({
-            title: '啊呀，当前客服暂时不在呢~'
-          })
-        }
-      },
-      ...mapActions([
-        'beforeQueue'
-      ])
+        this.$emit('clickToLineUp', csData)
+      }
     }
   }
 

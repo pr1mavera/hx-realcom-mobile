@@ -5,7 +5,7 @@
     :class="[{'item-padding-left': msg.isSelfSend, 'item-padding-right': !msg.isSelfSend}]">
     <div class="avatar" v-if="!msg.isSelfSend">
       <div class="bot-avatar bg-image">
-        <img width=100% height=100% v-lazy="avatarUrl">
+        <img width=100% height=100% v-lazy="avatarUrl" @click="enterSerCenter">
       </div>
       <!-- <svg class="icon extend-click" aria-hidden="true">
         <use xlink:href="#icon-wode"></use>
@@ -175,9 +175,24 @@ export default {
     clickImgMsg() {
       this.$emit('onClickImgMsg', +this.imgId)
     },
-    // 点击留言按钮
+
+    // 点击留言按钮,进入留言页面
     leaveMsg() {
       this.$emit('toLeaveMsg')
+    },
+
+    // 进入在线客服个人中心
+    enterSerCenter() {
+      // 判断是否是人工客服（机器人没有个人中心）
+      if (!this.csInfo.csId) {
+        return
+      }
+      this.$router.push({
+        path: '/room/serverDetail',
+        query: {
+          cusSerId: this.csInfo.csId
+        }
+      })
     },
     /* *********************************** CopyButton *********************************** */
     showCopyButton() {

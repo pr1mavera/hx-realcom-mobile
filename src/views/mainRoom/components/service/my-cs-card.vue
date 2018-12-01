@@ -113,6 +113,7 @@
           }
         })
       },
+      // 点击视频坐席
       clickToLineUp() {
         this.$emit('clickToLineUp', this.currentCs)
       }
