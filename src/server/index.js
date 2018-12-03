@@ -54,7 +54,7 @@ export const getUserInfoByOpenID = openID => http.get('user', `/video/user?openI
 // 评价信息保存
 export const saveAssess = async(data) => http.post('user', `/video/user/evaluate`, data)
 
-// 获取客服信息
+// 获取客服列表
 export const queryCsInfo = async(page, pageSize, userId, listType) => http.get('user', `/video/user/cs/query?page=${page}&pageSize=${pageSize}&userId=${userId}&listType=${listType}`)
 
 // 获取坐席头像
@@ -68,6 +68,9 @@ export const removeCs = async(data) => http.post('user', `/video/user/cs/delete`
 
 // 客服信息获取（获取客服的个人资料）
 export const getCsInfo = async(csId) => http.get('user', `/video/user/cs?csId=${csId}`)
+
+// 查询‘为我服务次数’
+export const getTimesForMe = async(csId, userId) => http.get('video', `video/cs/service?csId=${csId}&userId=${userId}`)
 
 // 礼物查询信息(同标签查询)
 export const viewGifts = async(page, pageSize, csId) => http.get('user', `/video/user/gifts?page=${page}&pageSize=${pageSize}&csId=${csId}`)

@@ -72,7 +72,7 @@
   // import Tools from '@/common/js/tools'
   import { mapGetters } from 'vuex'
   import { Swiper, SwiperItem, XButton, XCircle } from 'vux'
-  import { ERR_OK, getCsInfo, csPhoto } from '@/server/index.js'
+  import { ERR_OK, getCsInfo, csPhoto, getTimesForMe } from '@/server/index.js'
 
   export default {
     components: {
@@ -94,13 +94,10 @@
     computed: {
       enterVideo() {
         return this.$route.query.csStatus
-        /*
-        * 人工客服query中为传CSStatus该值
-        * 视频客服跳转过来带有该字段
-        * */
       },
       ...mapGetters([
-        'csInfo'
+        'csInfo',
+        'userInfo'
       ])
     },
     mounted() {
@@ -126,7 +123,13 @@
         }
       },
 
-      // 点击视频客服
+      // 获取为我服务次数
+      async timesForMe() {
+        const res = await getTimesForMe()
+        console.log(res)
+      },
+
+      // 点击咨询按钮
       enterLinUp() {
         const csData = {
           id: this.$route.query.cusSerId,
