@@ -137,7 +137,8 @@ export default {
     },
     showIframe({ link, clientX, clientY }) {
       this.iframeView = true
-      this.iframeSrc = link
+      this.iframeSrc = Tools.MsgsFilterTools.transHttp2Https(link)
+      debugger
       // this.iframeSrc = 'http://www.baidu.com'
       // this.iframePos = {
       //   clientX,

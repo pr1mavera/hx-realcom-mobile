@@ -29,6 +29,7 @@ export const loginMixin = {
         return new Promise((resolve) => {
           // 存vuex userInfo
           !res.data.userInfo.openId && (res.data.userInfo.openId = this.$route.query.openId)
+          // !res.data.userInfo.userPhone && (res.data.userInfo.userPhone = '00000000')
           res.data.userInfo.avatar = res.data.wxUserInfo ? res.data.wxUserInfo.headImgUrl : ''
           res.data.userInfo.nickName = res.data.wxUserInfo ? res.data.wxUserInfo.nickName : ''
           this.setUserInfo(res.data.userInfo)
@@ -585,6 +586,7 @@ export const sendMsgsMixin = {
         // '123456789',
         {
           sessionId: this.sessionId,
+          chatGuid: this.chatGuid,
           toUserName: this.csInfo.csName,
           msg: text,
           time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
@@ -617,6 +619,7 @@ export const sendMsgsMixin = {
         // '123456789',
         {
           sessionId: this.sessionId,
+          chatGuid: this.chatGuid,
           toUserName: this.csInfo.csName,
           msg: `${this.userInfo.userName}给你送了一个礼物`,
           time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
@@ -651,6 +654,7 @@ export const sendMsgsMixin = {
         // '123456789',
         {
           sessionId: this.sessionId,
+          chatGuid: this.chatGuid,
           toUserName: this.csInfo.csName,
           msg: `我${this.userInfo.userName}给你点赞`,
           time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
@@ -692,6 +696,7 @@ export const sendMsgsMixin = {
           avatar: this.userInfo.userId,
           toUserName: this.csInfo.csName,
           sessionId: this.sessionId,
+          chatGuid: this.chatGuid,
           identifier: this.userInfo.userId,
           msgStatus: msgStatus.msg,
           msgType: msgTypes.msg_img,
@@ -732,6 +737,7 @@ export const sendMsgsMixin = {
         this.csInfo.csId,
         {
           sessionId: this.sessionId,
+          chatGuid: this.chatGuid,
           toUserName: this.csInfo.csName,
           msg: `小华表情`,
           time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
@@ -1053,11 +1059,11 @@ export const onLineQueueMixin = {
         // 客服转接定时器
         const ONLINE_CS_REQ_TRANS_FAIL_msg = {
           code: systemMsgStatus.ONLINE_CS_REQ_TRANS_FAIL,
-          toast: this.$vux.toast,
           csId: msg.csId
         }
         this.reqTransTimeout({
           msg: ONLINE_CS_REQ_TRANS_FAIL_msg,
+          toast: this.$vux.toast,
           delay: 30000
         }).then(() => {
           this.afterQueueFailed()

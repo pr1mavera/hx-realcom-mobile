@@ -15,7 +15,6 @@
       <p class="name" v-if="!msg.isSelfSend">{{msg.nickName}}</p>
       <div
         class="content chat-content-shadow"
-        :id="msgCellId"
         :class="[{
           'right-content-style': msg.isSelfSend,
           'left-content-style': !msg.isSelfSend,
@@ -32,7 +31,7 @@
           </div>
         </div>
         <!-- 基本消息 -->
-        <span class="text" v-if="msg.msgType === msgTypes.msg_normal" v-html="msg.content" @click="$emit('targetLink', $event)">{{msg.content}}</span>
+        <span class="text" :id="msgCellId" v-if="msg.msgType === msgTypes.msg_normal" v-html="msg.content" @click="$emit('targetLink', $event)">{{msg.content}}</span>
         <!-- 点赞消息 -->
         <span class="text" v-if="msg.msgType === msgTypes.msg_liked" v-html="msg.content"></span>
         <!-- 转人工 -->
