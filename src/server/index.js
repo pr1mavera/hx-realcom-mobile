@@ -43,7 +43,7 @@ export const getCsStatus = csId => http.get('RTCRoom', `/video/room/status?csId=
  */
 export const getImgUrl = imgUrl => http.url('user', `/video/image/get?imgUrl=${imgUrl}`)
 
-// 获取客服生活照servertest.ihxlife.com:8083/api/v1/video/image/csPhoto?id=1
+// 获取客服生活照
 export const csPhoto = id => http.url('user', `/video/image/csPhoto?id=${id}`)
 
 /**
@@ -70,7 +70,7 @@ export const removeCs = async(data) => http.post('user', `/video/user/cs/delete`
 export const getCsInfo = async(csId) => http.get('user', `/video/user/cs?csId=${csId}`)
 
 // 查询‘为我服务次数’
-export const getTimesForMe = async(csId, userId) => http.get('video', `video/cs/service?csId=${csId}&userId=${userId}`)
+export const getTimesForMe = async(csId, userId) => http.get('user', `/video/cs/service?csId=${csId}&userId=${userId}`)
 
 // 礼物查询信息(同标签查询)
 export const viewGifts = async(page, pageSize, csId) => http.get('user', `/video/user/gifts?page=${page}&pageSize=${pageSize}&csId=${csId}`)
