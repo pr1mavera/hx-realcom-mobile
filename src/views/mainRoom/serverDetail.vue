@@ -129,7 +129,9 @@
 
       // 获取为我服务次数
       async timesForMe() {
-        const res = await getTimesForMe()
+        const userId = this.userInfo.userId
+        const csId = this.$route.query.cusSerId
+        const res = await getTimesForMe(csId, userId)
         debugger
         if (res.result.code === ERR_OK) {
           this.serTimes = res.data.serTimes
