@@ -200,9 +200,9 @@ export default {
       showIframeframes.complete = done
     },
     async showGiftAnime(giftInfo) {
-      this.showGiftView(giftInfo.id)
-      const duration = (+giftInfo.duration) * 1000
-      await Tools.AsyncTools.sleep(duration)
+      this.showGiftView(giftInfo.giftId)
+      // const duration = (+giftInfo.duration) * 1000
+      await Tools.AsyncTools.sleep(4000)
       this.resetGiftView()
     },
     showGiftView(id) {
@@ -266,7 +266,7 @@ export default {
     width: 100%;
     height: 100%;
     z-index: 10;
-    background-color: rgba(0, 0, 0, 0.2);
+    // background-color: rgba(0, 0, 0, 0.2);
     img {
       width: 100%;
       height: 100%;
@@ -274,12 +274,12 @@ export default {
     }
   }
   .fade-enter-active, .fade-leave-active {
-    backdrop-filter: blur(2px);
+    // backdrop-filter: blur(2px);
     transition: all .3s;
   }
   .fade-enter, .fade-leave-to {
     opacity: 0;
-    backdrop-filter: blur(0);
+    // backdrop-filter: blur(0);
   }
 }
 </style>

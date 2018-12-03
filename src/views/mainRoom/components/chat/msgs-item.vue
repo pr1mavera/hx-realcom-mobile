@@ -60,8 +60,8 @@
         </span>
         <!-- 礼物消息 -->
         <span class="text gift-item" v-if="msg.msgType === msgTypes.msg_gift">
-          我送给{{this.csInfo.csName || '客服'}}一个{{msg.giftInfo.name}} !
-          <img class="text-gift" :src="`/static/img/gift/${msg.giftInfo.id}.png`">
+          我送给{{this.csInfo.csName || '客服'}}一个{{msg.giftInfo.giftName}} !
+          <img class="text-gift" :src="`/static/img/gift/${msg.giftInfo.giftId}.png`">
         </span>
         <!-- 留言 -->
         <span class="text" v-if="msg.msgType === msgTypes.msg_leave">{{msg.content}}，请<span class="button" @click="leaveMsg">点击留言</span>~</span>
