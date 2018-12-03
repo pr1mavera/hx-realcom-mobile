@@ -89,18 +89,6 @@
       // 切换轮播页
       changePage(index) {
         this.currentPage = index
-        // // debugger
-        // // console.log('======================>当前页是' + index)
-        // const page = this.currentPage
-        // const pageSize = 2
-        // // this.disable = false // 标签可以选
-        // // debugger
-        // const res = await viewAllLabels(page, pageSize)
-        // if (res.result.code === ERR_OK) {
-        //   this.btnList = res.data.labels
-        // } else {
-        //   // console.log('======================= error about query labelTags')
-        // }
       },
 
       // 标签信息查询，获取label列表
@@ -111,7 +99,7 @@
         if (this.labelType === 'notAll') {
           const page = 0
           const pageSize = -1
-          const csId = this.$route.query.cusSerId
+          csId = this.$route.query.cusSerId
           // 评价当前客服的标签
 
           const res = await viewLabels(page, pageSize, csId)

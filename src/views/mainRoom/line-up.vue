@@ -209,7 +209,7 @@ export default {
         img {
           width: 5rem;
           vertical-align: middle;
-          animation: waiting 8s;
+          animation: waiting 30s;
           animation-timing-function: ease-in;
         }
       }
@@ -249,7 +249,7 @@ export default {
           transform: rotate(0deg);
         }
         100% {
-          transform: rotate(1800deg);
+          transform: rotate(7200deg);
         }
       }
     }

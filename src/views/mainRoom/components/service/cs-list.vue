@@ -92,10 +92,10 @@ export default {
 
     // 删除客服
     removeCs(index) {
-      // debugger
       this.$emit('removeCs', index)
-      // this.myCsList.splice(index, 1)
     },
+
+    // 接收子组件传值
     clickToLineUp(cs) {
       this.$emit('goToLineUp', cs)
     }

@@ -38,11 +38,6 @@ export default new Router({
           component: lineUp
         },
         {
-          path: '/room/serverDetail',
-          name: 'serverDetail',
-          component: serverDetail
-        },
-        {
           path: '/room/leaveMessage',
           name: 'leaveMessage',
           component: leaveMessage
@@ -61,6 +56,11 @@ export default new Router({
               path: '/room/cusServ/add',
               name: 'cusServAdd',
               component: csAdd
+            },
+            {
+              path: '/room/serverDetail',
+              name: 'serverDetail',
+              component: serverDetail
             }
           ]
         }
