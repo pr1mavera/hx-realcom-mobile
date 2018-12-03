@@ -110,10 +110,9 @@ export default {
     background: #f4f4f4;
     box-sizing: border-box;
     .icon {
-      width: 1.4rem;
-      height: 1.4rem;
+      width: 1.2rem;
+      height: 1.2rem;
       fill: #ffffff;
-      vertical-align: -0.15em;
     }
     .tips {
       color: #909090;
