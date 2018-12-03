@@ -666,7 +666,12 @@ export default {
     },
     /* *********************************** copy btn *********************************** */
     showCopy(el, msg) {
+      // get window scroll Y
+      let pageYScroll = window.pageYOffset || document.documentElement.scrollTop
+      // get position of element relative to viewport
       this.targetEleRect = Tools.RectTools.getRectLimitDoc(el)
+      this.targetEleRect.top += pageYScroll
+
       const pureText = msg.replace(/<\/?.+?>/g, '').replace(/&nbsp;/g, '')
       this.copyTextTemp = pureText
       this.isCopyButtonShow = true

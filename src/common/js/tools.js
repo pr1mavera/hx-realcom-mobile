@@ -245,6 +245,11 @@ const MsgsFilterTools = {
     // return answer.replace(regHref, `href="javascript:;"`) answer.match(regUrl)[0] store.commit('SET_ASSESS_VIEW', true)
   },
 
+  // 机器人答案链接统一为https
+  transHttp2Https: function(url) {
+    return url.match(/https/) ? url : url.replace(/http/, 'https')
+  },
+
   // 机器人消息解析器
   botAnswerfilter: function(data) {
     let msg = {
@@ -252,6 +257,7 @@ const MsgsFilterTools = {
       nickName: data.botName,
       isSelfSend: false,
       time: data.time,
+      timestamp: new Date().getTime(),
       msgStatus: msgStatus.msg,
       chatType: sessionStatus.robot
     }

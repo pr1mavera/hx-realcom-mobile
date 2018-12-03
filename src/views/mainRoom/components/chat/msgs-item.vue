@@ -15,7 +15,6 @@
       <p class="name" v-if="!msg.isSelfSend">{{msg.nickName}}</p>
       <div
         class="content chat-content-shadow"
-        :id="msgCellId"
         :class="[{
           'right-content-style': msg.isSelfSend,
           'left-content-style': !msg.isSelfSend,
@@ -32,7 +31,7 @@
           </div>
         </div>
         <!-- 基本消息 -->
-        <span class="text" v-if="msg.msgType === msgTypes.msg_normal" v-html="msg.content" @click="$emit('targetLink', $event)">{{msg.content}}</span>
+        <span class="text" :id="msgCellId" v-if="msg.msgType === msgTypes.msg_normal" v-html="msg.content" @click="$emit('targetLink', $event)">{{msg.content}}</span>
         <!-- 点赞消息 -->
         <span class="text" v-if="msg.msgType === msgTypes.msg_liked" v-html="msg.content"></span>
         <!-- 转人工 -->
@@ -61,8 +60,8 @@
         </span>
         <!-- 礼物消息 -->
         <span class="text gift-item" v-if="msg.msgType === msgTypes.msg_gift">
-          我送给{{this.csInfo.csName || '客服'}}一个{{msg.giftInfo.name}} !
-          <img class="text-gift" :src="`/static/img/gift/${msg.giftInfo.id}.png`">
+          我送给{{this.csInfo.csName || '客服'}}一个{{msg.giftInfo.giftName}} !
+          <img class="text-gift" :src="`/static/img/gift/${msg.giftInfo.giftId}.png`">
         </span>
         <!-- 留言 -->
         <span class="text" v-if="msg.msgType === msgTypes.msg_leave">{{msg.content}}，请<span class="button" @click="leaveMsg">点击留言</span>~</span>

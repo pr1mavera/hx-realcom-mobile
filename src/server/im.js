@@ -377,6 +377,7 @@ const IM = (() => {
       data: options.msg,
       desc: `{
         "sessionId":"${options.sessionId}",
+        "chatGuid":"${options.chatGuid}",
         "sendUserId":"${from_id}",
         "sendUserType":"1",
         "toUserId":"${to_id}",
