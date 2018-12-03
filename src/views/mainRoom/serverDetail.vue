@@ -29,7 +29,7 @@
         <p class="tips">总服务数</p>
       </div>
       <div class="flex-box-item">
-        <p><span>{{ cuSerInfo.servTimes === null ? 0 : cuSerInfo.servTimes }}</span>次</p>
+        <p><span>{{serTimes}}</span>次</p>
         <p class="tips">为我服务</p>
       </div>
       <div class="flex-box-item">
@@ -87,6 +87,7 @@
      return {
        personalDisplay: [],
        cuSerInfo: [],
+       serTimes: '0',
        labelType: 'notAll',
        giftType: 'notAll'
      }
@@ -101,7 +102,10 @@
       ])
     },
     mounted() {
-      this.getCsInfo()
+      this.$nextTick(() => {
+        this.getCsInfo()
+        this.timesForMe()
+      })
     },
     methods: {
       // 获取客服信息
@@ -126,7 +130,12 @@
       // 获取为我服务次数
       async timesForMe() {
         const res = await getTimesForMe()
-        console.log(res)
+        debugger
+        if (res.result.code === ERR_OK) {
+          this.serTimes = res.data.serTimes
+        } else {
+          console.log('========== there are some errors' + JSON.stringify(res.result))
+        }
       },
 
       // 点击咨询按钮
