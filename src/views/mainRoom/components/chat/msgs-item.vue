@@ -34,6 +34,8 @@
         <span class="text" :id="msgCellId" v-if="msg.msgType === msgTypes.msg_normal" v-html="msg.content" @click="$emit('targetLink', $event)">{{msg.content}}</span>
         <!-- 点赞消息 -->
         <span class="text" v-if="msg.msgType === msgTypes.msg_liked" v-html="msg.content"></span>
+        <!-- 机器人感谢消息 -->
+        <span class="text" v-if="msg.msgType === msgTypes.msg_bot_thanks">小华感谢您的认可</span>
         <!-- 转人工 -->
         <span class="text" v-if="msg.msgType === msgTypes.msg_no_idea">
           小华好像听不太懂您的问题呢，可转
@@ -228,11 +230,11 @@ export default {
   }
   .avatar {
     position: relative;
-    width: 4.2rem;
-    height: 4.2rem;
+    width: 3.8rem;
+    height: 3.8rem;
     background-color: @text-light;
     border-radius: 50%;
-    margin: 0 1.2rem;
+    margin: 0 1rem;
     overflow: hidden;
     align-items: flex-start;
     .bot-avatar {
@@ -251,13 +253,13 @@ export default {
     .icon {
       width: 1.2rem;
       height: 1.2rem;
-      padding: 1.5rem;
+      padding: 1.3rem;
       fill: @label-line-normal;
     }
   }
   .content-box {
     position: relative;
-    width: calc(~'100% - 6.6rem');
+    width: calc(~'100% - 5.8rem');
     font-size: 1.4rem;
     display: flex;
     flex-direction: column;
@@ -278,7 +280,7 @@ export default {
       display: inline-block;
       width: auto;
       max-width: 100%;
-      padding: 0.9rem 1.2rem;
+      padding: 0.8rem 1.2rem;
       margin-bottom: 1.4rem;
       box-sizing: border-box;
       .msg-status {
@@ -300,14 +302,14 @@ export default {
         }
       }
       &.left-content-style {
-        border-radius: 0.4rem 1.5rem 1.5rem 1.5rem;
+        border-radius: 0.4rem 1.2rem 1.2rem 1.2rem;
         color: @text-normal;
         background-color: @bg-light;
         .chat-content-shadow(@bg-light-shadow)
         // left: 0;
       }
       &.right-content-style {
-        border-radius: 1.5rem 0.4rem 1.5rem 1.5rem;
+        border-radius: 1.2rem 0.4rem 1.2rem 1.2rem;
         color: @text-lighter;
         background-color: @text-special;
         .chat-content-shadow(@text-special-shadow)

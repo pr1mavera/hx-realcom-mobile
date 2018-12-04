@@ -52,7 +52,7 @@
             </li>
             <!--@click="$router-->
             <!--<li class="chat-content-li" @click="toLeaveMsg">请留言</li>-->
-            <li class="chat-content-block chat-content-end" ref="chatContentEnd"></li>
+            <li class="chat-content-block chat-content-end" :class="{'bot-assess': isBotAssessShow}" ref="chatContentEnd"></li>
           </ul>
         </div>
         <fload-button
@@ -60,6 +60,9 @@
           @enterVideoLineUp="confirmToLineUp"
           @enterOnLineLineUp="enterOnLineLineUp"
         ></fload-button>
+        <float-bot-assess v-if="isBotAssessShow"
+          @targetBotAssess="targetBotAssess"
+        ></float-bot-assess>
       </div>
       <input-bar
         ref="inputBar"
@@ -133,6 +136,7 @@ export default {
     'DialogItem': () => import('@/views/mainRoom/components/chat/dialog-item'),
     'CardItem': () => import('@/views/mainRoom/components/chat/card-item'),
     'FloadButton': () => import('@/views/mainRoom/components/chat/fload-button'),
+    'FloatBotAssess': () => import('@/views/mainRoom/components/chat/float-bot-assess'),
     'extendBar': () => import('@/views/mainRoom/components/chat/extend-bar'),
     'PullDown': () => import('@/views/mainRoom/components/chat/pull-down')
   },
@@ -174,6 +178,22 @@ export default {
         left: self.targetEleRect.left + self.targetEleRect.width / 2 - 30
       }
       return `transform: translate(${pos.left}px, ${pos.top}px); opacity: ${self.isCopyButtonShow ? 1 : 0};`
+    },
+    isBotAssessShow() {
+      if (this.roomMode !== roomStatus.AIChat) {
+        return false
+      }
+
+      if (!this.msgs.length) {
+        return false
+      }
+
+      const lastMsg = this.msgs[this.msgs.length - 1]
+      if (lastMsg.msgType === msgTypes.msg_normal && lastMsg.isSelfSend === false) {
+        return true
+      }
+
+      return false
     },
     ...mapGetters([
       'userInfo',
@@ -602,7 +622,11 @@ export default {
     confirmToLineUp() {
       const enterVideoStatus = window.sessionStorage.getItem('enterVideoStatus')
       switch (enterVideoStatus) {
-        case 'enter-video-line-up':
+        case 'safari':
+          // 正常进入专属客服
+          this.$router.push('/room/cusServ/list')
+          break
+        case 'Android':
           // 正常进入专属客服
           this.$router.push('/room/cusServ/list')
           break
@@ -696,6 +720,22 @@ export default {
         width: 0,
         height: 0
       }
+    },
+    targetBotAssess(isResolved) {
+      const ques = {
+        nickName: this.botInfo.botName,
+        isSelfSend: false,
+        time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+        timestamp: new Date().getTime(),
+        msgStatus: msgStatus.msg,
+        chatType: this.sendType
+      }
+      if (isResolved) {
+        ques.msgType = msgTypes.msg_bot_thanks
+      } else {
+        ques.msgType = msgTypes.msg_no_idea
+      }
+      this.sendMsgs(ques)
     },
     async onLineCancelQueue(id) {
       await this.cancelQueue()
@@ -807,6 +847,9 @@ export default {
             }
             &.chat-content-end {
               height: 0;
+              &.bot-assess {
+                height: 9.2rem;
+              }
             }
           }
           .chat-content-li {
@@ -822,6 +865,11 @@ export default {
         position: absolute;
         bottom: 1.2rem;
         right: 1.2rem;
+      }
+      .float-bot-assess {
+        position: absolute;
+        bottom: 1.2rem;
+        left: 1.2rem;
       }
     }
     .input-bar {

@@ -33,7 +33,7 @@
         <p class="tips">为我服务</p>
       </div>
       <div class="flex-box-item">
-        <p class="tips" @click="$emit('showShare')">偷偷的分享</p>
+        <p class="tips" @click="$emit('showShare', cuSerInfo.id, cuSerInfo.nickName)">偷偷的分享</p>
       </div>
     </div>
     <!-- about me -->

@@ -460,6 +460,8 @@ export const IMMixin = {
 
         // 结束会话（在线）
         case systemMsgStatus.ONLINE_SERVER_FINISH:
+          const csId = this.csInfo.csId
+          const csName = this.csInfo.csName
           this.setServerTime('00:00')
           this.$vux.toast.text('当前人工服务已结束', 'middle')
           await Tools.AsyncTools.sleep(3000)
@@ -469,7 +471,7 @@ export const IMMixin = {
           } else {
             // action
             this.afterServerFinish(sessionStatus.onLine)
-            this.$emit('showShare')
+            this.$emit('showShare', csId, csName)
           }
           break
 

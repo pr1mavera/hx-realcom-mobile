@@ -66,11 +66,11 @@
       <div v-transfer-dom>
         <x-dialog v-model="isVideoOverReportShow" :dialog-style="{'max-width': '100%', width: '100%', height: '100%', 'background-color': 'transparent'}">
           <video-over-toast
-            :csAvatarUrl="this.csInfo.csAvatar"
+            :csId="this.csInfo.csId"
             :csName="this.csInfo.csName"
             :time="this.serverTime"
             @goBackToChat="goBackToChat"
-            @showShare="$emit('showShare')"
+            @showShare="showShare"
           ></video-over-toast>
         </x-dialog>
       </div>
@@ -226,6 +226,9 @@ export default {
         this.videoScreenShotShow = true
         resolve()
       })
+    },
+    showShare(csId, csName) {
+      this.$emit('showShare', csId, csName)
     },
     goBackToChat() {
       // 退群

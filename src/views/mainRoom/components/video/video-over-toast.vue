@@ -2,7 +2,7 @@
   <div class="video-over-toast">
     <div class="header">
       <div class="avatar">
-        <img :src="csAvatarUrl || 'http://video-servertest.ihxlife.com:8083/api/v1/video/image/csHeader?id=123456789'">
+        <img v-lazy="avatar">
       </div>
       <div class="name">{{csName || '丽丽'}}</div>
     </div>
@@ -13,16 +13,18 @@
       <p class="desc">总通话时长</p>
     </div>
     <div class="footer">
-      <button id="onMenuShare" class="share" type="button" @click="$emit('showShare')">分享</button>
+      <button id="onMenuShare" class="share" type="button" v-if="isShareBtnShow" @click="$emit('showShare', csId, csName)">分享</button>
       <button class="back" type="button" @click="$emit('goBackToChat')">返回</button>
     </div>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
+import { getCsAvatar } from '@/server/index.js'
+
 export default {
   props: {
-    csAvatarUrl: {
+    csId: {
       type: String
     },
     csName: {
@@ -31,6 +33,20 @@ export default {
     time: {
       type: String
     }
+  },
+  data() {
+    return {
+      isShareBtnShow: false
+    }
+  },
+  computed: {
+    avatar() {
+      return getCsAvatar(this.csId)
+    }
+  },
+  mounted() {
+    const enterVideoStatus = window.sessionStorage.getItem('enterVideoStatus')
+    this.isShareBtnShow = enterVideoStatus === 'Android'
   }
 }
 </script>

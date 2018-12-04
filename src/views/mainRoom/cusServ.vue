@@ -6,6 +6,7 @@
       @removeCs="removeCs"
       @goToLineUp="showConfirm"
       @clickToLineUp = "showConfirm"
+      @showShare="showShare"
     ></router-view>
     <!--<div v-transfer-dom>-->
       <!--<confirm v-model='alertTip'>-->
@@ -53,6 +54,9 @@ export default {
     removeCs(index) {
       // debugger
       this.myCs.splice(index, 1)
+    },
+    showShare(csId, csName) {
+      this.$emit('showShare', csId, csName)
     },
 
     // 进入视频客服

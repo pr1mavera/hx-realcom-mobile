@@ -18,23 +18,37 @@
         @keyup.enter="chatInput($event, true)">
         </br>
       </div> -->
-      <div class="input-content needsclick"
-        autofocus
-        contenteditable="true"
-        placeholder="请输入..."
-        id="input-content-hook"
-        ref="inputContent"
-        type="text"
-        @click="chatFocus($event)"
-        @keyup="chatInput($event)"
-      ></div>
+      <section class="input-wrapper">
+        <div class="input-content needsclick"
+          autofocus
+          contenteditable="true"
+          placeholder="有问题，找小华"
+          id="input-content-hook"
+          ref="inputContent"
+          type="text"
+          @click="chatFocus($event)"
+          @keyup="chatInput($event)"
+        ></div>
+        <!-- <button class="input-inline-btn" @click="chatCommit">
+          <svg class="icon extend-click" aria-hidden="true" :class="{'extend-Bar-Open': this.extendBarOpen}">
+            <use xlink:href="#icon-xiaolian1"></use>
+          </svg>
+        </button> -->
+      </section>
       <!-- <input v-model="inputText" type="text" ref="invisibleInput" v-show="false"> -->
     </div>
     <div class="input-bar-item right-item">
-      <transition
+      <!-- <transition
         @enter="sendBtnEnter"
         @leave="sendBtnLeave">
         <button id="sendBtn" class="sendBtn" v-if="isSendBtnShow" @click="chatCommit">发送</button>
+      </transition> -->
+      <transition name="send-plus" mode="out-in">
+        <button class="input-bar-item-btn" v-if="isSendBtnShow" @click="chatCommit">
+          <svg class="icon extend-click" aria-hidden="true" :class="{'extend-Bar-Open': this.extendBarOpen}">
+            <use xlink:href="#icon-shangchuan"></use>
+          </svg>
+        </button>
       </transition>
       <transition name="send-plus" mode="out-in">
         <button class="input-bar-item-btn" v-if="!isSendBtnShow" @click="toggleExtend">
@@ -49,7 +63,7 @@
 
 <script type="text/ecmascript-6">
 import { mapGetters } from 'vuex'
-import anime from 'animejs'
+// import anime from 'animejs'
 import Tools from '@/common/js/tools'
 // import { XTextarea, Group } from 'vux'
 
@@ -65,7 +79,8 @@ export default {
   },
   computed: {
     isSendBtnShow() {
-      return this.inputBarOpen || this.extendBarOpen
+      // return this.inputBarOpen || this.extendBarOpen
+      return this.inputBarOpen
     },
     ...mapGetters([
       'extendBarOpen',
@@ -138,37 +153,37 @@ export default {
         caretOffset = preCaretRange.toString().length
       }
       return caretOffset
-    },
-    sendBtnEnter() {
-      const extendBarKeyframes = anime.timeline()
-      extendBarKeyframes.add({
-        targets: '#sendBtn',
-        translateX: [
-          { value: [-46, 0], duration: 500, delay: 300, easing: 'easeInOutQuart' }
-        ],
-        translateY: [
-          { value: [10, 0], duration: 200, delay: 300, easing: 'easeInOutQuart' }
-        ],
-        scaleX: [
-          { value: [0.1, 1], duration: 200, delay: 300, easing: 'linear' }
-        ],
-        scaleY: [
-          { value: [0.2, 1], duration: 100, delay: 300, easing: 'linear' }
-        ],
-        borderRadius: [
-          { value: [50, 5], duration: 200, delay: 400, easing: 'easeInOutQuart' }
-        ],
-        opacity: [
-          { value: [0, 1], duration: 300, delay: 300, easing: 'easeInOutQuart' }
-        ],
-        color: [
-          { value: '#fff', duration: 500, delay: 400, easing: 'easeInOutQuart' }
-        ]
-      })
-    },
-    sendBtnLeave() {
-
     }
+    // sendBtnEnter() {
+    //   const extendBarKeyframes = anime.timeline()
+    //   extendBarKeyframes.add({
+    //     targets: '#sendBtn',
+    //     translateX: [
+    //       { value: [-46, 0], duration: 500, delay: 300, easing: 'easeInOutQuart' }
+    //     ],
+    //     translateY: [
+    //       { value: [10, 0], duration: 200, delay: 300, easing: 'easeInOutQuart' }
+    //     ],
+    //     scaleX: [
+    //       { value: [0.1, 1], duration: 200, delay: 300, easing: 'linear' }
+    //     ],
+    //     scaleY: [
+    //       { value: [0.2, 1], duration: 100, delay: 300, easing: 'linear' }
+    //     ],
+    //     borderRadius: [
+    //       { value: [50, 5], duration: 200, delay: 400, easing: 'easeInOutQuart' }
+    //     ],
+    //     opacity: [
+    //       { value: [0, 1], duration: 300, delay: 300, easing: 'easeInOutQuart' }
+    //     ],
+    //     color: [
+    //       { value: '#fff', duration: 500, delay: 400, easing: 'easeInOutQuart' }
+    //     ]
+    //   })
+    // },
+    // sendBtnLeave() {
+    //
+    // }
   }
 }
 </script>
@@ -185,7 +200,7 @@ export default {
   // bottom: 0;
   width: 100%;
   height: auto;
-  min-height: 4.6rem;
+  min-height: 5.2rem;
   // padding: 0 0.8rem;
   // box-sizing: border-box;
   background-color: @bg-light;
@@ -208,36 +223,62 @@ export default {
     &.input-box {
       // min-width: calc(~'100% - 9rem');
       height: 100%;
-      padding: 0.7rem 0 0.7rem 0.8rem;
+      padding: 0.7rem 0 0.7rem 1.6rem;
       flex: 1;
       box-sizing: border-box;
-      .input-content {
-        width: 100%;
-        line-height: 2.2rem;
-        min-height: 3.2rem;
-        max-height: 12rem;
-        outline: 0;
-        word-wrap: break-word;
-        word-break: break-all;
-        overflow-x: hidden;
-        overflow-y: auto;
-        // border-radius: 5px;
-        padding: 0.5rem;
-        // border: 0.05rem solid @label-line-normal;
-        font-size: 1.4rem;
+      .input-wrapper {
+        display: flex;
+        align-items: flex-end;
+        border-radius: 1.9rem;
+        border: 0.05rem solid @text-lighter-a;
+        background-color: rgba(250, 248, 249, 1);
+        padding: 0.5rem 0 0.5rem 1.2rem;
         box-sizing: border-box;
-        color: @text-normal;
-        // background-color: @bg-normal;
-        transition: all .5s cubic-bezier(0.11, 0.62, 0.23, 1);
-        -webkit-overflow-scrolling: touch;
-        -webkit-user-select: text;
-        &:empty:before {
-          content: attr(placeholder);
-          color: @label-line-normal;
-          font-size: 1.2rem;
+        .input-content {
+          width: calc(~'100% - 3.4rem');
+          line-height: 2.8rem;
+          min-height: 2.8rem;
+          max-height: 12rem;
+          outline: 0;
+          word-wrap: break-word;
+          word-break: break-all;
+          overflow-x: hidden;
+          overflow-y: auto;
+          font-size: 1.4rem;
+          color: @text-normal;
+          background-color: unset;
+          transition: all .5s cubic-bezier(0.11, 0.62, 0.23, 1);
+          -webkit-overflow-scrolling: touch;
+          -webkit-user-select: text;
+          &:empty:before {
+            content: attr(placeholder);
+            color: @text-lighter-a;
+            font-size: 1.4rem;
+          }
+          &:focus {
+            content: none;
+          }
         }
-        &:focus {
-          content: none;
+        .input-inline-btn {
+          // position: absolute;
+          // bottom: 0;
+          // right: 0;
+          width: 2.4rem;
+          height: 2.4rem;
+          // flex-basis: 4.6rem;
+          margin: 0.2rem;
+          border: 0;
+          padding: 0;
+          // background-color: @text-special;
+          border-radius: 50%;
+          .icon {
+            margin: 0 auto;
+            width: 100%;
+            height: 100%;
+            transition: all 0.4s ease-in-out;
+            fill: @text-normal;
+            // transition-delay: 0.65s;
+          }
         }
       }
     }
@@ -246,8 +287,8 @@ export default {
       display: flex;
       justify-content: space-between;
       align-items: flex-end;
-      min-width: 8rem;
-      height: 4.6rem;
+      min-width: 4.6rem;
+      height: 5.2rem;
       flex-grow: 0;
       .send-plus-enter-active, .send-plus-leave-active {
         transition: all .5s ease;
@@ -264,17 +305,18 @@ export default {
         width: 2.4rem;
         height: 2.4rem;
         // flex-basis: 4.6rem;
-        margin: 1.1rem;
+        margin: 1.4rem 1.1rem;
         flex-shrink: 0;
         border: 0;
         padding: 0;
-        background-color: unset;
+        background-color: @text-special;
         border-radius: 50%;
         .icon {
           margin: 0 auto;
           width: 1.4rem;
           height: 1.4rem;
           transition: all 0.4s ease-in-out;
+          fill: @text-lighter;
           // transition-delay: 0.65s;
           &.extend-Bar-Open {
             transform: rotate(135deg);

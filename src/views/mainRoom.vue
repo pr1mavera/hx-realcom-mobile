@@ -4,7 +4,7 @@
       <router-view class="router-view" id="router-view"
         @showIosGuide="iosGuide = true"
         @showLowVersion="lowVersion = true"
-        @showShare="isShareView = true"
+        @showShare="toShare"
         @showIframe="showIframe"
         @showGiftAnime="showGiftAnime"
       ></router-view>
@@ -63,7 +63,7 @@ export default {
       shareGuide: false,
       iosGuide: false,
       lowVersion: false,
-      shareUrl: 'https://video-uat.ihxlife.com:8080/video/room/chat?openId=o23yMh5_T67jbkdj36HvgfGvKtsf',
+      shareUrl: '',
       // iframe
       iframeView: false,
       iframeSrc: '',
@@ -84,7 +84,8 @@ export default {
     ...mapGetters([
       'roomMode',
       'isAssessView',
-      'serverTime'
+      'serverTime',
+      'csInfo'
     ])
   },
   mounted() {
@@ -121,16 +122,20 @@ export default {
             // 若当前为人工客服结束，需要手动清空vuex数据
             if (self.roomMode === roomStatus.menChat) {
               // action
+              const csId = self.csInfo.csId
+              const csName = self.csInfo.csName
               self.afterServerFinish(sessionStatus.onLine)
-              self.toShare()
+              self.toShare(csId, csName)
             }
           }
         })
       }
     },
-    async toShare() {
+    async toShare(csId, csName) {
       this.isShareView = false
       this.shareGuide = true
+      debugger
+      this.shareUrl = `https://${window.location.host}/video/share?csId=${csId}&csName=${csName}`
       GoShare(this.shareUrl)
       // await this.initShare()
       // this.clickShare()
