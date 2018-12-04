@@ -63,7 +63,7 @@
     </div>
     <div class="btn-box">
       <a class="btn btn-back" @click="$router.back(-1)">返 回</a>
-      <a class="btn btn-lin-up" v-if="enterVideo" @click="enterLinUp">立即咨询</a>
+      <a class="btn btn-lin-up" v-if="enterVideo" @click="enterLinUp">立即视频</a>
     </div>
   </div>
 </template>

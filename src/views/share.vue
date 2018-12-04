@@ -36,13 +36,15 @@ export default {
   },
   data() {
     return {
-      name: '丽丽',
       labelType: 'notAll'
     }
   },
   computed: {
+    name() {
+      return this.$route.query.csName
+    },
     avatarImgSrc() {
-      return getCsAvatar(this.$route.query.cusSerId)
+      return getCsAvatar(this.$route.query.csId)
     }
   }
 }

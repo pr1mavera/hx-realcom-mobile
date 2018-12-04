@@ -14,7 +14,7 @@
               <div class="header">
                 <img width=100% class="header-img" src="/static/img/chat/csAddBg.png">
                 <div class="header-msg">
-                  <div class="avatar">
+                  <div class="avatar" @click="enterSerCenter">
                     <img width=100% height=100% v-lazy="avatarImg">
                   </div>
                   <div class="nickname">{{curLabelInfo.nickName}}</div>
@@ -345,6 +345,17 @@ export default {
       } else {
         console.log('error about query csInfo')
       }
+    },
+
+    // 点击专属客服头像进入客服的个人中心
+    enterSerCenter() {
+      this.$router.push({
+        path: '/room/serverDetail',
+        query: {
+          cusSerId: this.curLabelInfo.id,
+          csStatus: this.curLabelInfo.status
+        }
+      })
     }
   }
 }
