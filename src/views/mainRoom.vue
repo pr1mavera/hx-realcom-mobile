@@ -134,7 +134,6 @@ export default {
     async toShare(csId, csName) {
       this.isShareView = false
       this.shareGuide = true
-      debugger
       this.shareUrl = `https://${window.location.host}/video/share?csId=${csId}&csName=${csName}`
       GoShare(this.shareUrl)
       // await this.initShare()

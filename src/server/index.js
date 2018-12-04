@@ -118,6 +118,9 @@ export const getBotRoamMsgs = (sessionId, page, pageSize) => http.get('user', `/
 export const requestHistoryMsgs = (userId, page, pageSize) => http.get('user', `/chat/history?page=${page}&pageSize=${pageSize}&userId=${userId}`)
 // export const requestHistoryMsgs = (userId) => http.get('chat', `/chat/history?userId=${userId}`)
 
+// 获取iframe URL
+export const getIframeUrl = url => http.url('user', `/video/frame/content?url=${url}`)
+
 /**
  ************************************ onLine ************************************
  */

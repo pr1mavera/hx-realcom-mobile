@@ -19,7 +19,7 @@
     </div>
     <div class="btn-box" style="text-align: center">
       <x-button mini @click.native="clickToLineUp" style="color: #FF959C;background: #fff;">
-        视频咨询
+        立即视频
       </x-button>
     </div>
   </div>

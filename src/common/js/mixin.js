@@ -363,13 +363,13 @@ export const IMMixin = {
           // 清空转接定时器
           this.userInfo.transTimeout && clearTimeout(this.userInfo.transTimeout)
 
-          const csInfo_video = {
-            csId: msgsObj.csId,
-            csAvatar: getCsAvatar(msgsObj.csId),
-            csName: msgsObj.csName,
-            likesCount: msgsObj.likesCount,
-            csCode: msgsObj.csCode
-          }
+          const csInfo_video = Tools.CopyTools.objDeepClone(this.csInfo)
+          csInfo_video.csId = msgsObj.csId
+          csInfo_video.csAvatar = getCsAvatar(msgsObj.csId)
+          csInfo_video.csName = msgsObj.csName
+          csInfo_video.likesCount = msgsObj.likesCount
+          csInfo_video.csCode = msgsObj.csCode
+
           // 视频坐席基本信息
           this.setCsInfo(csInfo_video)
           // 设置房间ID
@@ -407,6 +407,7 @@ export const IMMixin = {
 
         // 客户端排队成功（在线）
         case systemMsgStatus.ONLINE_QUEUES_SUCCESS:
+          debugger
           this.$router.replace({path: `/room/chat?openId=${this.userInfo.openId}`})
           const onlineQueueSuccMsg = {
             code: systemMsgStatus.ONLINE_REQUEST_CS_ENTANCE,
@@ -436,11 +437,11 @@ export const IMMixin = {
           // 清空转接定时器
           this.userInfo.transTimeout && clearTimeout(this.userInfo.transTimeout)
 
-          const csInfo_onLine = {
-            csId: msgsObj.csId,
-            csAvatar: getCsAvatar(msgsObj.csId),
-            csName: msgsObj.csName
-          }
+          const csInfo_onLine = Tools.CopyTools.objDeepClone(this.csInfo)
+          csInfo_onLine.csId = msgsObj.csId
+          csInfo_onLine.csAvatar = getCsAvatar(msgsObj.csId)
+          csInfo_onLine.csName = msgsObj.csName
+
           // action 删除msgs中排队状态的tips
           this.deleteTipMsg()
           // 设置坐席信息
@@ -454,6 +455,19 @@ export const IMMixin = {
           })
           // action 排队完成，进入会话
           this.afterQueueSuccess(roomStatus.menChat)
+          // 发送欢迎语
+          const msg = {
+            nickName: this.csInfo.csName,
+            avatar: this.csInfo.csId,
+            content: this.csInfo.welcomeText,
+            isSelfSend: false,
+            time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+            timestamp: new Date().getTime(),
+            msgStatus: msgStatus.msg,
+            msgType: msgTypes.msg_normal,
+            chatType: this.sendType
+          }
+          this.sendMsgs(msg)
           // action 初始化用户最后响应时间
           this.updateLastAction()
           break
@@ -463,7 +477,7 @@ export const IMMixin = {
           const csId = this.csInfo.csId
           const csName = this.csInfo.csName
           this.setServerTime('00:00')
-          this.$vux.toast.text('当前人工服务已结束', 'middle')
+          this.$vux.toast.text('当前人工服务已结束', 'default')
           await Tools.AsyncTools.sleep(3000)
           // assess
           if (!this.hasAssess) {
@@ -1026,7 +1040,8 @@ export const onLineQueueMixin = {
             csName: data.userName || '',
             isTeam: data.team,
             startTime: data.queueStartTime,
-            endTime: data.queueEndTime
+            endTime: data.queueEndTime,
+            welcomeText: data.content
           }
         }
         // }
@@ -1046,6 +1061,12 @@ export const onLineQueueMixin = {
       }
     },
     async handleQueueRes(data) {
+      const csInfo_onLine = {
+        welcomeText: data.content
+      }
+      // 设置坐席信息
+      this.setCsInfo(csInfo_onLine)
+
       if (!data.isTeam) {
         // 排队成功，直接通知坐席
         const msg = {
@@ -1102,7 +1123,7 @@ export const onLineQueueMixin = {
       })
       if (res.data.result_code === '200') {
         console.info('取消排队成功')
-        this.$vux.toast.text('您已经取消排队', 'middle')
+        this.$vux.toast.text('您已经取消排队', 'default')
         this.stopHeartBeat()
         this.setQueueMode({
           mode: roomStatus.AIChat,

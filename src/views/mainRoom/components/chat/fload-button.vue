@@ -1,32 +1,38 @@
 <template>
   <div class="fload-button">
+    <div class="fload-button-mask" :class="{'show-when-input': barStatus}"></div>
     <div class="popover" :style="tipsPos" :class="{'tipsShow': tipsShow}">
       <span class="text">{{tipsText}}</span>
     </div>
-    <button
-      class="item extend-click transition-bezier"
-      :disabled="barStatus"
-      @click="callPhone"
-      :class="[{'visible-when-input': barStatus, 'item-1': !barStatus}]">
-      <img width=100% height=100% src="/static/img/chat/fb_phone.png">
-    </button>
-    <button
-      class="item extend-click transition-bezier"
-      :disabled="barStatus"
-      @click="videoLineUp"
-      :class="[{'visible-when-input': barStatus, 'item-2': !barStatus}]">
-      <img width=100% height=100% src="/static/img/chat/fb_video.png">
-    </button>
-    <button
-      class="item extend-click transition-bezier"
-      :disabled="barStatus"
-      @click="onLineLineUp"
-      :class="[{'visible-when-input': barStatus, 'item-3': !barStatus}]">
-      <img width=100% height=100% :src='`/static/img/chat/fb_${iconByUserGrade}.png`'>
-    </button>
+    <div class="btn-item">
+      <button
+        class="item extend-click transition-bezier"
+        @click="callPhone"
+        :class="[{'visible-when-input': barStatus, 'item-1': !barStatus}]">
+        <img width=100% height=100% src="/static/img/chat/fb_phone.png">
+      </button>
+      <p class="text">转电话</p>
+    </div>
+    <div class="btn-item">
+      <button
+        class="item extend-click transition-bezier"
+        @click="videoLineUp"
+        :class="[{'visible-when-input': barStatus, 'item-2': !barStatus}]">
+        <img width=100% height=100% src="/static/img/chat/fb_video.png">
+      </button>
+      <p class="text">转视频</p>
+    </div>
+    <div class="btn-item">
+      <button
+        class="item extend-click transition-bezier"
+        @click="onLineLineUp"
+        :class="[{'visible-when-input': barStatus, 'item-3': !barStatus}]">
+        <img width=100% height=100% :src='`/static/img/chat/fb_${iconByUserGrade}.png`'>
+      </button>
+      <p class="text">转人工</p>
+    </div>
     <!-- <button
       class="item extend-click transition-bezier"
-      :disabled="barStatus"
       @click="clickAssess"
       :class="[{'visible-when-input': barStatus, 'item-4': !barStatus}]">
       <img width=100% height=100% src="/static/img/chat/fb_assess.png">
@@ -57,7 +63,7 @@ export default {
       return this.isVip ? 'chat_vip' : 'chat'
     },
     tipsPos() {
-      return `transform: translateY(${(this.tipsIndex - 1) * 5.6}rem)`
+      return `transform: translateY(${(this.tipsIndex - 1) * 7}rem)`
     },
     ...mapGetters([
       'roomMode',
@@ -69,6 +75,7 @@ export default {
   data() {
     return {
       notWorkTimeClicked: false,
+      fastClickTimer: null,
       tipsTimer: null,
       tipsIndex: 0,
       tipsText: '',
@@ -77,14 +84,32 @@ export default {
   },
   methods: {
     callPhone() {
+      if (this.fastClickTimer) {
+        return
+      } else {
+        this.fastClickTimer = setTimeout(() => {
+          clearTimeout(this.fastClickTimer)
+          this.fastClickTimer = null
+        }, 1000)
+      }
+
       window.location.href = 'tel:95300'
     },
     // 视频客服
     videoLineUp() {
-      if (!this.isVip) { // 非VIP客户
-        this.showTips(2, '此功能只对VIP客户开放')
+      if (this.fastClickTimer) {
         return
+      } else {
+        this.fastClickTimer = setTimeout(() => {
+          clearTimeout(this.fastClickTimer)
+          this.fastClickTimer = null
+        }, 1000)
       }
+
+      // if (!this.isVip) { // 非VIP客户
+      //   this.showTips(2, '此功能只对VIP客户开放')
+      //   return
+      // }
 
       if (this.queueMode.status === queueStatus.queuing && this.queueMode.mode === roomStatus.menChat) { // 排队中
         this.onlineServ2Video('您当前正在在线人工排队中，确认需要取消排队并进入视频客服吗？')
@@ -110,6 +135,15 @@ export default {
     },
     // 在线客服
     onLineLineUp() {
+      if (this.fastClickTimer) {
+        return
+      } else {
+        this.fastClickTimer = setTimeout(() => {
+          clearTimeout(this.fastClickTimer)
+          this.fastClickTimer = null
+        }, 1000)
+      }
+
       if (this.queueMode.status === queueStatus.queuing) { // 排队中
         return
       }
@@ -230,40 +264,62 @@ export default {
 @import '~@/common/style/theme.less';
 
 .fload-button {
-  .item {
-    display: block;
-    width: 3.4rem;
-    height: 3.4rem;
-    padding: 0;
-    margin-bottom: 2.2rem;
-    border: 0;
-    // border: 0.2rem solid @theme;
-    border-radius: 50%;
-    // background-color: @bg-light;
-    transition: all cubic-bezier(0.4, 0, 0, 1) .2s;
+  .fload-button-mask {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 0;
+    z-index: 1000;
+    &.show-when-input {
+      height: 100%;
+    }
+  }
+  .btn-item {
+    margin-bottom: 1.2rem;
     &:last-child {
       margin-bottom: 0;
     }
-    &.visible-when-input {
-      transform: translateY(-15rem);
-      opacity: 0;
+    .item {
+      display: block;
+      width: 3.4rem;
+      height: 3.4rem;
+      padding: 0;
+      border: 0;
+      // border: 0.2rem solid @theme;
+      border-radius: 50%;
+      // background-color: @bg-light;
+      transition: all cubic-bezier(0.4, 0, 0, 1) .2s;
+
+      // &.visible-when-input {
+      //   transform: translateY(-15rem);
+      //   opacity: 0;
+      // }
+      &.item-1 {
+        transition-delay: .34s;
+      }
+      &.item-2 {
+        transition-delay: .31s;
+      }
+      &.item-3 {
+        transition-delay: .28s;
+      }
+      &.item-4 {
+        transition-delay: .25s;
+      }
+      .icon {
+        width: 100%;
+        height: 100%;
+        // fill: @theme;
+      }
     }
-    &.item-1 {
-      transition-delay: .34s;
-    }
-    &.item-2 {
-      transition-delay: .31s;
-    }
-    &.item-3 {
-      transition-delay: .28s;
-    }
-    &.item-4 {
-      transition-delay: .25s;
-    }
-    .icon {
-      width: 100%;
-      height: 100%;
-      // fill: @theme;
+    .text {
+      font-size: 1.2rem;
+      line-height: 2.4rem;
+      color: @text-light;
+      text-align: center;
+      transform: scale(0.9);
+      transform-origin: 50%;
     }
   }
   .popover {

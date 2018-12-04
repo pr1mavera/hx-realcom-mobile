@@ -4,7 +4,8 @@
       <span>{{iframeTitle}}</span>
     </div>
     <div class="iframe-container">
-      <iframe sandbox="allow-same-origin allow-scripts" class="iframe" id="targetIframe" :src="iframeSrc" width=100% height=100%></iframe>
+      <iframe sandbox="allow-same-origin allow-scripts" class="iframe" id="targetIframe" :src="src" width=100% height=100%></iframe>
+       <!-- :onload="getIframeTitle"  -->
     </div>
     <div class="close-btn extend-click" @click="$emit('closeIframe')">
       <svg class="icon" aria-hidden="true">
@@ -15,10 +16,17 @@
 </template>
 
 <script type="text/ecmascript-6">
+import { getIframeUrl } from '@/server/index.js'
+
 export default {
   props: {
     iframeSrc: {
       type: String
+    }
+  },
+  computed: {
+    src() {
+      return getIframeUrl(this.iframeSrc)
     }
   },
   data() {
@@ -27,8 +35,13 @@ export default {
     }
   },
   mounted() {
-    const iframe = document.getElementById('targetIframe')
-    this.iframeTitle = iframe.contentWindow.document.title
+
+  },
+  methods: {
+    getIframeTitle() {
+      const iframe = document.getElementById('targetIframe')
+      this.iframeTitle = iframe.contentWindow.document.title
+    }
   }
 }
 </script>

@@ -60,9 +60,12 @@
           @enterVideoLineUp="confirmToLineUp"
           @enterOnLineLineUp="enterOnLineLineUp"
         ></fload-button>
-        <float-bot-assess v-if="isBotAssessShow"
-          @targetBotAssess="targetBotAssess"
-        ></float-bot-assess>
+        <transition name="fade">
+          <float-bot-assess
+            v-if="isBotAssessShow"
+            @targetBotAssess="targetBotAssess"
+          ></float-bot-assess>
+        </transition>
       </div>
       <input-bar
         ref="inputBar"
@@ -179,22 +182,6 @@ export default {
       }
       return `transform: translate(${pos.left}px, ${pos.top}px); opacity: ${self.isCopyButtonShow ? 1 : 0};`
     },
-    isBotAssessShow() {
-      if (this.roomMode !== roomStatus.AIChat) {
-        return false
-      }
-
-      if (!this.msgs.length) {
-        return false
-      }
-
-      const lastMsg = this.msgs[this.msgs.length - 1]
-      if (lastMsg.msgType === msgTypes.msg_normal && lastMsg.isSelfSend === false) {
-        return true
-      }
-
-      return false
-    },
     ...mapGetters([
       'userInfo',
       'botInfo',
@@ -234,16 +221,17 @@ export default {
         left: 0,
         width: 0,
         height: 0
-      }
+      },
+      isBotAssessShow: false
     }
   },
   mounted() {
     // 初始化滚动
     this.$nextTick(() => {
       this.inputEle = this.$refs.inputBar.$refs.inputContent
-      this.login()
       this._initScroll()
       this._initPullDownRefresh()
+      this.login()
     })
   },
   activated() {
@@ -378,7 +366,7 @@ export default {
         click: true,
         // autoBlur: false,
         probeType: 3,
-        // swipeBounceTime: 200,
+        swipeBounceTime: 300,
         bounceTime: 400,
         bindToWrapper: true,
         pullDownRefresh: {
@@ -526,20 +514,28 @@ export default {
       this.inputEle.innerText = ''
       text = text.replace(/<\/?.+?>/g, '').replace(/&nbsp;/g, '')
       if (text && text.trim()) {
-        this.roomMode === roomStatus.AIChat ? await this.sendTextMsgToBot(text) : await this.sendC2CMsgs(text)
-        // switch (this.roomMode) {
-        //   case roomStatus.AIChat:
-        //     await this.sendTextMsgToBot(text)
-        //     // await this.sendC2CMsgs(text)
-        //     break
-        //   case roomStatus.menChat:
-        //     await this.sendC2CMsgs(text)
-        //     break
-        //   case roomStatus.videoChat:
-        //     // this.sendTextMsg(text)
-        //     await this.sendC2CMsgs(text)
-        //     break
-        // }
+        // this.roomMode === roomStatus.AIChat ? await this.sendTextMsgToBot(text) : await this.sendC2CMsgs(text)
+        switch (this.roomMode) {
+          case roomStatus.AIChat:
+            await this.sendTextMsgToBot(text)
+            if (!this.isBotAssessShow) {
+              this.isBotAssessShow = true
+            }
+            break
+          case roomStatus.menChat:
+            await this.sendC2CMsgs(text)
+            if (this.isBotAssessShow) {
+              this.isBotAssessShow = false
+            }
+            break
+          case roomStatus.videoChat:
+            // this.sendTextMsg(text)
+            await this.sendC2CMsgs(text)
+            if (this.isBotAssessShow) {
+              this.isBotAssessShow = false
+            }
+            break
+        }
       } else {
         this.$vux.alert.show({
           title: '消息为空'
@@ -722,20 +718,30 @@ export default {
       }
     },
     targetBotAssess(isResolved) {
-      const ques = {
-        nickName: this.botInfo.botName,
-        isSelfSend: false,
-        time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
-        timestamp: new Date().getTime(),
-        msgStatus: msgStatus.msg,
-        chatType: this.sendType
-      }
+      // const ques = {
+      //   nickName: this.botInfo.botName,
+      //   isSelfSend: false,
+      //   time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+      //   timestamp: new Date().getTime(),
+      //   msgStatus: msgStatus.msg,
+      //   chatType: this.sendType
+      // }
       if (isResolved) {
-        ques.msgType = msgTypes.msg_bot_thanks
+        // ques.msgType = msgTypes.msg_bot_thanks
+        this.$vux.toast.text('感谢您的认可！', 'default')
       } else {
-        ques.msgType = msgTypes.msg_no_idea
+        const self = this
+        this.$vux.confirm.show({
+          title: '非常抱歉，没能解决您的问题，小华正在学习中，为了更好地解决您的问题，您可以转接人工客服。',
+          confirmText: '转人工',
+          cancelText: '暂时不需要',
+          onConfirm() {
+            self.enterOnLineLineUp()
+          }
+        })
       }
-      this.sendMsgs(ques)
+      this.isBotAssessShow = false
+      // this.sendMsgs(ques)
     },
     async onLineCancelQueue(id) {
       await this.cancelQueue()
@@ -870,6 +876,16 @@ export default {
         position: absolute;
         bottom: 1.2rem;
         left: 1.2rem;
+      }
+      .fade-enter-active, .fade-leave-active {
+        // backdrop-filter: blur(2px);
+        transition: all .3s;
+        transition-delay: .3s;
+      }
+      .fade-enter, .fade-leave-to {
+        opacity: 0;
+        transform: translateX(-99%);
+        // backdrop-filter: blur(0);
       }
     }
     .input-bar {

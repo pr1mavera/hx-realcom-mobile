@@ -90,6 +90,11 @@ html, body {
 body {
   padding-bottom: constant(safe-area-inset-bottom);
 }
+
+a {
+  color: rgb(82, 144, 239)!important;
+}
+
 #app {
   height: 100%;
   font-family: "lucida grande", "lucida sans unicode", lucida, helvetica, "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
@@ -192,7 +197,7 @@ body {
       .weui-dialog__hd {
         padding: 1.8em 1.6em 0.5em;
         .weui-dialog__title {
-          font-size: 1.6rem;
+          font-size: 1.4rem;
         }
       }
       .weui-dialog__bd {

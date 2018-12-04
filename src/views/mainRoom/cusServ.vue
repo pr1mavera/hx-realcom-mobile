@@ -20,7 +20,7 @@
 import { mapGetters, mapActions } from 'vuex'
 import Tools from '@/common/js/tools'
 
-import {getCsStatus} from '@/server/index.js'
+import { getCsStatus } from '@/server/index.js'
 import { roomStatus } from '@/common/js/status'
 
 export default {

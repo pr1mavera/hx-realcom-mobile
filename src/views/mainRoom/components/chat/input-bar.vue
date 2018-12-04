@@ -62,7 +62,7 @@
 </template>
 
 <script type="text/ecmascript-6">
-import { mapGetters } from 'vuex'
+import { mapGetters, mapMutations } from 'vuex'
 // import anime from 'animejs'
 import Tools from '@/common/js/tools'
 // import { XTextarea, Group } from 'vux'
@@ -96,6 +96,9 @@ export default {
   methods: {
     toggleExtend() {
       this.$emit('toggleExtend')
+    },
+    closeKeyBoard() {
+      this.setInputBar(false)
     },
     chatFocus(event) {
       this.$emit('targetInputBuffer')
@@ -153,7 +156,10 @@ export default {
         caretOffset = preCaretRange.toString().length
       }
       return caretOffset
-    }
+    },
+    ...mapMutations({
+      setInputBar: 'SET_INPUT_BAR'
+    })
     // sendBtnEnter() {
     //   const extendBarKeyframes = anime.timeline()
     //   extendBarKeyframes.add({

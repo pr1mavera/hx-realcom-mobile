@@ -21,33 +21,45 @@
                 </div>
               </div>
               <div class="video-btn">
-                <button class="button" @click.self="clickToLineUp(curLabelInfo)">视频咨询</button>
+                <button class="button" :class="{'on-line': isCsOnline}" @click.self="clickToLineUp(curLabelInfo)">
+                  <svg class="icon extend-click" aria-hidden="true">
+                    <use xlink:href="#icon-zixun"></use>
+                  </svg>
+                  立即视频
+                </button>
               </div>
               <div class="cs-info">
                 <ul>
                   <li class="cs-info-list">
+                    <span class="title">当前状态</span>
+                    <label class="state" :class="{'on-line': isCsOnline}"></label>
+                    <span class="text with-state">
+                      <label :class="{'on-line': isCsOnline}">{{isCsOnline ? '在线' : '离线'}}</label>
+                    </span>
+                  </li>
+                  <li class="cs-info-list">
                     <span class="title">服务总量</span>
                     <span class="text">
-                      <label>{{curLabelInfo.servTimes === null ? 0 : curLabelInfo.servTimes}}次</label>
+                      <label>{{curLabelInfo.servTimes || 0}}次</label>
                     </span>
                   </li>
                   <li class="cs-info-list">
                     <span class="title">收到礼物</span>
                     <span class="text">
-                      <label>{{curLabelInfo.giftCount === null ? 0 : curLabelInfo.giftCount}}份</label>
+                      <label>{{curLabelInfo.giftCount || 0}}份</label>
                     </span>
                   </li>
                   <li class="cs-info-list">
                     <span class="title">客服标签</span>
                     <span class="text">
-                      <label>甜美可爱</label>
-                      <label>善解人意</label>
-                      <label>活泼可爱</label>
+                      <label class="cs-label">甜美可爱</label>
+                      <label class="cs-label">善解人意</label>
+                      <label class="cs-label">活泼可爱</label>
                     </span>
                   </li>
                 </ul>
               </div>
-              <div class="footer-btn">设定喜欢的客服标签</div>
+              <!-- <div class="footer-btn">设定喜欢的客服标签</div> -->
             </div>
           </div>
         </div>
@@ -72,9 +84,12 @@
       </div>
     </div>
     <div class="slide-btn">
-      <div class="btn btn-left" @click="hendleChange">切 换</div>
+      <div class="btn btn-left" @click="hendleChange">换一个</div>
       <!--<div class="btn btn-right" @click="hendleAdd">添加为专属客服</div>-->
       <XButton class="btn btn-right" :gradients="['#FF8C6A', '#FF80A0']" @click.native="hendleAdd" :disabled="addDis">
+        <svg class="icon extend-click" aria-hidden="true">
+          <use xlink:href="#icon-xin"></use>
+        </svg>
         添加为专属客服
       </XButton>
     </div>
@@ -84,8 +99,8 @@
           <use xlink:href="#icon-huanyipi"></use>
         </svg>
       </div>
-      <!-- :class="{'show-fload-tip-right': angle >= targAngle}" -->
-      <div class="tip tip-right show-fload-tip-right" id="fload-tip-right" @click="$router.back(-1)">
+      <!-- <div class="tip tip-right show-fload-tip-right" id="fload-tip-right" @click="$router.back(-1)"> -->
+      <div class="tip tip-right" id="fload-tip-right" :class="{'show-fload-tip-right': angle >= targAngle}">
         <svg class="icon extend-click" aria-hidden="true">
           <use xlink:href="#icon-zhuanshukefu"></use>
         </svg>
@@ -165,6 +180,9 @@ export default {
   computed: {
     setRotate() {
       return `transform: rotateZ(${this.angle}deg); opacity: ${this.opacityNum};`
+    },
+    isCsOnline() {
+      return this.curLabelInfo.status === '3' || this.curLabelInfo.status === '5'
     },
     ...mapGetters([
       'userInfo'
@@ -262,6 +280,9 @@ export default {
       }
       this.resetCurLabelInfo()
       this.addDis = false // 此时‘添加’按钮可以重新点击
+      this.$vux.toast.text('您已成功添加专属客服', 'default')
+      await Tools.AsyncTools.sleep(2000)
+      this.$router.back(-1)
       return 0
     },
     switchCS() {
@@ -365,7 +386,12 @@ export default {
 @import '~@/common/style/theme.less';
 
 .cs-add {
-  position: relative;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  margin: auto;
   width: 100%;
   height: 100%;
   overflow: hidden;
@@ -437,12 +463,29 @@ export default {
               background-color: #fff;
               margin: 2rem 0 0 0;
               padding: 0;
-              width: 6.5rem;
-              height: 2rem;
-              border: 1px solid rgba(255, 149, 156, .5);
+              width: 7.8rem;
+              height: 2.2rem;
+              line-height: 2rem;
+              border: 1px solid @label-line-light;
               border-radius: 1rem;
-              color: rgba(255, 149, 156, 1);
+              color: @label-line-light;
               font-size: 1.2rem;
+              .icon {
+                width: 1.4rem;
+                height: 1.4rem;
+                vertical-align: text-bottom;
+                fill: @label-line-light;
+              }
+              &.on-line {
+                border: 1px solid rgba(255, 149, 156, .5);
+                color: rgba(255, 149, 156, 1);
+                .icon {
+                  width: 1.4rem;
+                  height: 1.4rem;
+                  vertical-align: text-bottom;
+                  fill: rgba(255, 149, 156, 1);
+                }
+              }
             }
           }
           .cs-info {
@@ -462,12 +505,40 @@ export default {
                   width: 5rem;
                   font-weight: 700;
                 }
+                .state {
+                  width: 1.4rem;
+                  height: 1.4rem;
+                  margin-top: 0.3rem;
+                  border-radius: 50%;
+                  background-color: @label-line-light;
+                  vertical-align: bottom;
+                  &.on-line {
+                    background-color: #56de47;
+                  }
+                }
                 .text {
                   width: calc(~'100% - 6.4rem');
                   display: flex;
                   flex-wrap: nowrap;
+                  &.with-state {
+                    width: calc(~'100% - 9rem');
+                    label {
+                      color: @label-line-light;
+                    }
+                  }
                   label {
                     flex: 33.3%;
+                    margin-right: 0.8rem;
+                    &.on-line {
+                      color: #56de47;
+                    }
+                    &.cs-label {
+                      padding: 0.1rem 0.4rem;
+                      box-sizing: border-box;
+                      border: 0.1rem solid rgba(255, 149, 156, 1);
+                      border-radius: 2.5rem;
+                      color: rgba(255, 149, 156, 1);
+                    }
                   }
                 }
               }
@@ -532,28 +603,37 @@ export default {
     }
   }
   .slide-btn {
-    width: 100%;
+    width: max-content;
     height: 4rem;
-    padding: 0 6.2rem;
-    box-sizing: border-box;
+    margin: 0 auto;
+    // box-sizing: border-box;
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     .btn {
       border-radius: 2rem;
       font-size: 1.4rem;
       line-height: 4rem;
       cursor: pointer;
       &.btn-left {
-        padding: 0 3rem;
+        padding: 0 2rem;
         background-color: #fff;
         color: @text-normal;
         box-shadow: 0 0.5rem 1.2rem 0 rgba(0, 0, 0, .05);
+        margin-right: 2rem;
       }
       &.btn-right {
-        width: max-content;
-        padding: 0 2rem;
+        width: 15rem;
+        padding: 0 1.2rem;
         background: linear-gradient(to right, #FF8C6A, #FF80A0);
         color: @text-lighter;
+        text-align: left;
+        .icon {
+          width: 2rem;
+          height: 2rem;
+          line-height: 4rem;
+          vertical-align: middle;
+          fill: @text-lighter;
+        }
       }
     }
   }

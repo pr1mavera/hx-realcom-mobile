@@ -191,7 +191,7 @@ export const reqTransTimeout = function({ commit, state }, { msg, toast, delay =
         IM.sendSystemMsg(onlineConfig)
       }
       // 本地提示转接失败
-      toast.text('转接失败，请重试', 'middle')
+      toast.text('转接失败，请重试', 'default')
       await Tools.AsyncTools.sleep(2000)
       // 回调
       resolve()

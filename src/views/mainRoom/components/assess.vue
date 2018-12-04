@@ -98,10 +98,10 @@
 
       // 保存评论的信息
       async handleToSaveAssess() {
-        if (this.labels.length === 0) {
-          this.$vux.toast.text('啊呀，给个评价呗~', 'middle')
-          return
-        }
+        // if (this.labels.length === 0) {
+        //   this.$vux.toast.text('啊呀，给个评价呗~', 'default')
+        //   return
+        // }
 
         // const data = {
         //   sessionId: this.sessionId,
@@ -147,9 +147,9 @@
         // 调用评价接口，告诉服务
         const res = await saveAssess(data)
         if (res.result.code === ERR_OK) {
-          this.$vux.toast.text('评价成功', 'middle')
+          this.$vux.toast.text('评价成功', 'default')
         } else {
-          this.$vux.toast.text('评价失败', 'middle')
+          this.$vux.toast.text('评价失败', 'default')
         }
 
         // 清空数据

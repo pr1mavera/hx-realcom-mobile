@@ -10,7 +10,7 @@
           智能客服
         </div>
       </div>
-      <div class="label">{{msg.cardInfo.nickName}}进入会话竭诚为您服务~</div>
+      <!-- <div class="label">{{msg.cardInfo.nickName}}进入会话竭诚为您服务~</div> -->
     </div>
   </div>
 </template>
