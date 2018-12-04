@@ -99,7 +99,7 @@
         if (this.labelType === 'notAll') {
           const page = 0
           const pageSize = -1
-          csId = this.$route.query.cusSerId
+          csId = this.$route.query.cusSerId || this.$route.query.csId
           // 评价当前客服的标签
 
           const res = await viewLabels(page, pageSize, csId)
