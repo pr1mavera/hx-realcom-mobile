@@ -109,7 +109,7 @@
           path: '/room/serverDetail',
           query: {
             cusSerId: this.currentCs.id,
-            csStatus: this.currentCs.status
+            csStatus: this.currentCs.status || 1
           }
         })
       },

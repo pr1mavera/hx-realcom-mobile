@@ -353,7 +353,7 @@ export default {
         path: '/room/serverDetail',
         query: {
           cusSerId: this.curLabelInfo.id,
-          csStatus: this.curLabelInfo.status
+          csStatus: this.curLabelInfo.status || 1
         }
       })
     }
