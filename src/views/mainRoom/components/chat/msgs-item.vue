@@ -184,14 +184,27 @@ export default {
 
     // 进入在线客服个人中心
     enterSerCenter() {
-      // 判断是否是人工客服（机器人没有个人中心）
-      if (!this.csInfo.csId) {
-        return
+      var csId = ''
+      switch (this.msg.chatType) {
+        case sessionStatus.robot:
+          return
+        case sessionStatus.video:
+          csId = this.msg.avatar
+          break
+        case sessionStatus.onLine:
+          csId = this.msg.avatar
+          break
+        default:
+          return
       }
+      // 判断是否是人工客服（机器人没有个人中心）
+      // if (!this.csInfo.csId) {
+      //   return
+      // }
       this.$router.push({
         path: '/room/serverDetail',
         query: {
-          cusSerId: this.csInfo.csId
+          cusSerId: csId
         }
       })
     },
