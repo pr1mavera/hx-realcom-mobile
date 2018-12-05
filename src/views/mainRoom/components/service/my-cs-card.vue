@@ -13,12 +13,16 @@
       </a>
       <div class="info">
         <p class="name">{{currentCs.nickName}}</p>
+        <p>当前状态 <label class="status" :class="{'on-line': isCsOnline}">{{isCsOnline ? '在线' : '离线'}}</label></p>
         <p>服务总量 {{currentCs.servTimes || 0}}次</p>
         <p>收到礼物 {{currentCs.giftCount || 0}}份</p>
       </div>
     </div>
     <div class="btn-box" style="text-align: center">
-      <x-button mini @click.native="clickToLineUp" style="color: #FF959C;background: #fff;">
+      <x-button mini @click.native="clickToLineUp" class="btn" :class="{'online': isCsOnline}">
+        <svg class="icon extend-click" aria-hidden="true">
+          <use xlink:href="#icon-zixun"></use>
+        </svg>
         立即视频
       </x-button>
     </div>
@@ -52,6 +56,9 @@
     computed: {
       avatarImgSrc() {
         return getCsAvatar(this.currentCs.id)
+      },
+      isCsOnline() {
+        return this.currentCs.status === '3' || this.currentCs.status === '5'
       },
       ...mapGetters([
         'userInfo'
@@ -142,7 +149,7 @@
     .container-main {
       display: flex;
       padding: 2.5rem 0 0;
-      margin: 0 0 4.2rem 2.8rem;
+      margin: 0 0 2.5rem 2.8rem;
       .avatar {
         width: 7.5rem;
         height: 7.5rem;
@@ -165,11 +172,53 @@
           font-weight: bold;
           color: @text-normal;
         }
+        .status {
+          color: @label-line-light;
+        }
+        .status:before {
+          content: '';
+          display: inline-block;
+          width: .8rem;
+          height: .8rem;
+          border-radius: 50%;
+          background: @label-line-light;
+          margin: 0 .3rem 0 0;
+        }
+        .on-line {
+          color: #56de47;
+        }
+        .on-line:before {
+          background: #56de47;
+        }
         p {
           padding-top: 1.4rem;
         }
         p:first-child {
           padding-top: .4rem;
+        }
+      }
+    }
+    .btn-box {
+      .btn {
+        color: @label-line-light;
+        background: #fff;
+        border: 1px solid @label-line-light;
+        margin: 0 auto;
+        .icon {
+          width: 1.4rem;
+          height: 1.4rem;
+          vertical-align: text-bottom;
+          fill: @label-line-light;
+        }
+      }
+      .online {
+        border: 1px solid rgba(255, 149, 156, .5) !important;
+        color: rgba(255, 149, 156, 1) !important;
+        .icon {
+          width: 1.4rem;
+          height: 1.4rem;
+          vertical-align: text-bottom;
+          fill: rgba(255, 149, 156, 1);
         }
       }
     }
