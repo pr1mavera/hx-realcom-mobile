@@ -4,33 +4,33 @@
       <router-view class="router-view" id="router-view"
         @showIosGuide="iosGuide = true"
         @showLowVersion="lowVersion = true"
-        @showShare="toShare"
-        @showIframe="showIframe"
         @showGiftAnime="showGiftAnime"
       ></router-view>
+      <!-- @showShare="toShare"
+      @showIframe="showIframe" -->
     </keep-alive>
     <videoBar class="video-bar"
       v-if="isVideoBarOpen"
-      @showShare="toShare"
     ></videoBar>
-    <share-dialog
+    <!-- @showShare="toShare" -->
+    <!-- <share-dialog
       :show="isShareView"
       @cancelShare="isShareView = false"
       @toShare="toShare"
-    ></share-dialog>
+    ></share-dialog> -->
     <ios-guide v-if="iosGuide" @click.native="iosGuide = false"></ios-guide>
     <low-version v-if="lowVersion" @click.native="lowVersion = false"></low-version>
-    <share-guide v-if="shareGuide" @click.native="shareGuide = false"></share-guide>
+    <!-- <share-guide v-if="shareGuide" @click.native="shareGuide = false"></share-guide> -->
     <assess
       :showAssess="this.isAssessView"
       @handleToCancelAssess="handleToCancelAssess"
       @assessSuccess="assessSuccess"
     ></assess>
-    <transition @enter="showIframeEnter" @leave="showIframeLeave">
+    <!-- <transition @enter="showIframeEnter" @leave="showIframeLeave">
       <section class="iframe-section" id="iframe-section" v-if="iframeView">
         <iframe-bar class="iframe-bar" :iframeSrc="iframeSrc" @closeIframe="iframeView = false"></iframe-bar>
       </section>
-    </transition>
+    </transition> -->
     <transition name="fade">
       <section class="gift-section" v-if="giftAnimeView">
         <img :src="giftSrc">
@@ -44,33 +44,35 @@
 import { mapGetters, mapMutations, mapActions } from 'vuex'
 import { roomStatus, sessionStatus } from '@/common/js/status'
 import Tools from '@/common/js/tools'
-import GoShare from '@/common/js/share'
-import anime from 'animejs'
+// import GoShare from '@/common/js/share'
+// import anime from 'animejs'
 
 export default {
   components: {
     'videoBar': () => import('@/views/mainRoom/videoBar'),
-    'ShareDialog': () => import('@/views/mainRoom/components/share-dialog'),
+    // 'ShareDialog': () => import('@/views/mainRoom/components/share-dialog'),
     'IosGuide': () => import('@/views/mainRoom/components/video/ios-guide'),
     'LowVersion': () => import('@/views/mainRoom/components/video/low-version'),
-    'ShareGuide': () => import('@/views/mainRoom/components/share-guide'),
-    'Assess': () => import('@/views/mainRoom/components/assess'),
-    'iframeBar': () => import('@/views/mainRoom/components/iframe-bar')
+    // 'ShareGuide': () => import('@/views/mainRoom/components/share-guide'),
+    'Assess': () => import('@/views/mainRoom/components/assess')
+    // 'iframeBar': () => import('@/views/mainRoom/components/iframe-bar')
   },
   data() {
     return {
-      isShareView: false,
-      shareGuide: false,
+      // share
+      // shareUrl: '',
+      // isShareView: false,
+      // shareGuide: false,
+      // 异常
       iosGuide: false,
       lowVersion: false,
-      shareUrl: '',
       // iframe
-      iframeView: false,
-      iframeSrc: '',
-      iframePos: {
-        clientX: 0,
-        clientY: 0
-      },
+      // iframeView: false,
+      // iframeSrc: '',
+      // iframePos: {
+      //   clientX: 0,
+      //   clientY: 0
+      // },
       // gift
       giftAnimeView: false,
       giftSrc: null
@@ -131,78 +133,77 @@ export default {
         })
       }
     },
-    async toShare(csId, csName) {
-      this.isShareView = false
-      this.shareGuide = true
-      this.shareUrl = `https://${window.location.host}/video/share?csId=${csId}&csName=${csName}`
-      GoShare(this.shareUrl)
-      // await this.initShare()
-      // this.clickShare()
-    },
-    showIframe({ link, clientX, clientY }) {
-      this.iframeView = true
-      this.iframeSrc = Tools.MsgsFilterTools.transHttp2Https(link)
-      debugger
-      // this.iframeSrc = 'http://www.baidu.com'
-      // this.iframePos = {
-      //   clientX,
-      //   clientY
-      // }
-    },
-    showIframeEnter(el, done) {
-      const showIframeframes = anime.timeline()
-      showIframeframes.add({
-        targets: '#router-view',
-        scale: [1, 0.92],
-        duration: 200,
-        easing: 'easeOutQuint',
-        offset: 0
-      }).add({
-        targets: '#iframe-section',
-        backdropFilter: [blur(0), blur('4px')],
-        opacity: [0, 1],
-        duration: 300,
-        easing: 'easeOutQuint',
-        offset: 0
-      }).add({
-        targets: '#iframe-section .iframe-bar',
-        // translateX: [this.iframePos.clientX, 0],
-        // translateY: [this.iframePos.clientY, 0],
-        opacity: [0, 1],
-        scale: [0, 1],
-        duration: 300,
-        easing: 'easeOutQuint',
-        offset: 0
-      })
-      showIframeframes.complete = done
-    },
-    showIframeLeave(el, done) {
-      const showIframeframes = anime.timeline()
-      showIframeframes.add({
-        targets: '#router-view',
-        scale: [0.92, 1],
-        duration: 200,
-        easing: 'easeInOutQuad',
-        offset: 0
-      }).add({
-        targets: '#iframe-section',
-        backdropFilter: [blur('4px'), blur(0)],
-        opacity: [1, 0],
-        duration: 300,
-        easing: 'easeInOutQuad',
-        offset: 0
-      }).add({
-        targets: '#iframe-section .iframe-bar',
-        // translateX: [0, this.iframePos.clientX],
-        // translateY: [0, this.iframePos.clientX],
-        opacity: [1, 0],
-        scale: [1, 0],
-        duration: 300,
-        easing: 'easeInOutQuad',
-        offset: 0
-      })
-      showIframeframes.complete = done
-    },
+    // async toShare(csId, csName) {
+    //   this.isShareView = false
+    //   this.shareGuide = true
+    //   this.shareUrl = `https://${window.location.host}/video/share?csId=${csId}&csName=${csName}`
+    //   GoShare(this.shareUrl)
+    //   await this.initShare()
+    //   this.clickShare()
+    // },
+    // showIframe({ link, clientX, clientY }) {
+    //   this.iframeView = true
+    //   this.iframeSrc = Tools.MsgsFilterTools.transHttp2Https(link)
+    //   // this.iframeSrc = 'http://www.baidu.com'
+    //   // this.iframePos = {
+    //   //   clientX,
+    //   //   clientY
+    //   // }
+    // },
+    // showIframeEnter(el, done) {
+    //   const showIframeframes = anime.timeline()
+    //   showIframeframes.add({
+    //     targets: '#router-view',
+    //     scale: [1, 0.92],
+    //     duration: 200,
+    //     easing: 'easeOutQuint',
+    //     offset: 0
+    //   }).add({
+    //     targets: '#iframe-section',
+    //     backdropFilter: [blur(0), blur('4px')],
+    //     opacity: [0, 1],
+    //     duration: 300,
+    //     easing: 'easeOutQuint',
+    //     offset: 0
+    //   }).add({
+    //     targets: '#iframe-section .iframe-bar',
+    //     // translateX: [this.iframePos.clientX, 0],
+    //     // translateY: [this.iframePos.clientY, 0],
+    //     opacity: [0, 1],
+    //     scale: [0, 1],
+    //     duration: 300,
+    //     easing: 'easeOutQuint',
+    //     offset: 0
+    //   })
+    //   showIframeframes.complete = done
+    // },
+    // showIframeLeave(el, done) {
+    //   const showIframeframes = anime.timeline()
+    //   showIframeframes.add({
+    //     targets: '#router-view',
+    //     scale: [0.92, 1],
+    //     duration: 200,
+    //     easing: 'easeInOutQuad',
+    //     offset: 0
+    //   }).add({
+    //     targets: '#iframe-section',
+    //     backdropFilter: [blur('4px'), blur(0)],
+    //     opacity: [1, 0],
+    //     duration: 300,
+    //     easing: 'easeInOutQuad',
+    //     offset: 0
+    //   }).add({
+    //     targets: '#iframe-section .iframe-bar',
+    //     // translateX: [0, this.iframePos.clientX],
+    //     // translateY: [0, this.iframePos.clientX],
+    //     opacity: [1, 0],
+    //     scale: [1, 0],
+    //     duration: 300,
+    //     easing: 'easeInOutQuad',
+    //     offset: 0
+    //   })
+    //   showIframeframes.complete = done
+    // },
     async showGiftAnime(giftInfo) {
       this.showGiftView(giftInfo.giftId)
       // const duration = (+giftInfo.duration) * 1000

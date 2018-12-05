@@ -13,100 +13,103 @@
     </div>
     <div class="content-box" :class="[{'right-content-box': msg.isSelfSend, 'left-content-box': !msg.isSelfSend}]">
       <p class="name" v-if="!msg.isSelfSend">{{msg.nickName}}</p>
-      <div
-        class="content chat-content-shadow"
-        :class="[{
-          'right-content-style': msg.isSelfSend,
-          'left-content-style': !msg.isSelfSend,
-          'padding-for-img': msg.msgType === msgTypes.msg_img,
-          'padding-for-HX': msg.msgType === msgTypes.msg_XH_express
-        }]">
-        <!-- 消息状态 -->
-        <div class="msg-status" v-if="msg.isSelfSend">
-          <inline-loading v-if="msg.status === 'pending'"></inline-loading>
-          <div class="failed" v-if="msg.status === 'failed'" @click="$emit('resendMsgs', msg)">
-            <svg class="icon extend-click" aria-hidden="true">
-              <use xlink:href="#icon-gantanhao"></use>
-            </svg>
+      <transition name="msg" mode="out-in">
+        <div
+          v-show="msgAlready"
+          class="content chat-content-shadow"
+          :class="[{
+            'right-content-style': msg.isSelfSend,
+            'left-content-style': !msg.isSelfSend,
+            'padding-for-img': msg.msgType === msgTypes.msg_img,
+            'padding-for-HX': msg.msgType === msgTypes.msg_XH_express
+          }]">
+          <!-- 消息状态 -->
+          <div class="msg-status" v-if="msg.isSelfSend">
+            <inline-loading v-if="msg.status === 'pending'"></inline-loading>
+            <div class="failed" v-if="msg.status === 'failed'" @click="$emit('resendMsgs', msg)">
+              <svg class="icon extend-click" aria-hidden="true">
+                <use xlink:href="#icon-gantanhao"></use>
+              </svg>
+            </div>
           </div>
+          <!-- 基本消息 -->
+          <span class="text" :id="msgCellId" v-if="msg.msgType === msgTypes.msg_normal" v-html="msg.content" @click="$emit('targetLink', $event)">{{msg.content}}</span>
+          <!-- 点赞消息 -->
+          <span class="text" v-if="msg.msgType === msgTypes.msg_liked" v-html="msg.content"></span>
+          <!-- 机器人感谢消息 -->
+          <span class="text" v-if="msg.msgType === msgTypes.msg_bot_thanks">小华感谢您的认可</span>
+          <!-- 转人工 -->
+          <span class="text" v-if="msg.msgType === msgTypes.msg_no_idea">
+            小华好像听不太懂您的问题呢，可转
+            <span class="button" @click="enterOnLineLineUp">人工客服</span>
+          </span>
+          <!-- 热点问题 -->
+          <span class="text" v-if="msg.msgType === msgTypes.msg_hot">
+            {{msg.content}}
+            <span class="line"></span>
+            <span class="text-extend-hot">
+              <span class="text-extend">您可能想问：</span>
+              <span class="text-extend button" v-for="(item, index) in msg.msgExtend" :key="index" @click="clickHotQues(item.question)">{{item.question}}</span>
+              <!-- <span class="text-extend button" @click="enterOnLineLineUp">人工客服</span> -->
+            </span>
+          </span>
+          <!-- 图片消息 -->
+          <span class="text text-img" v-if="msg.msgType === msgTypes.msg_img">
+            <img class="text-img-cell" :id="imgId" height=100% :src="msg.imgData.small" @click="clickImgMsg"
+            :class="[{'right-img-style': msg.isSelfSend, 'left-img-style': !msg.isSelfSend}]">
+          </span>
+          <!-- 小华表情消息 -->
+          <span class="text" v-if="msg.msgType === msgTypes.msg_XH_express">
+            <img class="text-XH" height=100% :src="msg.imgData.small">
+          </span>
+          <!-- 礼物消息 -->
+          <span class="text gift-item" v-if="msg.msgType === msgTypes.msg_gift">
+            我送给{{this.csInfo.csName || '客服'}}一个{{msg.giftInfo.giftName}} !
+            <img class="text-gift" :src="`/static/img/gift/${msg.giftInfo.giftId}.png`">
+          </span>
+          <!-- 留言 -->
+          <span class="text" v-if="msg.msgType === msgTypes.msg_leave">{{msg.content}}，请<span class="button" @click="leaveMsg">点击留言</span>~</span>
+          <!-- 猜问题 -->
+          <span class="text" v-if="msg.msgType === msgTypes.msg_guess">我猜您想知道这些问题</span>
+          <!-- 名片消息 -->
+          <span class="text" v-if="msg.msgType === msgTypes.msg_card">
+            <div class="text-card">
+              <div class="card-left">
+                <span class="name">{{msg.proxyInfo.agentName}}</span>
+                <!-- <span class="sex">{{msg.proxyInfo.agentSex}}</span> -->
+                <span class="sex">
+                  <svg class="icon extend-click" aria-hidden="true">
+                    <use xlink:href="#icon-nan"></use>
+                  </svg>
+                </span>
+              </div>
+              <div class="card-right">
+                <ul>
+                  <li class="infoList">
+                    <span class="title">工号：</span>
+                    <span class="val">{{msg.proxyInfo.agentId}}</span>
+                  </li>
+                  <li class="infoList">
+                    <span class="title">所属渠道：</span>
+                    <span class="val">个险</span>
+                  </li>
+                  <li class="infoList">
+                    <span class="title">电话：</span>
+                    <span class="val phone" @click="callPhone($event)">{{msg.proxyInfo.agentPhone}}</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </span>
         </div>
-        <!-- 基本消息 -->
-        <span class="text" :id="msgCellId" v-if="msg.msgType === msgTypes.msg_normal" v-html="msg.content" @click="$emit('targetLink', $event)">{{msg.content}}</span>
-        <!-- 点赞消息 -->
-        <span class="text" v-if="msg.msgType === msgTypes.msg_liked" v-html="msg.content"></span>
-        <!-- 机器人感谢消息 -->
-        <span class="text" v-if="msg.msgType === msgTypes.msg_bot_thanks">小华感谢您的认可</span>
-        <!-- 转人工 -->
-        <span class="text" v-if="msg.msgType === msgTypes.msg_no_idea">
-          小华好像听不太懂您的问题呢，可转
-          <span class="button" @click="enterOnLineLineUp">人工客服</span>
-        </span>
-        <!-- 热点问题 -->
-        <span class="text" v-if="msg.msgType === msgTypes.msg_hot">
-          {{msg.content}}
-          <span class="line"></span>
-          <span class="text-extend-hot">
-            <span class="text-extend">您可能想问：</span>
+        <!-- 猜问题 模块 -->
+        <div v-show="msgAlready" class="content chat-content-shadow left-content-style content-extend" v-if="msg.msgType === msgTypes.msg_guess">
+          <span class="text">
             <span class="text-extend button" v-for="(item, index) in msg.msgExtend" :key="index" @click="clickHotQues(item.question)">{{item.question}}</span>
             <!-- <span class="text-extend button" @click="enterOnLineLineUp">人工客服</span> -->
           </span>
-        </span>
-        <!-- 图片消息 -->
-        <span class="text text-img" v-if="msg.msgType === msgTypes.msg_img">
-          <img class="text-img-cell" :id="imgId" height=100% :src="msg.imgData.small" @click="clickImgMsg"
-          :class="[{'right-img-style': msg.isSelfSend, 'left-img-style': !msg.isSelfSend}]">
-        </span>
-        <!-- 小华表情消息 -->
-        <span class="text" v-if="msg.msgType === msgTypes.msg_XH_express">
-          <img class="text-XH" height=100% :src="msg.imgData.small">
-        </span>
-        <!-- 礼物消息 -->
-        <span class="text gift-item" v-if="msg.msgType === msgTypes.msg_gift">
-          我送给{{this.csInfo.csName || '客服'}}一个{{msg.giftInfo.giftName}} !
-          <img class="text-gift" :src="`/static/img/gift/${msg.giftInfo.giftId}.png`">
-        </span>
-        <!-- 留言 -->
-        <span class="text" v-if="msg.msgType === msgTypes.msg_leave">{{msg.content}}，请<span class="button" @click="leaveMsg">点击留言</span>~</span>
-        <!-- 猜问题 -->
-        <span class="text" v-if="msg.msgType === msgTypes.msg_guess">我猜您想知道这些问题</span>
-        <!-- 名片消息 -->
-        <span class="text" v-if="msg.msgType === msgTypes.msg_card">
-          <div class="text-card">
-            <div class="card-left">
-              <span class="name">{{msg.proxyInfo.agentName}}</span>
-              <!-- <span class="sex">{{msg.proxyInfo.agentSex}}</span> -->
-              <span class="sex">
-                <svg class="icon extend-click" aria-hidden="true">
-                  <use xlink:href="#icon-nan"></use>
-                </svg>
-              </span>
-            </div>
-            <div class="card-right">
-              <ul>
-                <li class="infoList">
-                  <span class="title">工号：</span>
-                  <span class="val">{{msg.proxyInfo.agentId}}</span>
-                </li>
-                <li class="infoList">
-                  <span class="title">所属渠道：</span>
-                  <span class="val">个险</span>
-                </li>
-                <li class="infoList">
-                  <span class="title">电话：</span>
-                  <span class="val phone" @click="callPhone($event)">{{msg.proxyInfo.agentPhone}}</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </span>
-      </div>
-      <!-- 猜问题 模块 -->
-      <div class="content chat-content-shadow left-content-style content-extend" v-if="msg.msgType === msgTypes.msg_guess">
-        <span class="text">
-          <span class="text-extend button" v-for="(item, index) in msg.msgExtend" :key="index" @click="clickHotQues(item.question)">{{item.question}}</span>
-          <!-- <span class="text-extend button" @click="enterOnLineLineUp">人工客服</span> -->
-        </span>
-      </div>
+        </div>
+      </transition>
     </div>
     <!-- <div class="avatar" v-show="false">
       <svg class="icon extend-click" aria-hidden="true">
@@ -133,7 +136,8 @@ export default {
   },
   data() {
     return {
-      msgTypes: msgTypes
+      msgTypes: msgTypes,
+      msgAlready: false
     }
   },
   computed: {
@@ -161,6 +165,9 @@ export default {
   },
   mounted() {
     console.log('chat-content-item ===> 你个组件你被引用了哈哈哈')
+    this.$nextTick(() => {
+      this.msgAlready = true
+    })
   },
   methods: {
     callPhone(event) {
@@ -470,6 +477,19 @@ export default {
           }
         }
       }
+    }
+    .msg-enter-active, .msg-leave-active {
+      &.left-content-style {
+        transform-origin: left top;
+      }
+      &.right-content-style {
+        transform-origin: right top;
+      }
+      transition: all ease .2s;
+    }
+    .msg-enter, .msg-leave-to {
+      opacity: 0;
+      transform: scale(0, .8);
     }
   }
 }

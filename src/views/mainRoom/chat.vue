@@ -60,7 +60,7 @@
           @enterVideoLineUp="confirmToLineUp"
           @enterOnLineLineUp="enterOnLineLineUp"
         ></fload-button>
-        <transition name="fade">
+        <transition name="fade" mode="out-in">
           <float-bot-assess
             v-if="isBotAssessShow"
             @targetBotAssess="targetBotAssess"
@@ -111,7 +111,7 @@ import { loginMixin, IMMixin, sendMsgsMixin, getMsgsMixin, onLineQueueMixin } fr
 import { beforeEnterVideo } from '@/common/js/beforeEnterVideo'
 // eslint-disable-next-line
 import { roomStatus, queueStatus, sessionStatus, toggleBarStatus, msgStatus, msgTypes, tipTypes, dialogTypes, cardTypes } from '@/common/js/status'
-import { ERR_OK, getImgUrl, getBotInfo, syncGroupC2CMsg } from '@/server/index.js'
+import { ERR_OK, syncGroupC2CMsg } from '@/server/index.js'
 import { Previewer, TransferDom } from 'vux'
 
 export default {
@@ -232,6 +232,7 @@ export default {
       this._initScroll()
       this._initPullDownRefresh()
       this.login()
+      beforeEnterVideo()
     })
   },
   activated() {
@@ -242,66 +243,90 @@ export default {
   methods: {
     async login() {
       const query = this.$route.query
-      await this.loginByOpenID(query.openId)
-      await this.getUserInfo()
+
+      // 通过 openId 获取用户基本信息
+      let baseInfo = await this.loginByOpenID(query.openId)
+      // 通过 userId 获取用户签名
+      const userSig = await this.getUserInfo(baseInfo.userId)
+      // 封装用户基本信息进 vuex
+      const userInfo = Object.assign(baseInfo, userSig)
+      this.setUserInfo(userInfo)
+
+      // action 创建会话
       this.initSession()
-      this._setBotBaseInfo()
-      this.initIM()
-      beforeEnterVideo()
-      this.requestSessionList()
+
+      // 获取机器人基本信息，及配置机器人欢迎语
+      const { botInfo, welcomeMsg } = await this.getBotBaseInfo()
+      this.setBotInfo(botInfo)
+      this.setMsgs(welcomeMsg)
+
+      // IM 初始化
+      this.initIM(userInfo)
+
+      // 获取当日会话列表
+      this.requestSessionList(userInfo.userId)
     },
-    async _setBotBaseInfo() {
-      const res = await getBotInfo()
-      if (res.result.code === ERR_OK) {
-        console.log('============================= 我现在来请求 BotInfo 辣 =============================')
-        return new Promise((resolve) => {
-          const info = {
-            avatarUrl: getImgUrl(res.data.headUrl),
-            botName: res.data.name
-          }
-          this.setBotInfo(info)
-
-          const botCard = {
-            msgStatus: msgStatus.card,
-            msgType: cardTypes.bot_card,
-            cardInfo: {
-              avatar: this.botInfo.avatarUrl,
-              nickName: this.botInfo.botName
-            }
-          }
-          this.sendMsgs(botCard)
-
-          const botWelcomeMsg = {
-            nickName: res.data.name,
-            content: res.data.welcomeTip,
-            isSelfSend: false,
-            time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
-            msgStatus: msgStatus.msg,
-            msgType: msgTypes.msg_normal
-          }
-          this.sendMsgs(botWelcomeMsg)
-
-          const botHotMsg = {
-            content: res.data.hotspotDoc,
-            nickName: res.data.name,
-            isSelfSend: false,
-            time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
-            msgStatus: msgStatus.msg,
-            msgType: msgTypes.msg_hot,
-            msgExtend: res.data.hotspotQuestions.map((item) => {
-              return {
-                question: item.name
-              }
-            })
-          }
-          this.sendMsgs(botHotMsg)
-
-          resolve()
-        })
-      } else {
-        console.log('============================= getBotInfo error =============================')
-      }
-    },
+    // async _setBotBaseInfo() {
+    //   const res = await getBotInfo()
+    //   if (res.result.code === ERR_OK) {
+    //     console.log('============================= 我现在来请求 BotInfo 辣 =============================')
+    //     return new Promise((resolve) => {
+    //       const botInfo = {
+    //         avatarUrl: getImgUrl(res.data.headUrl),
+    //         botName: res.data.name,
+    //         welcomeTip: res.data.welcomeTip,
+    //         hotspotDoc: res.data.hotspotDoc,
+    //         hotspotQuestions: (function() {
+    //           return res.data.hotspotQuestions.map((item) => {
+    //             return {
+    //               question: item.name
+    //             }
+    //           })
+    //         })()
+    //       }
+    //       resolve(botInfo)
+    //
+    //       this.setBotInfo(botInfo)
+    //
+    //       const botCard = {
+    //         msgStatus: msgStatus.card,
+    //         msgType: cardTypes.bot_card,
+    //         cardInfo: {
+    //           avatar: botInfo.avatarUrl,
+    //           nickName: botInfo.botName
+    //         }
+    //       }
+    //       this.sendMsgs(botCard)
+    //
+    //       const botWelcomeMsg = {
+    //         nickName: res.data.name,
+    //         content: res.data.welcomeTip,
+    //         isSelfSend: false,
+    //         time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+    //         msgStatus: msgStatus.msg,
+    //         msgType: msgTypes.msg_normal
+    //       }
+    //       this.sendMsgs(botWelcomeMsg)
+    //
+    //       const botHotMsg = {
+    //         content: res.data.hotspotDoc,
+    //         nickName: res.data.name,
+    //         isSelfSend: false,
+    //         time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+    //         msgStatus: msgStatus.msg,
+    //         msgType: msgTypes.msg_hot,
+    //         msgExtend: res.data.hotspotQuestions.map((item) => {
+    //           return {
+    //             question: item.name
+    //           }
+    //         })
+    //       }
+    //       this.sendMsgs(botHotMsg)
+    //     })
+    //   } else {
+    //     console.log('============================= getBotInfo error =============================')
+    //   }
+    // },
     _showItemByType(type) {
       let component = ''
       switch (type) {
@@ -333,20 +358,22 @@ export default {
       this.$refs.previewer.show(curIndex)
     },
     targetLink(event) {
-      const e = event || window.event
-      e.preventDefault()
-      const target = e.target
-      // eslint-disable-next-line
-      const regUrl = /((http|ftp|https):\/\/)?[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#])?/g
-      if (target.href && target.href.match(regUrl)) {
-        const link = target.href.match(regUrl)[0]
-        this.$emit('showIframe', {
-          link
-          // clientX: e.clientX,
-          // clientY: e.clientY
-        })
+      if (this.roomMode === roomStatus.videoChat) {
+        const e = event || window.event
+        e.preventDefault()
       }
-      return false
+      // const target = e.target
+      // // eslint-disable-next-line
+      // const regUrl = /((http|ftp|https):\/\/)?[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#])?/g
+      // if (target.href && target.href.match(regUrl)) {
+      //   const link = target.href.match(regUrl)[0]
+      //   this.$emit('showIframe', {
+      //     link
+      //     // clientX: e.clientX,
+      //     // clientY: e.clientY
+      //   })
+      // }
+      // return false
     },
 
     // 进入留言
@@ -750,8 +777,9 @@ export default {
     },
     // 删除msgs里面对应时间戳的一条提示消息
     ...mapMutations({
+      setUserInfo: 'SET_USER_INFO',
       setBotInfo: 'SET_BOT_INFO',
-      setModeToMenChat: 'SET_ROOM_MODE',
+      setSessionId: 'SET_SESSION_ID',
       setMsgs: 'SET_MSGS',
       setInputBar: 'SET_INPUT_BAR',
       setExtendBar: 'SET_EXTEND_BAR'
@@ -884,7 +912,7 @@ export default {
       }
       .fade-enter, .fade-leave-to {
         opacity: 0;
-        transform: translateX(-99%);
+        left: -18rem;
         // backdrop-filter: blur(0);
       }
     }
