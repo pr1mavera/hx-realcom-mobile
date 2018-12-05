@@ -15,20 +15,34 @@ export const loginMixin = {
     ])
   },
   methods: {
-    async loginByOpenID(openID) {
-      const res = await getUserInfoByOpenID(openID)
+    async loginByOpenID(openId) {
+      // 若本地缓存存在且未过期，直接返回本地缓存
+      let data = {}
+      if (data = Tools.CacheTools.getCacheData({ key: 'userBaseInfo', check: openId })) return data
+
+      const res = await getUserInfoByOpenID(openId)
       if (res.result.code === ERR_OK) {
         console.log('============================= 我现在来请求 loginByOpenID 辣 =============================')
         // 配置 userInfo
         !res.data.userInfo.openId && (res.data.userInfo.openId = this.$route.query.openId)
         res.data.userInfo.avatar = res.data.wxUserInfo ? res.data.wxUserInfo.headImgUrl : ''
         res.data.userInfo.nickName = res.data.wxUserInfo ? res.data.wxUserInfo.nickName : ''
+        // 存本地localstorage
+        Tools.CacheTools.setCacheData({
+          key: 'userBaseInfo',
+          check: res.data.userInfo.openId,
+          data: res.data.userInfo
+        })
         return res.data.userInfo
       } else {
         console.log('error in getUserInfoByOpenID')
       }
     },
     async getUserInfo(userId) {
+      // 若本地缓存存在且未过期，直接返回本地缓存
+      let data = {}
+      if (data = Tools.CacheTools.getCacheData({ key: 'userSigInfo', check: userId })) return data
+
       const res = await getLoginInfo(userId, 1)
       if (res.result.code === ERR_OK) {
         console.log('============================= 我现在来请求 getUserInfo 辣 =============================')
@@ -38,60 +52,80 @@ export const loginMixin = {
           sdkAppID: res.data.sdkAppId,
           userSig: res.data.userSig
         }
+        Tools.CacheTools.setCacheData({
+          key: 'userSigInfo',
+          check: userId,
+          data: info
+        })
         return info
       } else {
         console.log('error in getLoginInfo')
       }
     },
     async getBotBaseInfo() {
-      const res = await getBotInfo()
-      if (res.result.code === ERR_OK) {
-        console.log('============================= 我现在来请求 BotInfo 辣 =============================')
-        const botInfo = {
-          avatarUrl: getImgUrl(res.data.headUrl),
-          botName: res.data.name,
-          welcomeTip: res.data.welcomeTip,
-          hotspotDoc: res.data.hotspotDoc,
-          hotspotQuestions: (function() {
-            return res.data.hotspotQuestions.map((item) => {
-              return { question: item.name }
-            })
-          })()
-        }
-
-        const botCard = {
-          msgStatus: msgStatus.card,
-          msgType: cardTypes.bot_card,
-          cardInfo: {
-            avatar: botInfo.avatarUrl,
-            nickName: botInfo.botName
-          }
-        }
-        const botWelcomeMsg = {
-          nickName: botInfo.botName,
-          content: botInfo.welcomeTip,
-          isSelfSend: false,
-          time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
-          msgStatus: msgStatus.msg,
-          msgType: msgTypes.msg_normal
-        }
-        const botHotMsg = {
-          content: botInfo.hotspotDoc,
-          nickName: botInfo.botName,
-          isSelfSend: false,
-          time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
-          msgStatus: msgStatus.msg,
-          msgType: msgTypes.msg_hot,
-          msgExtend: botInfo.hotspotQuestions
-        }
-        const welcomeMsg = [ botCard, botWelcomeMsg, botHotMsg ]
-
-        return {
-          botInfo,
-          welcomeMsg
-        }
+      // 若本地缓存存在且未过期，直接返回本地缓存
+      let data = {}
+      let botInfo = {}
+      if (data = Tools.CacheTools.getCacheData({ key: 'botInfo', check: this.userInfo.userId })) {
+        // 若本地缓存存在且未过期，直接取本地缓存
+        botInfo = data
       } else {
-        console.log('============================= getBotInfo error =============================')
+        const res = await getBotInfo()
+        if (res.result.code === ERR_OK) {
+          console.log('============================= 我现在来请求 BotInfo 辣 =============================')
+          botInfo = {
+            avatarUrl: getImgUrl(res.data.headUrl),
+            botName: res.data.name,
+            welcomeTip: res.data.welcomeTip,
+            hotspotDoc: res.data.hotspotDoc,
+            hotspotQuestions: (function() {
+              return res.data.hotspotQuestions.map((item) => {
+                return { question: item.name }
+              })
+            })()
+          }
+          Tools.CacheTools.setCacheData({
+            key: 'botInfo',
+            check: this.userInfo.userId,
+            data: botInfo
+          })
+        } else {
+          console.log('============================= getBotInfo error =============================')
+          throw Error('getBotInfo error')
+        }
+      }
+
+      // 配置欢迎语消息
+      const botCard = {
+        msgStatus: msgStatus.card,
+        msgType: cardTypes.bot_card,
+        cardInfo: {
+          avatar: botInfo.avatarUrl,
+          nickName: botInfo.botName
+        }
+      }
+      const botWelcomeMsg = {
+        nickName: botInfo.botName,
+        content: botInfo.welcomeTip,
+        isSelfSend: false,
+        time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+        msgStatus: msgStatus.msg,
+        msgType: msgTypes.msg_normal
+      }
+      const botHotMsg = {
+        content: botInfo.hotspotDoc,
+        nickName: botInfo.botName,
+        isSelfSend: false,
+        time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+        msgStatus: msgStatus.msg,
+        msgType: msgTypes.msg_hot,
+        msgExtend: botInfo.hotspotQuestions
+      }
+      const welcomeMsg = [ botCard, botWelcomeMsg, botHotMsg ]
+
+      return {
+        botInfo,
+        welcomeMsg
       }
     }
   }
@@ -502,6 +536,9 @@ export const IMMixin = {
 
         // 结束会话（在线）
         case systemMsgStatus.ONLINE_SERVER_FINISH:
+          if (this.roomMode !== roomStatus.menChat) {
+            return
+          }
           const csId = this.csInfo.csId
           const csName = this.csInfo.csName
           this.setServerTime('00:00')
@@ -1055,7 +1092,7 @@ export const onLineQueueMixin = {
         // 发送正在转接提示
         this.beforeQueue({
           mode: roomStatus.menChat,
-          content: '正在为您转接在线客服，请稍候'
+          content: `尊敬的${+this.userInfo.userGrade <= 3 ? this.userInfo.userGradeName : ''}客户，正在为您转接人工客服，请稍后。`
         })
         // 排队中
         return {

@@ -88,7 +88,7 @@ export default {
           this.$router.push({path: `/room/line-up?csId=${this.csSelected.id}&csName=${this.csSelected.nickName}`})
           this.beforeQueue({
             mode: roomStatus.videoChat,
-            content: '正在为您转接视频客服，请稍候'
+            content: `尊敬的${+this.userInfo.userGrade <= 3 ? this.userInfo.userGradeName : ''}客户，正在为您转接视频客服，请稍后。`
           })
           break
         case status === 4:

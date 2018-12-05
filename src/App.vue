@@ -10,6 +10,7 @@
 
 <script>
 import deviceConfig from './config/device'
+import { stringEx } from './config/extend'
 // import { mapGetters, mapMutations } from 'vuex'
 // import Tools from '@/common/js/tools'
 // import wxConfig from './config/wechat'
@@ -27,6 +28,7 @@ export default {
   // },
   created() {
     deviceConfig()
+    stringEx()
     // wxConfig()
     window.addEventListener('offline', () => {
       this.$vux.toast.show({

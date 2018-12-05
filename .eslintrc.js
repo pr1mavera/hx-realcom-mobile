@@ -38,6 +38,8 @@ module.exports = {
     'no-alert': 0,
     'no-use-before-define': 0,
     'vue/no-parsing-error': [2, { 'invalid-first-character-of-tag-name': false, 'x-invalid-end-tag': false }],
-    'camelcase': 0
+    'camelcase': 0,
+    'no-extend-native': ['error', { 'exceptions': ['Object', 'String'] }],
+    'no-cond-assign': 0
   }
 }

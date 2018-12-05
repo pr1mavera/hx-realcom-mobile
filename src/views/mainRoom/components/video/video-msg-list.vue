@@ -12,11 +12,11 @@
             </span>
             <span class="text-section" v-if="item.msgType === msgTypes.msg_gift">
               <span class="text">
-                我送给客服一个{{item.giftInfo.csName}}
+                我送给客服一个{{item.giftInfo.giftName}}
                 <!-- 我送给{{this.csInfo.csName || '客服'}}一个{{item.giftInfo.name}} -->
               </span>
               <i class="gift-area">
-                <img width=100% height=100% :src="`/static/img/gift/${item.giftInfo.csId}.png`">
+                <img width=100% height=100% :src="`/static/img/gift/${item.giftInfo.giftId}.png`">
               </i>
             </span>
             <span class="text-section" v-if="item.msgType === msgTypes.msg_liked">

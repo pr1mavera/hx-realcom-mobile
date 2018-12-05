@@ -150,7 +150,7 @@ export const afterServerFinish = function({ commit, state }, mode) {
   commit(types.SET_ROOM_MODE, roomStatus.AIChat)
   initSession({ commit, state })
   const tip = [{
-    content: '客服已结束本次会话，如需继续咨询，请重新联系客服',
+    content: '本次服务已结束，如需继续咨询，请重新联系客服',
     time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
     msgStatus: msgStatus.tip,
     msgType: tipTypes.tip_normal

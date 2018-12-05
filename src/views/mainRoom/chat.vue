@@ -245,11 +245,11 @@ export default {
       const query = this.$route.query
 
       // 通过 openId 获取用户基本信息
-      let baseInfo = await this.loginByOpenID(query.openId)
+      const baseInfo = await this.loginByOpenID(query.openId)
       // 通过 userId 获取用户签名
       const userSig = await this.getUserInfo(baseInfo.userId)
       // 封装用户基本信息进 vuex
-      const userInfo = Object.assign(baseInfo, userSig)
+      const userInfo = Object.assign({}, baseInfo, userSig)
       this.setUserInfo(userInfo)
 
       // action 创建会话
