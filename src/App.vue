@@ -126,7 +126,7 @@ body {
 
 /*-小按钮的边框的颜色-*/
 .weui-btn:after {
-  border: 1px solid #FF959C!important;
+  /*border: 1px solid #FF959C!important;*/
 }
 
 /*-,评价组件星星颜色-*/

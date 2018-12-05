@@ -163,7 +163,7 @@
     .count {
       height: 6rem;
       position: relative;
-      background: #ffffff;
+      background: @text-lighter;
       .count-rate-bg {
         width: 9.35rem;
         height: 9.35rem;
@@ -257,6 +257,7 @@
       .btn {
         flex: 1;
         height: 3.5rem;
+        color: @text-lighter;
         line-height: 3.5rem;
         align-self: center;
       }
