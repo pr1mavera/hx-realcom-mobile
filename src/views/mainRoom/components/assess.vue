@@ -131,6 +131,7 @@
           // '123456789',
           {
             sessionId: this.sessionId,
+            chatGuid: this.chatGuid,
             toUserName: data.csName,
             msg: `${this.userInfo.userName}评价了你`,
             time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),

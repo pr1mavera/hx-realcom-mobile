@@ -407,7 +407,6 @@ export const IMMixin = {
 
         // 客户端排队成功（在线）
         case systemMsgStatus.ONLINE_QUEUES_SUCCESS:
-          debugger
           this.$router.replace({path: `/room/chat?openId=${this.userInfo.openId}`})
           const onlineQueueSuccMsg = {
             code: systemMsgStatus.ONLINE_REQUEST_CS_ENTANCE,
@@ -1031,6 +1030,7 @@ export const onLineQueueMixin = {
           mode: roomStatus.menChat,
           content: '正在为您转接在线客服，请稍候'
         })
+        debugger
         // 排队中
         return {
           code: '0',
@@ -1062,7 +1062,7 @@ export const onLineQueueMixin = {
     },
     async handleQueueRes(data) {
       const csInfo_onLine = {
-        welcomeText: data.content
+        welcomeText: data.welcomeText
       }
       // 设置坐席信息
       this.setCsInfo(csInfo_onLine)

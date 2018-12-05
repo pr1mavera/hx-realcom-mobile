@@ -86,13 +86,12 @@ html, body {
   height: 100%;
   /*font-size: 62.5%;*/
 }
+a {
+  color: rgb(82, 144, 239);
+}
 /*防止iPhone X 底部小黑条遮挡页面最底部内容的情况*/
 body {
   padding-bottom: constant(safe-area-inset-bottom);
-}
-
-a {
-  color: rgb(82, 144, 239)!important;
 }
 
 #app {
@@ -197,7 +196,7 @@ a {
       .weui-dialog__hd {
         padding: 1.8em 1.6em 0.5em;
         .weui-dialog__title {
-          font-size: 1.4rem;
+          font-size: 1.6rem;
         }
       }
       .weui-dialog__bd {

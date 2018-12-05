@@ -396,6 +396,8 @@ export default {
   height: 100%;
   overflow: hidden;
   background-color: @bg-light-shadow;
+  background-image: url('/static/img/service/cs-add-bg.png');
+  background-size: cover;
   .cs-label-wrapper{
     width: 100%;
     height: 44rem;

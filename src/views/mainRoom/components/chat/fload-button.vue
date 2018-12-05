@@ -106,10 +106,10 @@ export default {
         }, 1000)
       }
 
-      // if (!this.isVip) { // 非VIP客户
-      //   this.showTips(2, '此功能只对VIP客户开放')
-      //   return
-      // }
+      if (!this.isVip) { // 非VIP客户
+        this.showTips(2, '此功能只对VIP客户开放')
+        return
+      }
 
       if (this.queueMode.status === queueStatus.queuing && this.queueMode.mode === roomStatus.menChat) { // 排队中
         this.onlineServ2Video('您当前正在在线人工排队中，确认需要取消排队并进入视频客服吗？')
