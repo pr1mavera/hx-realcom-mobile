@@ -80,6 +80,7 @@
     computed: {
       ...mapGetters([
         'sessionId',
+        'chatGuid',
         'userInfo',
         'csInfo',
         'sendType'
@@ -122,7 +123,6 @@
           'evaluateLevel': this.stars,
           'labels': this.labels
         })
-        this.$emit('assessSuccess')
 
         // 发送评价消息，告诉坐席
         IM.sendNormalMsg(
@@ -145,13 +145,16 @@
             isMsgSync: 2
           })
 
+        this.$emit('assessSuccess')
         // 调用评价接口，告诉服务
         const res = await saveAssess(data)
+        let text = ''
         if (res.result.code === ERR_OK) {
-          this.$vux.toast.text('评价成功', 'default')
+          text = '评价成功'
         } else {
-          this.$vux.toast.text('评价失败', 'default')
+          text = '评价失败'
         }
+        this.$vux.toast.text(text, 'default')
 
         // 清空数据
         this.$refs.labelBar.resetLabelList()
