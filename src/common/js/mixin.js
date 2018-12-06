@@ -1082,29 +1082,29 @@ export const onLineQueueMixin = {
   methods: {
     async enterOnLineLineUp() {
       this.$router.replace({path: `/room/chat?openId=${this.userInfo.openId}&csId=${this.onLineQueueCsId || 'wait_for_distribution'}`})
-      // 排队成功，直接通知坐席
-      this.setChatGuid(new Date().getTime())
-      const msg = {
-        code: systemMsgStatus.ONLINE_REQUEST_CS_ENTANCE,
-        chatGuid: this.chatGuid,
-        csId: 'webchat7',
-        csName: 'webchat7',
-        startTime: '',
-        endTime: ''
-      }
-      const config = await this.configSendSystemMsg(msg)
-      await IM.sendSystemMsg(config)
-
-      // // 在线转人工流程
-      // // 1. 请求排队
-      // const res = await this.formatOnLineQueueAPI()
-      // // 2. 处理
-      // if (res.code === ERR_OK) {
-      //   window.sessionStorage.setItem('queue_start_time', new Date().getTime())
-      //   this.handleQueueRes(res.data)
-      // } else {
-      //   this.botSendLeaveMsg()
+      // // 排队成功，直接通知坐席
+      // this.setChatGuid(new Date().getTime())
+      // const msg = {
+      //   code: systemMsgStatus.ONLINE_REQUEST_CS_ENTANCE,
+      //   chatGuid: this.chatGuid,
+      //   csId: 'webchat7',
+      //   csName: 'webchat7',
+      //   startTime: '',
+      //   endTime: ''
       // }
+      // const config = await this.configSendSystemMsg(msg)
+      // await IM.sendSystemMsg(config)
+
+      // 在线转人工流程
+      // 1. 请求排队
+      const res = await this.formatOnLineQueueAPI()
+      // 2. 处理
+      if (res.code === ERR_OK) {
+        window.sessionStorage.setItem('queue_start_time', new Date().getTime())
+        this.handleQueueRes(res.data)
+      } else {
+        this.botSendLeaveMsg()
+      }
     },
     async formatOnLineQueueAPI() {
       // 初始化人工客服排队ID，存vuex
