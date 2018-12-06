@@ -3,63 +3,131 @@ import IM from '@/server/im'
 // import Creator from '@/common/js/msgsLoader'
 import MsgsLoader from '@/common/js/MsgsLoader'
 // import WebRTCAPI from 'webRTCAPI'
-import { ERR_OK, getUserInfoByOpenID, getLoginInfo, sendMsgToBot, getSessionList, getCsAvatar, onLineQueue, getBotRoamMsgs, requestHistoryMsgs, onLineQueueCancel, chatQueueHeartBeat } from '@/server/index.js'
+import { ERR_OK, getImgUrl, getUserInfoByOpenID, getLoginInfo, getBotInfo, sendMsgToBot, getSessionList, getCsAvatar, onLineQueue, getBotRoamMsgs, requestHistoryMsgs, onLineQueueCancel, chatQueueHeartBeat } from '@/server/index.js'
 import Tools from '@/common/js/tools'
 // import { formatDate } from '@/common/js/dateConfig.js'
-import { roomStatus, queueStatus, sessionStatus, systemMsgStatus, msgStatus, msgTypes, tipTypes } from '@/common/js/status'
+import { roomStatus, queueStatus, sessionStatus, systemMsgStatus, msgStatus, cardTypes, msgTypes, tipTypes } from '@/common/js/status'
 
 export const loginMixin = {
-  data() {
-    return {
-      userId: '',
-      userName: '',
-      roomName: ''
-    }
-  },
   computed: {
     ...mapGetters([
       'userInfo'
     ])
   },
   methods: {
-    async loginByOpenID(openID) {
-      const res = await getUserInfoByOpenID(openID)
+    async loginByOpenID(openId) {
+      // 若本地缓存存在且未过期，直接返回本地缓存
+      let data = {}
+      if (data = Tools.CacheTools.getCacheData({ key: 'userBaseInfo', check: openId })) return data
+
+      const res = await getUserInfoByOpenID(openId)
       if (res.result.code === ERR_OK) {
         console.log('============================= 我现在来请求 loginByOpenID 辣 =============================')
-        return new Promise((resolve) => {
-          // 存vuex userInfo
-          !res.data.userInfo.openId && (res.data.userInfo.openId = this.$route.query.openId)
-          // !res.data.userInfo.userPhone && (res.data.userInfo.userPhone = '00000000')
-          res.data.userInfo.avatar = res.data.wxUserInfo ? res.data.wxUserInfo.headImgUrl : ''
-          res.data.userInfo.nickName = res.data.wxUserInfo ? res.data.wxUserInfo.nickName : ''
-          this.setUserInfo(res.data.userInfo)
-          resolve()
+        // 配置 userInfo
+        !res.data.userInfo.openId && (res.data.userInfo.openId = this.$route.query.openId)
+        res.data.userInfo.avatar = res.data.wxUserInfo ? res.data.wxUserInfo.headImgUrl : ''
+        res.data.userInfo.nickName = res.data.wxUserInfo ? res.data.wxUserInfo.nickName : ''
+        // 存本地localstorage
+        Tools.CacheTools.setCacheData({
+          key: 'userBaseInfo',
+          check: res.data.userInfo.openId,
+          data: res.data.userInfo
         })
+        return res.data.userInfo
       } else {
         console.log('error in getUserInfoByOpenID')
       }
     },
-    async getUserInfo() {
-      const res = await getLoginInfo(this.userInfo.userId, 1)
+    async getUserInfo(userId) {
+      // 若本地缓存存在且未过期，直接返回本地缓存
+      let data = {}
+      if (data = Tools.CacheTools.getCacheData({ key: 'userSigInfo', check: userId })) return data
+
+      const res = await getLoginInfo(userId, 1)
       if (res.result.code === ERR_OK) {
         console.log('============================= 我现在来请求 getUserInfo 辣 =============================')
-        return new Promise((resolve) => {
-          const info = Tools.CopyTools.objShallowClone(this.userInfo)
-          info.accountType = res.data.accountType
-          info.sdkAppID = res.data.sdkAppId
-          info.userSig = res.data.userSig
-          // 存vuex userInfo
-          this.setUserInfo(info)
-          resolve()
+        // const info = Tools.CopyTools.objShallowClone(this.userInfo)
+        const info = {
+          accountType: res.data.accountType,
+          sdkAppID: res.data.sdkAppId,
+          userSig: res.data.userSig
+        }
+        Tools.CacheTools.setCacheData({
+          key: 'userSigInfo',
+          check: userId,
+          data: info
         })
+        return info
       } else {
         console.log('error in getLoginInfo')
       }
     },
-    ...mapMutations({
-      setUserInfo: 'SET_USER_INFO',
-      setSessionId: 'SET_SESSION_ID'
-    })
+    async getBotBaseInfo() {
+      // 若本地缓存存在且未过期，直接返回本地缓存
+      let data = {}
+      let botInfo = {}
+      if (data = Tools.CacheTools.getCacheData({ key: 'botInfo', check: this.userInfo.userId })) {
+        // 若本地缓存存在且未过期，直接取本地缓存
+        botInfo = data
+      } else {
+        const res = await getBotInfo()
+        if (res.result.code === ERR_OK) {
+          console.log('============================= 我现在来请求 BotInfo 辣 =============================')
+          botInfo = {
+            avatarUrl: getImgUrl(res.data.headUrl),
+            botName: res.data.name,
+            welcomeTip: res.data.welcomeTip,
+            hotspotDoc: res.data.hotspotDoc,
+            hotspotQuestions: (function() {
+              return res.data.hotspotQuestions.map((item) => {
+                return { question: item.name }
+              })
+            })()
+          }
+          Tools.CacheTools.setCacheData({
+            key: 'botInfo',
+            check: this.userInfo.userId,
+            data: botInfo
+          })
+        } else {
+          console.log('============================= getBotInfo error =============================')
+          throw Error('getBotInfo error')
+        }
+      }
+
+      // 配置欢迎语消息
+      const botCard = {
+        msgStatus: msgStatus.card,
+        msgType: cardTypes.bot_card,
+        cardInfo: {
+          avatar: botInfo.avatarUrl,
+          nickName: botInfo.botName
+        }
+      }
+      const botWelcomeMsg = {
+        nickName: botInfo.botName,
+        content: botInfo.welcomeTip,
+        isSelfSend: false,
+        time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+        msgStatus: msgStatus.msg,
+        msgType: msgTypes.msg_normal
+      }
+      const botHotMsg = {
+        content: botInfo.hotspotDoc,
+        nickName: botInfo.botName,
+        isSelfSend: false,
+        time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+        msgStatus: msgStatus.msg,
+        msgType: msgTypes.msg_hot,
+        msgExtend: botInfo.hotspotQuestions
+      }
+      const welcomeMsg = [ botCard, botWelcomeMsg, botHotMsg ]
+
+      return {
+        botInfo,
+        welcomeMsg
+      }
+    }
   }
 }
 
@@ -254,22 +322,17 @@ export const IMMixin = {
       'hasAssess'
     ])
   },
-  data() {
-    return {
-
-    }
-  },
   methods: {
-    initIM() {
+    initIM(userInfo) {
       // const self = this
       // self.onMsgNotify.bind(this)
       const loginInfo = {
-        sdkAppID: this.userInfo.sdkAppID,
-        appIDAt3rd: this.userInfo.sdkAppID,
-        identifier: this.userInfo.userId,
-        identifierNick: this.userInfo.userName,
-        accountType: this.userInfo.accountType,
-        userSig: this.userInfo.userSig
+        sdkAppID: userInfo.sdkAppID,
+        appIDAt3rd: userInfo.sdkAppID,
+        identifier: userInfo.userId,
+        identifierNick: userInfo.userName,
+        accountType: userInfo.accountType,
+        userSig: userInfo.userSig
       }
       console.debug('initIM', loginInfo)
       return new Promise((resolve) => {
@@ -473,6 +536,9 @@ export const IMMixin = {
 
         // 结束会话（在线）
         case systemMsgStatus.ONLINE_SERVER_FINISH:
+          if (this.roomMode !== roomStatus.menChat) {
+            return
+          }
           const csId = this.csInfo.csId
           const csName = this.csInfo.csName
           this.setServerTime('00:00')
@@ -541,6 +607,7 @@ export const sendMsgsMixin = {
       'csInfo',
       'roomId',
       'sessionId',
+      'chatGuid',
       'sendType',
       'msgs'
     ])
@@ -887,14 +954,11 @@ export const getMsgsMixin = {
   },
   methods: {
     /* 获取当天会话列表 */
-    async requestSessionList() {
-      const res = await getSessionList(this.userInfo.userId)
+    async requestSessionList(userId) {
+      const res = await getSessionList(userId)
       if (res.result.code === ERR_OK) {
         console.log('============================= 我现在来请求 会话列表 辣 =============================')
-        return new Promise((resolve) => {
-          this.sessionList = res.data.sessionList
-          resolve()
-        })
+        this.sessionList = res.data.sessionList
       } else {
         console.log('error in getHistoryMsgs')
       }
@@ -988,8 +1052,8 @@ export const onLineQueueMixin = {
       // const msg = {
       //   code: systemMsgStatus.ONLINE_REQUEST_CS_ENTANCE,
       //   chatGuid: this.chatGuid,
-      //   csId: 'webchat7',
-      //   csName: 'webchat7',
+      //   csId: 'webchat6',
+      //   csName: 'webchat6',
       //   startTime: '',
       //   endTime: ''
       // }
@@ -1028,9 +1092,8 @@ export const onLineQueueMixin = {
         // 发送正在转接提示
         this.beforeQueue({
           mode: roomStatus.menChat,
-          content: '正在为您转接在线客服，请稍候'
+          content: `尊敬的${+this.userInfo.userGrade <= 3 ? this.userInfo.userGradeName : ''}客户，正在为您转接人工客服，请稍后。`
         })
-        debugger
         // 排队中
         return {
           code: '0',

@@ -1,4 +1,4 @@
-import { msgStatus, msgTypes, sessionStatus } from '@/common/js/status'
+import { CACHE_QUALITY_TIME, msgStatus, msgTypes, sessionStatus } from '@/common/js/status'
 
 const DateTools = {
   formatDate: function(date, format) {
@@ -35,6 +35,11 @@ const DateTools = {
     const cacheT = new Date(cache.replace(/-/g, '/'))
     const nextT = new Date(next.replace(/-/g, '/'))
     return nextT - cacheT >= 60000
+  },
+
+  isCacheValid: function(cacheT) {
+    const now = new Date().getTime()
+    return (now - cacheT) <= CACHE_QUALITY_TIME
   },
 
   isWorkTime: function({ startT, endT }) {
@@ -336,13 +341,34 @@ const MsgsFilterTools = {
   }
 }
 
-let Tools = {}
+const CacheTools = {
+  // 从localStorage取对应字段的缓存
+  getCacheData: function({ key, check }) {
+    const cache = window.localStorage.getItem(key) || ''
+    if (cache && DateTools.isCacheValid(cache.parseJSON().timestamp) && (cache.parseJSON().check === check)) {
+      return cache.parseJSON().data
+    }
+    return false
+  },
 
-Tools.DateTools = Object.create(DateTools)
-Tools.AsyncTools = Object.create(AsyncTools)
-Tools.CharTools = Object.create(CharTools)
-Tools.CopyTools = Object.create(CopyTools)
-Tools.RectTools = Object.create(RectTools)
-Tools.MsgsFilterTools = Object.create(MsgsFilterTools)
+  // 存localStorage
+  setCacheData: function({ key, check, data }) {
+    window.localStorage.setItem(key, JSON.stringify({
+      timestamp: new Date().getTime(),
+      check,
+      data
+    }))
+  }
+}
+
+let Tools = Object.assign({}, {
+  DateTools: Object.create(DateTools),
+  AsyncTools: Object.create(AsyncTools),
+  CharTools: Object.create(CharTools),
+  CopyTools: Object.create(CopyTools),
+  RectTools: Object.create(RectTools),
+  MsgsFilterTools: Object.create(MsgsFilterTools),
+  CacheTools: Object.create(CacheTools)
+})
 
 export default Tools

@@ -10,6 +10,7 @@
 
 <script>
 import deviceConfig from './config/device'
+import { stringEx } from './config/extend'
 // import { mapGetters, mapMutations } from 'vuex'
 // import Tools from '@/common/js/tools'
 // import wxConfig from './config/wechat'
@@ -27,6 +28,7 @@ export default {
   // },
   created() {
     deviceConfig()
+    stringEx()
     // wxConfig()
     window.addEventListener('offline', () => {
       this.$vux.toast.show({
@@ -124,7 +126,7 @@ body {
 
 /*-小按钮的边框的颜色-*/
 .weui-btn:after {
-  border: 1px solid #FF959C!important;
+  /*border: 1px solid #FF959C!important;*/
 }
 
 /*-,评价组件星星颜色-*/

@@ -1,3 +1,5 @@
+export const CACHE_QUALITY_TIME = 1000 * 60 * 60 * 24 // 本地缓存过期时间（24小时）
+
 export const toggleBarStatus = {
   allFold: 0,
   inputBar: 1, // 软键盘
