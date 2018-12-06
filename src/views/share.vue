@@ -3,7 +3,7 @@
     <div class="top">
       <div class="outline">
         <div class="avatar">
-          <img v-lazy="avatarImgSrc" :key="avatarImgSrc">
+           <img v-lazy="avatarImgSrc" :key="avatarImgSrc">
         </div>
       </div>
       <p class="name">客服{{name}}</p>
