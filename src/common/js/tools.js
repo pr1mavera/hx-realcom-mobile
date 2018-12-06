@@ -358,6 +358,22 @@ const CacheTools = {
       check,
       data
     }))
+  },
+
+  // 跟新当前服务缓存消息
+  updateCacheData: function(msgs) {
+    let cache = window.localStorage.getItem('curServInfo')
+    if (!cache) {
+      return
+    }
+    cache = cache.parseJSON()
+    cache.data.msgs = msgs
+    window.localStorage.setItem('curServInfo', JSON.stringify(cache))
+  },
+
+  // 清空本地localstorage
+  removeCacheData: function(key) {
+    window.localStorage.removeItem(key)
   }
 }
 

@@ -264,4 +264,5 @@ export const sendMsgs = async function({ commit, state }, msg) {
     updateLastAction({ commit, state })
   }
   commit(types.SET_MSGS, state.msgs.concat([msg]))
+  return 0
 }

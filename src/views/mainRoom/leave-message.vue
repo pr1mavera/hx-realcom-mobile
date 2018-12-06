@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <div class="header">
-      <img class="avatar" src="/static/img/leaveMsg/leaveMsgAvatar.png">
+      <img class="avatar" src="/video/static/img/leaveMsg/leaveMsgAvatar.png">
       <p>客服暂时不在线，偷偷告诉他</p>
     </div>
     <section>
@@ -99,7 +99,7 @@
       width: 100%;
       height: 18rem;
       text-align: center;
-      background: url("/static/img/leaveMsg/leaveMsgBg.png");
+      background: url("/video/static/img/leaveMsg/leaveMsgBg.png");
       background-size: cover;
       .avatar {
         margin: 3rem auto 1.2rem;

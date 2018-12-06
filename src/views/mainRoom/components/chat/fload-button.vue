@@ -9,7 +9,7 @@
         class="item extend-click transition-bezier"
         @click="callPhone"
         :class="[{'visible-when-input': barStatus, 'item-1': !barStatus}]">
-        <img width=100% height=100% src="/static/img/chat/fb_phone.png">
+        <img width=100% height=100% src="/video/static/img/chat/fb_phone.png">
       </button>
       <p class="text">转电话</p>
     </div>
@@ -18,7 +18,7 @@
         class="item extend-click transition-bezier"
         @click="videoLineUp"
         :class="[{'visible-when-input': barStatus, 'item-2': !barStatus}]">
-        <img width=100% height=100% src="/static/img/chat/fb_video.png">
+        <img width=100% height=100% src="/video/static/img/chat/fb_video.png">
       </button>
       <p class="text">转视频</p>
     </div>
@@ -27,7 +27,7 @@
         class="item extend-click transition-bezier"
         @click="onLineLineUp"
         :class="[{'visible-when-input': barStatus, 'item-3': !barStatus}]">
-        <img width=100% height=100% :src='`/static/img/chat/fb_${iconByUserGrade}.png`'>
+        <img width=100% height=100% :src='`/video/static/img/chat/fb_${iconByUserGrade}.png`'>
       </button>
       <p class="text">转人工</p>
     </div>
@@ -35,7 +35,7 @@
       class="item extend-click transition-bezier"
       @click="clickAssess"
       :class="[{'visible-when-input': barStatus, 'item-4': !barStatus}]">
-      <img width=100% height=100% src="/static/img/chat/fb_assess.png">
+      <img width=100% height=100% src="/video/static/img/chat/fb_assess.png">
     </button> -->
   </div>
 </template>

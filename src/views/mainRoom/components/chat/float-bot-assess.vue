@@ -25,7 +25,7 @@
         </button>
       </div>
     </div>
-    <div class="slide-btn extend-click" :class="{'open': !touchToggle || move >= 0}" @click.stop="targetSlideBtn">
+    <div class="slide-btn extend-click-big-right" :class="{'open': !touchToggle || move >= 0}" @click.stop="targetSlideBtn">
       <span class="slide-item top"></span>
       <span class="slide-item bottom"></span>
     </div>

@@ -2,20 +2,20 @@
   <main class="main">
     <!-- 点击右上角的手指 -->
     <div class="step-one">
-      <img src="/static/img/ios-guide1.png">
+      <img src="/video/static/img/ios-guide1.png">
     </div>
     <!-- 文字提示 -->
     <div class="step-two">
-      <img src="/static/img/ios-guide2.png">
+      <img src="/video/static/img/ios-guide2.png">
     </div>
     <div class="step-thr">
-      <img src="/static/img/ios-guide3.png">
+      <img src="/video/static/img/ios-guide3.png">
     </div>
    <div class="step-four">
-     <img src="/static/img/ios-guide1.png">
+     <img src="/video/static/img/ios-guide1.png">
    </div>
     <div class="step-fif">
-      <img style="" src="/static/img/ios-guide4.png">
+      <img style="" src="/video/static/img/ios-guide4.png">
     </div>
   </main>
 </template>

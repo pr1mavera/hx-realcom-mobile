@@ -111,7 +111,7 @@ import { loginMixin, IMMixin, sendMsgsMixin, getMsgsMixin, onLineQueueMixin } fr
 import { beforeEnterVideo } from '@/common/js/beforeEnterVideo'
 // eslint-disable-next-line
 import { roomStatus, queueStatus, sessionStatus, toggleBarStatus, msgStatus, msgTypes, tipTypes, dialogTypes, cardTypes } from '@/common/js/status'
-import { ERR_OK, syncGroupC2CMsg } from '@/server/index.js'
+import { ERR_OK, getSessionStatus, syncGroupC2CMsg } from '@/server/index.js'
 import { Previewer, TransferDom } from 'vux'
 
 export default {
@@ -161,8 +161,11 @@ export default {
       }
     },
     previewImgList() {
-      const allMsgs = this.historyMsgs.concat(this.msgs)
+      let allMsgs = this.historyMsgs.concat(this.msgs)
       let map = []
+      // if (this.historyMsgs.length && this.msgs.length) {
+      //   allMsgs = this.historyMsgs.concat(this.msgs)
+      // }
       allMsgs.forEach(item => {
         if (item.msgStatus === msgStatus.msg && item.msgType === msgTypes.msg_img) {
           map.push({
@@ -252,13 +255,16 @@ export default {
       const userInfo = Object.assign({}, baseInfo, userSig)
       this.setUserInfo(userInfo)
 
-      // action 创建会话
-      this.initSession()
+      // 判断是否重连
+      const reConnectStatus = await this.getCurServStatus()
+
+      // 若无重连，则 action 创建会话
+      !reConnectStatus && this.initSession()
 
       // 获取机器人基本信息，及配置机器人欢迎语
       const { botInfo, welcomeMsg } = await this.getBotBaseInfo()
       this.setBotInfo(botInfo)
-      this.setMsgs(welcomeMsg)
+      !reConnectStatus && this.setMsgs(welcomeMsg)
 
       // IM 初始化
       this.initIM(userInfo)
@@ -266,67 +272,47 @@ export default {
       // 获取当日会话列表
       this.requestSessionList(userInfo.userId)
     },
-    // async _setBotBaseInfo() {
-    //   const res = await getBotInfo()
-    //   if (res.result.code === ERR_OK) {
-    //     console.log('============================= 我现在来请求 BotInfo 辣 =============================')
-    //     return new Promise((resolve) => {
-    //       const botInfo = {
-    //         avatarUrl: getImgUrl(res.data.headUrl),
-    //         botName: res.data.name,
-    //         welcomeTip: res.data.welcomeTip,
-    //         hotspotDoc: res.data.hotspotDoc,
-    //         hotspotQuestions: (function() {
-    //           return res.data.hotspotQuestions.map((item) => {
-    //             return {
-    //               question: item.name
-    //             }
-    //           })
-    //         })()
-    //       }
-    //       resolve(botInfo)
-    //
-    //       this.setBotInfo(botInfo)
-    //
-    //       const botCard = {
-    //         msgStatus: msgStatus.card,
-    //         msgType: cardTypes.bot_card,
-    //         cardInfo: {
-    //           avatar: botInfo.avatarUrl,
-    //           nickName: botInfo.botName
-    //         }
-    //       }
-    //       this.sendMsgs(botCard)
-    //
-    //       const botWelcomeMsg = {
-    //         nickName: res.data.name,
-    //         content: res.data.welcomeTip,
-    //         isSelfSend: false,
-    //         time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
-    //         msgStatus: msgStatus.msg,
-    //         msgType: msgTypes.msg_normal
-    //       }
-    //       this.sendMsgs(botWelcomeMsg)
-    //
-    //       const botHotMsg = {
-    //         content: res.data.hotspotDoc,
-    //         nickName: res.data.name,
-    //         isSelfSend: false,
-    //         time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
-    //         msgStatus: msgStatus.msg,
-    //         msgType: msgTypes.msg_hot,
-    //         msgExtend: res.data.hotspotQuestions.map((item) => {
-    //           return {
-    //             question: item.name
-    //           }
-    //         })
-    //       }
-    //       this.sendMsgs(botHotMsg)
-    //     })
-    //   } else {
-    //     console.log('============================= getBotInfo error =============================')
-    //   }
-    // },
+    async getCurServStatus() {
+      // 如果有会话未结束，则重连
+      let data = Tools.CacheTools.getCacheData({ key: 'curServInfo', check: this.userInfo.openId })
+      if (!data) {
+        // 当前无缓存
+        return false
+      }
+      const res = await getSessionStatus(data.sessionId)
+      if (res.result.code === ERR_OK) {
+        if (Boolean(res.data.status) === false) {
+          // 当前会话已结束
+          return false
+        } else {
+          // 重连
+          await this.reConnect(data)
+          return true
+        }
+      } else {
+        // 调用会话是否结束接口失败
+        console.log('================> 调用会话是否结束接口失败 <================')
+        return false
+      }
+    },
+    async reConnect(data) {
+      // 设置房间状态
+      data.roomMode && this.setRoomMode(data.roomMode)
+      // 设置坐席信息
+      data.csInfo && this.setCsInfo(data.csInfo)
+      // 设置会话ID
+      data.sessionId && this.setSessionId(data.sessionId)
+      // 设置chatGuid
+      data.chatGuid && this.setChatGuid(data.chatGuid)
+      // 设置msgs
+      this.setMsgs(data.msgs)
+      // 滑动到最底部
+      await Tools.AsyncTools.sleep(30)
+      this.chatScroll.refresh()
+      this.chatScroll.scrollToElement(this.$refs.chatContentEnd, 400)
+      this.$vux.toast.text('重连成功', 'default')
+      return
+    },
     _showItemByType(type) {
       let component = ''
       switch (type) {
@@ -779,7 +765,10 @@ export default {
     ...mapMutations({
       setUserInfo: 'SET_USER_INFO',
       setBotInfo: 'SET_BOT_INFO',
+      setCsInfo: 'SET_CS_INFO',
       setSessionId: 'SET_SESSION_ID',
+      setChatGuid: 'SET_CHAT_GUID',
+      setRoomMode: 'SET_ROOM_MODE',
       setMsgs: 'SET_MSGS',
       setInputBar: 'SET_INPUT_BAR',
       setExtendBar: 'SET_EXTEND_BAR'
@@ -819,6 +808,10 @@ export default {
   watch: {
     msgs() {
       this.$nextTick(async() => {
+        // 若当前为在线服务，则更新缓存
+        if (this.roomMode === roomStatus.menChat) {
+          Tools.CacheTools.updateCacheData(this.msgs)
+        }
         await Tools.AsyncTools.sleep(30)
         this.chatScroll.refresh()
         this.chatScroll.scrollToElement(this.$refs.chatContentEnd, 400)
@@ -864,7 +857,7 @@ export default {
       overflow: hidden;
       // background-color: @bg-normal;
       flex: 1;
-      background-image: url('/static/img/chat/chatBG.png');
+      background-image: url('/video/static/img/chat/chatBG.png');
       background-size: cover;
       // background-color: #000;
       // flex-basis: auto;

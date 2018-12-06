@@ -124,10 +124,11 @@ export default {
             // 若当前为人工客服结束，需要手动清空vuex数据
             if (self.roomMode === roomStatus.menChat) {
               // action
-              const csId = self.csInfo.csId
-              const csName = self.csInfo.csName
               self.afterServerFinish(sessionStatus.onLine)
-              self.toShare(csId, csName)
+              // 分享
+              // const csId = self.csInfo.csId
+              // const csName = self.csInfo.csName
+              // self.toShare(csId, csName)
             }
           }
         })
@@ -212,7 +213,7 @@ export default {
     },
     showGiftView(id) {
       this.giftAnimeView = true
-      this.giftSrc = `/static/img/gift/${id}.gif`
+      this.giftSrc = `/video/static/img/gift/${id}.gif`
     },
     resetGiftView() {
       this.giftAnimeView = false

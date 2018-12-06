@@ -2,7 +2,7 @@
   <section class="section">
     <!--<div class="top"></div>-->
     <main class="main">
-      <div class="img-box"><img src="/static/img/networkBusy.png"></div>
+      <div class="img-box"><img src="/video/static/img/networkBusy.png"></div>
       <p class="tip">抱歉网络繁忙，视频连接失败，请稍后重连！</p>
       <flexbox>
         <flexbox-item :gutter="3">

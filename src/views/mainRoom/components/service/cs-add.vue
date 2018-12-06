@@ -12,7 +12,7 @@
             :style="setRotate"> <!-- 限制边框范围及显示阴影 -->
             <div class="container">
               <div class="header">
-                <img width=100% class="header-img" src="/static/img/chat/csAddBg.png">
+                <img width=100% class="header-img" src="/video/static/img/chat/csAddBg.png">
                 <div class="header-msg">
                   <div class="avatar" @click="enterSerCenter">
                     <img width=100% height=100% v-lazy="avatarImg">
@@ -396,7 +396,7 @@ export default {
   height: 100%;
   overflow: hidden;
   background-color: @bg-light-shadow;
-  background-image: url('/static/img/service/cs-add-bg.png');
+  background-image: url('/video/static/img/service/cs-add-bg.png');
   background-size: cover;
   .cs-label-wrapper{
     width: 100%;
@@ -423,7 +423,7 @@ export default {
             width: 100%;
             height: 17.5rem;
             text-align: center;
-            // background-image: url('~/static/img/chat/csAddBg.png');
+            // background-image: url('~/video/static/img/chat/csAddBg.png');
             // background-size: 100%;
             .header-img {
               position: absolute;

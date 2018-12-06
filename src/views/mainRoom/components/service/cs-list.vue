@@ -51,7 +51,7 @@ export default {
     return {
       myCsList: [
         // {
-        //   resultUrl: '/static/img/avatar@2x.png',
+        //   resultUrl: '/video/static/img/avatar@2x.png',
         //   nickName: '花花',
         //   servTimes: 4578,
         //   giftCount: 9933

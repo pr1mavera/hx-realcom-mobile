@@ -137,7 +137,7 @@
     position: relative;
     margin: 0 auto 2.5rem;
     border-radius: .5rem;
-    background: url("/static/img/service/myCsCardBg.png") no-repeat;
+    background: url("/video/static/img/service/myCsCardBg.png") no-repeat;
     box-shadow: 0 .3rem .5rem 0 rgba(148, 148, 148, 0.1);
     background-size: 22.65rem 5.85rem;
     background-color: #ffffff;

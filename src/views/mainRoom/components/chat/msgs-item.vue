@@ -55,8 +55,13 @@
           </span>
           <!-- 图片消息 -->
           <span class="text text-img" v-if="msg.msgType === msgTypes.msg_img">
-            <img class="text-img-cell" :id="imgId" height=100% :src="msg.imgData.small" @click="clickImgMsg"
+            <img class="text-img-cell"
+            :id="imgId"
+            height=100%
+            :src="msg.imgData.small"
+            @click="clickImgMsg"
             :class="[{'right-img-style': msg.isSelfSend, 'left-img-style': !msg.isSelfSend}]">
+            <!-- :onerror="msg.imgData.small" -->
           </span>
           <!-- 小华表情消息 -->
           <span class="text" v-if="msg.msgType === msgTypes.msg_XH_express">
@@ -65,7 +70,7 @@
           <!-- 礼物消息 -->
           <span class="text gift-item" v-if="msg.msgType === msgTypes.msg_gift">
             我送给{{this.csInfo.csName || '客服'}}一个{{msg.giftInfo.giftName}} !
-            <img class="text-gift" :src="`/static/img/gift/${msg.giftInfo.giftId}.png`">
+            <img class="text-gift" :src="`/video/static/img/gift/${msg.giftInfo.giftId}.png`">
           </span>
           <!-- 留言 -->
           <span class="text" v-if="msg.msgType === msgTypes.msg_leave">{{msg.content}}，请<span class="button" @click="leaveMsg">点击留言</span>~</span>
@@ -144,13 +149,13 @@ export default {
     avatarUrl() {
       switch (this.msg.chatType) {
         case sessionStatus.robot:
-          return '/static/img/chat/xiaohua@2x.png'
+          return '/video/static/img/chat/xiaohua@2x.png'
         case sessionStatus.video:
           return getCsAvatar(this.msg.avatar)
         case sessionStatus.onLine:
           return getCsAvatar(this.msg.avatar)
         default:
-          return '/static/img/chat/xiaohua@2x.png'
+          return '/video/static/img/chat/xiaohua@2x.png'
       }
     },
     imgId() {
@@ -268,7 +273,7 @@ export default {
         height: 100%;
         object-fit: cover;
       }
-      // .bg-image('~/static/img/chat/xiaohua');
+      // .bg-image('~/video/static/img/chat/xiaohua');
     }
     .icon {
       width: 1.2rem;

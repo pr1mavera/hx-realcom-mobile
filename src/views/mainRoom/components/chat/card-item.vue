@@ -3,7 +3,7 @@
     <div class="card-container" v-if="msg.msgType === cardTypes.bot_card">
       <div class="card">
         <div class="avatar">
-          <img width=100% height=100% src="/static/img/chat/xiaohua@2x.png">
+          <img width=100% height=100% src="/video/static/img/chat/xiaohua@2x.png">
         </div>
         <div class="text">
           <span class="name">{{msg.cardInfo.nickName}}</span>
@@ -56,6 +56,7 @@ export default {
         width: 4.6rem;
         height: 4.6rem;
         border-radius:50%;
+        overflow: hidden;
         margin: 0 auto;
         border: 0.3rem solid rgb(244, 244, 244);
         box-sizing: border-box;

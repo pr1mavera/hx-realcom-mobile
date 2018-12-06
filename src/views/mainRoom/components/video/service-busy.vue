@@ -1,6 +1,6 @@
 <template>
   <section>
-    <div class="img-box"><img src="/static/img/lineing.png"></div>
+    <div class="img-box"><img src="/video/static/img/lineing.png"></div>
     <div class="tips">
       <p class="tips-big">客服正忙，请稍后重试</p>
       <p>可点击右下按钮寻找新客服</p>

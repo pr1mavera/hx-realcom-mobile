@@ -17,7 +17,7 @@
       </div>
       <div class="rec">
         <div class="qr-code">
-          <img src="/static/img/share/qr_code.jpg">
+          <img src="/video/static/img/share/qr_code.jpg">
         </div>
         <div class="txt">
           扫描二维码关注官微 有更多惊喜等着你~
@@ -114,7 +114,7 @@ export default {
         color: #FF959C;
         font-size: 1.2rem;
         padding: 2.4rem 3rem 0 2rem;
-        background: url("/static/img/share/quota@2x.png") no-repeat;
+        background: url("/video/static/img/share/quota@2x.png") no-repeat;
         background-size: 2.4rem;
       }
     }

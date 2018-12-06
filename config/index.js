@@ -9,7 +9,7 @@ module.exports = {
 
     // Paths
     assetsSubDirectory: 'static',
-    assetsPublicPath: '/',
+    assetsPublicPath: '/video/',
     proxyTable: {
       // '/api': {
       //   target: 'http://api.douban.com/v2',

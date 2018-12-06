@@ -93,6 +93,11 @@ export const getShareTicket = url => http.post('user', `/ticket/query`, { url })
 export const createSession = (userId, userName, userPhone, chatType) => http.post('user', `/chat/session/create`, { userId, userName, userPhone, chatType })
 
 /**
+ * [getSessionStatus 获取会话状态]
+ */
+export const getSessionStatus = sessionId => http.get('user', `/video/session/query?sessionId=${sessionId}`)
+
+/**
  * [getSessionList 获取会话列表]
  */
 export const getSessionList = userId => http.get('user', `/user/session?userId=${userId}`)
@@ -161,3 +166,8 @@ export const getLoginInfo = (userId, userType) => http.get('TM', `/im/account/lo
  * [syncGroupC2CMsg 拉取漫游消息]
  */
 export const syncGroupC2CMsg = data => http.post('TM', '/syncGroupC2CMsg', data)
+
+/**
+ * [getLoginState 获取当前客户IM登录状态]
+ */
+export const getLoginState = userId => http.get('TM', `/im/account/login/status?userId=${userId}`)

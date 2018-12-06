@@ -73,9 +73,9 @@
                 class="swiper-item-li"
                 v-for="(item, index) in page.pageList"
                 :key="`xiaohua_${index}`"
-                @click="$emit('sendXiaoHua', `/static/img/express/${item.id}.gif`)">
+                @click="$emit('sendXiaoHua', `/video/static/img/express/${item.id}.gif`)">
                 <send-extend-item
-                  :icon="`/static/img/express/${item.id}.gif`"
+                  :icon="`/video/static/img/express/${item.id}.gif`"
                 ></send-extend-item>
               </li>
             </ul>
@@ -240,6 +240,7 @@ export default {
                 width: 2.4rem;
                 height: 2.4rem;
                 margin: 1.1rem;
+                border-radius: 50%;
                 .bg-image('@{imgPath}/chat/xiaohua');
               }
               .icon {

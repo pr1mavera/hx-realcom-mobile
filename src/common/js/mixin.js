@@ -41,7 +41,7 @@ export const loginMixin = {
     async getUserInfo(userId) {
       // 若本地缓存存在且未过期，直接返回本地缓存
       let data = {}
-      if (data = Tools.CacheTools.getCacheData({ key: 'userSigInfo', check: userId })) return data
+      if (data = Tools.CacheTools.getCacheData({ key: 'userSigInfo', check: this.userInfo.openId })) return data
 
       const res = await getLoginInfo(userId, 1)
       if (res.result.code === ERR_OK) {
@@ -54,7 +54,7 @@ export const loginMixin = {
         }
         Tools.CacheTools.setCacheData({
           key: 'userSigInfo',
-          check: userId,
+          check: this.userInfo.openId,
           data: info
         })
         return info
@@ -66,7 +66,7 @@ export const loginMixin = {
       // 若本地缓存存在且未过期，直接返回本地缓存
       let data = {}
       let botInfo = {}
-      if (data = Tools.CacheTools.getCacheData({ key: 'botInfo', check: this.userInfo.userId })) {
+      if (data = Tools.CacheTools.getCacheData({ key: 'botInfo', check: this.userInfo.openId })) {
         // 若本地缓存存在且未过期，直接取本地缓存
         botInfo = data
       } else {
@@ -86,7 +86,7 @@ export const loginMixin = {
           }
           Tools.CacheTools.setCacheData({
             key: 'botInfo',
-            check: this.userInfo.userId,
+            check: this.userInfo.openId,
             data: botInfo
           })
         } else {
@@ -94,6 +94,14 @@ export const loginMixin = {
           throw Error('getBotInfo error')
         }
       }
+
+      // // 若当前有未结束服务，则不配置机器人欢迎语，会在拉取的缓存消息里配置
+      // if (Tools.CacheTools.getCacheData({ key: 'curServInfo', check: this.userInfo.openId })) {
+      //   return {
+      //     botInfo,
+      //     welcomeMsg: []
+      //   }
+      // }
 
       // 配置欢迎语消息
       const botCard = {
@@ -532,6 +540,21 @@ export const IMMixin = {
           this.sendMsgs(msg)
           // action 初始化用户最后响应时间
           this.updateLastAction()
+
+          // 存本地localstorage
+          const self = this
+          Tools.CacheTools.setCacheData({
+            key: 'curServInfo',
+            check: self.userInfo.openId,
+            data: Object.assign({}, {
+              csInfo: csInfo_onLine,
+              sessionId: self.sessionId,
+              chatGuid: self.chatGuid,
+              roomMode: roomStatus.menChat,
+              msgs: self.msgs
+            })
+          })
+
           break
 
         // 结束会话（在线）
@@ -552,6 +575,9 @@ export const IMMixin = {
             this.afterServerFinish(sessionStatus.onLine)
             this.$emit('showShare', csId, csName)
           }
+          // 清空本地localstorage
+          Tools.CacheTools.removeCacheData('curServInfo')
+
           break
 
         // 坐席端创建会话失败（在线）
@@ -797,7 +823,7 @@ export const sendMsgsMixin = {
           this.userInfo.userId,
           this.csInfo.csId,
           customMsgInfo, () => {
-            this.setMsgStatus(timestamp, 'succ')
+            this.setMsgStatus(timestamp, 'succ', customMsgInfo)
           }, () => {
             this.setMsgStatus(timestamp, 'failed')
           }
@@ -922,12 +948,21 @@ export const sendMsgsMixin = {
       }
       this.sendMsgs(msg)
     },
-    setMsgStatus(timestamp, status) {
+    setMsgStatus(timestamp, status, ...msg) {
       for (let i = this.msgs.length - 1; i > 0; i--) {
         if (this.msgs[i].timestamp && this.msgs[i].timestamp === timestamp) {
           let msgsList = Tools.CopyTools.arrShallowClone(this.msgs)
           let currMsg = Tools.CopyTools.objDeepClone(this.msgs[i])
+          // 修改对应消息的状态
           currMsg.status = status
+          // 若为图片消息，则对应添加图片的真实地址
+          if (msg.length && (msg[0].msgType === msgTypes.msg_img)) {
+            const img = msg[0].imgData
+            currMsg.imgData = {
+              big: img.big,
+              small: img.small
+            }
+          }
           msgsList.splice(i, 1, currMsg)
           this.setMsgs(msgsList)
           break
@@ -1047,29 +1082,29 @@ export const onLineQueueMixin = {
   methods: {
     async enterOnLineLineUp() {
       this.$router.replace({path: `/room/chat?openId=${this.userInfo.openId}&csId=${this.onLineQueueCsId || 'wait_for_distribution'}`})
-      // // 排队成功，直接通知坐席
-      // this.setChatGuid(new Date().getTime())
-      // const msg = {
-      //   code: systemMsgStatus.ONLINE_REQUEST_CS_ENTANCE,
-      //   chatGuid: this.chatGuid,
-      //   csId: 'webchat6',
-      //   csName: 'webchat6',
-      //   startTime: '',
-      //   endTime: ''
-      // }
-      // const config = await this.configSendSystemMsg(msg)
-      // await IM.sendSystemMsg(config)
-
-      // 在线转人工流程
-      // 1. 请求排队
-      const res = await this.formatOnLineQueueAPI()
-      // 2. 处理
-      if (res.code === ERR_OK) {
-        window.sessionStorage.setItem('queue_start_time', new Date().getTime())
-        this.handleQueueRes(res.data)
-      } else {
-        this.botSendLeaveMsg()
+      // 排队成功，直接通知坐席
+      this.setChatGuid(new Date().getTime())
+      const msg = {
+        code: systemMsgStatus.ONLINE_REQUEST_CS_ENTANCE,
+        chatGuid: this.chatGuid,
+        csId: 'webchat7',
+        csName: 'webchat7',
+        startTime: '',
+        endTime: ''
       }
+      const config = await this.configSendSystemMsg(msg)
+      await IM.sendSystemMsg(config)
+
+      // // 在线转人工流程
+      // // 1. 请求排队
+      // const res = await this.formatOnLineQueueAPI()
+      // // 2. 处理
+      // if (res.code === ERR_OK) {
+      //   window.sessionStorage.setItem('queue_start_time', new Date().getTime())
+      //   this.handleQueueRes(res.data)
+      // } else {
+      //   this.botSendLeaveMsg()
+      // }
     },
     async formatOnLineQueueAPI() {
       // 初始化人工客服排队ID，存vuex
