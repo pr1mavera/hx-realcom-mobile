@@ -1,3 +1,5 @@
+import wx from "weixin-jsapi";
+
 /**
  *
  * Created by WangXj 。
@@ -30,19 +32,6 @@ export function beforeEnterVideo() {
       // 当前在微信内置浏览器中，弹层提示用户在浏览器中打开,
       // 而且用户此时点击右上角“...”出现的菜单项只有 “在Safari中打开一项”
       sessionStorage.setItem('enterVideoStatus', 'ios-guide')
-      // wx.showMenuItems({
-      //   menuList: [
-      //     'menuItem:openWithSafari'
-      //   ] // 要显示的菜单项，只显示在浏览器中打开
-      // })
-      // 传参给query
-      // this.$router.push({
-      //   path: '/room/cusServ/list',
-      //   name: 'chat',
-      //   query: {
-      //     groupId: '12345678'
-      //   }
-      // })
     } else if (device === 'iPhone' && browser === 'safari') {
       // alert('当前ios的版本为：' + version + '！')
       // 进入排队的页面

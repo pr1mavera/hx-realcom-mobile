@@ -7,18 +7,24 @@ const shareJs = async function(shareUrl) {
     const jssdk = res.data
     console.log(res.data)
     wx.config({
-      debug: false,
-      appId: jssdk.appId,
+      debug: true, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印
+      appId: jssdk.appId, // 必填，公众号的唯一标识
       timestamp: parseInt(jssdk.timestamp),
-      nonceStr: jssdk.nonceStr,
-      signature: jssdk.signature,
+      nonceStr: jssdk.nonceStr, // 必填，生成签名的时间戳
+      signature: jssdk.signature, // 必填，签名
       jsApiList: [
-        'hideAllNonBaseMenuItem',
-        'showMenuItems',
-        'onMenuShareTimeline',
-        'onMenuShareAppMessage'
+        'hideAllNonBaseMenuItem', // 隐藏所有非基本菜单项
+        'showMenuItems', // 批量显示菜单项
+        'onMenuShareTimeline', // 分享到朋友圈
+        'onMenuShareAppMessage', // 监听“分享给朋友”，按钮点击、自定义分享内容及分享结果接口
+        'hideMenuItems', // 批量隐藏菜单
+        'showMenuItems', // 批量显示菜单
+        'hideOptionMenu', // 隐藏右上角菜单
+        'showOptionMenu' // 显示右上角的菜单
       ]
     })
+
+    // 调用微信API
   })
   // if (res.result.code === ERR_OK) {
   //   const jssdk = res.data
@@ -53,20 +59,26 @@ const shareJs = async function(shareUrl) {
     // wx.showMenuItems({
     //   menuList: ['menuItem:share:appMessage', 'menuItem:share:timeline'] // 要显示的菜单项，所有menu项见附录3
     // })
-    wx.showMenuItems({
-      menuList: [
-        'menuItem:share:appMessage',
-        'menuItem:share:timeline'
-      ],
-      success: function(res) {
-        console.log('批量显示菜单')
-        // alert('批量显示菜单')
-      },
-      fail: function(res) {
-        console.log('批量显示菜单失败:' + JSON.stringify(res))
-        // alert(JSON.stringify(res))
-      }
-    })
+    /*
+    * @change by Wang xinjie
+    * */
+    // wx.showMenuItems({
+    //   menuList: [
+    //     'menuItem:share:appMessage',
+    //     'menuItem:share:timeline'
+    //   ],
+    //   success: function(res) {
+    //     console.log('批量显示菜单')
+    //     // alert('批量显示菜单')
+    //   },
+    //   fail: function(res) {
+    //     console.log('批量显示菜单失败:' + JSON.stringify(res))
+    //     // alert(JSON.stringify(res))
+    //   }
+    // })
+    /*
+     * @change by Wang xinjie
+     * */
     // 分享给朋友
     // wx.onMenuShareAppMessage({
     //   title: thatopts.title, // 分享标题
@@ -100,6 +112,22 @@ const shareJs = async function(shareUrl) {
         console.log('onMenuShareTimeline分享失败:' + JSON.stringify(res))
       }
     })
+
+    /*
+     * @change by Wang xinjie
+     * */
+    wx.showMenuItems({
+      menuList: [
+        'menuItem:openWithSafari' // 要显示的菜单项:在safari浏览器中打开
+      ]
+    })
+
+    wx.error(function(res) {
+      console.log('there are some error about share js' + res + '======')
+    })
+    /*
+     * @change by Wang xinjie
+     * */
   })
 }
 
