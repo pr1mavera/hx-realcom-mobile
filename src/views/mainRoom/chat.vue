@@ -41,7 +41,7 @@
                   :msg="msg"
                   @msgLongPress="showCopy"
                   @onClickImgMsg="onClickImgMsg"
-                  @enterOnLineLineUp="enterOnLineLineUp"
+                  @handleReConnectToOnlineChat="handleReConnectToOnlineChat"
                   @clickHotQues="chatInputCommit"
                   @onLineCancelQueue="onLineCancelQueue"
                   @toLeaveMsg="toLeaveMsg"
@@ -56,6 +56,7 @@
           </ul>
         </div>
         <fload-button
+          ref="floadButton"
           :barStatus="this.inputBarOpen || this.extendBarOpen"
           @enterVideoLineUp="confirmToLineUp"
           @enterOnLineLineUp="enterOnLineLineUp"
@@ -361,7 +362,10 @@ export default {
       // }
       // return false
     },
-
+    // 点击重连坐席
+    handleReConnectToOnlineChat() {
+      this.$refs.floadButton.$refs.enterMenChat.click()
+    },
     // 进入留言
     toLeaveMsg() {
       this.$router.push({

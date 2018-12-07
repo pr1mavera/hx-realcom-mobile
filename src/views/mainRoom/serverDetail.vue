@@ -32,9 +32,9 @@
         <p><span>{{serTimes}}</span>次</p>
         <p class="tips">为我服务</p>
       </div>
-      <div class="flex-box-item">
+      <!-- <div class="flex-box-item">
         <p class="tips" @click="$emit('showShare', cuSerInfo.id, cuSerInfo.nickName)">偷偷的分享</p>
-      </div>
+      </div> -->
     </div>
     <!-- about me -->
     <div class="container-item about-me">
