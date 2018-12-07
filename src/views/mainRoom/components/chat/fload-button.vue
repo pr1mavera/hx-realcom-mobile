@@ -202,7 +202,7 @@ export default {
           self.setAssessStatus(true)
           // 用户主动断开人工客服
           const sysMsgs = {
-            code: systemMsgStatus.ONLINE_USER_NO_RESPONSE,
+            code: systemMsgStatus.ONLINE_USER_ACTION_ENDING_SESSION,
             csId: self.csInfo.csId
           }
           const onlineConfig = await self.configSendSystemMsg(sysMsgs)

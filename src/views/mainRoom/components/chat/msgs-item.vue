@@ -13,9 +13,9 @@
     </div>
     <div class="content-box" :class="[{'right-content-box': msg.isSelfSend, 'left-content-box': !msg.isSelfSend}]">
       <p class="name" v-if="!msg.isSelfSend">{{msg.nickName}}</p>
-      <transition name="msg" mode="out-in">
+      <!-- <transition-group name="msg" mode="out-in"> -->
+      <!-- v-show="msgAlready" -->
         <div
-          v-show="msgAlready"
           class="content chat-content-shadow"
           :class="[{
             'right-content-style': msg.isSelfSend,
@@ -108,13 +108,13 @@
           </span>
         </div>
         <!-- 猜问题 模块 -->
-        <div v-show="msgAlready" class="content chat-content-shadow left-content-style content-extend" v-if="msg.msgType === msgTypes.msg_guess">
+        <div class="content chat-content-shadow left-content-style content-extend" v-if="msg.msgType === msgTypes.msg_guess">
           <span class="text">
             <span class="text-extend button" v-for="(item, index) in msg.msgExtend" :key="index" @click="clickHotQues(item.question)">{{item.question}}</span>
             <!-- <span class="text-extend button" @click="enterOnLineLineUp">人工客服</span> -->
           </span>
         </div>
-      </transition>
+      <!-- </transition-group> -->
     </div>
     <!-- <div class="avatar" v-show="false">
       <svg class="icon extend-click" aria-hidden="true">

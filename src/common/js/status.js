@@ -32,7 +32,7 @@ export const systemMsgStatus = {
   VIDEO_QUEUES_SUCCESS: 1, // 客户端排队成功
   VIDEO_REQUEST_CS_ENTENCE: 2, // 座席端视频接入请求
   VIDEO_TRANS_BASE_INFO: 3, // 座席端创建会话传递
-  VIDEO_CS_INIT_SESSIONID_FAIL: 4, // 坐席端创建会话失败（视频）
+  VIDEO_CS_INIT_SESSIONID_FAIL: 4, // 坐席端创建会话失败（视频）(坐席 -> 用户)
   VIDEO_CS_REQ_TRANS_FAIL: 5, // 坐席端转接超时（视频）
   // 20 - ~ 在线
   ONLINE_QUEUES_REDUCE: 20, // 在线排队位置(system -> 用户)
@@ -40,7 +40,7 @@ export const systemMsgStatus = {
   ONLINE_REQUEST_CS_ENTANCE: 22, // 座席端人工坐席接入请求(用户 -> 坐席)
   ONLINE_TRANS_BASE_INFO: 23, // 转接成功后人工坐席推送创建会话以及基本信息(坐席 -> 用户)
   ONLINE_SERVER_FINISH: 24, // 坐席端结束会话（在线）(坐席 -> 用户)
-  ONLINE_USER_NO_RESPONSE: 25, // 客户端主动结束会话（在线）(用户 -> 坐席)
+  ONLINE_USER_ACTION_ENDING_SESSION: 25, // 客户端主动结束会话（在线）(用户 -> 坐席)
   ONLINE_CS_INIT_SESSIONID_FAIL: 26, // 坐席端创建会话失败（在线）(坐席 -> 用户)
   ONLINE_CS_REQ_TRANS_FAIL: 27 // 坐席端转接超时（在线）(用户 -> 坐席)
 }

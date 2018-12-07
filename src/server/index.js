@@ -149,6 +149,11 @@ export const chatQueueHeartBeat = data => http.post('user', '/webchat/queue/v1/h
 export const leaveMsg = async(data) => http.post('user', '/common/leaveword/v1/add', data)
 
 /**
+ * [transTimeoutRedistribution 转接超时，重新分配坐席]
+ */
+export const transTimeoutRedistribution = data => http.post('user', '/webchat/queue/chatresult', data)
+
+/**
  ************************************ systemMsg ************************************
  */
 
