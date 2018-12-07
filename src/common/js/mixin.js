@@ -488,10 +488,9 @@ export const IMMixin = {
         // 客户端排队成功（在线）
         case systemMsgStatus.ONLINE_QUEUES_SUCCESS:
           this.$router.replace({path: `/room/chat?openId=${this.userInfo.openId}`})
-
           // 设置欢迎语
           const welcomeText_onLine = {
-            welcomeText: msgsObj.content
+            welcomeText: msgsObj.desc
           }
           this.setCsInfo(welcomeText_onLine)
 
@@ -698,7 +697,6 @@ export const sendMsgsMixin = {
 
       // 重置消息状态
       this.setMsgStatus(timestamp, 'pending')
-
       IM.sendNormalMsg(
         this.userInfo.userId,
         this.csInfo.csId,
@@ -920,8 +918,8 @@ export const sendMsgsMixin = {
         msgType: msgTypes.msg_XH_express,
         chatType: this.sendType,
         imgData: {
-          big: url,
-          small: url
+          big: `/video/static/img/express/${url}.gif`,
+          small: `/video/static/img/express/${url}.gif`
         }
       }
       this.sendMsgs(msg)

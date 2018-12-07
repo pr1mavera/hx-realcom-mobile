@@ -92,15 +92,15 @@ export const afterQueueSuccess = function({ commit, state }, { mode, msgsObj }) 
     commit(types.SET_MSGS, state.msgs.concat(tip))
     // 发送欢迎语
     const msg = {
-      nickName: this.csInfo.csName,
-      avatar: this.csInfo.csId,
-      content: this.csInfo.welcomeText,
+      nickName: state.csInfo.csName,
+      avatar: state.csInfo.csId,
+      content: state.csInfo.welcomeText,
       isSelfSend: false,
       time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
       timestamp: new Date().getTime(),
       msgStatus: msgStatus.msg,
       msgType: msgTypes.msg_normal,
-      chatType: this.sendType
+      chatType: state.sendType
     }
     commit(types.SET_MSGS, state.msgs.concat(msg))
     // action 初始化用户最后响应时间
@@ -234,7 +234,7 @@ export const reqTransAnotherTimeout = function({ commit, state }, delay) {
         desc: '坐席转接超时，客户端请求转接其他客服',
         againAllot: true
       })
-      if (res.data.status.result_code === '200') {
+      if ((res.result.code === ERR_OK) && (res.data.status.result_code === '200')) {
         // 发送排队成功的消息给坐席
         const data = res.data.status.data
         const onlineQueueSuccMsg = {

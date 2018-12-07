@@ -50,7 +50,7 @@ export default {
   methods: {
     reConnect() {
       console.log('重新连接')
-      this.$emit('enterOnLineLineUp')
+      this.$emit('handleReConnectToOnlineChat')
     }
   }
 }

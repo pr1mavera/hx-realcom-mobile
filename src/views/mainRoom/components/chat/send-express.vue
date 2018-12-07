@@ -75,7 +75,7 @@
                 class="swiper-item-li"
                 v-for="(item, index) in page.pageList"
                 :key="`xiaohua_${index}`"
-                @click="$emit('sendXiaoHua', `/video/static/img/express/${item.id}.gif`)">
+                @click="$emit('sendXiaoHua', item.id)">
                 <send-extend-item
                   :icon="`/video/static/img/express/${item.id}.gif`"
                 ></send-extend-item>

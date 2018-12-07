@@ -24,6 +24,7 @@
     </div> -->
     <div class="btn-item">
       <button
+        ref="enterMenChat"
         class="item extend-click transition-bezier"
         @click="onLineLineUp"
         :class="[{'visible-when-input': barStatus, 'item-3': !barStatus}]">
