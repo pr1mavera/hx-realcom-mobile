@@ -250,7 +250,7 @@ export default {
       // 通过 openId 获取用户基本信息
       const baseInfo = await this.loginByOpenID(query.openId)
       // 通过 userId 获取用户签名
-      const userSig = await this.getUserInfo(baseInfo.userId)
+      const userSig = await this.getUserInfo(query.openId, baseInfo.userId)
       // 封装用户基本信息进 vuex
       const userInfo = Object.assign({}, baseInfo, userSig)
       this.setUserInfo(userInfo)
@@ -262,7 +262,7 @@ export default {
       !reConnectStatus && this.initSession()
 
       // 获取机器人基本信息，及配置机器人欢迎语
-      const { botInfo, welcomeMsg } = await this.getBotBaseInfo()
+      const { botInfo, welcomeMsg } = await this.getBotBaseInfo(query.openId)
       this.setBotInfo(botInfo)
       !reConnectStatus && this.setMsgs(welcomeMsg)
 
@@ -311,7 +311,7 @@ export default {
       this.chatScroll.refresh()
       this.chatScroll.scrollToElement(this.$refs.chatContentEnd, 400)
       this.$vux.toast.text('重连成功', 'default')
-      return
+      return 0
     },
     _showItemByType(type) {
       let component = ''

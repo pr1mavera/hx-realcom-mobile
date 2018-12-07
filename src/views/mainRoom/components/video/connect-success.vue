@@ -12,7 +12,8 @@
       <p class="confirm-tips" v-else>{{this.csInfo.csName}}首次为您服务</p> -->
     </x-dialog>
     <div class="countdown" v-show="queueSuccess">
-      <countdown v-model="time" :start="queueSuccess" @on-finish="$emit('confirmToVideo')"></countdown>
+      <countdown v-model="time" :start="queueSuccess"></countdown>
+       <!-- @on-finish="$emit('confirmToVideo')" -->
     </div>
   </div>
 </template>

@@ -17,9 +17,11 @@
               </svg>
             </div>
           </tab-item>
-          <tab-item :selected="currIndex === 2" @on-item-click="currIndex = 2">
+          <tab-item :selected="currIndex === 2" @on-item-click="currIndex = 2" :disabled="isRobotChat">
             <div class="menu-nav-item">
-              <div class="menu-nav-xiaohua bg-image"></div>
+              <div class="menu-nav-xiaohua">
+                <img width=100% height=100% :src="xiaohuaItemImg">
+              </div>
               <!-- <svg class="icon extend-click" aria-hidden="true">
                 <use xlink:href="#icon-wode"></use>
               </svg> -->
@@ -87,8 +89,10 @@
 </template>
 
 <script type="text/ecmascript-6">
+import { mapGetters } from 'vuex'
 import { Tab, TabItem, Swiper, SwiperItem } from 'vux'
 import { emojiMap } from '@/common/js/emojiMap'
+import { roomStatus } from '@/common/js/status'
 
 export default {
   components: {
@@ -101,6 +105,21 @@ export default {
   props: {
     inputPos: {
       type: Number
+    }
+  },
+  computed: {
+    ...mapGetters([
+      'roomMode'
+    ]),
+    isRobotChat() {
+      return this.roomMode === roomStatus.AIChat
+    },
+    xiaohuaItemImg() {
+      if (this.isRobotChat) {
+        return '/video/static/img/chat/xiaohua_disable@2x.png'
+      } else {
+        return '/video/static/img/chat/xiaohua@2x.png'
+      }
     }
   },
   data() {
@@ -241,7 +260,10 @@ export default {
                 height: 2.4rem;
                 margin: 1.1rem;
                 border-radius: 50%;
-                .bg-image('@{imgPath}/chat/xiaohua');
+                overflow: hidden;
+                img {
+                  object-fit: cover;
+                }
               }
               .icon {
                 display: block;

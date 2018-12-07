@@ -2,8 +2,8 @@ import * as types from './mutation-types'
 import Tools from '@/common/js/tools'
 import IM from '@/server/im'
 // import { isTimeDiffLongEnough, formatDate } from '@/common/js/dateConfig.js'
-import { sessionStatus, toggleBarStatus, roomStatus, queueStatus, msgStatus, dialogTypes, tipTypes, systemMsgStatus } from '@/common/js/status'
-import { ERR_OK, createSession } from '@/server/index.js'
+import { sessionStatus, toggleBarStatus, roomStatus, queueStatus, msgStatus, msgTypes, dialogTypes, tipTypes, systemMsgStatus } from '@/common/js/status'
+import { ERR_OK, createSession, getCsAvatar, transTimeoutRedistribution } from '@/server/index.js'
 
 // 键盘弹出延迟（弃用）
 export const closeBarBuffer = async function({ commit }, { mutationType, delay }) {
@@ -52,33 +52,72 @@ export const beforeQueue = function({ commit, state }, { mode, content }) {
 }
 
 // 人工（视频）排队完成，接通客服后，修改对应的房间模式
-export const afterQueueSuccess = function({ commit, state }, mode) {
+export const afterQueueSuccess = function({ commit, state }, { mode, msgsObj }) {
   // 排队状态
   commit(types.SET_QUEUE_MODE, {
     mode,
     status: queueStatus.queueOver
   })
-  let tip = []
   if (mode === roomStatus.videoChat) {
     // 房间状态
     commit(types.SET_ROOM_MODE, roomStatus.videoChat)
-    tip.push({
+    const tip = {
       content: `视频客服${state.csInfo.csName}转接成功，祝您沟通愉快！`,
       time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
       msgStatus: msgStatus.tip,
       msgType: tipTypes.tip_success
-    })
+    }
+    commit(types.SET_MSGS, state.msgs.concat(tip))
   } else if (mode === roomStatus.menChat) {
+    // 清空转接定时器
+    state.userInfo.transTimeout && clearTimeout(state.userInfo.transTimeout)
+    // 设置坐席信息
+    const csInfo_onLine = Tools.CopyTools.objDeepClone(state.csInfo)
+    csInfo_onLine.csId = msgsObj.csId
+    csInfo_onLine.csAvatar = getCsAvatar(msgsObj.csId)
+    csInfo_onLine.csName = msgsObj.csName
+    commit(types.SET_CS_INFO, csInfo_onLine)
+    // action 删除msgs中排队状态的tips
+    deleteTipMsg({ commit, state })
+    // 设置会话ID
+    commit(types.SET_SESSION_ID, msgsObj.sessionId)
     // 房间状态
     commit(types.SET_ROOM_MODE, roomStatus.menChat)
-    tip.push({
+    const tip = {
       content: `人工客服${state.csInfo.csName}转接成功，祝您沟通愉快！`,
       time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
       msgStatus: msgStatus.tip,
       msgType: tipTypes.tip_success
+    }
+    commit(types.SET_MSGS, state.msgs.concat(tip))
+    // 发送欢迎语
+    const msg = {
+      nickName: this.csInfo.csName,
+      avatar: this.csInfo.csId,
+      content: this.csInfo.welcomeText,
+      isSelfSend: false,
+      time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+      timestamp: new Date().getTime(),
+      msgStatus: msgStatus.msg,
+      msgType: msgTypes.msg_normal,
+      chatType: this.sendType
+    }
+    commit(types.SET_MSGS, state.msgs.concat(msg))
+    // action 初始化用户最后响应时间
+    updateLastAction({ commit, state })
+    // 存本地localstorage
+    Tools.CacheTools.setCacheData({
+      key: 'curServInfo',
+      check: state.userInfo.openId,
+      data: Object.assign({}, {
+        csInfo: csInfo_onLine,
+        sessionId: state.sessionId,
+        chatGuid: state.chatGuid,
+        roomMode: roomStatus.menChat,
+        msgs: state.msgs
+      })
     })
   }
-  commit(types.SET_MSGS, state.msgs.concat(tip))
 }
 
 // 排队失败
@@ -181,6 +220,45 @@ export const initSession = async function({ commit, state }) {
   }
 }
 
+// 排队成功转接超时时，调用转接另一坐席接口
+export const reqTransAnotherTimeout = function({ commit, state }, delay) {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(async() => {
+      // 转接至另外坐席
+      const res = await transTimeoutRedistribution({
+        userId: `${state.userInfo.userId}`,
+        origin: 'WE',
+        callType: 'ZX',
+        sessionId: `${state.chatGuid}`,
+        chatResult: '02',
+        desc: '坐席转接超时，客户端请求转接其他客服',
+        againAllot: true
+      })
+      if (res.data.status.result_code === '200') {
+        // 发送排队成功的消息给坐席
+        const data = res.data.status.data
+        const onlineQueueSuccMsg = {
+          code: systemMsgStatus.ONLINE_REQUEST_CS_ENTANCE,
+          csId: data.userCode,
+          startTime: data.queueStartTime,
+          endTime: data.queueEndTime
+        }
+        const onlineConfig = await configSendSystemMsg({ state }, onlineQueueSuccMsg)
+        await IM.sendSystemMsg(onlineConfig)
+        resolve()
+      } else {
+        const err = 'error in transTimeoutRedistribution 转接至另外坐席'
+        reject(err)
+      }
+      // 清空定时器
+      timer && clearTimeout(timer)
+    }, delay)
+    const userInfo = Tools.CopyTools.objShallowClone(state.userInfo)
+    userInfo.transTimeout = timer
+    commit(types.SET_USER_INFO, userInfo)
+  })
+}
+
 // 排队成功定时器，一定时间内坐席没转接则提示转接失败
 export const reqTransTimeout = function({ commit, state }, { msg, toast, delay = 0 }) {
   return new Promise((resolve) => {
@@ -213,7 +291,7 @@ export const updateLastAction = function({ commit, state }) {
   const actionTimeout = setTimeout(async() => {
     // 用户长时间无响应，主动断开连接
     const sysMsgs = {
-      code: systemMsgStatus.ONLINE_USER_NO_RESPONSE,
+      code: systemMsgStatus.ONLINE_USER_ACTION_ENDING_SESSION,
       csId: state.csInfo.csId
     }
     const onlineConfig = await configSendSystemMsg({ state }, sysMsgs)

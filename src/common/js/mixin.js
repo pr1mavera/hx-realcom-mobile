@@ -17,8 +17,8 @@ export const loginMixin = {
   methods: {
     async loginByOpenID(openId) {
       // 若本地缓存存在且未过期，直接返回本地缓存
-      let data = {}
-      if (data = Tools.CacheTools.getCacheData({ key: 'userBaseInfo', check: openId })) return data
+      // let data = {}
+      // if (data = Tools.CacheTools.getCacheData({ key: 'userBaseInfo', check: openId })) return data
 
       const res = await getUserInfoByOpenID(openId)
       if (res.result.code === ERR_OK) {
@@ -28,20 +28,20 @@ export const loginMixin = {
         res.data.userInfo.avatar = res.data.wxUserInfo ? res.data.wxUserInfo.headImgUrl : ''
         res.data.userInfo.nickName = res.data.wxUserInfo ? res.data.wxUserInfo.nickName : ''
         // 存本地localstorage
-        Tools.CacheTools.setCacheData({
-          key: 'userBaseInfo',
-          check: res.data.userInfo.openId,
-          data: res.data.userInfo
-        })
+        // Tools.CacheTools.setCacheData({
+        //   key: 'userBaseInfo',
+        //   check: openId,
+        //   data: res.data.userInfo
+        // })
         return res.data.userInfo
       } else {
         console.log('error in getUserInfoByOpenID')
       }
     },
-    async getUserInfo(userId) {
+    async getUserInfo(openId, userId) {
       // 若本地缓存存在且未过期，直接返回本地缓存
       let data = {}
-      if (data = Tools.CacheTools.getCacheData({ key: 'userSigInfo', check: this.userInfo.openId })) return data
+      if (data = Tools.CacheTools.getCacheData({ key: 'userSigInfo', check: openId })) return data
 
       const res = await getLoginInfo(userId, 1)
       if (res.result.code === ERR_OK) {
@@ -54,7 +54,7 @@ export const loginMixin = {
         }
         Tools.CacheTools.setCacheData({
           key: 'userSigInfo',
-          check: this.userInfo.openId,
+          check: openId,
           data: info
         })
         return info
@@ -62,11 +62,11 @@ export const loginMixin = {
         console.log('error in getLoginInfo')
       }
     },
-    async getBotBaseInfo() {
+    async getBotBaseInfo(openId) {
       // 若本地缓存存在且未过期，直接返回本地缓存
       let data = {}
       let botInfo = {}
-      if (data = Tools.CacheTools.getCacheData({ key: 'botInfo', check: this.userInfo.openId })) {
+      if (data = Tools.CacheTools.getCacheData({ key: 'botInfo', check: openId })) {
         // 若本地缓存存在且未过期，直接取本地缓存
         botInfo = data
       } else {
@@ -86,7 +86,7 @@ export const loginMixin = {
           }
           Tools.CacheTools.setCacheData({
             key: 'botInfo',
-            check: this.userInfo.openId,
+            check: openId,
             data: botInfo
           })
         } else {
@@ -447,10 +447,19 @@ export const IMMixin = {
           this.setRoomId(csInfo_video.csCode)
           // 设置会话ID
           this.setSessionId(msgsObj.sessionId)
-          // 设置排队状态
+          // 设置排队状态，以便显示转接成功提示
           this.setQueueMode({
             mode: roomStatus.videoChat,
             status: queueStatus.queueSuccess
+          })
+          // 延迟三秒显示
+          Tools.AsyncTools.sleep(3000)
+          // 停止心跳
+          this.stopHeartBeat()
+          this.$router.replace({path: `/room/chat?openId=${this.userInfo.openId}`})
+          this.afterQueueSuccess({
+            mode: roomStatus.videoChat,
+            msgsObj
           })
           break
 
@@ -479,6 +488,14 @@ export const IMMixin = {
         // 客户端排队成功（在线）
         case systemMsgStatus.ONLINE_QUEUES_SUCCESS:
           this.$router.replace({path: `/room/chat?openId=${this.userInfo.openId}`})
+
+          // 设置欢迎语
+          const welcomeText_onLine = {
+            welcomeText: msgsObj.content
+          }
+          this.setCsInfo(welcomeText_onLine)
+
+          // 发送排队成功的消息给坐席
           const onlineQueueSuccMsg = {
             code: systemMsgStatus.ONLINE_REQUEST_CS_ENTANCE,
             csId: msgsObj.csId,
@@ -488,73 +505,33 @@ export const IMMixin = {
           const onlineConfig = await this.configSendSystemMsg(onlineQueueSuccMsg)
           await IM.sendSystemMsg(onlineConfig)
 
-          // 客服转接定时器
-          const ONLINE_CS_REQ_TRANS_FAIL_msg = {
-            code: systemMsgStatus.ONLINE_CS_REQ_TRANS_FAIL,
-            csId: onlineQueueSuccMsg.csId
-          }
-          this.reqTransTimeout({
-            msg: ONLINE_CS_REQ_TRANS_FAIL_msg,
-            toast: this.$vux.toast,
-            delay: 30000
-          }).then(() => {
+          this.reqTransAnotherTimeout(30000).then(() => {
+            // 客服转接定时器，分配坐席成功回调
+            const ONLINE_CS_REQ_TRANS_FAIL_msg = {
+              code: systemMsgStatus.ONLINE_CS_REQ_TRANS_FAIL,
+              csId: onlineQueueSuccMsg.csId
+            }
+            this.reqTransTimeout({
+              msg: ONLINE_CS_REQ_TRANS_FAIL_msg,
+              toast: this.$vux.toast,
+              delay: 30000
+            }).then(() => {
+              this.afterQueueFailed()
+            })
+          }, (err) => {
+            // 失败回调
+            console.log(err)
             this.afterQueueFailed()
           })
           break
 
         // 座席端会话、坐席基本信息传递（在线）
         case systemMsgStatus.ONLINE_TRANS_BASE_INFO:
-          // 清空转接定时器
-          this.userInfo.transTimeout && clearTimeout(this.userInfo.transTimeout)
-
-          const csInfo_onLine = Tools.CopyTools.objDeepClone(this.csInfo)
-          csInfo_onLine.csId = msgsObj.csId
-          csInfo_onLine.csAvatar = getCsAvatar(msgsObj.csId)
-          csInfo_onLine.csName = msgsObj.csName
-
-          // action 删除msgs中排队状态的tips
-          this.deleteTipMsg()
-          // 设置坐席信息
-          this.setCsInfo(csInfo_onLine)
-          // 设置会话ID
-          this.setSessionId(msgsObj.sessionId)
-          // 设置排队状态
-          this.setQueueMode({
-            mode: roomStatus.menChat,
-            status: queueStatus.noneQueue
-          })
           // action 排队完成，进入会话
-          this.afterQueueSuccess(roomStatus.menChat)
-          // 发送欢迎语
-          const msg = {
-            nickName: this.csInfo.csName,
-            avatar: this.csInfo.csId,
-            content: this.csInfo.welcomeText,
-            isSelfSend: false,
-            time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
-            timestamp: new Date().getTime(),
-            msgStatus: msgStatus.msg,
-            msgType: msgTypes.msg_normal,
-            chatType: this.sendType
-          }
-          this.sendMsgs(msg)
-          // action 初始化用户最后响应时间
-          this.updateLastAction()
-
-          // 存本地localstorage
-          const self = this
-          Tools.CacheTools.setCacheData({
-            key: 'curServInfo',
-            check: self.userInfo.openId,
-            data: Object.assign({}, {
-              csInfo: csInfo_onLine,
-              sessionId: self.sessionId,
-              chatGuid: self.chatGuid,
-              roomMode: roomStatus.menChat,
-              msgs: self.msgs
-            })
+          this.afterQueueSuccess({
+            mode: roomStatus.menChat,
+            msgsObj
           })
-
           break
 
         // 结束会话（在线）
@@ -617,6 +594,7 @@ export const IMMixin = {
       'configSendSystemMsg',
       'afterQueueSuccess',
       'afterServerFinish',
+      'reqTransAnotherTimeout',
       'reqTransTimeout',
       'updateLastAction',
       'afterQueueFailed'
@@ -1139,7 +1117,7 @@ export const onLineQueueMixin = {
             isTeam: data.team,
             startTime: data.queueStartTime,
             endTime: data.queueEndTime,
-            welcomeText: data.content
+            welcomeText: data.content || ''
           }
         }
         // }
@@ -1159,13 +1137,12 @@ export const onLineQueueMixin = {
       }
     },
     async handleQueueRes(data) {
-      const csInfo_onLine = {
-        welcomeText: data.welcomeText
-      }
-      // 设置坐席信息
-      this.setCsInfo(csInfo_onLine)
-
       if (!data.isTeam) {
+        const csInfo_onLine = {
+          welcomeText: data.welcomeText
+        }
+        // 设置坐席信息
+        this.setCsInfo(csInfo_onLine)
         // 排队成功，直接通知坐席
         const msg = {
           code: systemMsgStatus.ONLINE_REQUEST_CS_ENTANCE,
@@ -1177,16 +1154,22 @@ export const onLineQueueMixin = {
         const config = await this.configSendSystemMsg(msg)
         await IM.sendSystemMsg(config)
 
-        // 客服转接定时器
-        const ONLINE_CS_REQ_TRANS_FAIL_msg = {
-          code: systemMsgStatus.ONLINE_CS_REQ_TRANS_FAIL,
-          csId: msg.csId
-        }
-        this.reqTransTimeout({
-          msg: ONLINE_CS_REQ_TRANS_FAIL_msg,
-          toast: this.$vux.toast,
-          delay: 30000
-        }).then(() => {
+        this.reqTransAnotherTimeout(30000).then(() => {
+          // 客服转接定时器
+          const ONLINE_CS_REQ_TRANS_FAIL_msg = {
+            code: systemMsgStatus.ONLINE_CS_REQ_TRANS_FAIL,
+            csId: msg.csId
+          }
+          this.reqTransTimeout({
+            msg: ONLINE_CS_REQ_TRANS_FAIL_msg,
+            toast: this.$vux.toast,
+            delay: 30000
+          }).then(() => {
+            this.afterQueueFailed()
+          })
+        }, (err) => {
+          // 失败回调
+          console.log(err)
           this.afterQueueFailed()
         })
       } else {
@@ -1305,6 +1288,7 @@ export const onLineQueueMixin = {
     ...mapActions([
       'beforeQueue',
       'configSendSystemMsg',
+      'reqTransAnotherTimeout',
       'reqTransTimeout',
       'afterQueueFailed'
     ])

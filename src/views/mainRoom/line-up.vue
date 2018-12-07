@@ -10,7 +10,8 @@
         <p class="tips-top" v-else>排队成功，正在为您转接视频客服</p>
       </div>
       <a type="reset" class="btn-cancel" @click="clickToCancelLineUp">取 消</a>
-      <connect-success ref="connectSuccess" @confirmToVideo="confirmToVideo"></connect-success>
+      <connect-success ref="connectSuccess"></connect-success>
+       <!-- @confirmToVideo="confirmToVideo" -->
     </main>
   </section>
 </template>
@@ -168,12 +169,12 @@ export default {
         console.log('error in videoQueueCancel')
       }
     },
-    confirmToVideo() {
-      // 停止心跳
-      this.stopHeartBeat()
-      this.$router.replace({path: `/room/chat?openId=${this.userInfo.openId}`})
-      this.afterQueueSuccess(roomStatus.videoChat)
-    },
+    // confirmToVideo() {
+    //   // 停止心跳
+    //   this.stopHeartBeat()
+    //   this.$router.replace({path: `/room/chat?openId=${this.userInfo.openId}`})
+    //   this.afterQueueSuccess(roomStatus.videoChat)
+    // },
     ...mapMutations({
       setUserInfo: 'SET_USER_INFO',
       setQueueMode: 'SET_QUEUE_MODE',
@@ -181,7 +182,7 @@ export default {
     }),
     ...mapActions([
       'configSendSystemMsg',
-      'afterQueueSuccess',
+      // 'afterQueueSuccess',
       'reqTransTimeout',
       'afterQueueFailed'
     ])
