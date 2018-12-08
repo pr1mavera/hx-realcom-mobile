@@ -43,7 +43,7 @@
 
 <script type="text/ecmascript-6">
 import { mapGetters, mapMutations, mapActions } from 'vuex'
-import { systemMsgStatus, roomStatus, queueStatus, msgStatus, msgTypes } from '@/common/js/status'
+import { systemMsgStatus, sessionStatus, roomStatus, queueStatus, msgStatus, msgTypes } from '@/common/js/status'
 import Tools from '@/common/js/tools'
 import IM from '@/server/im'
 
@@ -167,7 +167,7 @@ export default {
             // 当前不在工作时间
             if (this.notWorkTimeClicked) {
               // 用户重复点击
-              this.showTips(3, '请勿重复点击')
+              this.showTips(2, '请勿重复点击')
               return 0
             } else {
               // 用户第一次点击
@@ -208,7 +208,8 @@ export default {
           }
           const onlineConfig = await self.configSendSystemMsg(sysMsgs)
           await IM.sendSystemMsg(onlineConfig)
-          await Tools.AsyncTools.sleep(3000)
+          this.afterServerFinish(sessionStatus.onLine)
+          await Tools.AsyncTools.sleep(2000)
           // 进入专属客服
           self.$emit('enterVideoLineUp')
         }
@@ -254,6 +255,7 @@ export default {
     }),
     ...mapActions([
       'sendMsgs',
+      'afterServerFinish',
       'configSendSystemMsg'
     ])
   }

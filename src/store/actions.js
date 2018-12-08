@@ -100,7 +100,7 @@ export const afterQueueSuccess = function({ commit, state }, { mode, msgsObj }) 
       timestamp: new Date().getTime(),
       msgStatus: msgStatus.msg,
       msgType: msgTypes.msg_normal,
-      chatType: state.sendType
+      chatType: sessionStatus.onLine
     }
     commit(types.SET_MSGS, state.msgs.concat(msg))
     // action 初始化用户最后响应时间
@@ -108,7 +108,7 @@ export const afterQueueSuccess = function({ commit, state }, { mode, msgsObj }) 
     // 存本地localstorage
     Tools.CacheTools.setCacheData({
       key: 'curServInfo',
-      check: state.userInfo.openId,
+      check: state.userInfo.userId,
       data: Object.assign({}, {
         csInfo: csInfo_onLine,
         sessionId: state.sessionId,
@@ -152,7 +152,7 @@ export const configSendSystemMsg = function({ state }, msgsObj) {
         nickName: state.userInfo.nickName,
         userPhone: state.userInfo.userPhone,
         openId: state.userInfo.userId,
-        origin: 'WE',
+        origin: state.userInfo.origin || 'WE',
         robotSessionId: state.sessionId,
         accessId: msgsObj.accessId || '',
         queueStartTime: msgsObj.startTime,
@@ -200,10 +200,12 @@ export const afterServerFinish = function({ commit, state }, mode) {
   } else
   if (mode === sessionStatus.onLine) {
     // 清空定时器
-    clearTimeout(state.userInfo.actionTimeout)
+    state.userInfo.actionTimeout && clearTimeout(state.userInfo.actionTimeout)
     const userInfo = Tools.CopyTools.objShallowClone(state.userInfo)
     userInfo.actionTimeout = null
     commit(types.SET_USER_INFO, userInfo)
+    // 清空本地localstorage
+    Tools.CacheTools.removeCacheData('curServInfo')
   }
 }
 
@@ -227,7 +229,7 @@ export const reqTransAnotherTimeout = function({ commit, state }, delay) {
       // 转接至另外坐席
       const res = await transTimeoutRedistribution({
         userId: `${state.userInfo.userId}`,
-        origin: 'WE',
+        origin: state.userInfo.origin || 'WE',
         callType: 'ZX',
         sessionId: `${state.chatGuid}`,
         chatResult: '02',
@@ -286,6 +288,10 @@ export const reqTransTimeout = function({ commit, state }, { msg, toast, delay =
 export const updateLastAction = function({ commit, state }) {
   // 清空原来的定时器
   state.userInfo.actionTimeout && clearTimeout(state.userInfo.actionTimeout)
+  // 当前不是人工服务中，直接返回
+  if (state.roomMode !== roomStatus.menChat) {
+    return
+  }
 
   // 创建定时器，绑定在 vuex 的 userInfo
   const actionTimeout = setTimeout(async() => {
@@ -307,6 +313,8 @@ export const updateLastAction = function({ commit, state }) {
       }
     }
     commit(types.SET_MSGS, state.msgs.concat(dialog))
+    // 清空本地localstorage
+    Tools.CacheTools.removeCacheData('curServInfo')
   }, 300000)
 
   const userInfo = Tools.CopyTools.objShallowClone(state.userInfo)

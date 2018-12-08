@@ -116,18 +116,28 @@ const IM = (() => {
 
   function parseMsgs(newMsgList) {
     var textMsgs = []
-    var whiteBoardMsgs = []
-    for (var i in newMsgList) { // 遍历新消息
-      var msg = parseMsg(newMsgList[i])
-      if (msg && msg.type === 'TXWhiteBoardExt') {
-        whiteBoardMsgs.push(msg.data)
+    newMsgList.filter((item) => {
+      if (item.fromAccount === 'administrator') {
+        // 系统消息
+        textMsgs.push(parseMsgInSystem(item))
       } else {
-        textMsgs.push(msg)
+        // 自定义消息
+        textMsgs.push(parseMsg(item))
       }
-    }
+    })
+    // var whiteBoardMsgs = []
+    // for (var i in newMsgList) { // 遍历新消息
+      // var msg = {}
+      // parseMsg(newMsgList[i])
+      // if (msg && msg.type === 'TXWhiteBoardExt') {
+      //   whiteBoardMsgs.push(msg.data)
+      // } else {
+      //   textMsgs.push(msg)
+      // }
+    // }
     return {
-      textMsgs: textMsgs,
-      whiteBoardMsgs: whiteBoardMsgs
+      textMsgs: textMsgs
+      // whiteBoardMsgs: whiteBoardMsgs
     }
   }
 
@@ -162,28 +172,11 @@ const IM = (() => {
       giftInfo,
       content: newMsg.toHtml(),
       isSelfSend: newMsg.getIsSend(),
-      isSystem: newMsg.getFromAccount() === '@TIM#SYSTEM' || false,
+      isSystem: false,
       msgType,
       msgStatus,
       chatType,
       time
-    }
-  }
-
-  function parseMsgsInSystem(newMsgList) {
-    var textMsgs = []
-    var whiteBoardMsgs = []
-    for (var i in newMsgList) { // 遍历新消息
-      var msg = parseMsgInSystem(newMsgList[i])
-      if (msg && msg.type === 'TXWhiteBoardExt') {
-        whiteBoardMsgs.push(msg.data)
-      } else {
-        textMsgs.push(msg)
-      }
-    }
-    return {
-      textMsgs: textMsgs,
-      whiteBoardMsgs: whiteBoardMsgs
     }
   }
 
@@ -219,6 +212,7 @@ const IM = (() => {
       accessId: data.accessId,
       queueStartTime: data.queueStartTime,
       queueEndTime: data.queueEndTime,
+      isSystem: true,
       desc
     }
   }
@@ -546,10 +540,9 @@ const IM = (() => {
     createGroup,
     joinGroup,
     quitGroup,
-    parseMsg,
     parseMsgs,
+    parseMsg,
     parseMsgInSystem,
-    parseMsgsInSystem,
     uploadPic,
     sendPic,
     getIMRoamMsgs,

@@ -14,9 +14,10 @@
               <div class="header">
                 <img width=100% class="header-img" src="/video/static/img/chat/csAddBg.png">
                 <div class="header-msg">
-                  <div class="avatar" @click="enterSerCenter">
+                  <div class="avatar">
                     <img width=100% height=100% v-lazy="avatarImg">
                   </div>
+                  <!-- @click="enterSerCenter" -->
                   <div class="nickname">{{curLabelInfo.nickName}}</div>
                 </div>
               </div>

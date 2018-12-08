@@ -111,7 +111,7 @@ import Tools from '@/common/js/tools'
 import { loginMixin, IMMixin, sendMsgsMixin, getMsgsMixin, onLineQueueMixin } from '@/common/js/mixin'
 import { beforeEnterVideo } from '@/common/js/beforeEnterVideo'
 // eslint-disable-next-line
-import { roomStatus, queueStatus, sessionStatus, toggleBarStatus, msgStatus, msgTypes, tipTypes, dialogTypes, cardTypes } from '@/common/js/status'
+import { TIME_5_MIN, roomStatus, queueStatus, sessionStatus, toggleBarStatus, msgStatus, msgTypes, tipTypes, dialogTypes, cardTypes } from '@/common/js/status'
 import { ERR_OK, getSessionStatus, syncGroupC2CMsg } from '@/server/index.js'
 import { Previewer, TransferDom } from 'vux'
 
@@ -249,9 +249,9 @@ export default {
       const query = this.$route.query
 
       // 通过 openId 获取用户基本信息
-      const baseInfo = await this.loginByOpenID(query.openId)
+      const baseInfo = await this.getUserBaseInfo(query.openId, query.origin)
       // 通过 userId 获取用户签名
-      const userSig = await this.getUserInfo(query.openId, baseInfo.userId)
+      const userSig = await this.getUserSig(query.openId, baseInfo.userId)
       // 封装用户基本信息进 vuex
       const userInfo = Object.assign({}, baseInfo, userSig)
       this.setUserInfo(userInfo)
@@ -259,11 +259,14 @@ export default {
       // 判断是否重连
       const reConnectStatus = await this.getCurServStatus()
 
+      // 若无缓存则清空当前缓存
+      !reConnectStatus && Tools.CacheTools.removeCacheData('curServInfo')
+
       // 若无重连，则 action 创建会话
       !reConnectStatus && this.initSession()
 
       // 获取机器人基本信息，及配置机器人欢迎语
-      const { botInfo, welcomeMsg } = await this.getBotBaseInfo(query.openId)
+      const { botInfo, welcomeMsg } = await this.getBotBaseInfo(query.openId, userInfo.userId)
       this.setBotInfo(botInfo)
       !reConnectStatus && this.setMsgs(welcomeMsg)
 
@@ -275,7 +278,7 @@ export default {
     },
     async getCurServStatus() {
       // 如果有会话未结束，则重连
-      let data = Tools.CacheTools.getCacheData({ key: 'curServInfo', check: this.userInfo.openId })
+      let data = Tools.CacheTools.getCacheData({ key: 'curServInfo', check: this.userInfo.userId, quality: TIME_5_MIN })
       if (!data) {
         // 当前无缓存
         return false
@@ -312,6 +315,8 @@ export default {
       this.chatScroll.refresh()
       this.chatScroll.scrollToElement(this.$refs.chatContentEnd, 400)
       this.$vux.toast.text('重连成功', 'default')
+      // 手动更新用户最后活动时间（更新定时器）
+      this.updateLastAction()
       return 0
     },
     _showItemByType(type) {
@@ -444,13 +449,13 @@ export default {
     pullingDown() {
       return new Promise((resolve) => {
         if (!this.historyMsgs.length) {
-          const tip = {
-            content: '以上为历史消息',
-            time: '2018-03-28 15:23:14',
-            msgStatus: msgStatus.tip,
-            msgType: tipTypes.tip_normal
-          }
-          this.historyMsgs.push(tip)
+          // const tip = {
+          //   content: '以上为历史消息',
+          //   time: '2018-03-28 15:23:14',
+          //   msgStatus: msgStatus.tip,
+          //   msgType: tipTypes.tip_normal
+          // }
+          // this.historyMsgs.push(tip)
         }
         this.requestMsgsMixin()
         resolve()
@@ -753,7 +758,7 @@ export default {
           confirmText: '转人工',
           cancelText: '暂时不需要',
           onConfirm() {
-            self.enterOnLineLineUp()
+            self.$refs.floadButton.$refs.enterMenChat.click()
           }
         })
       }
@@ -781,7 +786,8 @@ export default {
       'initSession',
       'toggleBar',
       'sendMsgs',
-      'deleteTipMsg'
+      'deleteTipMsg',
+      'updateLastAction'
     ]),
     // 若ios用户 不在微信内置浏览器中打开该页面 则需要拉取漫游信息
     async getRoamMessage() {
@@ -814,7 +820,11 @@ export default {
       this.$nextTick(async() => {
         // 若当前为在线服务，则更新缓存
         if (this.roomMode === roomStatus.menChat) {
-          Tools.CacheTools.updateCacheData(this.msgs)
+          Tools.CacheTools.updateCacheData({
+            key: 'curServInfo',
+            msgs: this.msgs,
+            timestamp: new Date().getTime()
+          })
         }
         await Tools.AsyncTools.sleep(30)
         this.chatScroll.refresh()

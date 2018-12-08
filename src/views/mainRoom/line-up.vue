@@ -99,7 +99,7 @@ export default {
       //   csName: this.$route.query.csName,
       //   nickName: this.userInfo.userName,
       //   toCsFlag: true,
-      //   origin: 'WE',
+      //   origin: this.userInfo.origin || 'WE',
       //   userPriority: this.userInfo.userPriority,
       //   robotSessionId: this.sessionId
       // }
@@ -110,7 +110,7 @@ export default {
         this.$route.query.csName,
         this.userInfo.userName,
         true,
-        'WE',
+        this.userInfo.origin || 'WE',
         this.userInfo.userPriority,
         this.sessionId
       )
