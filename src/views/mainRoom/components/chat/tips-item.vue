@@ -56,7 +56,7 @@ export default {
 .tips-item {
   position: relative;
   display: inline-block;
-  max-width: 50%;
+  max-width: 52%;
   min-height: 1.2rem;
   padding: 0.3rem 0.6rem;
   margin: 0 auto 1.8rem;

@@ -193,7 +193,8 @@ export default {
       'roomMode',
       'roomId',
       'extendBarOpen',
-      'inputBarOpen'
+      'inputBarOpen',
+      'isWorkTime'
     ])
   },
   data() {
@@ -752,6 +753,11 @@ export default {
         // ques.msgType = msgTypes.msg_bot_thanks
         this.$vux.toast.text('感谢您的认可！', 'default')
       } else {
+        // if (true) {
+        //
+        // } else {
+        //
+        // }
         const self = this
         this.$vux.confirm.show({
           title: '非常抱歉，没能解决您的问题，小华正在学习中，为了更好地解决您的问题，您可以转接人工客服。',

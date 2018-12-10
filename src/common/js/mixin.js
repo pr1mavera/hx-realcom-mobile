@@ -17,9 +17,9 @@ export const loginMixin = {
   methods: {
     async getUserBaseInfo(openId, origin) {
       let userInfo = null
-      if (origin === 'WE') {
+      if (origin === 'WE' || origin === undefined) {
         // 调用openId拿用户信息
-        userInfo = this.getUserInfoFromOpenId(openId)
+        userInfo = await this.getUserInfoFromOpenId(openId)
       }
       if (!userInfo) {
         // 当前为游客，或者调用接口失败
@@ -52,22 +52,25 @@ export const loginMixin = {
       }
     },
     getVisitorInfo(origin) {
-      // 若本地缓存存在且未是对应的渠道，直接返回本地缓存
       let data = {}
+      // 缓存中有游客信息，直接返回：
       if (data = Tools.CacheTools.getCacheData({ key: `${origin}_visitorInfo`, check: origin })) return data
 
       // 缓存中没有对应渠道的游客信息：
       // 1. 创建游客信息
-      const random = `${Math.floor(Math.random() * 10000)}`
+      const randomMin2Max = Tools.curry(Tools.rand)
+      const rand = randomMin2Max(1000)(9999)
+      const timestamp = new Date().getTime()
       const visitorInfo = {
         avatar: '',
-        nickName: `游客_${random}`,
+        openId: `visitor_${rand}_${timestamp}`,
+        nickName: `游客_${rand}`,
         birthday: '1971-01-01',
         isVip: 'N',
         userGrade: '5',
         userGradeName: `游客`,
-        userId: `visitor_${random}`,
-        userName: `游客_${random}`,
+        userId: `visitor_${rand}_${timestamp}`,
+        userName: `游客_${rand}`,
         userPhone: '000000000000',
         origin: origin,
         userPriority: '5',
@@ -556,6 +559,8 @@ export const IMMixin = {
           const onlineQueueSuccMsg = {
             code: systemMsgStatus.ONLINE_REQUEST_CS_ENTANCE,
             csId: msgsObj.csId,
+            csName: msgsObj.csName || '',
+            csNick: msgsObj.csNick || '',
             startTime: msgsObj.queueStartTime,
             endTime: msgsObj.queueEndTime
           }
@@ -1117,8 +1122,9 @@ export const onLineQueueMixin = {
       // const msg = {
       //   code: systemMsgStatus.ONLINE_REQUEST_CS_ENTANCE,
       //   chatGuid: this.chatGuid,
-      //   csId: 'webchat1',
-      //   csName: 'webchat1',
+      //   csId: 'webchat6',
+      //   csName: 'webchat6',
+      //   csNick: '我才是csNick',
       //   startTime: '',
       //   endTime: ''
       // }
@@ -1166,6 +1172,7 @@ export const onLineQueueMixin = {
             num: data.teamNum,
             csId: data.userCode || '',
             csName: data.userName || '',
+            csNick: data.userNick || '',
             isTeam: data.team,
             startTime: data.queueStartTime,
             endTime: data.queueEndTime,
@@ -1199,7 +1206,8 @@ export const onLineQueueMixin = {
         const msg = {
           code: systemMsgStatus.ONLINE_REQUEST_CS_ENTANCE,
           csId: data.csId,
-          csName: data.csName,
+          csName: data.csName || '',
+          csNick: data.csNick || '',
           startTime: data.startTime,
           endTime: data.endTime
         }

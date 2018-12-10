@@ -1,4 +1,6 @@
 import { msgStatus, msgTypes, roomStatus, sessionStatus } from '@/common/js/status'
+import Tools from '@/common/js/tools'
+
 // 用户基本信息
 export const userInfo = state => state.userInfo
 // 机器人基本信息
@@ -18,6 +20,19 @@ export const videoMsgs = state => {
   return state.msgs.filter(item => {
     return item.msgStatus === msgStatus.msg && (item.msgType === msgTypes.msg_gift || item.msgType === msgTypes.msg_liked)
   })
+}
+// 是否为工作时间
+export const isWorkTime = state => {
+  const ZX_workT = state.userInfo.workTimeInfo.filter(item => item.callType === 'ZX')
+  let workT = {
+    startT: ZX_workT[0].startTime,
+    endT: ZX_workT[0].endTime
+  }
+  return {
+    state: Tools.DateTools.isWorkTime(workT),
+    startT: workT.startT,
+    endT: workT.endT
+  }
 }
 // 拓展输入打开状态
 export const extendBarOpen = state => state.extendBarOpen

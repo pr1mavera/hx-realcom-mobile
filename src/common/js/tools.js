@@ -395,7 +395,18 @@ let Tools = Object.assign({}, {
   CopyTools: Object.create(CopyTools),
   RectTools: Object.create(RectTools),
   MsgsFilterTools: Object.create(MsgsFilterTools),
-  CacheTools: Object.create(CacheTools)
+  CacheTools: Object.create(CacheTools),
+  curry: function(fn) {
+    function _c(restNum, argsList) {
+      return restNum === 0 ? fn.apply(null, argsList) : function(...x) {
+        return _c(restNum - x.length, argsList.concat(x))
+      }
+    }
+    return _c(fn.length, [])
+  },
+  rand: function(min, max) {
+    return Math.floor(Math.random() * (max - min) + min)
+  }
 })
 
 export default Tools
