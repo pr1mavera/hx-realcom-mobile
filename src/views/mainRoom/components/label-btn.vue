@@ -22,6 +22,7 @@
                     :key="index"
                     :value="item"
       >{{item.labelName}} {{item.labelCount}}</checker-item>
+      <a class="btn btn-more" v-if="showMoreBtn" @click="showMore">更多···</a>
     </checker>
     <!-- 当没有标签的情况 -->
     <div class="label-none" v-if="btnList.length === 0">
@@ -57,12 +58,14 @@
         btnList: [
           // {name: '聪明伶俐', id: 3}
         ],
+        allBtnList: [], // 所有评价我的标签
         selTags: null, // 选中的标签
         isDisabled: '',
         disable: true, // 标签不能选，只是做展示功能
         currentPage: 0, // 当前页
         pageList: [1],
-        showDots: true
+        showDots: true,
+        showMoreBtn: false
       }
     },
     computed: {
@@ -71,15 +74,11 @@
       ])
     },
     mounted() {
-      // this.getLabelList()
       this.$nextTick(() => {
         this.getLabels()
       })
     },
     methods: {
-      // 获取label列表
-      getLabelList() {},
-
       // 清空标签
       resetLabelList() {
         this.selTags = null
@@ -108,6 +107,12 @@
             // console.log('=============这是查询到的我的评价标签信息:' + JSON.stringify(res.data.labels))
             this.showDots = false
             this.btnList = res.data.labels
+            debugger
+            this.allBtnList = res.data.labels
+            if (this.btnList.length > 6) {
+              this.btnList.splice(5, this.btnList.length - 5)
+              this.showMoreBtn = true
+            }
           } else {
             // console.log('======================= error about query labelTags')
           }
@@ -195,6 +200,11 @@
         // debugger
         this.$emit('seledLabels', this.selTags)
         // console.log('你选中了这一个选项' + JSON.stringify(this.selTags))
+      },
+
+      // 点击更多，查看更多
+      showMore() {
+        alert('查看更多标签')
       }
     }
   }
@@ -215,6 +225,12 @@
   .tags-selected {
     color: #ffffff;
     background: #fe959c;
+  }
+  .btn {
+    color: #FF959C;
+    padding: .6rem 0.8rem;
+    border: 1px solid #FF959C;
+    border-radius: 2rem;
   }
   .label-none {
     display: flex;

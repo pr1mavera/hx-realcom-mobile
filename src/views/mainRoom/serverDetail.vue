@@ -36,34 +36,52 @@
         <p class="tips" @click="$emit('showShare', cuSerInfo.id, cuSerInfo.nickName)">偷偷的分享</p>
       </div> -->
     </div>
-    <!-- about me -->
-    <div class="container-item about-me">
-      <p class="container-item-tit">关于我</p>
-      <div class="container-item-con ">
-        <div class="about-me-item"><div class="tit">星座</div>{{cuSerInfo.starSign === null ? `保密` : cuSerInfo.starSign}}</div>
-        <div class="about-me-item"><div class="tit">家乡</div>{{cuSerInfo.hometown === null ? `保密` : cuSerInfo.hometown}}</div>
-        <div class="about-me-item"><div class="tit">爱好</div>{{cuSerInfo.hobby === null ? `保密` : cuSerInfo.hobby}}</div>
-      </div>
-    </div>
-    <!-- labels  -->
-    <div class="container-item">
-      <p class="container-item-tit">认识我</p>
-      <div class="container-item-con">
-        <!--<x-button mini style="margin-right: 1.5rem">温柔1</x-button>-->
-        <!-- :labelsInfo=labelsInfo -->
-        <label-btn :labelType="labelType"></label-btn>
-      </div>
-    </div>
+
     <!-- the gifts which send to me -->
     <div class="container-item">
-      <p class="container-item-tit">我的小幸福</p>
+      <div class="container-item-tit">
+        <span>送礼物</span>
+        <span style="color: #909090;" @click="showGiftsRecord">
+          收到礼物
+          <label style="color: #FF959C;">{{giftNum}}</label> 份
+          <svg class="icon icon-arrow" aria-hidden="true"><use xlink:href="#icon-ziyuanldpi"></use></svg>
+        </span>
+      </div>
       <send-gift style="height: unset"
                  :giftType="giftType"
       ></send-gift>
     </div>
+
+    <!-- labels  -->
+    <div class="container-item">
+      <p class="container-item-tit">对她印象</p>
+      <div class="container-item-con">
+        <label-btn :labelType="labelType"></label-btn>
+      </div>
+    </div>
+
+    <!-- about me -->
+    <div class="container-item about-me">
+      <p class="container-item-tit">关于我</p>
+      <div class="container-item-con ">
+        <div class="about-me-item">
+          <div class="tit">星座</div>
+          {{cuSerInfo.starSign === null ? `保密` : cuSerInfo.starSign}}
+        </div>
+        <div class="about-me-item">
+          <div class="tit">家乡</div>
+          {{cuSerInfo.hometown === null ? `保密` : cuSerInfo.hometown}}
+        </div>
+        <div class="about-me-item">
+          <div class="tit">爱好</div>
+          {{cuSerInfo.hobby === null ? `保密` : cuSerInfo.hobby}}
+        </div>
+      </div>
+    </div>
+
     <div class="btn-box">
       <a class="btn btn-back" @click="$router.back(-1)">返 回</a>
-      <a class="btn btn-lin-up" v-if="enterVideo" @click="enterLinUp">立即视频</a>
+      <!--<a class="btn btn-lin-up" v-if="enterVideo" @click="enterLinUp">立即视频</a>-->
     </div>
   </div>
 </template>
@@ -89,7 +107,8 @@
        cuSerInfo: [],
        serTimes: '0',
        labelType: 'notAll',
-       giftType: 'notAll'
+       giftType: 'all',
+       giftNum: '300' // 收到的礼物的份数
      }
     },
     computed: {
@@ -147,6 +166,11 @@
           status: this.$route.query.csStatus
         }
         this.$emit('clickToLineUp', csData)
+      },
+
+      // showGiftsRecord
+      showGiftsRecord() {
+        alert('查看礼物记录')
       }
     }
   }
@@ -160,6 +184,12 @@
     height: unset;
     padding-bottom: 6.5rem;
     background: @bg-normal;
+    .icon {
+      width: 1.3rem;
+      height: 1.2rem;
+      fill: #FF959C;
+      vertical-align: -0.15em
+    }
     .count {
       height: 6rem;
       position: relative;
@@ -194,12 +224,6 @@
         line-height: 6rem;
         text-align: right;
         margin-right: 1rem;
-        .icon {
-          width: 1.3rem;
-          height: 1.2rem;
-          fill: #FF959C;
-          vertical-align: -0.15em
-        }
       }
     }
     .container-item {
@@ -209,8 +233,15 @@
       box-sizing: border-box;
       background: @bg-light;
       .container-item-tit {
+        display: flex;
         color: #FF959C;
         font-size: 1.4rem;
+        justify-content: space-between;
+        .icon-arrow {
+          width: 1rem;
+          height: 1rem;
+          vertical-align: -.15em;
+        }
       }
     }
     .about-me {
@@ -261,9 +292,9 @@
         line-height: 3.5rem;
         align-self: center;
       }
-      .btn-lin-up {
-        border-left: 2px solid #ffffff;
-      }
+      /*.btn-lin-up {*/
+        /*border-left: 2px solid #ffffff;*/
+      /*}*/
     }
   }
 

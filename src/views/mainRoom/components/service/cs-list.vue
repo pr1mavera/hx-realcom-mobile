@@ -49,14 +49,7 @@ export default {
   },
   data() {
     return {
-      myCsList: [
-        // {
-        //   resultUrl: '/video/static/img/avatar@2x.png',
-        //   nickName: '花花',
-        //   servTimes: 4578,
-        //   giftCount: 9933
-        // }
-      ],
+      myCsList: [],
       quota: 3,
       status: '',
       alertTip: false,
