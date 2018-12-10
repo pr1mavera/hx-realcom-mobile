@@ -197,6 +197,7 @@ const IM = (() => {
       csId: data.csId,
       csAvatar: data.csAvatar,
       csName: data.csName,
+      csNick: data.csNick,
       likesCount: data.likesCount,
       csCode: data.csCode,
       chatGuid: data.chatGuid,

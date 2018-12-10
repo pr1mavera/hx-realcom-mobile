@@ -13,7 +13,7 @@
       </button>
       <p class="text">转电话</p>
     </div>
-    <!-- <div class="btn-item">
+    <div class="btn-item">
       <button
         class="item extend-click transition-bezier"
         @click="videoLineUp"
@@ -21,7 +21,7 @@
         <img width=100% height=100% src="/video/static/img/chat/fb_video.png">
       </button>
       <p class="text">转视频</p>
-    </div> -->
+    </div>
     <div class="btn-item">
       <button
         ref="enterMenChat"
@@ -70,7 +70,8 @@ export default {
       'roomMode',
       'userInfo',
       'csInfo',
-      'queueMode'
+      'queueMode',
+      'isWorkTime'
     ])
   },
   data() {
@@ -151,14 +152,7 @@ export default {
 
       switch (this.roomMode) { // 服务中
         case roomStatus.AIChat:
-          const ZX_workT = this.userInfo.workTimeInfo.filter(item => item.callType === 'ZX')
-          let workT = {
-            startT: ZX_workT[0].startTime,
-            endT: ZX_workT[0].endTime
-            // startT: '01:00',
-            // endT: '02:00'
-          }
-          if (Tools.DateTools.isWorkTime(workT)) {
+          if (this.isWorkTime.state) {
             // 当前在工作时间
             this.$emit('enterOnLineLineUp')
             // 重置非工作时间用户点击
@@ -167,12 +161,12 @@ export default {
             // 当前不在工作时间
             if (this.notWorkTimeClicked) {
               // 用户重复点击
-              this.showTips(2, '请勿重复点击')
+              this.showTips(3, '请勿重复点击')
               return 0
             } else {
               // 用户第一次点击
               const msg = {
-                content: `抱歉，当前为非工作时间，人工客服工作时间为周一至周日${workT.startT}-${workT.endT}`,
+                content: `抱歉，当前为非工作时间，人工客服工作时间为周一至周日${this.isWorkTime.startT}-${this.isWorkTime.endT}`,
                 time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
                 msgStatus: msgStatus.msg,
                 msgType: msgTypes.msg_leave

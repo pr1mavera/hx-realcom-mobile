@@ -76,6 +76,7 @@ export const afterQueueSuccess = function({ commit, state }, { mode, msgsObj }) 
     csInfo_onLine.csId = msgsObj.csId
     csInfo_onLine.csAvatar = getCsAvatar(msgsObj.csId)
     csInfo_onLine.csName = msgsObj.csName
+    csInfo_onLine.csNick = msgsObj.csNick
     commit(types.SET_CS_INFO, csInfo_onLine)
     // action 删除msgs中排队状态的tips
     deleteTipMsg({ commit, state })
@@ -84,7 +85,7 @@ export const afterQueueSuccess = function({ commit, state }, { mode, msgsObj }) 
     // 房间状态
     commit(types.SET_ROOM_MODE, roomStatus.menChat)
     const tip = {
-      content: `人工客服${state.csInfo.csName}转接成功，祝您沟通愉快！`,
+      content: `人工客服${state.csInfo.csNick}转接成功，祝您沟通愉快！`,
       time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
       msgStatus: msgStatus.tip,
       msgType: tipTypes.tip_success
@@ -92,7 +93,7 @@ export const afterQueueSuccess = function({ commit, state }, { mode, msgsObj }) 
     commit(types.SET_MSGS, state.msgs.concat(tip))
     // 发送欢迎语
     const msg = {
-      nickName: state.csInfo.csName,
+      nickName: state.csInfo.csNick,
       avatar: state.csInfo.csId,
       content: state.csInfo.welcomeText,
       isSelfSend: false,
@@ -145,11 +146,12 @@ export const configSendSystemMsg = function({ state }, msgsObj) {
         code: msgsObj.code,
         chatGuid: state.chatGuid,
         csId: msgsObj.csId,
-        csName: msgsObj.csName || msgsObj.csId,
+        csName: msgsObj.csName || msgsObj.csNick,
+        csNick: msgsObj.csNick || '',
         userId: state.userInfo.userId,
         userAvatar: state.userInfo.avatar,
         userName: state.userInfo.userName,
-        nickName: state.userInfo.nickName,
+        userNick: state.userInfo.nickName || state.userInfo.userName,
         userPhone: state.userInfo.userPhone,
         openId: state.userInfo.userId,
         origin: state.userInfo.origin || 'WE',
@@ -242,6 +244,8 @@ export const reqTransAnotherTimeout = function({ commit, state }, delay) {
         const onlineQueueSuccMsg = {
           code: systemMsgStatus.ONLINE_REQUEST_CS_ENTANCE,
           csId: data.userCode,
+          csName: data.userName || '',
+          csNick: data.userNick || '',
           startTime: data.queueStartTime,
           endTime: data.queueEndTime
         }
