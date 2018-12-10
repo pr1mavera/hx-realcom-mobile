@@ -2,6 +2,7 @@ let wx = {}
 exports.wx = wx
 
 wx.hideMenu = function() {
+  // eslint-disable-next-line
   WeixinJSBridge.call('hideOptionMenu')
 }
 if (typeof WeixinJSBridge === 'undefined') {

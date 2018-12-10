@@ -8,9 +8,10 @@
       </svg>
     </span>
     <div class="container-main">
-      <a @click="enterSerCenter" class="avatar">
+      <a class="avatar">
         <img v-lazy="avatarImgSrc" :key="avatarImgSrc">
       </a>
+      <!-- @click="enterSerCenter" -->
       <div class="info">
         <p class="name">{{currentCs.nickName}}</p>
         <p>当前状态 <label class="status" :class="{'on-line': isCsOnline}">{{isCsOnline ? '在线' : '离线'}}</label></p>

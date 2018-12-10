@@ -5,7 +5,8 @@
     :class="[{'item-padding-left': msg.isSelfSend, 'item-padding-right': !msg.isSelfSend}]">
     <div class="avatar" v-if="!msg.isSelfSend">
       <div class="bot-avatar bg-image">
-        <img width=100% height=100% v-lazy="avatarUrl" @click="enterSerCenter">
+        <img width=100% height=100% v-lazy="avatarUrl">
+        <!-- @click="enterSerCenter" -->
       </div>
       <!-- <svg class="icon extend-click" aria-hidden="true">
         <use xlink:href="#icon-wode"></use>
@@ -180,7 +181,7 @@ export default {
       window.location.href = `tel:${e.currentTarget.innerText}`
     },
     enterOnLineLineUp() {
-      this.$emit('enterOnLineLineUp')
+      this.$emit('handleReConnectToOnlineChat')
     },
     clickHotQues(ques) {
       this.$emit('clickHotQues', ques)
@@ -228,7 +229,7 @@ export default {
           const el = document.getElementById(this.msgCellId)
           this.$emit('msgLongPress', el, this.msg.content)
           // alert(`长按${JSON.stringify(this.msg.content)}`)
-        }, 1000)
+        }, 500)
       }
     },
     clearLoop() {
@@ -285,9 +286,15 @@ export default {
   .content-box {
     position: relative;
     width: calc(~'100% - 5.8rem');
-    font-size: 1.4rem;
+    font-size: 1.4rem!important;
     display: flex;
     flex-direction: column;
+    div {
+      span {
+        font-size: 1.4rem!important;
+        text-align: justify;
+      }
+    }
     &.left-content-box {
       align-items: flex-start;
     }

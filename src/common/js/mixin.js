@@ -6,7 +6,7 @@ import MsgsLoader from '@/common/js/MsgsLoader'
 import { ERR_OK, getImgUrl, getUserInfoByOpenID, getLoginInfo, getBotInfo, sendMsgToBot, getSessionList, getCsAvatar, onLineQueue, getBotRoamMsgs, requestHistoryMsgs, onLineQueueCancel, chatQueueHeartBeat } from '@/server/index.js'
 import Tools from '@/common/js/tools'
 // import { formatDate } from '@/common/js/dateConfig.js'
-import { roomStatus, queueStatus, sessionStatus, systemMsgStatus, msgStatus, cardTypes, msgTypes, tipTypes } from '@/common/js/status'
+import { TIME_24_HOURS, roomStatus, queueStatus, sessionStatus, systemMsgStatus, msgStatus, cardTypes, msgTypes, tipTypes } from '@/common/js/status'
 
 export const loginMixin = {
   computed: {
@@ -15,33 +15,88 @@ export const loginMixin = {
     ])
   },
   methods: {
-    async loginByOpenID(openId) {
-      // 若本地缓存存在且未过期，直接返回本地缓存
-      // let data = {}
-      // if (data = Tools.CacheTools.getCacheData({ key: 'userBaseInfo', check: openId })) return data
-
+    async getUserBaseInfo(openId, origin) {
+      let userInfo = null
+      if (origin === 'WE') {
+        // 调用openId拿用户信息
+        userInfo = this.getUserInfoFromOpenId(openId)
+      }
+      if (!userInfo) {
+        // 当前为游客，或者调用接口失败
+        userInfo = this.getVisitorInfo(origin)
+      }
+      return userInfo
+    },
+    async getUserInfoFromOpenId(openId) {
       const res = await getUserInfoByOpenID(openId)
       if (res.result.code === ERR_OK) {
         console.log('============================= 我现在来请求 loginByOpenID 辣 =============================')
-        // 配置 userInfo
-        !res.data.userInfo.openId && (res.data.userInfo.openId = this.$route.query.openId)
-        res.data.userInfo.avatar = res.data.wxUserInfo ? res.data.wxUserInfo.headImgUrl : ''
-        res.data.userInfo.nickName = res.data.wxUserInfo ? res.data.wxUserInfo.nickName : ''
-        // 存本地localstorage
-        // Tools.CacheTools.setCacheData({
-        //   key: 'userBaseInfo',
-        //   check: openId,
-        //   data: res.data.userInfo
-        // })
-        return res.data.userInfo
+        if (res.data.userInfo.userGrade === '5') {
+          // 当前通过openId获取userInfo失败，返回的是游客信息，则直接返回
+          return null
+        } else {
+          !res.data.userInfo.openId && (res.data.userInfo.openId = this.$route.query.openId)
+          res.data.userInfo.origin = this.$route.query.origin || ''
+          res.data.userInfo.avatar = res.data.wxUserInfo ? res.data.wxUserInfo.headImgUrl : ''
+          res.data.userInfo.nickName = res.data.wxUserInfo ? res.data.wxUserInfo.nickName : ''
+          // 存本地localstorage
+          // Tools.CacheTools.setCacheData({
+          //   key: 'userBaseInfo',
+          //   check: openId,
+          //   data: res.data.userInfo
+          // })
+          return res.data.userInfo
+        }
       } else {
-        console.log('error in getUserInfoByOpenID')
+        console.log('error in getUserInfoByOpenId')
       }
     },
-    async getUserInfo(openId, userId) {
+    getVisitorInfo(origin) {
+      // 若本地缓存存在且未是对应的渠道，直接返回本地缓存
+      let data = {}
+      if (data = Tools.CacheTools.getCacheData({ key: `${origin}_visitorInfo`, check: origin })) return data
+
+      // 缓存中没有对应渠道的游客信息：
+      // 1. 创建游客信息
+      const random = `${Math.floor(Math.random() * 10000)}`
+      const visitorInfo = {
+        avatar: '',
+        nickName: `游客_${random}`,
+        birthday: '1971-01-01',
+        isVip: 'N',
+        userGrade: '5',
+        userGradeName: `游客`,
+        userId: `visitor_${random}`,
+        userName: `游客_${random}`,
+        userPhone: '000000000000',
+        origin: origin,
+        userPriority: '5',
+        workTimeInfo: [
+          {
+            callType: 'SP',
+            endTime: '24:00',
+            startTime: '02:00'
+          },
+          {
+            callType: 'ZX',
+            endTime: '22:00',
+            startTime: '08:30'
+          }
+        ]
+      }
+      // 2. 游客信息存缓存
+      Tools.CacheTools.setCacheData({
+        key: `${origin}_visitorInfo`,
+        check: origin,
+        data: visitorInfo
+      })
+      // 3. 返回
+      return visitorInfo
+    },
+    async getUserSig(openId, userId) {
       // 若本地缓存存在且未过期，直接返回本地缓存
       let data = {}
-      if (data = Tools.CacheTools.getCacheData({ key: 'userSigInfo', check: openId })) return data
+      if (data = Tools.CacheTools.getCacheData({ key: 'userSigInfo', check: userId, quality: TIME_24_HOURS })) return data
 
       const res = await getLoginInfo(userId, 1)
       if (res.result.code === ERR_OK) {
@@ -54,7 +109,7 @@ export const loginMixin = {
         }
         Tools.CacheTools.setCacheData({
           key: 'userSigInfo',
-          check: openId,
+          check: userId,
           data: info
         })
         return info
@@ -62,11 +117,12 @@ export const loginMixin = {
         console.log('error in getLoginInfo')
       }
     },
-    async getBotBaseInfo(openId) {
+    async getBotBaseInfo(openId, userId) {
       // 若本地缓存存在且未过期，直接返回本地缓存
       let data = {}
       let botInfo = {}
-      if (data = Tools.CacheTools.getCacheData({ key: 'botInfo', check: openId })) {
+      // TIME_24_HOURS
+      if (data = Tools.CacheTools.getCacheData({ key: 'botInfo', check: userId, quality: 1 })) {
         // 若本地缓存存在且未过期，直接取本地缓存
         botInfo = data
       } else {
@@ -86,7 +142,7 @@ export const loginMixin = {
           }
           Tools.CacheTools.setCacheData({
             key: 'botInfo',
-            check: openId,
+            check: userId,
             data: botInfo
           })
         } else {
@@ -370,19 +426,21 @@ export const IMMixin = {
     },
     onMsgNotify(msgs) {
       if (msgs && msgs.length > 0) {
-        if (msgs[0].fromAccount === 'administrator') {
-          // 系统消息
-          this.receiveSystemMsgs(msgs)
-        } else {
-          // 自定义消息
-          this.receiveCustomMsgs(msgs)
-        }
+        const msgsObjs = IM.parseMsgs(msgs).textMsgs
+        msgsObjs.forEach(item => {
+          if (item.isSystem) {
+            // 系统消息
+            this.receiveSystemMsgs(item)
+          } else {
+            // 自定义消息
+            this.receiveCustomMsgs(item)
+          }
+        })
       }
     },
-    async receiveSystemMsgs(msgs) {
+    async receiveSystemMsgs(msgsObj) {
       // 处理系统消息（视频、在线）
-
-      const msgsObj = IM.parseMsgsInSystem(msgs).textMsgs[0]
+      // const msgsObj = IM.parseMsgsInSystem(msgs).textMsgs[0]
       switch (+msgsObj.code) {
         /* ******************************** 视频 ******************************** */
         // 人数减少（视频）
@@ -487,7 +545,7 @@ export const IMMixin = {
 
         // 客户端排队成功（在线）
         case systemMsgStatus.ONLINE_QUEUES_SUCCESS:
-          this.$router.replace({path: `/room/chat?openId=${this.userInfo.openId}`})
+          this.$router.replace({path: `/room/chat?openId=${this.userInfo.openId}&origin=YB`})
           // 设置欢迎语
           const welcomeText_onLine = {
             welcomeText: msgsObj.desc
@@ -538,10 +596,12 @@ export const IMMixin = {
           if (this.roomMode !== roomStatus.menChat) {
             return
           }
-          const csId = this.csInfo.csId
-          const csName = this.csInfo.csName
+          // const csId = this.csInfo.csId
+          // const csName = this.csInfo.csName
           this.setServerTime('00:00')
           this.$vux.toast.text('当前人工服务已结束', 'default')
+          // 清空本地localstorage
+          Tools.CacheTools.removeCacheData('curServInfo')
           await Tools.AsyncTools.sleep(3000)
           // assess
           if (!this.hasAssess) {
@@ -549,11 +609,8 @@ export const IMMixin = {
           } else {
             // action
             this.afterServerFinish(sessionStatus.onLine)
-            this.$emit('showShare', csId, csName)
+            // this.$emit('showShare', csId, csName)
           }
-          // 清空本地localstorage
-          Tools.CacheTools.removeCacheData('curServInfo')
-
           break
 
         // 坐席端创建会话失败（在线）
@@ -568,15 +625,12 @@ export const IMMixin = {
           break
       }
     },
-    receiveCustomMsgs(msgs) {
+    receiveCustomMsgs(msgsObj) {
       if (this.roomMode === roomStatus.AIChat) {
         return
       }
-      const msgsObjs = IM.parseMsgs(msgs).textMsgs
-      msgsObjs.forEach(item => {
-        item.timestamp = new Date().getTime()
-        this.sendMsgs(item)
-      })
+      msgsObj.timestamp = new Date().getTime()
+      this.sendMsgs(msgsObj)
     },
     ...mapMutations({
       setQueueMode: 'SET_QUEUE_MODE',
@@ -1057,14 +1111,14 @@ export const onLineQueueMixin = {
   },
   methods: {
     async enterOnLineLineUp() {
-      this.$router.replace({path: `/room/chat?openId=${this.userInfo.openId}&csId=${this.onLineQueueCsId || 'wait_for_distribution'}`})
+      this.$router.replace({path: `/room/chat?openId=${this.userInfo.openId}&origin=YB&csId=wait_for_distribution`})
       // // 排队成功，直接通知坐席
       // this.setChatGuid(new Date().getTime())
       // const msg = {
       //   code: systemMsgStatus.ONLINE_REQUEST_CS_ENTANCE,
       //   chatGuid: this.chatGuid,
-      //   csId: 'webchat7',
-      //   csName: 'webchat7',
+      //   csId: 'webchat1',
+      //   csName: 'webchat1',
       //   startTime: '',
       //   endTime: ''
       // }
@@ -1092,7 +1146,7 @@ export const onLineQueueMixin = {
         customerNick: this.userInfo.userName,
         identity: this.userInfo.userGrade,
         robotSessionId: this.sessionId,
-        origin: 'WE',
+        origin: this.userInfo.origin || 'WE',
         callType: 'ZX',
         type: '2'
       }
@@ -1197,7 +1251,7 @@ export const onLineQueueMixin = {
       const res = await onLineQueueCancel({
         customerGuid: `${this.userInfo.userId}`,
         chatGuid: `${this.chatGuid}`,
-        origin: 'WE',
+        origin: this.userInfo.origin || 'WE',
         callType: 'ZX'
       })
       if (res.data.result_code === '200') {
@@ -1225,7 +1279,7 @@ export const onLineQueueMixin = {
         this.heartBeatReq = await chatQueueHeartBeat({
           customerGuid: `${this.userInfo.userId}`,
           chatGuid: `${this.chatGuid}`,
-          origin: 'WE',
+          origin: this.userInfo.origin || 'WE',
           callType: 'ZX'
         })
         if (this.heartBeatReq.data.result_code === '200') {

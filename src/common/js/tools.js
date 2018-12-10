@@ -1,4 +1,4 @@
-import { CACHE_QUALITY_TIME, msgStatus, msgTypes, sessionStatus } from '@/common/js/status'
+import { msgStatus, msgTypes, sessionStatus } from '@/common/js/status'
 
 const DateTools = {
   formatDate: function(date, format) {
@@ -37,9 +37,9 @@ const DateTools = {
     return nextT - cacheT >= 60000
   },
 
-  isCacheValid: function(cacheT) {
+  isCacheValid: function(cacheT, quality) {
     const now = new Date().getTime()
-    return (now - cacheT) <= CACHE_QUALITY_TIME
+    return (now - cacheT) <= quality
   },
 
   isWorkTime: function({ startT, endT }) {
@@ -343,12 +343,21 @@ const MsgsFilterTools = {
 
 const CacheTools = {
   // 从localStorage取对应字段的缓存
-  getCacheData: function({ key, check }) {
+  getCacheData: function({ key, check, quality }) {
     const cache = window.localStorage.getItem(key) || ''
-    if (cache && DateTools.isCacheValid(cache.parseJSON().timestamp) && (cache.parseJSON().check === check)) {
-      return cache.parseJSON().data
+    if (!cache) {
+      // 缓存为null
+      return false
     }
-    return false
+    if (quality && !DateTools.isCacheValid(cache.parseJSON().timestamp, quality)) {
+      // 缓存过期
+      return false
+    }
+    if (cache.parseJSON().check !== check) {
+      // 缓存校验不通过
+      return false
+    }
+    return cache.parseJSON().data
   },
 
   // 存localStorage
@@ -361,14 +370,16 @@ const CacheTools = {
   },
 
   // 跟新当前服务缓存消息
-  updateCacheData: function(msgs) {
-    let cache = window.localStorage.getItem('curServInfo')
+  updateCacheData: function({ key, msgs, timestamp }) {
+    let cache = window.localStorage.getItem(key)
     if (!cache) {
+      // 当前无对应key值的缓存，
       return
     }
     cache = cache.parseJSON()
-    cache.data.msgs = msgs
-    window.localStorage.setItem('curServInfo', JSON.stringify(cache))
+    msgs && (cache.data.msgs = msgs)
+    timestamp && (cache.timestamp = timestamp)
+    window.localStorage.setItem(key, JSON.stringify(cache))
   },
 
   // 清空本地localstorage

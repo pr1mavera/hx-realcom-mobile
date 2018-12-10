@@ -65,7 +65,7 @@
             'leaveWordDescription': this.leaveWordDescription,
             'leaveWordDate': year + '-' + month + '-' + day + ' ' + hour + ':' + min + ':' + seconds,
             // 'origin': '1', // 1.官微2.凤凰营销（简称为营销）3.官网4.中介公众号（简称为中介）5.龙行银保（简称为银保）
-            'leaveWordChannel': 'WE',
+            'leaveWordChannel': this.userInfo.origin || 'WE',
             'leaveWordSource': '01', // 01-在线平台 02-服务箱（小华e家）03- 呼入04 - 虚拟
             'openId': this.$route.query.openId
           }
