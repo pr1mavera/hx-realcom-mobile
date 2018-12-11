@@ -107,7 +107,7 @@
             // console.log('=============这是查询到的我的评价标签信息:' + JSON.stringify(res.data.labels))
             this.showDots = false
             this.btnList = res.data.labels
-            debugger
+            // debugger
             this.allBtnList = res.data.labels
             if (this.btnList.length > 6) {
               this.btnList.splice(5, this.btnList.length - 5)
