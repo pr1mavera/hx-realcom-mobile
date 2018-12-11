@@ -67,6 +67,23 @@ const DateTools = {
 }
 
 const AsyncTools = {
+  // fastClickTimer: function() {
+  //   let timer = null
+  //   return (function() {
+  //     debugger
+  //     if (timer) {
+  //       const err = '请勿重复点击'
+  //       return { state: false, err }
+  //     } else {
+  //       timer = setTimeout(() => {
+  //         clearTimeout(timer)
+  //         timer = null
+  //       }, 10000)
+  //       return { state: true }
+  //     }
+  //   })()
+  // },
+
   debounce: function(func, time) {
     let timer
 
@@ -397,14 +414,15 @@ let Tools = Object.assign({}, {
   MsgsFilterTools: Object.create(MsgsFilterTools),
   CacheTools: Object.create(CacheTools),
   curry: function(fn) {
-    function _c(restNum, argsList) {
-      return restNum === 0 ? fn.apply(null, argsList) : function(...x) {
-        return _c(restNum - x.length, argsList.concat(x))
-      }
+    const _c = (restNum, argsList) => {
+      // 传递给执行函数的参数是否完整（剩余待传递的参数是否为0） ? 调用fn : 返回递归
+      return restNum === 0
+      ? fn(...argsList)
+      : (...x) => _c(restNum - x.length, argsList.concat(x))
     }
     return _c(fn.length, [])
   },
-  rand: function(min, max) {
+  randomMin2Max: function(min, max) {
     return Math.floor(Math.random() * (max - min) + min)
   }
 })
