@@ -96,7 +96,7 @@ export default {
       }
     },
     callPhone() {
-      if (this.clickTooFast) return
+      if (this.clickTooFast()) return
       // const fc = Tools.AsyncTools.fastClickTimer()
       // if (!fc.state) return
 
@@ -104,7 +104,7 @@ export default {
     },
     // 视频客服
     videoLineUp() {
-      if (this.clickTooFast) return
+      if (this.clickTooFast()) return
 
       if (!this.isVip) { // 非VIP客户
         this.showTips(2, '此功能只对VIP客户开放')
@@ -135,7 +135,7 @@ export default {
     },
     // 在线客服
     onLineLineUp() {
-      if (this.clickTooFast) return
+      if (this.clickTooFast()) return
 
       if (this.queueMode.status === queueStatus.queuing) { // 排队中
         return
