@@ -193,8 +193,7 @@ export default {
       'roomMode',
       'roomId',
       'extendBarOpen',
-      'inputBarOpen',
-      'isWorkTime'
+      'inputBarOpen'
     ])
   },
   data() {
@@ -741,32 +740,34 @@ export default {
       }
     },
     targetBotAssess(isResolved) {
-      // const ques = {
-      //   nickName: this.botInfo.botName,
-      //   isSelfSend: false,
-      //   time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
-      //   timestamp: new Date().getTime(),
-      //   msgStatus: msgStatus.msg,
-      //   chatType: this.sendType
-      // }
       if (isResolved) {
-        // ques.msgType = msgTypes.msg_bot_thanks
         this.$vux.toast.text('感谢您的认可！', 'default')
       } else {
-        // if (true) {
-        //
-        // } else {
-        //
-        // }
         const self = this
-        this.$vux.confirm.show({
-          title: '非常抱歉，没能解决您的问题，小华正在学习中，为了更好地解决您的问题，您可以转接人工客服。',
-          confirmText: '转人工',
-          cancelText: '暂时不需要',
-          onConfirm() {
-            self.$refs.floadButton.$refs.enterMenChat.click()
-          }
-        })
+        const ZX_workT = this.userInfo.workTimeInfo.filter(item => item.callType === 'ZX')
+        let workT = {
+          startT: ZX_workT[0].startTime,
+          endT: ZX_workT[0].endTime
+        }
+        if (Tools.DateTools.isWorkTime(workT)) {
+          this.$vux.confirm.show({
+            title: '非常抱歉，没能解决您的问题，小华正在学习中，为了更好地解决您的问题，您可以转接人工客服。',
+            confirmText: '转人工',
+            cancelText: '暂时不需要',
+            onConfirm() {
+              self.$refs.floadButton.$refs.enterMenChat.click()
+            }
+          })
+        } else {
+          this.$vux.confirm.show({
+            title: '非常抱歉，没能解决您的问题，小华正在学习中，为了更好地解决您的问题，您可以去留言。',
+            confirmText: '去留言',
+            cancelText: '暂时不需要',
+            onConfirm() {
+              self.toLeaveMsg()
+            }
+          })
+        }
       }
       this.isBotAssessShow = false
       // this.sendMsgs(ques)

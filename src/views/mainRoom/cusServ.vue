@@ -27,8 +27,7 @@ export default {
   name: 'cus-serv',
   computed: {
     ...mapGetters([
-      'userInfo',
-      'isWorkTime'
+      'userInfo'
     ])
   },
   data() {
@@ -62,9 +61,15 @@ export default {
 
     // 进入视频客服
     async goToLineUp() {
-      if (!this.isWorkTime.state) {
+      // 判断当前是否为工作时间
+      const SP_workT = this.userInfo.workTimeInfo.filter(item => item.callType === 'SP')
+      const workT = {
+        startT: SP_workT[0].startTime,
+        endT: SP_workT[0].endTime
+      }
+      if (!Tools.DateTools.isWorkTime(workT)) {
         this.$vux.alert.show({
-          title: `抱歉，当前为非工作时间，视频客服工作时间为周一至周日${this.isWorkTime.startT}-${this.isWorkTime.endT}，请在工作时间内来询，感谢您的关注！`
+          title: `抱歉，当前为非工作时间，视频客服工作时间为周一至周日${workT.startT}-${workT.endT}，请在工作时间内来询，感谢您的关注！`
         })
         return
       }

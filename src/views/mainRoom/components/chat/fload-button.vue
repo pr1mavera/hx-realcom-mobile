@@ -70,8 +70,7 @@ export default {
       'roomMode',
       'userInfo',
       'csInfo',
-      'queueMode',
-      'isWorkTime'
+      'queueMode'
     ])
   },
   data() {
@@ -85,28 +84,27 @@ export default {
     }
   },
   methods: {
-    callPhone() {
+    clickTooFast() {
       if (this.fastClickTimer) {
-        return
+        return true
       } else {
         this.fastClickTimer = setTimeout(() => {
           clearTimeout(this.fastClickTimer)
           this.fastClickTimer = null
         }, 1000)
+        return false
       }
+    },
+    callPhone() {
+      if (this.clickTooFast) return
+      // const fc = Tools.AsyncTools.fastClickTimer()
+      // if (!fc.state) return
 
       window.location.href = 'tel:95300'
     },
     // 视频客服
     videoLineUp() {
-      if (this.fastClickTimer) {
-        return
-      } else {
-        this.fastClickTimer = setTimeout(() => {
-          clearTimeout(this.fastClickTimer)
-          this.fastClickTimer = null
-        }, 1000)
-      }
+      if (this.clickTooFast) return
 
       if (!this.isVip) { // 非VIP客户
         this.showTips(2, '此功能只对VIP客户开放')
@@ -137,14 +135,7 @@ export default {
     },
     // 在线客服
     onLineLineUp() {
-      if (this.fastClickTimer) {
-        return
-      } else {
-        this.fastClickTimer = setTimeout(() => {
-          clearTimeout(this.fastClickTimer)
-          this.fastClickTimer = null
-        }, 1000)
-      }
+      if (this.clickTooFast) return
 
       if (this.queueMode.status === queueStatus.queuing) { // 排队中
         return
@@ -152,7 +143,14 @@ export default {
 
       switch (this.roomMode) { // 服务中
         case roomStatus.AIChat:
-          if (this.isWorkTime.state) {
+          const ZX_workT = this.userInfo.workTimeInfo.filter(item => item.callType === 'ZX')
+          let workT = {
+            startT: ZX_workT[0].startTime,
+            endT: ZX_workT[0].endTime
+            // startT: '01:00',
+            // endT: '02:00'
+          }
+          if (Tools.DateTools.isWorkTime(workT)) {
             // 当前在工作时间
             this.$emit('enterOnLineLineUp')
             // 重置非工作时间用户点击
@@ -166,7 +164,7 @@ export default {
             } else {
               // 用户第一次点击
               const msg = {
-                content: `抱歉，当前为非工作时间，人工客服工作时间为周一至周日${this.isWorkTime.startT}-${this.isWorkTime.endT}`,
+                content: `抱歉，当前为非工作时间，人工客服工作时间为周一至周日${workT.startT}-${workT.endT}`,
                 time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
                 msgStatus: msgStatus.msg,
                 msgType: msgTypes.msg_leave

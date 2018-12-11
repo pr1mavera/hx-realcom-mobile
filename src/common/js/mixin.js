@@ -58,7 +58,7 @@ export const loginMixin = {
 
       // 缓存中没有对应渠道的游客信息：
       // 1. 创建游客信息
-      const randomMin2Max = Tools.curry(Tools.rand)
+      const randomMin2Max = Tools.curry(Tools.randomMin2Max)
       const rand = randomMin2Max(1000)(9999)
       const timestamp = new Date().getTime()
       const visitorInfo = {
@@ -77,13 +77,13 @@ export const loginMixin = {
         workTimeInfo: [
           {
             callType: 'SP',
-            endTime: '24:00',
-            startTime: '02:00'
+            endTime: '20:00',
+            startTime: '09:00'
           },
           {
             callType: 'ZX',
-            endTime: '22:00',
-            startTime: '08:30'
+            endTime: '20:00',
+            startTime: '09:00'
           }
         ]
       }
