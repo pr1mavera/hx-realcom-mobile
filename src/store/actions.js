@@ -2,7 +2,7 @@ import * as types from './mutation-types'
 import Tools from '@/common/js/tools'
 import IM from '@/server/im'
 // import { isTimeDiffLongEnough, formatDate } from '@/common/js/dateConfig.js'
-import { sessionStatus, toggleBarStatus, roomStatus, queueStatus, msgStatus, msgTypes, dialogTypes, tipTypes, systemMsgStatus } from '@/common/js/status'
+import { MSG_PAGE_SIZE, sessionStatus, toggleBarStatus, roomStatus, queueStatus, msgStatus, msgTypes, dialogTypes, tipTypes, systemMsgStatus } from '@/common/js/status'
 import { ERR_OK, createSession, getCsAvatar, transTimeoutRedistribution } from '@/server/index.js'
 
 // 键盘弹出延迟（弃用）
@@ -42,13 +42,13 @@ export const beforeQueue = function({ commit, state }, { mode, content }) {
     mode,
     status: queueStatus.queuing
   })
-  const tip = [{
+  const tip = {
     content,
     time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
     msgStatus: msgStatus.tip,
     msgType: tipTypes.tip_normal
-  }]
-  commit(types.SET_MSGS, state.msgs.concat(tip))
+  }
+  sendMsgs({ commit, state }, [tip])
 }
 
 // 人工（视频）排队完成，接通客服后，修改对应的房间模式
@@ -67,7 +67,7 @@ export const afterQueueSuccess = function({ commit, state }, { mode, msgsObj }) 
       msgStatus: msgStatus.tip,
       msgType: tipTypes.tip_success
     }
-    commit(types.SET_MSGS, state.msgs.concat(tip))
+    sendMsgs({ commit, state }, [tip])
   } else if (mode === roomStatus.menChat) {
     // 清空转接定时器
     state.userInfo.transTimeout && clearTimeout(state.userInfo.transTimeout)
@@ -84,13 +84,13 @@ export const afterQueueSuccess = function({ commit, state }, { mode, msgsObj }) 
     commit(types.SET_SESSION_ID, msgsObj.sessionId)
     // 房间状态
     commit(types.SET_ROOM_MODE, roomStatus.menChat)
+    // 提示语
     const tip = {
       content: `人工客服${state.csInfo.csNick}转接成功，祝您沟通愉快！`,
       time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
       msgStatus: msgStatus.tip,
       msgType: tipTypes.tip_success
     }
-    commit(types.SET_MSGS, state.msgs.concat(tip))
     // 发送欢迎语
     const msg = {
       nickName: state.csInfo.csNick,
@@ -103,21 +103,17 @@ export const afterQueueSuccess = function({ commit, state }, { mode, msgsObj }) 
       msgType: msgTypes.msg_normal,
       chatType: sessionStatus.onLine
     }
-    commit(types.SET_MSGS, state.msgs.concat(msg))
+    sendMsgs({ commit, state }, [tip, msg])
     // action 初始化用户最后响应时间
     updateLastAction({ commit, state })
     // 存本地localstorage
-    Tools.CacheTools.setCacheData({
-      key: 'curServInfo',
-      check: state.userInfo.userId,
-      data: Object.assign({}, {
-        csInfo: csInfo_onLine,
-        sessionId: state.sessionId,
-        chatGuid: state.chatGuid,
-        roomMode: roomStatus.menChat,
-        msgs: state.msgs
-      })
-    })
+    const data = {
+      csInfo: csInfo_onLine,
+      sessionId: state.sessionId,
+      chatGuid: state.chatGuid,
+      roomMode: roomStatus.menChat
+    }
+    Tools.CacheTools.setCacheData({ key: 'curServInfo', check: state.userInfo.userId, data })
   }
 }
 
@@ -134,7 +130,7 @@ export const afterQueueFailed = function({ commit, state }) {
     msgStatus: msgStatus.tip,
     msgType: tipTypes.tip_fail
   }
-  commit(types.SET_MSGS, state.msgs.concat([tip]))
+  sendMsgs({ commit, state }, [tip])
 }
 
 // 配置排队成功后给坐席推送接入信息
@@ -170,9 +166,7 @@ export const configSendSystemMsg = function({ state }, msgsObj) {
 export const deleteTipMsg = function({ commit, state }) {
   for (let i = state.msgs.length - 1; i >= 0; i--) {
     if (state.msgs[i].msgStatus === msgStatus.tip && state.msgs[i].msgType === tipTypes.tip_line_up) {
-      const list = Tools.CopyTools.objDeepClone(state.msgs)
-      list.splice(i, 1)
-      commit(types.SET_MSGS, list)
+      commit(types.SET_MSGS, state.msgs.slice(0, i).concat(state.msgs.slice(i + 1, state.msgs.length)))
       break
     }
   }
@@ -190,13 +184,13 @@ export const afterServerFinish = function({ commit, state }, mode) {
   commit(types.SET_SERVER_TIME, '')
   commit(types.SET_ROOM_MODE, roomStatus.AIChat)
   initSession({ commit, state })
-  const tip = [{
+  const tip = {
     content: '本次服务已结束，如需继续咨询，请重新联系客服',
     time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
     msgStatus: msgStatus.tip,
     msgType: tipTypes.tip_normal
-  }]
-  commit(types.SET_MSGS, state.msgs.concat(tip))
+  }
+  sendMsgs({ commit, state }, [tip])
   if (mode === sessionStatus.video) {
     commit(types.SET_ROOM_ID, '')
   } else
@@ -316,7 +310,7 @@ export const updateLastAction = function({ commit, state }) {
         disconnectTime: 5
       }
     }
-    commit(types.SET_MSGS, state.msgs.concat(dialog))
+    sendMsgs({ commit, state }, [dialog])
     // 清空本地localstorage
     Tools.CacheTools.removeCacheData('curServInfo')
   }, 300000)
@@ -326,9 +320,52 @@ export const updateLastAction = function({ commit, state }) {
   commit(types.SET_USER_INFO, userInfo)
 }
 
+// 存当前缓存池消息
+export const saveCurMsgs = function({ commit, state }, { origin, msg }) {
+  const temp = Tools.CacheTools.getCacheData({ key: `${origin}_cur_msgs`, check: origin }) || []
+  Tools.CacheTools.setCacheData({ key: `${origin}_cur_msgs`, check: origin, data: temp.concat(msg) })
+}
+
+// 存历史消息（初始化）
+export const saveRoamMsgs = function({ commit, state }, origin) {
+  // 缓存池消息
+  const curTemp = Tools.CacheTools.getCacheData({ key: `${origin}_cur_msgs`, check: origin }) || []
+  // 当前缓存池没有上一次聊天的记录，直接退出
+  if (!curTemp.length) return
+  // 漫游消息分页列表
+  const roamTemp = Tools.CacheTools.getCacheData({ key: `${origin}_roam_msgs`, check: origin }) || []
+  // 还原分页
+  let list = []
+  roamTemp.length && roamTemp.forEach(item => {
+    list = list.concat(item.pageList)
+  })
+  // 合并
+  const roam = list.concat(curTemp)
+  // 分页方式（map的回调）
+  const mode = (item, i, arr) => {
+    return {
+      page: arr.length - i, pageList: roam.slice(i * MSG_PAGE_SIZE, (i + 1) * MSG_PAGE_SIZE)
+    }
+  }
+  const getPage = Tools.paging(MSG_PAGE_SIZE, mode)
+  const roamList = getPage(roam)
+  // 存贮
+  Tools.CacheTools.setCacheData({ key: `${origin}_roam_msgs`, check: origin, data: roamList })
+  // 清空缓存池消息
+  Tools.CacheTools.removeCacheData(`${origin}_cur_msgs`)
+  return 0
+}
+
+// 取历史消息（分页）
+export const getRoamMsgs = function({ commit, state }, { origin, page }) {
+  const list = Tools.CacheTools.getCacheData({ key: `${origin}_roam_msgs`, check: origin })
+  return list && list.length && list.length >= page ? list[list.length - page].pageList : []
+}
+
 // 更新本地消息队列
 export const sendMsgs = async function({ commit, state }, msg) {
-  if (msg.msgStatus !== msgStatus.tip) {
+  const tipMsg = msg.filter(item => item.msgStatus === msgStatus.msg)
+  if (tipMsg.length) {
     let lastT = null
     // 缓存最后一条信息的时间
     for (let i = state.msgs.length - 1; i > 0; i--) {
@@ -339,20 +376,21 @@ export const sendMsgs = async function({ commit, state }, msg) {
       console.log(`------------------------------------- 循环了 ${i} -------------------------------------`)
     }
     // 若间隔时间大于约定时间，则生成时间信息tip
-    if (lastT && Tools.DateTools.isTimeDiffLongEnough(lastT, msg.time)) {
+    if (lastT && msg[0].time && Tools.DateTools.isTimeDiffLongEnough(lastT, msg[0].time)) {
       const tip = {
-        content: msg.time,
-        time: msg.time,
+        content: msg[0].time,
+        time: msg[0].time,
         msgStatus: msgStatus.tip,
         msgType: tipTypes.tip_time
       }
-      commit(types.SET_MSGS, state.msgs.concat([tip]))
+      commit(types.SET_MSGS, state.msgs.concat(tip))
     }
   }
-  if ((state.roomMode === roomStatus.menChat) && msg.isSelfSend) {
+  const selfMsg = msg.filter((item) => item.isSelfSend)
+  if ((state.roomMode === roomStatus.menChat) && selfMsg.length) {
     // 更新用户最后活动时间（更新定时器）
     updateLastAction({ commit, state })
   }
-  commit(types.SET_MSGS, state.msgs.concat([msg]))
+  commit(types.SET_MSGS, state.msgs.concat(msg))
   return 0
 }

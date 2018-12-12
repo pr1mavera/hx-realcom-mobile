@@ -36,7 +36,7 @@ export const loginMixin = {
           return null
         } else {
           !res.data.userInfo.openId && (res.data.userInfo.openId = this.$route.query.openId)
-          res.data.userInfo.origin = this.$route.query.origin || ''
+          res.data.userInfo.origin = this.$route.query.origin || 'WE'
           res.data.userInfo.avatar = res.data.wxUserInfo ? res.data.wxUserInfo.headImgUrl : ''
           res.data.userInfo.nickName = res.data.wxUserInfo ? res.data.wxUserInfo.nickName : ''
           // 存本地localstorage
@@ -88,11 +88,7 @@ export const loginMixin = {
         ]
       }
       // 2. 游客信息存缓存
-      Tools.CacheTools.setCacheData({
-        key: `${origin}_visitorInfo`,
-        check: origin,
-        data: visitorInfo
-      })
+      Tools.CacheTools.setCacheData({ key: `${origin}_visitorInfo`, check: origin, data: visitorInfo })
       // 3. 返回
       return visitorInfo
     },
@@ -110,11 +106,8 @@ export const loginMixin = {
           sdkAppID: res.data.sdkAppId,
           userSig: res.data.userSig
         }
-        Tools.CacheTools.setCacheData({
-          key: 'userSigInfo',
-          check: userId,
-          data: info
-        })
+        // 缓存本地，用户签名
+        Tools.CacheTools.setCacheData({ key: 'userSigInfo', check: userId, data: info })
         return info
       } else {
         console.log('error in getLoginInfo')
@@ -143,11 +136,8 @@ export const loginMixin = {
               })
             })()
           }
-          Tools.CacheTools.setCacheData({
-            key: 'botInfo',
-            check: userId,
-            data: botInfo
-          })
+          // 缓存本地，机器人信息
+          Tools.CacheTools.setCacheData({ key: 'botInfo', check: userId, data: botInfo })
         } else {
           console.log('============================= getBotInfo error =============================')
           throw Error('getBotInfo error')
@@ -499,6 +489,7 @@ export const IMMixin = {
           csInfo_video.csId = msgsObj.csId
           csInfo_video.csAvatar = getCsAvatar(msgsObj.csId)
           csInfo_video.csName = msgsObj.csName
+          csInfo_video.csNick = msgsObj.csNick
           csInfo_video.likesCount = msgsObj.likesCount
           csInfo_video.csCode = msgsObj.csCode
 
@@ -517,7 +508,7 @@ export const IMMixin = {
           Tools.AsyncTools.sleep(3000)
           // 停止心跳
           this.stopHeartBeat()
-          this.$router.replace({path: `/room/chat?openId=${this.userInfo.openId}`})
+          this.$router.replace({path: `/room/chat?openId=${this.userInfo.openId}&origin=${this.userInfo.origin}`})
           this.afterQueueSuccess({
             mode: roomStatus.videoChat,
             msgsObj
@@ -548,7 +539,7 @@ export const IMMixin = {
 
         // 客户端排队成功（在线）
         case systemMsgStatus.ONLINE_QUEUES_SUCCESS:
-          this.$router.replace({path: `/room/chat?openId=${this.userInfo.openId}&origin=YB`})
+          this.$router.replace({path: `/room/chat?openId=${this.userInfo.openId}&origin=${this.userInfo.origin}`})
           // 设置欢迎语
           const welcomeText_onLine = {
             welcomeText: msgsObj.desc
@@ -635,7 +626,8 @@ export const IMMixin = {
         return
       }
       msgsObj.timestamp = new Date().getTime()
-      this.sendMsgs(msgsObj)
+      this.sendMsgs([msgsObj])
+      this.saveCurMsgs({ origin: this.userInfo.origin, msg: msgsObj })
     },
     ...mapMutations({
       setQueueMode: 'SET_QUEUE_MODE',
@@ -692,7 +684,7 @@ export const sendMsgsMixin = {
             msgType: msgTypes.msg_normal,
             chatType: this.sendType
           }
-          this.sendMsgs(ques)
+          this.sendMsgs([ques])
         }
 
         // 获取机器人返回
@@ -704,8 +696,9 @@ export const sendMsgsMixin = {
           data.botName = this.botInfo.botName
           data.time = Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss')
           const answer = Tools.MsgsFilterTools.botAnswerfilter(data)
-          // this.setMsgs(this.msgs.concat([answer]))
-          this.sendMsgs(answer)
+          this.sendMsgs([answer])
+          // 更新缓存
+          this.saveCurMsgs({ origin: this.userInfo.origin, msg: answer })
           resolve()
           console.log('============================= 我现在来请求 sendMsgToBot 辣 =============================')
         } else {
@@ -719,10 +712,10 @@ export const sendMsgsMixin = {
         // 没有时间戳，说明为第一次发送（若有，则为重发）
         timestamp = new Date().getTime()
         this.afterSendC2CTextMsgs(timestamp, text)
+      } else {
+        // 重置消息状态
+        this.setMsgStatus(timestamp, 'pending')
       }
-
-      // 重置消息状态
-      this.setMsgStatus(timestamp, 'pending')
 
       IM.sendNormalMsg(
         this.userInfo.userId,
@@ -752,10 +745,11 @@ export const sendMsgsMixin = {
         // 没有时间戳，说明为第一次发送（若有，则为重发）
         timestamp = new Date().getTime()
         this.afterSendC2CGiftMsgs(timestamp, giftInfo)
+      } else {
+        // 重置消息状态
+        this.setMsgStatus(timestamp, 'pending')
       }
 
-      // 重置消息状态
-      this.setMsgStatus(timestamp, 'pending')
       IM.sendNormalMsg(
         this.userInfo.userId,
         this.csInfo.csId,
@@ -786,10 +780,10 @@ export const sendMsgsMixin = {
         // 没有时间戳，说明为第一次发送（若有，则为重发）
         timestamp = new Date().getTime()
         this.afterSendC2CLikeMsgs(timestamp)
+      } else {
+        // 重置消息状态
+        this.setMsgStatus(timestamp, 'pending')
       }
-
-      // 重置消息状态
-      this.setMsgStatus(timestamp, 'pending')
 
       IM.sendNormalMsg(
         this.userInfo.userId,
@@ -826,10 +820,12 @@ export const sendMsgsMixin = {
           small: imgSrc
         }
         this.afterSendC2CImgMsgs(timestamp, imgData, img)
-      }
-      return new Promise(async(resolve) => {
+      } else {
         // 重置消息状态
         this.setMsgStatus(timestamp, 'pending')
+      }
+
+      return new Promise(async(resolve) => {
         resolve()
         // IM 封装上传/发送图片
         const info = {
@@ -870,10 +866,10 @@ export const sendMsgsMixin = {
         // 没有时间戳，说明为第一次发送（若有，则为重发）
         timestamp = new Date().getTime()
         this.afterSendXiaoHuaExpress(timestamp, url)
+      } else {
+        // 重置消息状态
+        this.setMsgStatus(timestamp, 'pending')
       }
-
-      // 重置消息状态
-      this.setMsgStatus(timestamp, 'pending')
 
       this.roomMode !== roomStatus.AIChat && IM.sendNormalMsg(
         this.userInfo.userId,
@@ -914,7 +910,7 @@ export const sendMsgsMixin = {
         msgType: msgTypes.msg_normal,
         chatType: this.sendType
       }
-      this.sendMsgs(msg)
+      this.sendMsgs([msg])
     },
     afterSendC2CGiftMsgs(timestamp, giftInfo) {
       const msg = {
@@ -930,7 +926,7 @@ export const sendMsgsMixin = {
         chatType: this.sendType,
         giftInfo
       }
-      this.sendMsgs(msg)
+      this.sendMsgs([msg])
     },
     afterSendC2CLikeMsgs(timestamp) {
       const msg = {
@@ -945,7 +941,7 @@ export const sendMsgsMixin = {
         msgType: msgTypes.msg_liked,
         chatType: this.sendType
       }
-      this.sendMsgs(msg)
+      this.sendMsgs([msg])
     },
     afterSendC2CImgMsgs(timestamp, imgData, file_Obj) {
       // const fileObj = Tools.CopyTools.objWithTypeDeepClone(file_Obj)
@@ -963,7 +959,7 @@ export const sendMsgsMixin = {
         fileObj,
         imgData
       }
-      this.sendMsgs(msg)
+      this.sendMsgs([msg])
     },
     afterSendXiaoHuaExpress(timestamp, url) {
       const msg = {
@@ -981,45 +977,57 @@ export const sendMsgsMixin = {
           small: `/video/static/img/express/${url}.gif`
         }
       }
-      this.sendMsgs(msg)
+      this.sendMsgs([msg])
     },
     setMsgStatus(timestamp, status, ...msg) {
-      for (let i = this.msgs.length - 1; i > 0; i--) {
-        if (this.msgs[i].timestamp && this.msgs[i].timestamp === timestamp) {
-          let msgsList = Tools.CopyTools.arrShallowClone(this.msgs)
-          let currMsg = Tools.CopyTools.objDeepClone(this.msgs[i])
-          // 修改对应消息的状态
-          currMsg.status = status
-          // 若为图片消息，则对应添加图片的真实地址
-          if (msg.length && (msg[0].msgType === msgTypes.msg_img)) {
-            const img = msg[0].imgData
-            currMsg.imgData = {
-              big: img.big,
-              small: img.small
-            }
-          }
-          msgsList.splice(i, 1, currMsg)
-          this.setMsgs(msgsList)
-          break
+      let index = null
+      const actMsg = this.msgs.filter((item, i) => {
+        if (item.timestamp && (item.timestamp === timestamp)) {
+          index = i
+          return item
         }
+      })[0]
+      if (actMsg) {
+        const currMsg = Tools.CopyTools.objDeepClone(actMsg)
+        // 修改对应消息的状态
+        currMsg.status = status
+        // 若为图片消息，则对应添加图片的真实地址
+        if (currMsg.msgType === msgTypes.msg_img) {
+          const img = msg[0].imgData
+          currMsg.imgData = {
+            big: img.big,
+            small: img.small
+          }
+        }
+        const msgsList = this.msgs.slice(0, index).concat(currMsg, this.msgs.slice(index + 1, this.msgs.length))
+        this.setMsgs(msgsList)
+        this.saveCurMsgs({ origin: this.userInfo.origin, msg: currMsg })
       }
     },
     ...mapMutations({
       setMsgs: 'SET_MSGS'
     }),
     ...mapActions([
-      'sendMsgs'
+      'sendMsgs',
+      'saveCurMsgs'
     ])
   }
 }
 
 export const getMsgsMixin = {
+  computed: {
+    ...mapGetters([
+      'userInfo'
+    ])
+  },
   data() {
     return {
       sessionList: [],
       historyMsgs: [],
       pulldownResult: '加载历史消息成功',
-      MsgsLoader: null
+      MsgsLoader: null,
+      cacheMsgsPage: 1,
+      cacheMsgsOver: false
     }
   },
   methods: {
@@ -1047,19 +1055,40 @@ export const getMsgsMixin = {
         pageSize: 15 // 单页条数（非必须，默认为5）
       })
     },
+    /* 消息加时间装饰 */
+    timeTipsFormat(list) {
+      let timeCache = list[0].time
+      let map = []
+      list.length && list.forEach((item, i) => {
+        item.timestamp = new Date(item.time.replace(/-/g, '/')).getTime()
+        if (Tools.DateTools.isTimeDiffLongEnough(timeCache, item.time) || i === 0) {
+          map.push({
+            content: item.time,
+            time: item.time,
+            msgStatus: msgStatus.tip,
+            msgType: tipTypes.tip_time
+          })
+          timeCache = item.time
+        }
+        map.push(item)
+      })
+      return map
+    },
     /* 拉取消息（漫游消息，历史消息） */
     async requestMsgsMixin() {
       // 初始化
-      !this.MsgsLoader && this.initMsgLoader()
+      // !this.MsgsLoader && this.initMsgLoader()
       // 拉取消息
-      const newMsgs = await this.MsgsLoader.getMsgs()
-
+      // const newMsgs = await this.MsgsLoader.getMsgs()
+      if (this.cacheMsgsOver) return
+      const newMsgs = await this.getRoamMsgs({ origin: this.userInfo.origin, page: this.cacheMsgsPage++ })
       if (newMsgs && newMsgs.length) {
-        const list = this.MsgsLoader.timeTipsFormat(newMsgs)
+        const list = this.timeTipsFormat(newMsgs)
         this.historyMsgs = list.concat(this.historyMsgs)
       } else {
         // 没有更多数据
         this.pulldownResult = '别拉了，没有更多消息了！！！'
+        this.cacheMsgsOver = true
       }
     },
     /* 机器人漫游消息 */
@@ -1091,7 +1120,11 @@ export const getMsgsMixin = {
       } else {
         console.log('error in requestHistoryMsgs')
       }
-    }
+    },
+    /* Action */
+    ...mapActions([
+      'getRoamMsgs'
+    ])
   }
 }
 
@@ -1116,7 +1149,7 @@ export const onLineQueueMixin = {
   },
   methods: {
     async enterOnLineLineUp() {
-      this.$router.replace({path: `/room/chat?openId=${this.userInfo.openId}&origin=YB&csId=wait_for_distribution`})
+      this.$router.replace({path: `/room/chat?openId=${this.userInfo.openId}&origin=${this.userInfo.origin}&csId=wait_for_distribution`})
       // // 排队成功，直接通知坐席
       // this.setChatGuid(new Date().getTime())
       // const msg = {
@@ -1188,7 +1221,7 @@ export const onLineQueueMixin = {
           msgStatus: msgStatus.tip,
           msgType: tipTypes.tip_fail
         }
-        this.sendMsgs(tip)
+        this.sendMsgs([tip])
       }
       return {
         code: '1',
@@ -1247,7 +1280,7 @@ export const onLineQueueMixin = {
           msgType: tipTypes.tip_line_up,
           queueNum: this.queueNum
         }
-        this.sendMsgs(msg)
+        this.sendMsgs([msg])
         // 设置排队状态
         this.setQueueMode({
           mode: roomStatus.menChat,
@@ -1327,7 +1360,7 @@ export const onLineQueueMixin = {
         msgStatus: msgStatus.msg,
         msgType: msgTypes.msg_leave
       }
-      this.sendMsgs(msg)
+      this.sendMsgs([msg])
     },
     pushNormalTipMsg(content) {
       const tip = {
@@ -1336,7 +1369,7 @@ export const onLineQueueMixin = {
         msgStatus: msgStatus.tip,
         msgType: tipTypes.tip_normal
       }
-      this.sendMsgs(tip)
+      this.sendMsgs([tip])
     },
     ...mapMutations({
       setCsInfo: 'SET_CS_INFO',

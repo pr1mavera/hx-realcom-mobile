@@ -169,7 +169,7 @@ export default {
                 msgStatus: msgStatus.msg,
                 msgType: msgTypes.msg_leave
               }
-              this.sendMsgs(msg)
+              this.sendMsgs([msg])
               this.notWorkTimeClicked = true
             }
           }

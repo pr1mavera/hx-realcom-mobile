@@ -405,6 +405,16 @@ const CacheTools = {
   }
 }
 
+const curry = function(fn) {
+  const _c = (restNum, argsList) => {
+    // 传递给执行函数的参数是否完整（剩余待传递的参数是否为0） ? 调用fn : 返回递归
+    return restNum === 0
+    ? fn(...argsList)
+    : (...x) => _c(restNum - x.length, argsList.concat(x))
+  }
+  return _c(fn.length, [])
+}
+
 let Tools = Object.assign({}, {
   DateTools: Object.create(DateTools),
   AsyncTools: Object.create(AsyncTools),
@@ -422,6 +432,18 @@ let Tools = Object.assign({}, {
     }
     return _c(fn.length, [])
   },
+  map: curry(function(f, arr) {
+    return arr.map(f)
+  }),
+  filter: curry(function(f, arr) {
+    return arr.filter(f)
+  }),
+  paging: curry(function(pageSize, f, arr) {
+    const totalPage = (arr.length / pageSize >>> 0) + 1 // 页数
+    return new Array(totalPage).fill(0).map(f)
+    // debugger
+    // return Array.from(pageTemp)
+  }),
   randomMin2Max: function(min, max) {
     return Math.floor(Math.random() * (max - min) + min)
   }

@@ -29,9 +29,9 @@
       <section class="video-components-section" v-show="!isVideoOverReportShow">
         <div class="video-header">
           <div class="avatar">
-            <img :src="this.csInfo.csAvatar">
+            <img v-lazy="this.csInfo.csAvatar">
           </div>
-          <div class="name">{{this.csInfo.csName}}</div>
+          <div class="name">{{this.csInfo.csNick}}</div>
         </div>
         <video-footer
           @hangUpVideo="hangUpVideo"

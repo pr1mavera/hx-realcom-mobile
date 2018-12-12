@@ -6,7 +6,7 @@
       <p class="confirm-bd-tit" style="">
           <icon class="icon" type="success"></icon> 转接成功！
       </p>
-      <p class="confirm-bd-subtit">本次视频由客服{{this.csInfo.csName}}为您服务</p>
+      <p class="confirm-bd-subtit">本次视频由客服{{this.csInfo.csNick}}为您服务</p>
       <!--<p class="confirm-tips">{{name}}{{num ? `已经为您服务过${num}次`: '首次为您服务'}}</p>-->
       <!-- <p class="confirm-tips" v-if="num">{{this.csInfo.csName}}已经为您服务过<label class="num">{{num}}</label>次</p>
       <p class="confirm-tips" v-else>{{this.csInfo.csName}}首次为您服务</p> -->
