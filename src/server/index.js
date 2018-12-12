@@ -176,3 +176,6 @@ export const syncGroupC2CMsg = data => http.post('TM', '/syncGroupC2CMsg', data)
  * [getLoginState 获取当前客户IM登录状态]
  */
 export const getLoginState = userId => http.get('TM', `/im/account/login/status?userId=${userId}`)
+
+// 获取客服工作时间 callType的值为'ZX' OR 'SP' OR空值(即查询所有工作时间)
+export const getWorkTime = async(callType) => http.post('user', `/webchat/worktime/getallworktime`, callType)
