@@ -238,7 +238,6 @@
 
       // showCsImg
       showCsImg() {
-        debugger
         this.filter = true
       }
     }
