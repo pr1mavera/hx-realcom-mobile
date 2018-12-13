@@ -18,7 +18,7 @@
 
 <script type="text/ecmascript-6">
 import { mapGetters, mapActions } from 'vuex'
-import Tools from '@/common/js/tools'
+// import Tools from '@/common/js/tools'
 
 import { getCsStatus } from '@/server/index.js'
 import { roomStatus } from '@/common/js/status'

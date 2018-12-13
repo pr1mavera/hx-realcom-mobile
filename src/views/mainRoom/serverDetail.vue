@@ -2,68 +2,138 @@
 <template>
   <div class="serverDetail container">
     <!-- 默认高度为180px, 如果设置aspect-ratio会根据宽度自动计算高度,如 :aspect-ratio="300/375" -->
-    <swiper auto dots-class="custom-bottom" dots-position="center" :aspect-ratio="160/375">
+<!--    <swiper auto dots-class="custom-bottom" dots-position="center" :aspect-ratio="160/375">
       <swiper-item class="swiper-img" v-for="(item, index) in personalDisplay" :key="index">
         <img :src="item" style="width: 100%;object-fit: fill;">
       </swiper-item>
     </swiper>
-    <div class="count">
-      <div class="count-rate-bg">
-        <div class="count-rate">
-          <span>{{ cuSerInfo.feedback }}</span>
-          <p style="line-height: 1.25;font-size: 1.2rem">好评率</p>
+      &lt;!&ndash; <div class="flex-box-item">
+        <p class="tips" @click="$emit('showShare', cuSerInfo.id, cuSerInfo.nickName)">偷偷的分享</p>
+      </div> &ndash;&gt;
+    </div>-->
+
+    <div class="container-top">
+      <div class="img" id="iconImg">
+        <svg @click="showCsImg" class="icon icon-img" aria-hidden="true"><use xlink:href="#icon-Group"></use></svg>
+      </div>
+      <div class="item-top">
+        <div class="left">
+          <div class="avatar">
+            <img v-lazy="avatarImgSrc" :key="avatarImgSrc">
+          </div>
+        </div>
+
+        <div class="right info">
+          <p class="name">{{cuSerInfo.nickName}}</p>
+          <P>当前状态</P>
+          <p>服务总量 {{cuSerInfo.serTimes || 0}}</p>
         </div>
       </div>
-      <div class="count-like">
-        <svg class="icon" aria-hidden="true"><use xlink:href="#icon-xin-hong1"></use></svg>
-        <span style="font-size: 1.2rem;">&nbsp;{{ cuSerInfo.likesCount }}</span>
+
+      <div class="flex-box" style="height: 5.4rem; margin-top: 2.5rem;">
+        <div class="flex-box-item btn-container">
+          <!--  @click.native="clickToLineUp" class="btn" :class="{'online': isCsOnline}" -->
+          <x-button mini @click.native="enterLinUp" style="font-size: 1.2rem;color: #ffffff;background: #FF8D88;border: 1px solid #ffffff;">
+            <svg class="icon extend-click" aria-hidden="true">
+              <use xlink:href="#icon-zixun"></use>
+            </svg>
+            立即视频
+          </x-button>
+        </div>
+
+        <div class="flex-box-item" v-if="enterVideo">
+            <div class="bg-box">
+              <svg class="icon" aria-hidden="true">
+                <use xlink:href="#icon-xin"></use>
+              </svg>
+              添加为专属客服
+            </div>
+        </div>
+      </div>
+
+      <div class="statistics">
+        <div class="feedback">
+          <span>好评率 {{cuSerInfo.feedback}}%</span>
+        </div>
+        <div class="flex-box-item count-like">
+          <svg class="icon" aria-hidden="true">
+            <use xlink:href="#icon-xin-hong1"></use>
+          </svg>
+          <span style="color: #bdbdbd;font-size: 1.5rem;">&nbsp;{{ cuSerInfo.likesCount }}</span>
+        </div>
+      </div>
+
+      <div class="container-item flex-box" style="background: unset; margin-top: 3.5rem">
+        <div class="flex-box-item">
+          <p><span style="">{{ cuSerInfo.servYears === null ? 0 : cuSerInfo.servYears }}</span>年</p>
+          <p class="tips">服务年限</p>
+        </div>
+        <div class="flex-box-item">
+          <p><span>{{ cuSerInfo.servTimes === null ? 0 : cuSerInfo.servTimes }}</span>份</p>
+          <p class="tips">收到礼物</p>
+        </div>
+        <div class="flex-box-item">
+          <p><span>{{serTimes}}</span>次</p>
+          <p class="tips">为我服务</p>
+        </div>
       </div>
     </div>
-    <div class="container-item flex-box">
-      <div class="flex-box-item">
-        <p><span style="">{{ cuSerInfo.servYears === null ? 0 : cuSerInfo.servYears }}</span>年</p>
-        <p class="tips">服务年限</p>
-      </div>
-      <div class="flex-box-item">
-        <p><span>{{ cuSerInfo.servTimes === null ? 0 : cuSerInfo.servTimes }}</span>人</p>
-        <p class="tips">总服务数</p>
-      </div>
-      <div class="flex-box-item">
-        <p><span>{{serTimes}}</span>次</p>
-        <p class="tips">为我服务</p>
-      </div>
-      <!-- <div class="flex-box-item">
-        <p class="tips" @click="$emit('showShare', cuSerInfo.id, cuSerInfo.nickName)">偷偷的分享</p>
-      </div> -->
-    </div>
-    <!-- about me -->
-    <div class="container-item about-me">
-      <p class="container-item-tit">关于我</p>
-      <div class="container-item-con ">
-        <div class="about-me-item"><div class="tit">星座</div>{{cuSerInfo.starSign === null ? `保密` : cuSerInfo.starSign}}</div>
-        <div class="about-me-item"><div class="tit">家乡</div>{{cuSerInfo.hometown === null ? `保密` : cuSerInfo.hometown}}</div>
-        <div class="about-me-item"><div class="tit">爱好</div>{{cuSerInfo.hobby === null ? `保密` : cuSerInfo.hobby}}</div>
-      </div>
-    </div>
-    <!-- labels  -->
-    <div class="container-item">
-      <p class="container-item-tit">认识我</p>
-      <div class="container-item-con">
-        <!--<x-button mini style="margin-right: 1.5rem">温柔1</x-button>-->
-        <!-- :labelsInfo=labelsInfo -->
-        <label-btn :labelType="labelType"></label-btn>
-      </div>
-    </div>
+
     <!-- the gifts which send to me -->
     <div class="container-item">
-      <p class="container-item-tit">我的小幸福</p>
+      <div class="container-item-tit">
+        <span>送礼物</span>
+        <span style="color: #909090;" @click="showGiftsRecord">
+          <!--收到礼物-->
+          <!--<label style="color: #FF959C;">{{giftNum}}</label> 份-->
+          查看详情
+          <svg class="icon icon-arrow" aria-hidden="true"><use xlink:href="#icon-ziyuanldpi"></use></svg>
+        </span>
+      </div>
       <send-gift style="height: unset"
                  :giftType="giftType"
       ></send-gift>
     </div>
+
+    <!-- labels  -->
+    <div class="container-item">
+      <p class="container-item-tit">对她印象</p>
+      <div class="container-item-con">
+        <label-btn :labelType="labelType"></label-btn>
+      </div>
+    </div>
+
+    <!-- about me -->
+    <div class="container-item about-me">
+      <p class="container-item-tit">关于我</p>
+      <div class="container-item-con ">
+        <div class="about-me-item">
+          <div class="tit">星座</div>
+          {{cuSerInfo.starSign === null ? `保密` : cuSerInfo.starSign}}
+        </div>
+        <div class="about-me-item">
+          <div class="tit">家乡</div>
+          {{cuSerInfo.hometown === null ? `保密` : cuSerInfo.hometown}}
+        </div>
+        <div class="about-me-item">
+          <div class="tit">爱好</div>
+          {{cuSerInfo.hobby === null ? `保密` : cuSerInfo.hobby}}
+        </div>
+      </div>
+    </div>
+
     <div class="btn-box">
       <a class="btn btn-back" @click="$router.back(-1)">返 回</a>
-      <a class="btn btn-lin-up" v-if="enterVideo" @click="enterLinUp">立即视频</a>
+      <!--<a class="btn btn-lin-up" v-if="enterVideo" @click="enterLinUp">立即视频</a>-->
+    </div>
+
+    <!-- 自定义遮罩层 -->
+    <div class="filter" v-show="filter">
+      <swiper id="swiperImg" class="swiper" dots-class="custom-bottom" dots-position="center">
+        <swiper-item class="swiper-img" v-for="(item, index) in personalDisplay" :key="index">
+          <img class="cs-img" :src="item" style="">
+        </swiper-item>
+      </swiper>
     </div>
   </div>
 </template>
@@ -72,7 +142,7 @@
   // import Tools from '@/common/js/tools'
   import { mapGetters } from 'vuex'
   import { Swiper, SwiperItem, XButton, XCircle } from 'vux'
-  import { ERR_OK, getCsInfo, csPhoto, getTimesForMe } from '@/server/index.js'
+  import { ERR_OK, getCsInfo, csPhoto, getTimesForMe, getCsAvatar } from '@/server/index.js'
 
   export default {
     components: {
@@ -89,10 +159,15 @@
        cuSerInfo: [],
        serTimes: '0',
        labelType: 'notAll',
-       giftType: 'notAll'
+       giftType: 'notAll',
+       giftNum: '300', // 收到的礼物的份数
+       filter: false
      }
     },
     computed: {
+      avatarImgSrc() {
+        return getCsAvatar(this.$route.query.cusSerId)
+      },
       enterVideo() {
         return this.$route.query.csStatus
       },
@@ -102,6 +177,13 @@
       ])
     },
     mounted() {
+      let self = this
+      const bigImg = document.getElementById('swiperImg')
+      const iconImg = document.getElementById('iconImg')
+      document.addEventListener('click', (e) => {
+        if (!bigImg.contains(e.target) && !iconImg.contains(e.target)) self.filter = false
+      })
+
       this.$nextTick(() => {
         this.getCsInfo()
         this.timesForMe()
@@ -113,8 +195,8 @@
         const cuSerId = this.$route.query.cusSerId
         // console.log('=================================' + JSON.stringify(this.csInfo))
         const res = await getCsInfo(cuSerId)
-        // debugger
         if (res.result.code === ERR_OK) {
+          // debugger
           this.cuSerInfo = res.data
           const cuSerPic = res.data.photos
 
@@ -147,6 +229,16 @@
           status: this.$route.query.csStatus
         }
         this.$emit('clickToLineUp', csData)
+      },
+
+      // showGiftsRecord
+      showGiftsRecord() {
+        alert('查看礼物记录')
+      },
+
+      // showCsImg
+      showCsImg() {
+        this.filter = true
       }
     }
   }
@@ -160,57 +252,116 @@
     height: unset;
     padding-bottom: 6.5rem;
     background: @bg-normal;
-    .count {
-      height: 6rem;
-      position: relative;
-      background: @text-lighter;
-      .count-rate-bg {
-        width: 9.35rem;
-        height: 9.35rem;
-        position: absolute;
-        bottom: 1rem;
-        left: 2rem;
-        border-radius: 100%;
-        background: rgba(255,255,255, 1);
-        box-shadow: 0 0 0 .6rem rgba(255, 255, 255, .4);
-        .count-rate {
-          width: 8.35rem;
-          height: 8.35rem;
-          padding-top: 1.8rem;
-          border-radius: 100%;
-          border: 1px solid #FF959C;
-          box-sizing: border-box;
-          margin: .5rem auto;
-          text-align: center;
-          background: #fff;
-          // box-shadow: 0 -.4rem 0 #fff;
-          span {
-            color: #FF959C;
-            font-size: 2.4rem;
+    .icon {
+      width: 1.3rem;
+      height: 1.2rem;
+      /*fill: #FF959C;*/
+      vertical-align: -0.15em
+    }
+    .container-top {
+      background: url("/video/static/img/service/csDetailBg.png") no-repeat;
+      background-size: contain;
+      background-color: #ffffff;
+      .img {
+        padding: 2rem 1.5rem 0 0;
+        text-align: right;
+        .icon-img {
+          width: 1.8rem;
+          height: 1.6rem;
+        }
+      }
+      .item-top {
+        display: flex;
+        position: relative;
+        .left {
+          margin-left: 4rem;
+          .avatar {
+            width: 10rem;
+            height: 10rem;
+            border-radius: 50%;
+            img {
+              width: 100%;
+              height: 100%;
+              border-radius: 50%;
+            }
+          }
+        }
+        .right {
+          color: #ffffff;
+          line-height: 2;
+          font-size: 1.2rem;
+          margin-left: 3.5rem;
+          .name {
+            font-size: 1.4rem;
+            font-weight: 600;
           }
         }
       }
-      .count-like {
-        line-height: 6rem;
-        text-align: right;
-        margin-right: 1rem;
-        .icon {
-          width: 1.3rem;
-          height: 1.2rem;
-          fill: #FF959C;
-          vertical-align: -0.15em
+      .flex-box {
+        .btn-container {
+          .icon {
+            fill: #ffffff;
+          }
+        }
+        .bg-box {
+          width: 12.3rem;
+          height: 4.5rem;
+          color: #FF8787;
+          font-size: 1.2rem;
+          line-height: 5rem;
+          margin-top: .9rem;
+          background: url("/video/static/img/service/csBg1.png") no-repeat;
+          background-size: contain;
+          .icon {
+            fill: #FF8787;
+          }
+        }
+      }
+      .statistics {
+        display: flex;
+        margin-top: -.2rem;
+        justify-content: space-between;
+        .feedback {
+          width: 10rem;
+          height: 7rem;
+          line-height: 8rem;
+          font-size: 1.2rem;
+          margin-left: 3.6rem;
+          background: url("/video/static/img/service/csFbBg.png") no-repeat;
+          background-size: contain;
+          span {
+            display: inline-block;
+            color: #ffffff;
+            margin-left: 1.2rem;
+            transform: rotate(10deg);
+          }
+        }
+        .count-like {
+          margin: 2rem 1.5rem 0 0;
+          .icon {
+            width: 1.5rem;
+            height: 1.5rem;
+            fill: #FF959C;
+          }
         }
       }
     }
     .container-item {
       width: 100%;
-      margin-top: .5rem;
+      margin-top: 1rem;
       padding: 1.5rem 1rem 2.5rem;
       box-sizing: border-box;
       background: @bg-light;
       .container-item-tit {
+        display: flex;
         color: #FF959C;
         font-size: 1.4rem;
+        justify-content: space-between;
+        .icon-arrow {
+          width: 1rem;
+          height: 1rem;
+          vertical-align: -.15em;
+        }
       }
     }
     .about-me {
@@ -232,7 +383,7 @@
         flex: 1;
         text-align: center;
         p {
-          color: @text-normal;
+          color: #FC8780;
           font-size: 1.2rem;
           span {
             font-size: 3.8rem;
@@ -261,8 +412,29 @@
         line-height: 3.5rem;
         align-self: center;
       }
-      .btn-lin-up {
-        border-left: 2px solid #ffffff;
+      /*.btn-lin-up {*/
+        /*border-left: 2px solid #ffffff;*/
+      /*}*/
+    }
+    .filter {
+      z-index: 2;
+      position: fixed;
+      top: 0;
+      width: 100vw;
+      height: 100vh;
+      cursor: pointer;
+      background: rgba(25, 25, 25, .5);
+      .swiper {
+        margin: 18vh 0;
+        .swiper-img {
+          text-align: center;
+          .cs-img {
+            width: 60vw;
+            object-fit: fill;
+            margin: 0 auto;
+            border-radius: 5px;
+          }
+        }
       }
     }
   }
