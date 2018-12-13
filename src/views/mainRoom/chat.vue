@@ -236,6 +236,8 @@ export default {
   },
   mounted() {
     this.$nextTick(() => {
+      document.getElementById('app').style.display = 'block'
+      document.getElementById('appLoading').style.display = 'none'
       this.inputEle = this.$refs.inputBar.$refs.inputContent
       // 初始化滚动
       this._initScroll()
@@ -265,7 +267,7 @@ export default {
       const reConnectStatus = await this.getCurServStatus()
 
       // 若无缓存则清空当前缓存
-      !reConnectStatus && Tools.CacheTools.removeCacheData('curServInfo')
+      !reConnectStatus && Tools.CacheTools.removeCacheData(`${this.userInfo.origin}_curServInfo`)
 
       // 若无重连，则 action 创建会话
       !reConnectStatus && this.initSession()
@@ -292,7 +294,7 @@ export default {
     },
     async getCurServStatus() {
       // 如果有会话未结束，则重连
-      let data = Tools.CacheTools.getCacheData({ key: 'curServInfo', check: this.userInfo.userId, quality: TIME_5_MIN })
+      let data = Tools.CacheTools.getCacheData({ key: `${this.userInfo.origin}_curServInfo`, check: this.userInfo.userId, quality: TIME_5_MIN })
       if (!data) {
         // 当前无缓存
         return false
@@ -734,12 +736,13 @@ export default {
         this.$vux.toast.text('感谢您的认可！', 'default')
       } else {
         const self = this
-        const ZX_workT = this.userInfo.workTimeInfo.filter(item => item.callType === 'ZX')
-        let workT = {
-          startT: ZX_workT[0].startTime,
-          endT: ZX_workT[0].endTime
-        }
-        if (Tools.DateTools.isWorkTime(workT)) {
+        const ZX_workT = this.userInfo.workTimeInfo.ZX
+        // filter(item => item.callType === 'ZX')
+        // let workT = {
+        //   startT: ZX_workT[0].startTime,
+        //   endT: ZX_workT[0].endTime
+        // }
+        if (Tools.DateTools.isWorkTime(ZX_workT)) {
           this.$vux.confirm.show({
             title: '非常抱歉，没能解决您的问题，小华正在学习中，为了更好地解决您的问题，您可以转接人工客服。',
             confirmText: '转人工',
@@ -867,7 +870,7 @@ export default {
       overflow: hidden;
       // background-color: @bg-normal;
       flex: 1;
-      background-image: url('/video/static/img/bg.jpg');
+      background-image: url('/video/static/img/chat/bg.jpg');
       background-size: cover;
       // background-color: #000;
       // flex-basis: auto;

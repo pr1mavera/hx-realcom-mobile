@@ -113,7 +113,7 @@ export const afterQueueSuccess = function({ commit, state }, { mode, msgsObj }) 
       chatGuid: state.chatGuid,
       roomMode: roomStatus.menChat
     }
-    Tools.CacheTools.setCacheData({ key: 'curServInfo', check: state.userInfo.userId, data })
+    Tools.CacheTools.setCacheData({ key: `${state.userInfo.origin}_curServInfo`, check: state.userInfo.userId, data })
   }
 }
 
@@ -312,7 +312,7 @@ export const updateLastAction = function({ commit, state }) {
     }
     sendMsgs({ commit, state }, [dialog])
     // 清空本地localstorage
-    Tools.CacheTools.removeCacheData('curServInfo')
+    Tools.CacheTools.removeCacheData(`${state.userInfo.origin}_curServInfo`)
   }, 300000)
 
   const userInfo = Tools.CopyTools.objShallowClone(state.userInfo)

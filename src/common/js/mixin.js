@@ -1,11 +1,9 @@
 import { mapGetters, mapMutations, mapActions } from 'vuex'
 import IM from '@/server/im'
-// import Creator from '@/common/js/msgsLoader'
 import MsgsLoader from '@/common/js/MsgsLoader'
 // import WebRTCAPI from 'webRTCAPI'
-import { ERR_OK, getImgUrl, getUserInfoByOpenID, getLoginInfo, getBotInfo, sendMsgToBot, getSessionList, getCsAvatar, onLineQueue, getBotRoamMsgs, requestHistoryMsgs, onLineQueueCancel, chatQueueHeartBeat } from '@/server/index.js'
+import { ERR_OK, getImgUrl, getUserInfoByOpenID, getLoginInfo, getBotInfo, sendMsgToBot, getSessionList, getCsAvatar, onLineQueue, getBotRoamMsgs, requestHistoryMsgs, onLineQueueCancel, chatQueueHeartBeat, getWorkTime } from '@/server/index.js'
 import Tools from '@/common/js/tools'
-// import { formatDate } from '@/common/js/dateConfig.js'
 import { TIME_24_HOURS, roomStatus, queueStatus, sessionStatus, systemMsgStatus, msgStatus, cardTypes, msgTypes, tipTypes } from '@/common/js/status'
 
 export const loginMixin = {
@@ -15,9 +13,9 @@ export const loginMixin = {
     ])
   },
   methods: {
-    async getUserBaseInfo(openId, origin) {
+    async getUserBaseInfo(openId, origin = 'WE') {
       let userInfo = null
-      if (origin === 'WE' || origin === undefined) {
+      if (origin === 'WE') {
         // 调用openId拿用户信息
         userInfo = await this.getUserInfoFromOpenId(openId)
       }
@@ -27,7 +25,7 @@ export const loginMixin = {
       }
       return userInfo
     },
-    async getUserInfoFromOpenId(openId) {
+    async getUserInfoFromOpenId(openId = 'hehe') {
       const res = await getUserInfoByOpenID(openId)
       if (res.result.code === ERR_OK) {
         console.log('============================= 我现在来请求 loginByOpenID 辣 =============================')
@@ -39,19 +37,19 @@ export const loginMixin = {
           res.data.userInfo.origin = this.$route.query.origin || 'WE'
           res.data.userInfo.avatar = res.data.wxUserInfo ? res.data.wxUserInfo.headImgUrl : ''
           res.data.userInfo.nickName = res.data.wxUserInfo ? res.data.wxUserInfo.nickName : ''
-          // 存本地localstorage
-          // Tools.CacheTools.setCacheData({
-          //   key: 'userBaseInfo',
-          //   check: openId,
-          //   data: res.data.userInfo
-          // })
+          res.data.userInfo.workTimeInfo = Tools.reduce((val, item) => Object.assign(val, {
+            [item.callType]: {
+              startTime: item.startTime,
+              endTime: item.endTime
+            }
+          }), {})(res.data.userInfo.workTimeInfo)
           return res.data.userInfo
         }
       } else {
         console.log('error in getUserInfoByOpenId')
       }
     },
-    getVisitorInfo(origin) {
+    async getVisitorInfo(origin) {
       let data = {}
       // 缓存中有游客信息，直接返回：
       if (data = Tools.CacheTools.getCacheData({ key: `${origin}_visitorInfo`, check: origin })) return data
@@ -59,8 +57,32 @@ export const loginMixin = {
       // 缓存中没有对应渠道的游客信息：
       // 1. 创建游客信息
       const randomMin2Max = Tools.curry(Tools.randomMin2Max)
-      const rand = randomMin2Max(1000)(9999)
-      const timestamp = new Date().getTime()
+      const rand = randomMin2Max(1000)(9999) // 随机四位数
+      const timestamp = new Date().getTime() // 时间戳
+      // 获取工作时间
+      const res = await getWorkTime()
+      let workTimeInfo = null
+      if (res.result.code = ERR_OK) {
+        const workTime = res.data.workTime
+        // 处理工作时间数据结构
+        workTimeInfo = Tools.reduce((val, item) => Object.assign(val, {
+          [item.callType]: {
+            startTime: item.startTime,
+            endTime: item.endTime
+          }
+        }), {})(workTime)
+      } else {
+        workTimeInfo = {
+          'SP': {
+            startTime: '09:00',
+            endTime: '20:00'
+          },
+          'ZX': {
+            startTime: '09:00',
+            endTime: '20:00'
+          }
+        }
+      }
       const visitorInfo = {
         avatar: '',
         openId: `visitor_${rand}_${timestamp}`,
@@ -74,18 +96,7 @@ export const loginMixin = {
         userPhone: '000000000000',
         origin: origin,
         userPriority: '5',
-        workTimeInfo: [
-          {
-            callType: 'SP',
-            endTime: '20:00',
-            startTime: '09:00'
-          },
-          {
-            callType: 'ZX',
-            endTime: '20:00',
-            startTime: '09:00'
-          }
-        ]
+        workTimeInfo
       }
       // 2. 游客信息存缓存
       Tools.CacheTools.setCacheData({ key: `${origin}_visitorInfo`, check: origin, data: visitorInfo })
@@ -211,7 +222,7 @@ export const RTCRoomMixin = {
       }, () => {
         this.RTC.createRoom({
           roomid: room,
-          role: 'miniwhite'
+          role: 'user'
         }, () => {
             console.info('ENTER RTC ROOM OK')
         }, (result) => {
@@ -230,14 +241,23 @@ export const RTCRoomMixin = {
         if (info && info.stream) {
           videoElement.srcObject = info.stream
           videoElement.muted = true
+          videoElement.autoplay = true
+          videoElement.playsinline = true
+          videoElement.play()
         }
       })
       this.RTC.on('onRemoteStreamUpdate', (info) => {
         const videoElement = document.getElementById('remoteVideo')
-        const videoElementMini = document.getElementById('remoteVideoMini')
+        // const videoElementMini = document.getElementById('remoteVideoMini')
         if (info && info.stream) {
           videoElement.srcObject = info.stream
-          videoElementMini.srcObject = info.stream
+          // videoElementMini.srcObject = info.stream
+          videoElement.autoplay = true
+          // videoElementMini.autoplay = true
+          videoElement.playsinline = true
+          // videoElementMini.playsinline = true
+          videoElement.play()
+          // videoElementMini.play()
         }
       })
 
@@ -597,7 +617,7 @@ export const IMMixin = {
           this.setServerTime('00:00')
           this.$vux.toast.text('当前人工服务已结束', 'default')
           // 清空本地localstorage
-          Tools.CacheTools.removeCacheData('curServInfo')
+          Tools.CacheTools.removeCacheData(`${this.userInfo.origin}_curServInfo`)
           await Tools.AsyncTools.sleep(3000)
           // assess
           if (!this.hasAssess) {
@@ -1002,6 +1022,11 @@ export const sendMsgsMixin = {
         const msgsList = this.msgs.slice(0, index).concat(currMsg, this.msgs.slice(index + 1, this.msgs.length))
         this.setMsgs(msgsList)
         this.saveCurMsgs({ origin: this.userInfo.origin, msg: currMsg })
+        // 更新服务状态时间戳
+        Tools.CacheTools.updateCacheData({
+          key: `${this.userInfo.origin}_curServInfo`,
+          timestamp: new Date().getTime()
+        })
       }
     },
     ...mapMutations({
@@ -1191,7 +1216,7 @@ export const onLineQueueMixin = {
       }
       const res = await onLineQueue(option)
       const data = res.data.data
-      if (res.data.result_code === '200') {
+      if (res.data.result_code === '200' || res.data.result_code === '450') {
         // if (data.online) {
         // 发送正在转接提示
         this.beforeQueue({

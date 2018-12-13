@@ -42,13 +42,13 @@ const DateTools = {
     return (now - cacheT) <= quality
   },
 
-  isWorkTime: function({ startT, endT }) {
-    const strb = startT.split(':')
+  isWorkTime: function({ startTime, endTime }) {
+    const strb = startTime.split(':')
     if (strb.length !== 2) {
       return false
     }
 
-    const stre = endT.split(':')
+    const stre = endTime.split(':')
     if (stre.length !== 2) {
       return false
     }

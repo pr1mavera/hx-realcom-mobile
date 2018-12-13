@@ -67,7 +67,6 @@ export default {
 </script>
 
 <style type="text/css" lang="less">
-@import '~vux/src/styles/reset.less';
 
 /*- 引入关闭按钮 -*/
 /*@import '~vux/src/styles/close.less';*/
