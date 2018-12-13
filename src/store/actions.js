@@ -334,17 +334,22 @@ export const saveRoamMsgs = function({ commit, state }, origin) {
   if (!curTemp.length) return
   // 漫游消息分页列表
   const roamTemp = Tools.CacheTools.getCacheData({ key: `${origin}_roam_msgs`, check: origin }) || []
+
   // 还原分页
-  let list = []
-  roamTemp.length && roamTemp.forEach(item => {
-    list = list.concat(item.pageList)
-  })
+  const list = Tools.reduce((val, item) => val.concat(item.pageList), [])(roamTemp)
+  // let list = []
+  // roamTemp.forEach(item => {
+  //   list = list.concat(item.pageList)
+  // })
+
   // 合并
   const roam = list.concat(curTemp)
+
   // 分页方式（map的回调）
   const mode = (item, i, arr) => {
     return {
-      page: arr.length - i, pageList: roam.slice(i * MSG_PAGE_SIZE, (i + 1) * MSG_PAGE_SIZE)
+      page: arr.length - i,
+      pageList: roam.slice(i * MSG_PAGE_SIZE, (i + 1) * MSG_PAGE_SIZE)
     }
   }
   const getPage = Tools.paging(MSG_PAGE_SIZE, mode)

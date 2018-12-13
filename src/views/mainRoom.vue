@@ -224,8 +224,7 @@ export default {
       setAssessView: 'SET_ASSESS_VIEW'
     }),
     ...mapActions([
-      'afterServerFinish',
-      'saveRoamMsgs'
+      'afterServerFinish'
     ])
   }
 }

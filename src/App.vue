@@ -11,7 +11,7 @@
 <script>
 import deviceConfig from './config/device'
 import { stringEx } from './config/extend'
-const wx = require('@/common/js/wx').wx
+// const wx = require('@/common/js/wx').wx
 // import { mapGetters, mapMutations } from 'vuex'
 // import Tools from '@/common/js/tools'
 // import wxConfig from './config/wechat'
@@ -50,8 +50,8 @@ export default {
       // this.sendMsgs([msgsList])
     }, true)
     // 关闭菜单项
-    this.addevent()
-    wx.hideMenu()
+    // this.addevent()
+    // wx.hideMenu()
   },
   activated() {
     this.$setgoindex()

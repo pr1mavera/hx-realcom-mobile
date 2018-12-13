@@ -17,7 +17,6 @@
         <div class="chat-content" ref="chatContent">
           <ul>
             <li class="chat-content-block chat-content-start" ref="chatContentStart"></li>
-            <!-- <li class="chat-content-li text-center">上拉可以查看历史消息</li> -->
             <li class="chat-content-li"
               v-for="(item, index) in this.historyMsgs"
               :key="`history-${index}`"
@@ -31,6 +30,11 @@
                   @targetLink="targetLink"
                 ></component>
               </keep-alive>
+            </li>
+            <li class="chat-content-li text-center history-block" v-if="historyMsgs.length !== 0">
+              <span class="item line border-1px-before"></span>
+              <span class="item text">以上为历史消息</span>
+              <span class="item line border-1px-before"></span>
             </li>
             <li class="chat-content-li"
               v-for="(msg, index) in this.msgs"
@@ -890,6 +894,25 @@ export default {
             width: 100%;
             &.text-center {
               text-align: center;
+            }
+            &.history-block {
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              padding-bottom: 2rem;
+              .item {
+                display: inline-block;
+                &.line {
+                  width: 20%;
+                  .border-1px-before(@label-line-normal);
+                }
+                &.text {
+                  font-size: 1.2rem;
+                  padding: 0 1.2rem;
+                  line-height: 1.2rem;
+                  color: @label-line-normal;
+                }
+              }
             }
           }
         }

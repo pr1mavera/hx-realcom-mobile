@@ -432,17 +432,12 @@ let Tools = Object.assign({}, {
     }
     return _c(fn.length, [])
   },
-  map: curry(function(f, arr) {
-    return arr.map(f)
-  }),
-  filter: curry(function(f, arr) {
-    return arr.filter(f)
-  }),
+  map: curry((f, arr) => arr.map(f)),
+  filter: curry((f, arr) => arr.filter(f)),
+  reduce: curry((f, val, arr) => arr.reduce(f, val)),
   paging: curry(function(pageSize, f, arr) {
     const totalPage = (arr.length / pageSize >>> 0) + 1 // 页数
     return new Array(totalPage).fill(0).map(f)
-    // debugger
-    // return Array.from(pageTemp)
   }),
   randomMin2Max: function(min, max) {
     return Math.floor(Math.random() * (max - min) + min)
