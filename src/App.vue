@@ -47,7 +47,7 @@ export default {
       //     item = newMsg
       //   }
       // })
-      // this.setMsgs(msgsList)
+      // this.sendMsgs([msgsList])
     }, true)
     // 关闭菜单项
     // this.addevent()
@@ -56,11 +56,6 @@ export default {
   activated() {
     this.$setgoindex()
   }
-  // methods: {
-  //   ...mapMutations({
-  //     setMsgs: 'SET_MSGS'
-  //   })
-  // }
 }
 
 // function refresh() {
@@ -72,7 +67,6 @@ export default {
 </script>
 
 <style type="text/css" lang="less">
-@import '~vux/src/styles/reset.less';
 
 /*- 引入关闭按钮 -*/
 /*@import '~vux/src/styles/close.less';*/

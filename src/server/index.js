@@ -127,6 +127,11 @@ export const requestHistoryMsgs = (userId, page, pageSize) => http.get('user', `
 export const getIframeUrl = url => http.url('user', `/video/frame/content?url=${url}`)
 
 /**
+ * [saveQueueTicket 转视频跳转至Safari前保存会话]
+ */
+export const saveQueueTicket = (csId, csName, csNick, userInfo, openId, sessionId) => http.post('user', `/user/cs/saveQueueTicket`, { csId, csName, csNick, userInfo, openId, sessionId })
+
+/**
  ************************************ onLine ************************************
  */
 
@@ -177,5 +182,5 @@ export const syncGroupC2CMsg = data => http.post('TM', '/syncGroupC2CMsg', data)
  */
 export const getLoginState = userId => http.get('TM', `/im/account/login/status?userId=${userId}`)
 
-// 获取客服工作时间 callType的值为'ZX' OR 'SP' OR空值(即查询所有工作时间)
+// 获取客服工作时间 callType的值为'ZX' or 'SP' or 空值(即查询所有工作时间)
 export const getWorkTime = async(callType) => http.post('user', `/webchat/worktime/getallworktime`, callType)

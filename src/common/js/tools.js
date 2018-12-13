@@ -42,13 +42,13 @@ const DateTools = {
     return (now - cacheT) <= quality
   },
 
-  isWorkTime: function({ startT, endT }) {
-    const strb = startT.split(':')
+  isWorkTime: function({ startTime, endTime }) {
+    const strb = startTime.split(':')
     if (strb.length !== 2) {
       return false
     }
 
-    const stre = endT.split(':')
+    const stre = endTime.split(':')
     if (stre.length !== 2) {
       return false
     }
@@ -405,6 +405,16 @@ const CacheTools = {
   }
 }
 
+const curry = function(fn) {
+  const _c = (restNum, argsList) => {
+    // 传递给执行函数的参数是否完整（剩余待传递的参数是否为0） ? 调用fn : 返回递归
+    return restNum === 0
+    ? fn(...argsList)
+    : (...x) => _c(restNum - x.length, argsList.concat(x))
+  }
+  return _c(fn.length, [])
+}
+
 let Tools = Object.assign({}, {
   DateTools: Object.create(DateTools),
   AsyncTools: Object.create(AsyncTools),
@@ -422,6 +432,13 @@ let Tools = Object.assign({}, {
     }
     return _c(fn.length, [])
   },
+  map: curry((f, arr) => arr.map(f)),
+  filter: curry((f, arr) => arr.filter(f)),
+  reduce: curry((f, val, arr) => arr.reduce(f, val)),
+  paging: curry(function(pageSize, f, arr) {
+    const totalPage = (arr.length / pageSize >>> 0) + 1 // 页数
+    return new Array(totalPage).fill(0).map(f)
+  }),
   randomMin2Max: function(min, max) {
     return Math.floor(Math.random() * (max - min) + min)
   }

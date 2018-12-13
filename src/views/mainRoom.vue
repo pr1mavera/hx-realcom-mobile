@@ -11,6 +11,7 @@
     </keep-alive>
     <videoBar class="video-bar"
       v-if="isVideoBarOpen"
+      @showGiftAnime="showGiftAnime"
     ></videoBar>
     <!-- @showShare="toShare" -->
     <!-- <share-dialog
@@ -271,7 +272,7 @@ export default {
     margin: auto;
     width: 100%;
     height: 100%;
-    z-index: 10;
+    z-index: 200;
     // background-color: rgba(0, 0, 0, 0.2);
     img {
       width: 100%;

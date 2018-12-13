@@ -31,6 +31,11 @@
                 ></component>
               </keep-alive>
             </li>
+            <li class="chat-content-li text-center history-block" v-if="historyMsgs.length !== 0">
+              <span class="item line border-1px-before"></span>
+              <span class="item text">以上为历史消息</span>
+              <span class="item line border-1px-before"></span>
+            </li>
             <li class="chat-content-li"
               v-for="(msg, index) in this.msgs"
               :key="`cur-${index}`"
@@ -230,9 +235,11 @@ export default {
     }
   },
   mounted() {
-    // 初始化滚动
     this.$nextTick(() => {
+      document.getElementById('app').style.display = 'block'
+      document.getElementById('appLoading').style.display = 'none'
       this.inputEle = this.$refs.inputBar.$refs.inputContent
+      // 初始化滚动
       this._initScroll()
       this._initPullDownRefresh()
       this.login()
@@ -260,7 +267,7 @@ export default {
       const reConnectStatus = await this.getCurServStatus()
 
       // 若无缓存则清空当前缓存
-      !reConnectStatus && Tools.CacheTools.removeCacheData('curServInfo')
+      !reConnectStatus && Tools.CacheTools.removeCacheData(`${this.userInfo.origin}_curServInfo`)
 
       // 若无重连，则 action 创建会话
       !reConnectStatus && this.initSession()
@@ -268,17 +275,26 @@ export default {
       // 获取机器人基本信息，及配置机器人欢迎语
       const { botInfo, welcomeMsg } = await this.getBotBaseInfo(query.openId, userInfo.userId)
       this.setBotInfo(botInfo)
-      !reConnectStatus && this.setMsgs(welcomeMsg)
+      !reConnectStatus && this.sendMsgs(welcomeMsg)
 
       // IM 初始化
       this.initIM(userInfo)
 
       // 获取当日会话列表
-      this.requestSessionList(userInfo.userId)
+      // this.requestSessionList(userInfo.userId)
+
+      // 漫游消息初始化分页
+      const origin = this.$route.query.origin || 'WE'
+      await this.saveRoamMsgs(origin)
+      // 加载一次缓存消息消息
+      this.requestMsgsMixin()
+
+      this.chatScroll.refresh()
+      this.chatScroll.scrollToElement(this.$refs.chatContentEnd, 0)
     },
     async getCurServStatus() {
       // 如果有会话未结束，则重连
-      let data = Tools.CacheTools.getCacheData({ key: 'curServInfo', check: this.userInfo.userId, quality: TIME_5_MIN })
+      let data = Tools.CacheTools.getCacheData({ key: `${this.userInfo.origin}_curServInfo`, check: this.userInfo.userId, quality: TIME_5_MIN })
       if (!data) {
         // 当前无缓存
         return false
@@ -308,8 +324,6 @@ export default {
       data.sessionId && this.setSessionId(data.sessionId)
       // 设置chatGuid
       data.chatGuid && this.setChatGuid(data.chatGuid)
-      // 设置msgs
-      this.setMsgs(data.msgs)
       // 滑动到最底部
       await Tools.AsyncTools.sleep(30)
       this.chatScroll.refresh()
@@ -447,19 +461,7 @@ export default {
       })
     },
     pullingDown() {
-      return new Promise((resolve) => {
-        if (!this.historyMsgs.length) {
-          // const tip = {
-          //   content: '以上为历史消息',
-          //   time: '2018-03-28 15:23:14',
-          //   msgStatus: msgStatus.tip,
-          //   msgType: tipTypes.tip_normal
-          // }
-          // this.historyMsgs.push(tip)
-        }
-        this.requestMsgsMixin()
-        resolve()
-      })
+      this.requestMsgsMixin()
     },
     _reboundPullDown() {
       const stopTime = 600
@@ -537,26 +539,16 @@ export default {
       text = text.replace(/<\/?.+?>/g, '').replace(/&nbsp;/g, '')
       if (text && text.trim()) {
         // this.roomMode === roomStatus.AIChat ? await this.sendTextMsgToBot(text) : await this.sendC2CMsgs(text)
-        switch (this.roomMode) {
-          case roomStatus.AIChat:
-            await this.sendTextMsgToBot(text)
-            if (!this.isBotAssessShow) {
-              this.isBotAssessShow = true
-            }
-            break
-          case roomStatus.menChat:
-            await this.sendC2CMsgs(text)
-            if (this.isBotAssessShow) {
-              this.isBotAssessShow = false
-            }
-            break
-          case roomStatus.videoChat:
-            // this.sendTextMsg(text)
-            await this.sendC2CMsgs(text)
-            if (this.isBotAssessShow) {
-              this.isBotAssessShow = false
-            }
-            break
+        if (this.roomMode === roomStatus.AIChat) {
+          await this.sendTextMsgToBot(text)
+          if (!this.isBotAssessShow) {
+            this.isBotAssessShow = true
+          }
+        } else {
+          await this.sendC2CMsgs(text)
+          if (this.isBotAssessShow) {
+            this.isBotAssessShow = false
+          }
         }
       } else {
         this.$vux.alert.show({
@@ -744,12 +736,13 @@ export default {
         this.$vux.toast.text('感谢您的认可！', 'default')
       } else {
         const self = this
-        const ZX_workT = this.userInfo.workTimeInfo.filter(item => item.callType === 'ZX')
-        let workT = {
-          startT: ZX_workT[0].startTime,
-          endT: ZX_workT[0].endTime
-        }
-        if (Tools.DateTools.isWorkTime(workT)) {
+        const ZX_workT = this.userInfo.workTimeInfo.ZX
+        // filter(item => item.callType === 'ZX')
+        // let workT = {
+        //   startT: ZX_workT[0].startTime,
+        //   endT: ZX_workT[0].endTime
+        // }
+        if (Tools.DateTools.isWorkTime(ZX_workT)) {
           this.$vux.confirm.show({
             title: '非常抱歉，没能解决您的问题，小华正在学习中，为了更好地解决您的问题，您可以转接人工客服。',
             confirmText: '转人工',
@@ -770,7 +763,6 @@ export default {
         }
       }
       this.isBotAssessShow = false
-      // this.sendMsgs(ques)
     },
     async onLineCancelQueue(id) {
       await this.cancelQueue()
@@ -785,7 +777,6 @@ export default {
       setSessionId: 'SET_SESSION_ID',
       setChatGuid: 'SET_CHAT_GUID',
       setRoomMode: 'SET_ROOM_MODE',
-      setMsgs: 'SET_MSGS',
       setInputBar: 'SET_INPUT_BAR',
       setExtendBar: 'SET_EXTEND_BAR'
     }),
@@ -794,7 +785,8 @@ export default {
       'toggleBar',
       'sendMsgs',
       'deleteTipMsg',
-      'updateLastAction'
+      'updateLastAction',
+      'saveRoamMsgs'
     ]),
     // 若ios用户 不在微信内置浏览器中打开该页面 则需要拉取漫游信息
     async getRoamMessage() {
@@ -826,13 +818,13 @@ export default {
     msgs() {
       this.$nextTick(async() => {
         // 若当前为在线服务，则更新缓存
-        if (this.roomMode === roomStatus.menChat) {
-          Tools.CacheTools.updateCacheData({
-            key: 'curServInfo',
-            msgs: this.msgs,
-            timestamp: new Date().getTime()
-          })
-        }
+        // if (this.roomMode === roomStatus.menChat) {
+        //   Tools.CacheTools.updateCacheData({
+        //     key: 'curServInfo',
+        //     msgs: this.msgs,
+        //     timestamp: new Date().getTime()
+        //   })
+        // }
         await Tools.AsyncTools.sleep(30)
         this.chatScroll.refresh()
         this.chatScroll.scrollToElement(this.$refs.chatContentEnd, 400)
@@ -878,7 +870,7 @@ export default {
       overflow: hidden;
       // background-color: @bg-normal;
       flex: 1;
-      background-image: url('/video/static/img/chat/chatBG.png');
+      background-image: url('/video/static/img/chat/bg.jpg');
       background-size: cover;
       // background-color: #000;
       // flex-basis: auto;
@@ -905,6 +897,25 @@ export default {
             width: 100%;
             &.text-center {
               text-align: center;
+            }
+            &.history-block {
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              padding-bottom: 2rem;
+              .item {
+                display: inline-block;
+                &.line {
+                  width: 20%;
+                  .border-1px-before(@label-line-normal);
+                }
+                &.text {
+                  font-size: 1.2rem;
+                  padding: 0 1.2rem;
+                  line-height: 1.2rem;
+                  color: @label-line-normal;
+                }
+              }
             }
           }
         }

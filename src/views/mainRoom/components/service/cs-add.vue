@@ -282,7 +282,7 @@ export default {
       this.resetCurLabelInfo()
       this.addDis = false // 此时‘添加’按钮可以重新点击
       this.$vux.toast.text('您已成功添加专属客服', 'default')
-      await Tools.AsyncTools.sleep(2000)
+      // await Tools.AsyncTools.sleep(2000)
       this.$router.back(-1)
       return 0
     },
@@ -397,7 +397,7 @@ export default {
   height: 100%;
   overflow: hidden;
   background-color: @bg-light-shadow;
-  background-image: url('/video/static/img/service/cs-add-bg.png');
+  background-image: url('/video/static/img/bg.jpg');
   background-size: cover;
   .cs-label-wrapper{
     width: 100%;
