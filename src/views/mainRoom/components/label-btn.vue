@@ -22,7 +22,7 @@
                     :key="index"
                     :value="item"
       >{{item.labelName}} {{item.labelCount}}</checker-item>
-      <a class="btn btn-more" v-if="showMoreBtn" @click="showMore">更多···</a>
+      <!--<a class="btn btn-more" v-if="showMoreBtn" @click="showMore">更多···</a>-->
     </checker>
     <!-- 当没有标签的情况 -->
     <div class="label-none" v-if="btnList.length === 0">
@@ -200,11 +200,6 @@
         // debugger
         this.$emit('seledLabels', this.selTags)
         // console.log('你选中了这一个选项' + JSON.stringify(this.selTags))
-      },
-
-      // 点击更多，查看更多
-      showMore() {
-        alert('查看更多标签')
       }
     }
   }
@@ -218,19 +213,13 @@
     color: #FF959C;
     padding: .6rem 0.8rem;
     margin: 1rem 0.5rem;
-    border-radius: 2rem;
+    border-radius: 5px;
     border: 1px solid #FF959C;
   }
   /*选中之后的状态*/
   .tags-selected {
     color: #ffffff;
     background: #fe959c;
-  }
-  .btn {
-    color: #FF959C;
-    padding: .6rem 0.8rem;
-    border: 1px solid #FF959C;
-    border-radius: 2rem;
   }
   .label-none {
     display: flex;
