@@ -62,10 +62,10 @@
         </div>
         <fload-button
           ref="floadButton"
-          :barStatus="this.inputBarOpen || this.extendBarOpen"
-          @enterVideoLineUp="confirmToLineUp"
+          :barStatus="inputBarOpen || extendBarOpen"
           @enterOnLineLineUp="enterOnLineLineUp"
         ></fload-button>
+        <!-- @enterVideoLineUp="confirmToLineUp" -->
         <transition name="fade" mode="out-in">
           <float-bot-assess
             v-if="isBotAssessShow"
@@ -75,8 +75,9 @@
       </div>
       <input-bar
         ref="inputBar"
-        :isFocus="this.inputBarOpen"
-        :class="{'inputFocus': this.inputBarOpen}"
+        :isFocus="inputBarOpen"
+        :expressBarShow="$refs.extendBar && $refs.extendBar.expressSectionShow"
+        :class="{'inputFocus': inputBarOpen}"
         @targetInputBuffer="targetInputBuffer"
         @chatInputChange="chatInputChange"
         @chatInputCommit="chatInputCommit"
@@ -114,10 +115,9 @@ import InputBar from '@/views/mainRoom/components/chat/input-bar'
 import Tools from '@/common/js/tools'
 // import { formatDate } from '@/common/js/dateConfig.js'
 import { loginMixin, IMMixin, sendMsgsMixin, getMsgsMixin, onLineQueueMixin } from '@/common/js/mixin'
-import { beforeEnterVideo } from '@/common/js/beforeEnterVideo'
 // eslint-disable-next-line
 import { TIME_5_MIN, roomStatus, queueStatus, sessionStatus, toggleBarStatus, msgStatus, msgTypes, tipTypes, dialogTypes, cardTypes } from '@/common/js/status'
-import { ERR_OK, getSessionStatus, syncGroupC2CMsg } from '@/server/index.js'
+import { ERR_OK, getSessionStatus } from '@/server/index.js'
 import { Previewer, TransferDom } from 'vux'
 
 export default {
@@ -235,15 +235,16 @@ export default {
     }
   },
   mounted() {
-    this.$nextTick(() => {
+    this.$nextTick(async() => {
       document.getElementById('app').style.display = 'block'
       document.getElementById('appLoading').style.display = 'none'
       this.inputEle = this.$refs.inputBar.$refs.inputContent
       // 初始化滚动
       this._initScroll()
       this._initPullDownRefresh()
-      this.login()
-      beforeEnterVideo()
+      await this._initChat()
+      this.chatScroll.refresh()
+      this.chatScroll.scrollToElement(this.$refs.chatContentEnd, 0)
     })
   },
   activated() {
@@ -252,45 +253,49 @@ export default {
     })
   },
   methods: {
-    async login() {
+    async _initChat() {
       const query = this.$route.query
+
+      // 漫游消息初始化分页
+      await this.saveRoamMsgs(query.origin || 'WE')
+      // 加载一次缓存消息消息
+      this.requestMsgsMixin()
+
+      // 初始化时当前房间状态为视频，则跳出
+      if (this.roomMode === roomStatus.videoChat) return
 
       // 通过 openId 获取用户基本信息
       const baseInfo = await this.getUserBaseInfo(query.openId, query.origin)
       // 通过 userId 获取用户签名
       const userSig = await this.getUserSig(query.openId, baseInfo.userId)
       // 封装用户基本信息进 vuex
-      const userInfo = Object.assign({}, baseInfo, userSig)
+      const userInfo = Object.assign(baseInfo, userSig)
       this.setUserInfo(userInfo)
+
+      // 获取机器人基本信息，及配置机器人欢迎语
+      const { botInfo, welcomeMsg } = await this.getBotBaseInfo(query.openId, this.userInfo.userId)
+      this.setBotInfo(botInfo)
 
       // 判断是否重连
       const reConnectStatus = await this.getCurServStatus()
 
-      // 若无缓存则清空当前缓存
-      !reConnectStatus && Tools.CacheTools.removeCacheData(`${this.userInfo.origin}_curServInfo`)
-
-      // 若无重连，则 action 创建会话
-      !reConnectStatus && this.initSession()
-
-      // 获取机器人基本信息，及配置机器人欢迎语
-      const { botInfo, welcomeMsg } = await this.getBotBaseInfo(query.openId, userInfo.userId)
-      this.setBotInfo(botInfo)
-      !reConnectStatus && this.sendMsgs(welcomeMsg)
+      if (!reConnectStatus) { // 当前无在线服务，或服务过期，不重连
+        // 若无缓存则清空当前缓存
+        Tools.CacheTools.removeCacheData(`${this.userInfo.origin}_curServInfo`)
+        // 若无重连，则 action 创建会话
+        this.initSession()
+        // 若无重连，则 配置机器人欢迎语
+        await this.sendMsgs(welcomeMsg)
+      } else {
+        await this.reConnect(reConnectStatus)
+      }
 
       // IM 初始化
       this.initIM(userInfo)
 
       // 获取当日会话列表
       // this.requestSessionList(userInfo.userId)
-
-      // 漫游消息初始化分页
-      const origin = this.$route.query.origin || 'WE'
-      await this.saveRoamMsgs(origin)
-      // 加载一次缓存消息消息
-      this.requestMsgsMixin()
-
-      this.chatScroll.refresh()
-      this.chatScroll.scrollToElement(this.$refs.chatContentEnd, 0)
+      return 0
     },
     async getCurServStatus() {
       // 如果有会话未结束，则重连
@@ -301,14 +306,7 @@ export default {
       }
       const res = await getSessionStatus(data.sessionId)
       if (res.result.code === ERR_OK) {
-        if (Boolean(res.data.status) === false) {
-          // 当前会话已结束
-          return false
-        } else {
-          // 重连
-          await this.reConnect(data)
-          return true
-        }
+        return res.data.status === 'true' ? data : false
       } else {
         // 调用会话是否结束接口失败
         console.log('================> 调用会话是否结束接口失败 <================')
@@ -324,10 +322,7 @@ export default {
       data.sessionId && this.setSessionId(data.sessionId)
       // 设置chatGuid
       data.chatGuid && this.setChatGuid(data.chatGuid)
-      // 滑动到最底部
-      await Tools.AsyncTools.sleep(30)
-      this.chatScroll.refresh()
-      this.chatScroll.scrollToElement(this.$refs.chatContentEnd, 400)
+
       this.$vux.toast.text('重连成功', 'default')
       // 手动更新用户最后活动时间（更新定时器）
       this.updateLastAction()
@@ -629,58 +624,26 @@ export default {
       this.inputEle.innerHTML += code
       this.$refs.inputBar.inputText += code
     },
-    confirmToLineUp() {
-      const enterVideoStatus = window.sessionStorage.getItem('enterVideoStatus')
-      switch (enterVideoStatus) {
-        case 'safari':
-          // 正常进入专属客服
-          this.$router.push('/room/cusServ/list')
-          break
-        case 'Android':
-          // 正常进入专属客服
-          this.$router.push('/room/cusServ/list')
-          break
-        case 'ios-guide':
-          // 当前为iOS的微信环境，需跳转至Safari
-          this.$emit('showIosGuide')
-          break
-        case 'low-version':
-          // 当前系统版本过低
-          this.$emit('showLowVersion')
-          break
-      }
-    },
-    // _reloadChatContentHeight() {
-    //   const self = this
-    //   let config = {
-    //     attributes: true,
-    //     attributeFilter: ['height'],
-    //     childList: true,
-    //     subtree: true
+    // confirmToLineUp() {
+    //   const enterVideoStatus = window.sessionStorage.getItem('enterVideoStatus')
+    //   switch (enterVideoStatus) {
+    //     case 'safari':
+    //       // 正常进入专属客服
+    //       this.$router.push('/room/cusServ/list')
+    //       break
+    //     case 'Android':
+    //       // 正常进入专属客服
+    //       this.$router.push('/room/cusServ/list')
+    //       break
+    //     case 'ios-guide':
+    //       // 当前为iOS的微信环境，需跳转至Safari
+    //       this.$emit('showIosGuide')
+    //       break
+    //     case 'low-version':
+    //       // 当前系统版本过低
+    //       this.$emit('showLowVersion')
+    //       break
     //   }
-    //   const mutationCallback = (mutationsList) => {
-    //     for (let mutation of mutationsList) {
-    //       let type = mutation.type
-    //       switch (type) {
-    //       case 'childList':
-    //         console.log('A child node has been added or removed.')
-    //         break
-    //       case 'attributes':
-    //         console.log(`The ${mutation.attributeName} attribute was modified.`)
-    //         self.chatScroll.refresh()
-    //         break
-    //       case 'subtree':
-    //         console.log(`The subtree was modified.`)
-    //         break
-    //       default:
-    //         break
-    //       }
-    //     }
-    //   }
-    //
-    //   let observer = new MutationObserver(mutationCallback)
-    //   observer.observe(document.querySelector(`.chat-wrapper`), config)
-    //   this.inputObserver = observer
     // },
     _resolveKeyboard() {
       const device = sessionStorage.getItem('device')
@@ -787,32 +750,7 @@ export default {
       'deleteTipMsg',
       'updateLastAction',
       'saveRoamMsgs'
-    ]),
-    // 若ios用户 不在微信内置浏览器中打开该页面 则需要拉取漫游信息
-    async getRoamMessage() {
-      const device = sessionStorage.getItem('device')
-      const browser = sessionStorage.getItem('browser')
-
-      if (device === 'iPhone' && browser === 'safari') {
-        // const groupID = '12345678'
-        const groupID = this.$route.query.groupId
-        const ReqMsgNumber = 2
-        let data = {
-          groupID,
-          msgNum: ReqMsgNumber
-        }
-        const res = await syncGroupC2CMsg(data)
-        // debugger
-        if (res.code === ERR_OK) {
-          const roamMsgList = res.data.RspMsgList
-          for (var i in roamMsgList) {
-            console.log('漫游消息：' + i + JSON.stringify(roamMsgList[i].MsgBody))
-          }
-        } else {
-          console.log('error:' + res)
-        }
-      }
-    }
+    ])
   },
   watch: {
     msgs() {
@@ -872,6 +810,7 @@ export default {
       flex: 1;
       background-image: url('/video/static/img/chat/bg.jpg');
       background-size: cover;
+      background-position: center;
       // background-color: #000;
       // flex-basis: auto;
       // flex-shrink: 1;

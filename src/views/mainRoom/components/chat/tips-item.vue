@@ -68,6 +68,7 @@ export default {
     color: @text-lighter;
     font-size: 1.2rem;
     height: 1.2rem;
+    line-height: 1.8rem;
     .icon {
       width: 1.2rem;
       height: 1.2rem;

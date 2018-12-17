@@ -17,11 +17,11 @@
 </template>
 
 <script type="text/ecmascript-6">
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters } from 'vuex'
 import Tools from '@/common/js/tools'
 
 import { getCsStatus } from '@/server/index.js'
-import { roomStatus } from '@/common/js/status'
+// import { roomStatus } from '@/common/js/status'
 
 export default {
   name: 'cus-serv',
@@ -81,11 +81,16 @@ export default {
           })
           break
         case status === 3 || status === 5:
-          this.$router.push({path: `/room/line-up?csId=${this.csSelected.id}&csName=${this.csSelected.nickName}`})
-          this.beforeQueue({
-            mode: roomStatus.videoChat,
-            content: `尊敬的${+this.userInfo.userGrade <= 3 ? this.userInfo.userGradeName : ''}客户，正在为您转接视频客服，请稍后。`
+          this.$emit('requestVideoServer', {
+            csId: this.csSelected.id,
+            csName: this.csSelected.nickName,
+            csNick: this.csSelected.nickName
           })
+          // this.$router.push({path: `/room/line-up?csId=${this.csSelected.id}&csName=${this.csSelected.nickName}`})
+          // this.beforeQueue({
+          //   mode: roomStatus.videoChat,
+          //   content: `尊敬的${+this.userInfo.userGrade <= 3 ? this.userInfo.userGradeName : ''}客户，正在为您转接视频客服，请稍后。`
+          // })
           break
         case status === 4:
           this.$vux.alert.show({
@@ -98,10 +103,7 @@ export default {
           })
           break
       }
-    },
-    ...mapActions([
-      'beforeQueue'
-    ])
+    }
   }
 }
 </script>

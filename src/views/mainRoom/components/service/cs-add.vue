@@ -397,8 +397,9 @@ export default {
   height: 100%;
   overflow: hidden;
   background-color: @bg-light-shadow;
-  background-image: url('/video/static/img/bg.jpg');
+  background-image: url('/video/static/img/chat/bg.jpg');
   background-size: cover;
+  background-position: center;
   .cs-label-wrapper{
     width: 100%;
     height: 44rem;
@@ -501,6 +502,8 @@ export default {
               width: 100%;
               .cs-info-list {
                 width: 100%;
+                height: 1.8rem;
+                line-height: 1.8rem;
                 margin-bottom: .8rem;
                 display: flex;
                 justify-content:space-between;
@@ -511,7 +514,7 @@ export default {
                 .state {
                   width: 1.4rem;
                   height: 1.4rem;
-                  margin-top: 0.3rem;
+                  margin-top: 0.2rem;
                   border-radius: 50%;
                   background-color: @label-line-light;
                   vertical-align: bottom;
@@ -538,6 +541,7 @@ export default {
                     &.cs-label {
                       padding: 0.1rem 0.4rem;
                       box-sizing: border-box;
+                      line-height: 1.4rem;
                       border: 0.1rem solid rgba(255, 149, 156, 1);
                       border-radius: 2.5rem;
                       color: rgba(255, 149, 156, 1);
@@ -615,17 +619,19 @@ export default {
     .btn {
       border-radius: 2rem;
       font-size: 1.4rem;
-      line-height: 4rem;
+      // line-height: 4rem;
       cursor: pointer;
       &.btn-left {
         padding: 0 2rem;
         background-color: #fff;
         color: @text-normal;
+        line-height: 4rem;
         box-shadow: 0 0.5rem 1.2rem 0 rgba(0, 0, 0, .05);
         margin-right: 2rem;
       }
       &.btn-right {
         width: 15rem;
+        margin: 0;
         padding: 0 1.2rem;
         background: linear-gradient(to right, #FF8C6A, #FF80A0);
         color: @text-lighter;
@@ -633,7 +639,6 @@ export default {
         .icon {
           width: 2rem;
           height: 2rem;
-          line-height: 4rem;
           vertical-align: middle;
           fill: @text-lighter;
         }

@@ -2,10 +2,11 @@
   <div class="main-room">
     <keep-alive :include="['chat', 'cus-serv']">
       <router-view class="router-view" id="router-view"
-        @showIosGuide="iosGuide = true"
-        @showLowVersion="lowVersion = true"
         @showGiftAnime="showGiftAnime"
+        @requestVideoServer="requestVideoServer"
       ></router-view>
+      <!-- @showIosGuide="iosGuide = true"
+      @showLowVersion="lowVersion = true" -->
       <!-- @showShare="toShare"
       @showIframe="showIframe" -->
     </keep-alive>
@@ -43,8 +44,10 @@
 <script type="text/ecmascript-6">
 // import wx from 'weixin-js-sdk'
 import { mapGetters, mapMutations, mapActions } from 'vuex'
+import { loginMixin, IMMixin } from '@/common/js/mixin'
 import { roomStatus, sessionStatus } from '@/common/js/status'
 import Tools from '@/common/js/tools'
+import { ERR_OK, saveQueueTicket } from '@/server/index.js'
 // import GoShare from '@/common/js/share'
 // import anime from 'animejs'
 
@@ -58,6 +61,10 @@ export default {
     'Assess': () => import('@/views/mainRoom/components/assess')
     // 'iframeBar': () => import('@/views/mainRoom/components/iframe-bar')
   },
+  mixins: [
+    loginMixin,
+    IMMixin
+  ],
   data() {
     return {
       // share
@@ -88,18 +95,63 @@ export default {
       'roomMode',
       'isAssessView',
       'serverTime',
-      'csInfo'
+      'csInfo',
+      'userInfo',
+      'sessionId'
     ])
   },
-  mounted() {
-    this.$nextTick(() => {
-      // this.initShare()
-      // document.getElementsByTagName('a').addEventListener('click', (e) => {
-      //   debugger
-      // }, false)
-    })
+  created() {
+    this.initRoom()
   },
   methods: {
+    async initRoom() {
+      // const enterVideoStatus = window.sessionStorage.getItem('enterVideoStatus')
+      // if (enterVideoStatus === 'iOS-Safari') { // 当前为iOS的Safari环境
+      //   // 获取基本信息
+      //   // 进入排队
+      //   // this.$router.replace({path: `/room/line-up?csId=${csId}&csName=${csName}`})
+      // } else { // 非Safari环境，进入chat，登录并初始化聊天室
+      //   this.$router.replace({path: `/room/chat?openId=${query.openId}&origin=${query.origin}`})
+      // }
+      // const query = this.$route.query
+      // this.$router.replace({path: `/room/chat?openId=${query.openId}&origin=${query.origin}`})
+    },
+    requestVideoServer({ csId, csName, csNick }) {
+      // this.setSessionTicket({ csId, csName, csNick })
+      const enterVideoStatus = window.sessionStorage.getItem('enterVideoStatus')
+      switch (enterVideoStatus) {
+        case 'low-version': // 版本过低
+          this.lowVersion = true
+          break
+        case 'iOS-wx': // 当前为iOS的微信环境，需跳转至Safari，并保持当次机器人会话信息
+          this.setSessionTicket({ csId, csName, csNick })
+          break
+        case 'iOS-Safari': // 当前为iOS的Safari环境
+          this.$router.push({path: `/room/line-up?csId=${csId}&csName=${csName}`})
+          this.beforeQueue({
+            mode: roomStatus.videoChat,
+            content: `尊敬的${+this.userInfo.userGrade <= 3 ? this.userInfo.userGradeName : ''}客户，正在为您转接视频客服，请稍后。`
+          })
+          break
+        case 'Android': // 当前为Android环境，进入专属客服
+          this.$router.push({path: `/room/line-up?csId=${csId}&csName=${csName}`})
+          this.beforeQueue({
+            mode: roomStatus.videoChat,
+            content: `尊敬的${+this.userInfo.userGrade <= 3 ? this.userInfo.userGradeName : ''}客户，正在为您转接视频客服，请稍后。`
+          })
+          break
+      }
+    },
+    async setSessionTicket({ csId, csName, csNick }) {
+      const res = await saveQueueTicket(csId, csName, csNick, this.userInfo, this.userInfo.openId, this.sessionId)
+      if (res.result.code === ERR_OK) {
+        this.$vux.toast.text('已为您保存咨询信息')
+        await Tools.AsyncTools.sleep(2000)
+        this.iosGuide = true
+      } else {
+        this.$vux.toast.text('咨询失败')
+      }
+    },
     assessSuccess() {
       this.setAssessStatus(true)
       this.setAssessView(false)
@@ -221,10 +273,12 @@ export default {
       this.giftSrc = null
     },
     ...mapMutations({
+      setUserInfo: 'SET_USER_INFO',
       setAssessStatus: 'SET_ASSESS_STATUS',
       setAssessView: 'SET_ASSESS_VIEW'
     }),
     ...mapActions([
+      'beforeQueue',
       'afterServerFinish'
     ])
   }

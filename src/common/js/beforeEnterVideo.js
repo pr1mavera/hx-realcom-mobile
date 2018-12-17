@@ -30,10 +30,10 @@ export function beforeEnterVideo() {
     } else if (device === 'iPhone' && browser === 'wx') {
       // 当前在微信内置浏览器中，弹层提示用户在浏览器中打开,
       // 而且用户此时点击右上角“...”出现的菜单项只有 “在Safari中打开一项”
-      sessionStorage.setItem('enterVideoStatus', 'ios-guide')
+      sessionStorage.setItem('enterVideoStatus', 'iOS-wx')
     } else if (device === 'iPhone' && browser === 'safari') {
       // 进入排队的页面
-      sessionStorage.setItem('enterVideoStatus', 'safari')
+      sessionStorage.setItem('enterVideoStatus', 'iOS-Safari')
     }
   }
 }

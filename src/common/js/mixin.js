@@ -248,16 +248,11 @@ export const RTCRoomMixin = {
       })
       this.RTC.on('onRemoteStreamUpdate', (info) => {
         const videoElement = document.getElementById('remoteVideo')
-        // const videoElementMini = document.getElementById('remoteVideoMini')
         if (info && info.stream) {
           videoElement.srcObject = info.stream
-          // videoElementMini.srcObject = info.stream
           videoElement.autoplay = true
-          // videoElementMini.autoplay = true
           videoElement.playsinline = true
-          // videoElementMini.playsinline = true
           videoElement.play()
-          // videoElementMini.play()
         }
       })
 
@@ -660,6 +655,7 @@ export const IMMixin = {
       setFullScreen: 'SET_FULL_SCREEN'
     }),
     ...mapActions([
+      'saveCurMsgs',
       'sendMsgs',
       'configSendSystemMsg',
       'afterQueueSuccess',
@@ -1106,7 +1102,8 @@ export const getMsgsMixin = {
       // 拉取消息
       // const newMsgs = await this.MsgsLoader.getMsgs()
       if (this.cacheMsgsOver) return
-      const newMsgs = await this.getRoamMsgs({ origin: this.userInfo.origin, page: this.cacheMsgsPage++ })
+      const query = this.$route.query
+      const newMsgs = await this.getRoamMsgs({ origin: query.origin, page: this.cacheMsgsPage++ })
       if (newMsgs && newMsgs.length) {
         const list = this.timeTipsFormat(newMsgs)
         this.historyMsgs = list.concat(this.historyMsgs)

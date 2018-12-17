@@ -15,7 +15,7 @@
       ></video>
       <img width=100% height=100% v-if="videoScreenShotShow" :src="videoScreenShotSrc" class="video-screen-shot">
     </div>
-    <div class="video-window" :class="customer" v-show="fullScreen">
+    <div class="video-window" :class="customer" v-show="fullScreen && !videoScreenShotShow">
       <video height=100%
         id="localVideo"
         v-if="!videoScreenShotShow"
@@ -211,7 +211,7 @@ export default {
       !this.hasAssess && this.setAssessView(true)
     },
     getVideoScreenShot() {
-      return new Promise((resolve) => {
+      return new Promise(resolve => {
         const canvas = document.getElementById('videoCanvas')
         var canvasCtx = canvas.getContext('2d')
         var video = document.getElementById('remoteVideo')
@@ -273,7 +273,7 @@ export default {
       width: 100%;
       height: 100%;
       z-index: 0;
-      // background-color: #666;
+      background-color: #666;
     }
     &.small {
       margin: .5rem .5rem 0 0;
@@ -283,7 +283,7 @@ export default {
       z-index: 200;
       overflow: hidden;
       z-index: 1;
-      // background-color: #222;
+      background-color: #222;
     }
     video {
       position: absolute;
@@ -291,12 +291,12 @@ export default {
       left: 50%;
       transform: translateX(-50%);
       height: 100%;
-      &#remoteVideo {
-        background-color: #666;
-      }
-      &#localVideo {
-        background-color: #222;
-      }
+      // &#remoteVideo {
+      //   background-color: #666;
+      // }
+      // &#localVideo {
+      //   background-color: #222;
+      // }
       &::-webkit-media-controls {
         display:none !important;
       }

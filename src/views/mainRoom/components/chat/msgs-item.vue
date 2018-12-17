@@ -70,7 +70,7 @@
           </span>
           <!-- 礼物消息 -->
           <span class="text gift-item" v-if="msg.msgType === msgTypes.msg_gift">
-            我送给{{this.csInfo.csName || '客服'}}一个{{msg.giftInfo.giftName}} !
+            我送给{{this.csInfo.csNick || '客服'}}一个{{msg.giftInfo.giftName}} !
             <img class="text-gift" :src="`/video/static/img/gift/${msg.giftInfo.giftId}.png`">
           </span>
           <!-- 留言 -->

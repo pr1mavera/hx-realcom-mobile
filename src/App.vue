@@ -10,6 +10,7 @@
 
 <script>
 import deviceConfig from './config/device'
+import { beforeEnterVideo } from '@/common/js/beforeEnterVideo'
 import { stringEx } from './config/extend'
 // const wx = require('@/common/js/wx').wx
 // import { mapGetters, mapMutations } from 'vuex'
@@ -29,6 +30,7 @@ export default {
   // },
   created() {
     deviceConfig()
+    beforeEnterVideo()
     stringEx()
     // wxConfig()
     window.addEventListener('offline', () => {
@@ -67,7 +69,6 @@ export default {
 </script>
 
 <style type="text/css" lang="less">
-
 /*- 引入关闭按钮 -*/
 /*@import '~vux/src/styles/close.less';*/
 
@@ -196,7 +197,8 @@ body {
       .weui-dialog__hd {
         padding: 1.8em 1.6em 0.5em;
         .weui-dialog__title {
-          font-size: 1.6rem;
+          font-size: 1.5rem;
+          line-height: 2rem;
         }
       }
       .weui-dialog__bd {
@@ -206,6 +208,7 @@ body {
         line-height: 44px;
         a {
           color: rgba(33, 150, 243, 1)!important;
+          font-size: 1.5rem;
         }
       }
     }

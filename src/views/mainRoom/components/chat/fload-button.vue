@@ -118,7 +118,8 @@ export default {
 
       switch (this.roomMode) { // 服务中
         case roomStatus.AIChat:
-          this.$emit('enterVideoLineUp')
+          // this.$emit('enterVideoLineUp')
+          this.$router.push('/room/cusServ/list')
           break
         case roomStatus.videoChat:
           this.$vux.alert.show({
@@ -197,7 +198,8 @@ export default {
           this.afterServerFinish(sessionStatus.onLine)
           await Tools.AsyncTools.sleep(2000)
           // 进入专属客服
-          self.$emit('enterVideoLineUp')
+          // self.$emit('enterVideoLineUp')
+          this.$router.push('/room/cusServ/list')
         }
       })
     },

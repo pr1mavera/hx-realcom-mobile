@@ -104,6 +104,7 @@ export const afterQueueSuccess = function({ commit, state }, { mode, msgsObj }) 
       chatType: sessionStatus.onLine
     }
     sendMsgs({ commit, state }, [tip, msg])
+    this.saveCurMsgs({ origin: state.userInfo.origin, msg })
     // action 初始化用户最后响应时间
     updateLastAction({ commit, state })
     // 存本地localstorage
@@ -335,24 +336,64 @@ export const saveRoamMsgs = function({ commit, state }, origin) {
   // 漫游消息分页列表
   const roamTemp = Tools.CacheTools.getCacheData({ key: `${origin}_roam_msgs`, check: origin }) || []
 
+  // const curTemp = [
+  //   {
+  //     msg: '666'
+  //   },
+  //   {
+  //     msg: '777'
+  //   },
+  //   {
+  //     msg: '888'
+  //   },
+  //   {
+  //     msg: '999'
+  //   },
+  //   {
+  //     msg: '000'
+  //   }
+  // ]
+  // const roamTemp = [
+  //   {
+  //     page: 1,
+  //     pageList: [
+  //       {
+  //         msg: '111'
+  //       },
+  //       {
+  //         msg: '222'
+  //       },
+  //       {
+  //         msg: '333'
+  //       }
+  //     ]
+  //   },
+  //   {
+  //     page: 2,
+  //     pageList: [
+  //       {
+  //         msg: '444'
+  //       },
+  //       {
+  //         msg: '555'
+  //       }
+  //     ]
+  //   }
+  // ]
+
   // 还原分页
   const list = Tools.reduce((val, item) => val.concat(item.pageList), [])(roamTemp)
-  // let list = []
-  // roamTemp.forEach(item => {
-  //   list = list.concat(item.pageList)
-  // })
 
   // 合并
   const roam = list.concat(curTemp)
 
   // 分页方式（map的回调）
-  const mode = (item, i, arr) => {
+  const getPage = Tools.paging((item, i, arr) => {
     return {
       page: arr.length - i,
       pageList: roam.slice(i * MSG_PAGE_SIZE, (i + 1) * MSG_PAGE_SIZE)
     }
-  }
-  const getPage = Tools.paging(MSG_PAGE_SIZE, mode)
+  }, MSG_PAGE_SIZE)
   const roamList = getPage(roam)
   // 存贮
   Tools.CacheTools.setCacheData({ key: `${origin}_roam_msgs`, check: origin, data: roamList })
