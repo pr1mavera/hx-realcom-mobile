@@ -9,7 +9,7 @@
     </span>
     <div class="container-main">
       <a class="avatar">
-        <img v-lazy="avatarImgSrc" :key="avatarImgSrc">
+        <img v-lazy="avatarImgSrc" :key="avatarImgSrc" @click="enterSerCenter">
       </a>
       <!-- @click="enterSerCenter" -->
       <div class="info">

@@ -436,7 +436,7 @@ let Tools = Object.assign({}, {
   filter: curry((f, arr) => arr.filter(f)),
   reduce: curry((f, val, arr) => arr.reduce(f, val)),
   paging: curry(function(pageSize, f, arr) {
-    const totalPage = (arr.length / pageSize >>> 0) + 1 // 页数
+    const totalPage = Math.ceil(arr.length / pageSize) // 页数
     return new Array(totalPage).fill(0).map(f)
   }),
   randomMin2Max: function(min, max) {
