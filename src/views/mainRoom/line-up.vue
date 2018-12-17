@@ -3,7 +3,7 @@
     <!--<div class="top"></div>-->
     <main class="main">
       <div class="img-box">
-          <img src="/video/static/img/lineing.png">
+          <img src="/video/static/img/lineing.gif">
         </div>
       <div class="tips">
         <p class="tips-top" v-if="isQueuingTextShow">当前还有<label class="num">{{this.queueNum}}</label>人排队.</p>
@@ -200,18 +200,16 @@ export default {
     .main {
       padding: 10rem 0 0;
       .img-box {
-        width: 11rem;
-        height: 11rem;
+        width: 15.3rem;
+        /*height: 15.3rem;*/
         margin: 0 auto;
         line-height: 11rem;
         text-align: center;
-        border-radius: 50%;
-        background-color: #D7DCE3;
         img {
-          width: 5rem;
+          width: 100%;
           vertical-align: middle;
-          animation: waiting 30s;
-          animation-timing-function: ease-in;
+          /*animation: waiting 30s;*/
+          /*animation-timing-function: ease-in;*/
         }
       }
       .tips {
@@ -245,14 +243,14 @@ export default {
         background: linear-gradient(to right, #FF8C6A, #FF80A0);
       }
       /*animation*/
-      @keyframes waiting {
+/*      @keyframes waiting {
         0% {
           transform: rotate(0deg);
         }
         100% {
           transform: rotate(7200deg);
         }
-      }
+      }*/
     }
   }
 </style>
