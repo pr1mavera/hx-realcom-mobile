@@ -64,6 +64,7 @@
           ref="floadButton"
           :barStatus="inputBarOpen || extendBarOpen"
           @enterOnLineLineUp="enterOnLineLineUp"
+          @onLineCancelQueue="onLineCancelQueue"
         ></fload-button>
         <!-- @enterVideoLineUp="confirmToLineUp" -->
         <transition name="fade" mode="out-in">
@@ -220,7 +221,6 @@ export default {
       pullDownStyle: '',
       bubbleY: 0,
       /* pull-down-load  over */
-      sessionList: [],
       curPreviewImgId: '',
       isCopyButtonShow: false,
       copyTextTemp: '',
@@ -236,8 +236,6 @@ export default {
   },
   mounted() {
     this.$nextTick(async() => {
-      document.getElementById('app').style.display = 'block'
-      document.getElementById('appLoading').style.display = 'none'
       this.inputEle = this.$refs.inputBar.$refs.inputContent
       // 初始化滚动
       this._initScroll()
@@ -293,8 +291,6 @@ export default {
       // IM 初始化
       this.initIM(userInfo)
 
-      // 获取当日会话列表
-      // this.requestSessionList(userInfo.userId)
       return 0
     },
     async getCurServStatus() {
@@ -727,7 +723,7 @@ export default {
       }
       this.isBotAssessShow = false
     },
-    async onLineCancelQueue(id) {
+    async onLineCancelQueue() {
       await this.cancelQueue()
       // action 删除msgs中排队状态的tips
       this.deleteTipMsg()

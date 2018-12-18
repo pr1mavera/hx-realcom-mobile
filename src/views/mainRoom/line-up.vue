@@ -47,68 +47,29 @@ export default {
       heartBeatFailCount: 0 // 心跳包超时失败次数
     }
   },
-  async mounted() {
-    this.setQueueMode({
-      mode: roomStatus.AIChat,
-      status: queueStatus.queuing
-    })
-    const res = await this.initQueue()
-    if (+res.queueNum === 0) {
-      // 当前队列无人排队，直接推送排队成功的消息给坐席
-      this.isQueuingTextShow = false
-      const msg = {
-        code: systemMsgStatus.VIDEO_REQUEST_CS_ENTENCE,
-        csId: this.$route.query.csId,
-        csName: this.$route.query.csName,
-        accessId: res.accessId,
-        startTime: res.startTime,
-        endTime: res.endTime
-      }
-      const config = await this.configSendSystemMsg(msg)
-      await IM.sendSystemMsg(config)
-
-      // 客服转接定时器
-      const VIDEO_CS_REQ_TRANS_FAIL_msg = {
-        code: systemMsgStatus.VIDEO_CS_REQ_TRANS_FAIL,
-        csId: msg.csId
-      }
-      this.reqTransTimeout({
-        msg: VIDEO_CS_REQ_TRANS_FAIL_msg,
-        toast: this.$vux.toast,
-        delay: 30000
-      }).then(() => {
-        if (this.$route.query.goindex === 'true') {
-          this.$router.push('/')
-        } else {
-          this.$router.back(-1)
-        }
-        this.afterQueueFailed()
-      })
-    } else {
-      this.setQueueNum(+res.queueNum)
-    }
-    // 开启心跳
-    this.startHeartBeat()
+  mounted() {
+    this.initQueue()
   },
   methods: {
     async initQueue() {
-      // const data = {
-      //   userId: this.userInfo.userId,
-      //   userName: this.userInfo.userName,
-      //   csId: this.$route.query.csId,
-      //   csName: this.$route.query.csName,
-      //   nickName: this.userInfo.userName,
-      //   toCsFlag: true,
-      //   origin: this.userInfo.origin || 'WE',
-      //   userPriority: this.userInfo.userPriority,
-      //   robotSessionId: this.sessionId
-      // }
+      /* map -> {
+        userId,
+        userName,
+        csId,
+        csName,
+        nickName,
+        toCsFlag,
+        origin,
+        userPriority,
+        robotSessionId
+      } */
+      const query = this.$route.query
       const res = await videoQueue(
         this.userInfo.userId,
         this.userInfo.userName,
-        this.$route.query.csId,
-        this.$route.query.csName,
-        this.userInfo.userName,
+        query.csId,
+        query.csName,
+        this.userInfo.nickName,
         true,
         this.userInfo.origin || 'WE',
         this.userInfo.userPriority,
@@ -116,23 +77,67 @@ export default {
       )
       if (res.result.code === ERR_OK) {
         console.log('===============================> 排队啊 排队啊 排队啊 <===============================')
+        this.setQueueMode({
+          mode: roomStatus.AIChat,
+          status: queueStatus.queuing
+        })
+        // 记录排队开始时间
         window.sessionStorage.setItem('queue_start_time', new Date().getTime())
-        this.accessId = res.data.accessId
-        return res.data
+
+        const data = res.data
+        // 记录accessId
+        this.accessId = data.accessId
+        if (+data.queueNum === 0) {
+          // 当前队列无人排队，直接推送排队成功的消息给坐席
+          this.isQueuingTextShow = false
+          const msg = {
+            code: systemMsgStatus.VIDEO_REQUEST_CS_ENTENCE,
+            csId: query.csId,
+            csName: query.csName,
+            accessId: data.accessId,
+            startTime: data.startTime,
+            endTime: data.endTime
+          }
+          const config = await this.configSendSystemMsg(msg)
+          await IM.sendSystemMsg(config)
+
+          // 客服转接定时器
+          const VIDEO_CS_REQ_TRANS_FAIL_msg = {
+            code: systemMsgStatus.VIDEO_CS_REQ_TRANS_FAIL,
+            csId: msg.csId
+          }
+          this.reqTransTimeout({
+            msg: VIDEO_CS_REQ_TRANS_FAIL_msg,
+            toast: this.$vux.toast,
+            delay: 30000
+          }).then(() => {
+            if (this.$route.query.goindex === 'true') {
+              this.$router.push('/')
+            } else {
+              this.$router.back(-1)
+            }
+            this.afterQueueFailed()
+          })
+        } else {
+          this.setQueueNum(+data.queueNum)
+        }
+        // 开启心跳
+        this.startHeartBeat()
       } else {
         console.log('error in videoQueue')
       }
     },
     startHeartBeat() {
       this.heart = true
+      const query = this.$route.query
       this.heartBeatTimer = setInterval(async() => {
         console.warn('====== 我现在请求心跳 ======')
-        if (!this.heart || !this.$route.query.csId) {
+        if (!this.heart || !query.csId) {
           // 非常规退出 & 浏览器回退
           this.stopHeartBeat()
           return
         }
-        this.heartBeatReq = await videoQueueHeartBeat(this.$route.query.csId, this.userInfo.userId)
+        this.heartBeatReq = await videoQueueHeartBeat(query.csId, this.userInfo.userId)
         if (this.heartBeatReq.code === ERR_OK) {
           console.info('心跳成功')
           this.heartBeatFailCount = 0
@@ -152,19 +157,15 @@ export default {
       }
     },
     async clickToCancelLineUp() {
+      const query = this.$route.query
       // 停止心跳
       this.stopHeartBeat()
       // 取消排队
-      const res = await videoQueueCancel(this.userInfo.userId, this.$route.query.csId, this.accessId)
+      const res = await videoQueueCancel(this.userInfo.userId, query.csId, this.accessId)
       if (res.result.code === ERR_OK) {
         console.log('===============================> 取消排队 啊 取消排队 <===============================')
-        debugger
-        if (this.$route.query.goindex === 'true') {
-          debugger
-          this.$router.push('/')
-        } else {
-          this.$router.back(-1)
-        }
+        this.$vux.toast.text('取消排队')
+        this.$emit('cancelVideoLineUp')
       } else {
         console.log('error in videoQueueCancel')
       }

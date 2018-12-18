@@ -40,6 +40,7 @@ module.exports = {
     'vue/no-parsing-error': [2, { 'invalid-first-character-of-tag-name': false, 'x-invalid-end-tag': false }],
     'camelcase': 0,
     'no-extend-native': ['error', { 'exceptions': ['Object', 'String'] }],
+    'brace-style': 0,
     'no-cond-assign': 0
   }
 }

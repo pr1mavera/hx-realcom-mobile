@@ -283,7 +283,7 @@ export default {
       this.addDis = false // 此时‘添加’按钮可以重新点击
       this.$vux.toast.text('您已成功添加专属客服', 'default')
       // await Tools.AsyncTools.sleep(2000)
-      this.$router.back(-1)
+      this.$router.push('/room/cusServ/list')
       return 0
     },
     switchCS() {
@@ -539,7 +539,7 @@ export default {
                       color: #56de47;
                     }
                     &.cs-label {
-                      padding: 0.1rem 0.4rem;
+                      padding: 0.1rem 0.3rem;
                       box-sizing: border-box;
                       line-height: 1.4rem;
                       border: 0.1rem solid rgba(255, 149, 156, 1);

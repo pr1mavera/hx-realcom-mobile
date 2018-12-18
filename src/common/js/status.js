@@ -1,3 +1,4 @@
+export const TIME_3_MIN = 1000 * 60 * 3 // 3分钟
 export const TIME_5_MIN = 1000 * 60 * 5 // 5分钟
 export const TIME_24_HOURS = 1000 * 60 * 60 * 24 // 24小时
 export const MSG_PAGE_SIZE = 10 // 漫游消息分页页数

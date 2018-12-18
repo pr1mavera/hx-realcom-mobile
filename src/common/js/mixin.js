@@ -460,6 +460,8 @@ export const IMMixin = {
         // 客户端排队成功（视频）
         case systemMsgStatus.VIDEO_QUEUES_SUCCESS:
           this.isQueuingTextShow = false
+          // 停止心跳
+          this.stopHeartBeat()
           const videoQueueSuccMsg = {
             code: systemMsgStatus.VIDEO_REQUEST_CS_ENTENCE,
             csId: this.$route.query.csId,
@@ -520,9 +522,8 @@ export const IMMixin = {
             status: queueStatus.queueSuccess
           })
           // 延迟三秒显示
-          Tools.AsyncTools.sleep(3000)
-          // 停止心跳
-          this.stopHeartBeat()
+          Tools.AsyncTools.sleep(4000)
+
           this.$router.replace({path: `/room/chat?openId=${this.userInfo.openId}&origin=${this.userInfo.origin}`})
           this.afterQueueSuccess({
             mode: roomStatus.videoChat,
@@ -1038,12 +1039,12 @@ export const sendMsgsMixin = {
 export const getMsgsMixin = {
   computed: {
     ...mapGetters([
-      'userInfo'
+      'userInfo',
+      'sessionList'
     ])
   },
   data() {
     return {
-      sessionList: [],
       historyMsgs: [],
       pulldownResult: '加载历史消息成功',
       MsgsLoader: null,
@@ -1057,7 +1058,7 @@ export const getMsgsMixin = {
       const res = await getSessionList(userId)
       if (res.result.code === ERR_OK) {
         console.log('============================= 我现在来请求 会话列表 辣 =============================')
-        this.sessionList = res.data.sessionList
+        this.setSessionList(res.data.sessionList.length ? res.data.sessionList : [])
       } else {
         console.log('error in getHistoryMsgs')
       }
@@ -1097,13 +1098,18 @@ export const getMsgsMixin = {
     },
     /* 拉取消息（漫游消息，历史消息） */
     async requestMsgsMixin() {
-      // 初始化
-      // !this.MsgsLoader && this.initMsgLoader()
-      // 拉取消息
-      // const newMsgs = await this.MsgsLoader.getMsgs()
-      if (this.cacheMsgsOver) return
-      const query = this.$route.query
-      const newMsgs = await this.getRoamMsgs({ origin: query.origin, page: this.cacheMsgsPage++ })
+      let newMsgs = []
+      if (this.sessionList === null) {
+        if (this.cacheMsgsOver) return
+        newMsgs = await this.getRoamMsgs({ origin: this.$route.query.origin || 'WE', page: this.cacheMsgsPage++ })
+        debugger
+      } else {
+        // 初始化
+        !this.MsgsLoader && this.initMsgLoader()
+        // 拉取消息
+        newMsgs = await this.MsgsLoader.getMsgs()
+      }
+
       if (newMsgs && newMsgs.length) {
         const list = this.timeTipsFormat(newMsgs)
         this.historyMsgs = list.concat(this.historyMsgs)
@@ -1143,6 +1149,9 @@ export const getMsgsMixin = {
         console.log('error in requestHistoryMsgs')
       }
     },
+    ...mapMutations({
+      setSessionList: 'SET_SESSION_LIST'
+    }),
     /* Action */
     ...mapActions([
       'getRoamMsgs'

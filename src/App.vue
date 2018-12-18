@@ -71,7 +71,10 @@ export default {
 <style type="text/css" lang="less">
 /*- 引入关闭按钮 -*/
 /*@import '~vux/src/styles/close.less';*/
-
+/** env = windows **/
+::-webkit-input-placeholder {
+  font-family: -apple-system-font, "Helvetica Neue", sans-serif;
+}
 input, textarea{
   -webkit-appearance: none;
   outline: none;
@@ -85,10 +88,15 @@ ul, li, ol, dl {
 html, body {
   width: 100%;
   height: 100%;
+  line-height: 1.6;
+  font-family: -apple-system-font, "Helvetica Neue", sans-serif, "lucida grande", "lucida sans unicode", lucida, helvetica, "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei";
+  -ms-text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
   /*font-size: 62.5%;*/
 }
 a {
   color: rgb(82, 144, 239);
+  -webkit-touch-callout: none;
 }
 /*防止iPhone X 底部小黑条遮挡页面最底部内容的情况*/
 body {
@@ -97,7 +105,6 @@ body {
 
 #app {
   height: 100%;
-  font-family: "lucida grande", "lucida sans unicode", lucida, helvetica, "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;

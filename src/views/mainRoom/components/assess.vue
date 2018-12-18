@@ -8,7 +8,7 @@
        </div>
         <x-icon type="ios-close" @click.native="$emit('handleToCancelAssess')" size="30"></x-icon>
         <div class="eva-part">
-          <p>请对{{this.csInfo.csName}}本次的服务进行评价</p>
+          <p>请对{{this.csInfo.csNick}}本次的服务进行评价</p>
           <!-- fill:#bfbfbf; 未评价时星星的颜色； #FEC656,评价点亮后星星的颜色 -->
           <rater v-model="stars"
                  star="<svg class='icon' style='width:2rem;height:2rem;' aria-hidden='true'>
