@@ -78,6 +78,9 @@ export const viewGifts = async(page, pageSize, csId) => http.get('user', `/video
 // 标签信息查询(传csId查询到评价当前客服的标签，csId=‘’查询到所有的标签）
 export const viewLabels = async(page, pageSize, csId) => http.get('user', `/video/user/labels?page=${page}&pageSize=${pageSize}&csId=${csId}`)
 
+// 分页查询礼物记录
+export const giftsRecording = async(page, pageSize, csId) => http.get('user', `/video/user/cs/gifts?page=${page}&pageSize=${pageSize}&csId=${csId}`)
+
 /**
  * [getUserInfoByOpenID 获取用户基本信息]
  */
