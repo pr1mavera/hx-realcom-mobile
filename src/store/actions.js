@@ -2,7 +2,7 @@ import * as types from './mutation-types'
 import Tools from '@/common/js/tools'
 import IM from '@/server/im'
 // import { isTimeDiffLongEnough, formatDate } from '@/common/js/dateConfig.js'
-import { MSG_PAGE_SIZE, sessionStatus, toggleBarStatus, roomStatus, queueStatus, msgStatus, msgTypes, dialogTypes, tipTypes, systemMsgStatus } from '@/common/js/status'
+import { TIME_3_MIN, TIME_5_MIN, MSG_PAGE_SIZE, sessionStatus, toggleBarStatus, roomStatus, queueStatus, msgStatus, msgTypes, dialogTypes, tipTypes, systemMsgStatus } from '@/common/js/status'
 import { ERR_OK, createSession, getCsAvatar, transTimeoutRedistribution } from '@/server/index.js'
 
 // 键盘弹出延迟（弃用）
@@ -62,7 +62,7 @@ export const afterQueueSuccess = function({ commit, state }, { mode, msgsObj }) 
     // 房间状态
     commit(types.SET_ROOM_MODE, roomStatus.videoChat)
     const tip = {
-      content: `视频客服${state.csInfo.csName}转接成功，祝您沟通愉快！`,
+      content: `视频客服${state.csInfo.csNick}转接成功，祝您沟通愉快！`,
       time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
       msgStatus: msgStatus.tip,
       msgType: tipTypes.tip_success
@@ -104,6 +104,7 @@ export const afterQueueSuccess = function({ commit, state }, { mode, msgsObj }) 
       chatType: sessionStatus.onLine
     }
     sendMsgs({ commit, state }, [tip, msg])
+    saveCurMsgs({ commit, state }, { origin: state.userInfo.origin, msg })
     // action 初始化用户最后响应时间
     updateLastAction({ commit, state })
     // 存本地localstorage
@@ -196,9 +197,11 @@ export const afterServerFinish = function({ commit, state }, mode) {
   } else
   if (mode === sessionStatus.onLine) {
     // 清空定时器
-    state.userInfo.actionTimeout && clearTimeout(state.userInfo.actionTimeout)
+    state.userInfo.actionTimeout && state.userInfo.actionTimeout.length && state.userInfo.actionTimeout.forEach(item => {
+      clearTimeout(item)
+    })
     const userInfo = Tools.CopyTools.objShallowClone(state.userInfo)
-    userInfo.actionTimeout = null
+    userInfo.actionTimeout = []
     commit(types.SET_USER_INFO, userInfo)
     // 清空本地localstorage
     Tools.CacheTools.removeCacheData('curServInfo')
@@ -285,14 +288,34 @@ export const reqTransTimeout = function({ commit, state }, { msg, toast, delay =
 // 更新用户最后活动时间（更新定时器）
 export const updateLastAction = function({ commit, state }) {
   // 清空原来的定时器
-  state.userInfo.actionTimeout && clearTimeout(state.userInfo.actionTimeout)
+  state.userInfo.actionTimeout && state.userInfo.actionTimeout.length && state.userInfo.actionTimeout.forEach(item => {
+    clearTimeout(item)
+  })
   // 当前不是人工服务中，直接返回
   if (state.roomMode !== roomStatus.menChat) {
     return
   }
 
-  // 创建定时器，绑定在 vuex 的 userInfo
-  const actionTimeout = setTimeout(async() => {
+  // 创建定时器（三分钟），绑定在 vuex 的 userInfo
+  const actionTimeout3 = setTimeout(async() => {
+    // 推送超时断开连接提示，至本地消息队列
+    const now = new Date()
+    const msg = {
+      nickName: state.csInfo.csNick,
+      avatar: state.csInfo.csId,
+      content: `尊敬的客户，${state.csInfo.csNick}还没有收到您的回复哦，本次会话将在两分钟后自动中断。`,
+      isSelfSend: false,
+      time: Tools.DateTools.formatDate(now, 'yyyy-MM-dd hh:mm:ss'),
+      timestamp: now.getTime(),
+      msgStatus: msgStatus.msg,
+      msgType: msgTypes.msg_normal,
+      chatType: sessionStatus.onLine
+    }
+    sendMsgs({ commit, state }, [msg])
+  }, TIME_3_MIN)
+
+  // 创建定时器（五分钟），绑定在 vuex 的 userInfo
+  const actionTimeout5 = setTimeout(async() => {
     // 用户长时间无响应，主动断开连接
     const sysMsgs = {
       code: systemMsgStatus.ONLINE_USER_ACTION_ENDING_SESSION,
@@ -313,10 +336,10 @@ export const updateLastAction = function({ commit, state }) {
     sendMsgs({ commit, state }, [dialog])
     // 清空本地localstorage
     Tools.CacheTools.removeCacheData(`${state.userInfo.origin}_curServInfo`)
-  }, 300000)
+  }, TIME_5_MIN)
 
   const userInfo = Tools.CopyTools.objShallowClone(state.userInfo)
-  userInfo.actionTimeout = actionTimeout
+  userInfo.actionTimeout = [actionTimeout3, actionTimeout5]
   commit(types.SET_USER_INFO, userInfo)
 }
 
@@ -337,22 +360,17 @@ export const saveRoamMsgs = function({ commit, state }, origin) {
 
   // 还原分页
   const list = Tools.reduce((val, item) => val.concat(item.pageList), [])(roamTemp)
-  // let list = []
-  // roamTemp.forEach(item => {
-  //   list = list.concat(item.pageList)
-  // })
 
   // 合并
   const roam = list.concat(curTemp)
 
   // 分页方式（map的回调）
-  const mode = (item, i, arr) => {
+  const getPage = Tools.paging((item, i, arr) => {
     return {
       page: arr.length - i,
       pageList: roam.slice(i * MSG_PAGE_SIZE, (i + 1) * MSG_PAGE_SIZE)
     }
-  }
-  const getPage = Tools.paging(MSG_PAGE_SIZE, mode)
+  }, MSG_PAGE_SIZE)
   const roamList = getPage(roam)
   // 存贮
   Tools.CacheTools.setCacheData({ key: `${origin}_roam_msgs`, check: origin, data: roamList })
@@ -374,17 +392,18 @@ export const sendMsgs = async function({ commit, state }, msg) {
     let lastT = null
     // 缓存最后一条信息的时间
     for (let i = state.msgs.length - 1; i > 0; i--) {
-      if (state.msgs[i].msgStatus === msgStatus.msg) {
+      if (state.msgs[i].msgStatus === msgStatus.tip && state.msgs[i].msgType === tipTypes.tip_time) {
          lastT = state.msgs[i].time
          break
       }
       console.log(`------------------------------------- 循环了 ${i} -------------------------------------`)
     }
     // 若间隔时间大于约定时间，则生成时间信息tip
-    if (lastT && msg[0].time && Tools.DateTools.isTimeDiffLongEnough(lastT, msg[0].time)) {
+    const now = Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss')
+    if (lastT && Tools.DateTools.isTimeDiffLongEnough(lastT, now)) {
       const tip = {
-        content: msg[0].time,
-        time: msg[0].time,
+        content: now,
+        time: now,
         msgStatus: msgStatus.tip,
         msgType: tipTypes.tip_time
       }

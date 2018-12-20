@@ -135,6 +135,11 @@ export const getIframeUrl = url => http.url('user', `/video/frame/content?url=${
 export const saveQueueTicket = (csId, csName, csNick, userInfo, openId, sessionId) => http.post('user', `/user/cs/saveQueueTicket`, { csId, csName, csNick, userInfo, openId, sessionId })
 
 /**
+ * [getQueueTicket 转视频跳转至Safari后获取会话]
+ */
+export const getQueueTicket = openId => http.get('user', `/user/cs/getQueueTicket?openId=${openId}`)
+
+/**
  ************************************ onLine ************************************
  */
 

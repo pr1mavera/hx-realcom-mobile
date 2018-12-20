@@ -15,7 +15,7 @@
       ></video>
       <img width=100% height=100% v-if="videoScreenShotShow" :src="videoScreenShotSrc" class="video-screen-shot">
     </div>
-    <div class="video-window" :class="customer" v-show="fullScreen">
+    <div class="video-window" :class="customer" v-show="fullScreen && !videoScreenShotShow">
       <video height=100%
         id="localVideo"
         v-if="!videoScreenShotShow"
@@ -60,17 +60,6 @@
       <section class="send-gift-section" v-show="giftSectionShow" @click.stop="giftSectionShow = false">
         <send-gift :theme="`dark`" @selectGift="selectGift"></send-gift>
       </section>
-      <div v-transfer-dom>
-        <x-dialog v-model="isVideoOverReportShow" :dialog-style="{'max-width': '100%', width: '100%', height: '100%', 'background-color': 'transparent'}">
-          <video-over-toast
-            :csId="this.csInfo.csId"
-            :csName="this.csInfo.csName"
-            :time="this.serverTime"
-            @goBackToChat="goBackToChat"
-            @showShare="showShare"
-          ></video-over-toast>
-        </x-dialog>
-      </div>
     </div>
     <!-- 最小化 -->
     <!-- <div class="mini-container" v-show="isMiniBarOpen" @click="openVideoBar">
@@ -87,16 +76,12 @@
 </template>
 
 <script type="text/ecmascript-6">
-import { mapGetters, mapMutations, mapActions } from 'vuex'
-import { XDialog, TransferDomDirective as TransferDom } from 'vux'
-import { queueStatus, sessionStatus } from '@/common/js/status'
+import { mapGetters, mapMutations } from 'vuex'
+import { queueStatus } from '@/common/js/status'
 import { RTCRoomMixin, sendMsgsMixin } from '@/common/js/mixin'
 // import IM from '@/server/im.js'
 
 export default {
-  directives: {
-    TransferDom
-  },
   mixins: [
     RTCRoomMixin,
     sendMsgsMixin
@@ -106,9 +91,7 @@ export default {
     'VideoFooter': () => import('@/views/mainRoom/components/video/video-footer'),
     'VideoMsgList': () => import('@/views/mainRoom/components/video/video-msg-list'),
     'SendGift': () => import('@/views/mainRoom/components/chat/send-gift'),
-    'Assess': () => import('@/views/mainRoom/components/assess'),
-    'videoOverToast': () => import('@/views/mainRoom/components/video/video-over-toast'),
-    XDialog
+    'Assess': () => import('@/views/mainRoom/components/assess')
   },
   computed: {
     // isVideoBarOpen() {
@@ -121,10 +104,6 @@ export default {
     // isLineUpShow() {
     //   return this.queueMode === queueStatus.queuing || this.queueMode === queueStatus.queueSuccess
     // },
-    isVideoOverReportShow() {
-      return this.hasAssess && this.serverTime !== ''
-      // return true
-    },
     customer() {
       return this.isChangeCamera ? 'big' : 'small'
     },
@@ -211,7 +190,7 @@ export default {
       !this.hasAssess && this.setAssessView(true)
     },
     getVideoScreenShot() {
-      return new Promise((resolve) => {
+      return new Promise(resolve => {
         const canvas = document.getElementById('videoCanvas')
         var canvasCtx = canvas.getContext('2d')
         var video = document.getElementById('remoteVideo')
@@ -228,20 +207,11 @@ export default {
     showShare(csId, csName) {
       this.$emit('showShare', csId, csName)
     },
-    goBackToChat() {
-      // 退群
-      // IM.quitGroup(this.roomId)
-      // action
-      this.afterServerFinish(sessionStatus.video)
-    },
     ...mapMutations({
       setFullScreen: 'SET_FULL_SCREEN',
       setAssessView: 'SET_ASSESS_VIEW',
       setServerTime: 'SET_SERVER_TIME'
-    }),
-    ...mapActions([
-      'afterServerFinish'
-    ])
+    })
   },
   filters: {
     videoTimeFormat(val) {
@@ -273,7 +243,7 @@ export default {
       width: 100%;
       height: 100%;
       z-index: 0;
-      // background-color: #666;
+      background-color: #666;
     }
     &.small {
       margin: .5rem .5rem 0 0;
@@ -283,7 +253,7 @@ export default {
       z-index: 200;
       overflow: hidden;
       z-index: 1;
-      // background-color: #222;
+      background-color: #222;
     }
     video {
       position: absolute;
@@ -291,12 +261,12 @@ export default {
       left: 50%;
       transform: translateX(-50%);
       height: 100%;
-      &#remoteVideo {
-        background-color: #666;
-      }
-      &#localVideo {
-        background-color: #222;
-      }
+      // &#remoteVideo {
+      //   background-color: #666;
+      // }
+      // &#localVideo {
+      //   background-color: #222;
+      // }
       &::-webkit-media-controls {
         display:none !important;
       }

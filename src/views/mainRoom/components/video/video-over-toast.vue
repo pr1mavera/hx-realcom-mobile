@@ -4,7 +4,7 @@
       <div class="avatar">
         <img v-lazy="avatar">
       </div>
-      <div class="name">{{csName || '丽丽'}}</div>
+      <div class="name">{{csNick}}</div>
     </div>
     <div class="container">
       <h1 class="title">视频通话结束</h1>
@@ -12,7 +12,7 @@
       <p class="desc time">{{time || '00:00'}}</p>
       <p class="desc">总通话时长</p>
     </div>
-    <div class="footer">
+    <div class="footer" v-if="isFooterBtnShow">
       <!-- <button id="onMenuShare" class="share" type="button" v-if="isShareBtnShow" @click="$emit('showShare', csId, csName)">分享</button> -->
       <button class="back" type="button" @click="$emit('goBackToChat')">返回</button>
     </div>
@@ -27,7 +27,7 @@ export default {
     csId: {
       type: String
     },
-    csName: {
+    csNick: {
       type: String
     },
     time: {
@@ -36,7 +36,7 @@ export default {
   },
   data() {
     return {
-      isShareBtnShow: false
+      isFooterBtnShow: false
     }
   },
   computed: {
@@ -46,7 +46,7 @@ export default {
   },
   mounted() {
     const enterVideoStatus = window.sessionStorage.getItem('enterVideoStatus')
-    this.isShareBtnShow = enterVideoStatus === 'Android'
+    this.isFooterBtnShow = enterVideoStatus !== 'iOS-Safari'
   }
 }
 </script>

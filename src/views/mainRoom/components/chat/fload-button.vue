@@ -112,13 +112,14 @@ export default {
       }
 
       if (this.queueMode.status === queueStatus.queuing && this.queueMode.mode === roomStatus.menChat) { // 排队中
-        this.onlineServ2Video('您当前正在在线人工排队中，确认需要取消排队并进入视频客服吗？')
+        this.onlineQueue2Video('您当前正在在线人工排队中，确认需要取消排队并进入视频客服吗？')
         return
       }
 
       switch (this.roomMode) { // 服务中
         case roomStatus.AIChat:
-          this.$emit('enterVideoLineUp')
+          // this.$emit('enterVideoLineUp')
+          this.$router.push('/room/cusServ/list')
           break
         case roomStatus.videoChat:
           this.$vux.alert.show({
@@ -180,6 +181,19 @@ export default {
           break
       }
     },
+    onlineQueue2Video(tip) {
+      const self = this
+      this.$vux.confirm.show({
+        title: tip,
+        async onConfirm() {
+          // 取消排队
+          self.$emit('onLineCancelQueue')
+          await Tools.AsyncTools.sleep(2000)
+          // 进入专属客服
+          this.$router.push('/room/cusServ/list')
+        }
+      })
+    },
     onlineServ2Video(tip) {
       const self = this
       this.$vux.confirm.show({
@@ -197,7 +211,8 @@ export default {
           this.afterServerFinish(sessionStatus.onLine)
           await Tools.AsyncTools.sleep(2000)
           // 进入专属客服
-          self.$emit('enterVideoLineUp')
+          // self.$emit('enterVideoLineUp')
+          this.$router.push('/room/cusServ/list')
         }
       })
     },

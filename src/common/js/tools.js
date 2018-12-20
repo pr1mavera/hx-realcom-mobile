@@ -423,6 +423,8 @@ let Tools = Object.assign({}, {
   RectTools: Object.create(RectTools),
   MsgsFilterTools: Object.create(MsgsFilterTools),
   CacheTools: Object.create(CacheTools),
+
+  // 柯里化
   curry: function(fn) {
     const _c = (restNum, argsList) => {
       // 传递给执行函数的参数是否完整（剩余待传递的参数是否为0） ? 调用fn : 返回递归
@@ -432,13 +434,26 @@ let Tools = Object.assign({}, {
     }
     return _c(fn.length, [])
   },
+
+  // 组合
+  compose: (f, g) => (x) => f(g(x)),
+
+  // map :: (a -> b) -> [a] -> [b]
   map: curry((f, arr) => arr.map(f)),
+
+  // filter :: (a -> bool) -> [a] -> [a]
   filter: curry((f, arr) => arr.filter(f)),
+
+  // reduce :: (b -> a -> b) -> b -> [a] -> b
   reduce: curry((f, val, arr) => arr.reduce(f, val)),
-  paging: curry(function(pageSize, f, arr) {
+
+  // paging :: (a -> b) -> c -> [a] -> [b]
+  paging: curry(function(f, pageSize, arr) {
     const totalPage = Math.ceil(arr.length / pageSize) // 页数
     return new Array(totalPage).fill(0).map(f)
   }),
+
+  // 取一定范围内的随机数
   randomMin2Max: function(min, max) {
     return Math.floor(Math.random() * (max - min) + min)
   }

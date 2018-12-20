@@ -262,6 +262,7 @@ export default {
                 border-radius: 50%;
                 overflow: hidden;
                 img {
+                  display: block;
                   object-fit: cover;
                 }
               }
@@ -369,7 +370,7 @@ export default {
       .vux-swiper-item {
         width: 100%;
         height: 100%;
-        padding: 1.8rem 2.6rem;
+        padding: 2.8rem 2.6rem;
         box-sizing: border-box;
         ul {
           display: flex;
@@ -377,7 +378,7 @@ export default {
           flex-wrap: wrap;
           .swiper-item-li {
             font-size: 2.4rem;
-            padding-bottom: 1rem;
+            padding-bottom: 1.6rem;
             flex-basis: 12.5%;
             text-align: center;
           }

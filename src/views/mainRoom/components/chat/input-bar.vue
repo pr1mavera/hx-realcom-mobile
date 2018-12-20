@@ -45,14 +45,14 @@
       </transition> -->
       <transition name="send-plus" mode="out-in">
         <button class="input-bar-item-btn" v-if="isSendBtnShow" @click="chatCommit">
-          <svg class="icon extend-click" aria-hidden="true" :class="{'extend-Bar-Open': this.extendBarOpen}">
+          <svg class="icon extend-click" aria-hidden="true">
             <use xlink:href="#icon-shangchuan"></use>
           </svg>
         </button>
       </transition>
       <transition name="send-plus" mode="out-in">
         <button class="input-bar-item-btn" v-if="!isSendBtnShow" @click="toggleExtend">
-          <svg class="icon extend-click" aria-hidden="true" :class="{'extend-Bar-Open': this.extendBarOpen}">
+          <svg class="icon extend-click" aria-hidden="true" :class="{'extend-Bar-Open': extendBarOpen}">
             <use xlink:href="#icon-jiahao"></use>
           </svg>
         </button>
@@ -75,12 +75,14 @@ export default {
   props: {
     isFocus: {
       type: Boolean
+    },
+    expressBarShow: {
+      type: Boolean
     }
   },
   computed: {
     isSendBtnShow() {
-      // return this.inputBarOpen || this.extendBarOpen
-      return this.inputBarOpen
+      return this.inputBarOpen || this.expressBarShow
     },
     ...mapGetters([
       'extendBarOpen',

@@ -8,6 +8,8 @@ export const SET_ROOM_ID = 'SET_ROOM_ID'
 
 export const SET_SESSION_ID = 'SET_SESSION_ID'
 
+export const SET_SESSION_LIST = 'SET_SESSION_LIST'
+
 export const SET_CHAT_GUID = 'SET_CHAT_GUID'
 
 export const SET_MSGS = 'SET_MSGS'

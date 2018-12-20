@@ -16,6 +16,9 @@ const mutations = {
   [types.SET_SESSION_ID](state, id) {
     state.sessionId = id
   },
+  [types.SET_SESSION_LIST](state, list) {
+    state.sessionList = list
+  },
   [types.SET_CHAT_GUID](state, id) {
     state.chatGuid = id
   },

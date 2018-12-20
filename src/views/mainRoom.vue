@@ -2,10 +2,12 @@
   <div class="main-room">
     <keep-alive :include="['chat', 'cus-serv']">
       <router-view class="router-view" id="router-view"
-        @showIosGuide="iosGuide = true"
-        @showLowVersion="lowVersion = true"
         @showGiftAnime="showGiftAnime"
+        @requestVideoServer="requestVideoServer"
+        @cancelVideoLineUp="videoFailed"
       ></router-view>
+      <!-- @showIosGuide="iosGuide = true"
+      @showLowVersion="lowVersion = true" -->
       <!-- @showShare="toShare"
       @showIframe="showIframe" -->
     </keep-alive>
@@ -13,6 +15,17 @@
       v-if="isVideoBarOpen"
       @showGiftAnime="showGiftAnime"
     ></videoBar>
+    <div v-transfer-dom>
+      <x-dialog v-model="isVideoOverReportShow" :dialog-style="{'max-width': '100%', width: '100%', height: '100%', 'background-color': 'transparent'}">
+        <video-over-toast
+          :csId="csInfo.csId"
+          :csNick="csInfo.csNick"
+          :time="serverTime"
+          @goBackToChat="afterServerFinish(sessionStatus.video)"
+        ></video-over-toast>
+        <!-- @showShare="showShare" -->
+      </x-dialog>
+    </div>
     <!-- @showShare="toShare" -->
     <!-- <share-dialog
       :show="isShareView"
@@ -43,23 +56,37 @@
 <script type="text/ecmascript-6">
 // import wx from 'weixin-js-sdk'
 import { mapGetters, mapMutations, mapActions } from 'vuex'
+import { XDialog, TransferDomDirective as TransferDom } from 'vux'
+import { loginMixin, IMMixin, getMsgsMixin } from '@/common/js/mixin'
 import { roomStatus, sessionStatus } from '@/common/js/status'
 import Tools from '@/common/js/tools'
+import { ERR_OK, saveQueueTicket, getQueueTicket } from '@/server/index.js'
 // import GoShare from '@/common/js/share'
 // import anime from 'animejs'
 
 export default {
+  directives: {
+    TransferDom
+  },
   components: {
     'videoBar': () => import('@/views/mainRoom/videoBar'),
+    'videoOverToast': () => import('@/views/mainRoom/components/video/video-over-toast'),
     // 'ShareDialog': () => import('@/views/mainRoom/components/share-dialog'),
     'IosGuide': () => import('@/views/mainRoom/components/video/ios-guide'),
     'LowVersion': () => import('@/views/mainRoom/components/video/low-version'),
     // 'ShareGuide': () => import('@/views/mainRoom/components/share-guide'),
-    'Assess': () => import('@/views/mainRoom/components/assess')
+    'Assess': () => import('@/views/mainRoom/components/assess'),
+    XDialog
     // 'iframeBar': () => import('@/views/mainRoom/components/iframe-bar')
   },
+  mixins: [
+    loginMixin,
+    IMMixin,
+    getMsgsMixin
+  ],
   data() {
     return {
+      sessionStatus: sessionStatus,
       // share
       // shareUrl: '',
       // isShareView: false,
@@ -84,22 +111,118 @@ export default {
       // return this.queueMode === queueStatus.queuing || this.queueMode === queueStatus.queueSuccess || this.queueMode === queueStatus.queueOver
       return this.roomMode === roomStatus.videoChat
     },
+    isVideoOverReportShow() {
+      return this.hasAssess && this.serverTime !== ''
+      // return true
+    },
     ...mapGetters([
       'roomMode',
       'isAssessView',
       'serverTime',
-      'csInfo'
+      'csInfo',
+      'userInfo',
+      'sessionId'
     ])
+  },
+  created() {
+    this.initRoom()
   },
   mounted() {
     this.$nextTick(() => {
-      // this.initShare()
-      // document.getElementsByTagName('a').addEventListener('click', (e) => {
-      //   debugger
-      // }, false)
+      document.getElementById('app').style.display = 'block'
+      document.getElementById('appLoading').style.display = 'none'
     })
   },
   methods: {
+    // 初始化房间
+    async initRoom() {
+      const enterVideoStatus = window.sessionStorage.getItem('enterVideoStatus')
+      const query = this.$route.query
+
+      if (enterVideoStatus === 'iOS-wx' || enterVideoStatus === 'Android') { // 微信环境
+        this.$router.replace({path: `/room/chat?openId=${query.openId}&origin=${query.origin}`})
+      }
+      else if (enterVideoStatus === 'iOS-Safari') { // Safari环境
+        const res = await getQueueTicket(query.openId)
+        debugger
+        if (res.result.code === ERR_OK && res.data.queueticket) {
+          this.afterEnterSafariQueue(res.data.queueticket)
+          return
+        }
+        // 会话请求校验失效，或异常情况
+        this.$vux.toast.text('咨询校验失败')
+        this.videoFailed()
+      }
+
+      // this.$router.replace({path: `/room/chat?openId=${query.openId}&origin=${query.origin}`})
+    },
+    // Safari进入排队前
+    async afterEnterSafariQueue(data) {
+      const userInfo = data.userInfo.parseJSON()
+      // 存用户基本信息
+      this.setUserInfo(userInfo)
+      // 存会话Id
+      this.setSessionId(data.sessionId)
+      // 获取当次会话列表
+      this.requestSessionList(userInfo.userId)
+      // IM 初始化
+      await this.initIM(userInfo)
+      // 设置对应请求坐席，进入排队
+      this.$router.replace({path: `/room/line-up?csId=${data.csId}&csName=${data.csName}`})
+    },
+    // 校验异常
+    videoFailed() {
+      this.setRoomMode(roomStatus.videoChat)
+      this.setAssessStatus(true)
+      this.setServerTime('00:00')
+    },
+    // 响应用户的视频请求
+    requestVideoServer({ csId, csName, csNick }) {
+      // this.setSessionTicket({ csId, csName, csNick })
+      const enterVideoStatus = window.sessionStorage.getItem('enterVideoStatus')
+      switch (enterVideoStatus) {
+        case 'low-version': // 版本过低
+          this.lowVersion = true
+          break
+        case 'iOS-wx': // 当前为iOS的微信环境，需跳转至Safari，并保持当次机器人会话信息
+          this.setSessionTicket({ csId, csName, csNick })
+          // this.iosGuide = true
+          break
+        case 'iOS-Safari': // 当前为iOS的Safari环境
+          this.$router.push({path: `/room/line-up?csId=${csId}&csName=${csName}`})
+          this.beforeQueue({
+            mode: roomStatus.videoChat,
+            content: `尊敬的${+this.userInfo.userGrade <= 3 ? this.userInfo.userGradeName : ''}客户，正在为您转接视频客服，请稍后。`
+          })
+          break
+        case 'Android': // 当前为Android环境，进入专属客服
+          this.$router.push({path: `/room/line-up?csId=${csId}&csName=${csName}`})
+          this.beforeQueue({
+            mode: roomStatus.videoChat,
+            content: `尊敬的${+this.userInfo.userGrade <= 3 ? this.userInfo.userGradeName : ''}客户，正在为您转接视频客服，请稍后。`
+          })
+          break
+      }
+    },
+    // 请求视频后，若当前环境为iOS的微信环境，则存一次会话信息
+    async setSessionTicket({ csId, csName, csNick }) {
+      const res = await saveQueueTicket(
+        csId,
+        csName,
+        csNick,
+        this.userInfo,
+        this.userInfo.openId,
+        this.sessionId
+      )
+      if (res.result.code === ERR_OK) {
+        this.$vux.toast.text('已为您保存咨询信息')
+        await Tools.AsyncTools.sleep(2000)
+        this.iosGuide = true
+      } else {
+        this.$vux.toast.text('咨询失败')
+      }
+    },
+    // 评价成功
     assessSuccess() {
       this.setAssessStatus(true)
       this.setAssessView(false)
@@ -108,6 +231,7 @@ export default {
         this.afterServerFinish(sessionStatus.onLine)
       }
     },
+    // 手动关闭评价
     handleToCancelAssess() {
       // 用户主动关闭评价
       if (this.serverTime === '') {
@@ -135,6 +259,7 @@ export default {
         })
       }
     },
+    // 分享
     // async toShare(csId, csName) {
     //   this.isShareView = false
     //   this.shareGuide = true
@@ -143,6 +268,7 @@ export default {
     //   await this.initShare()
     //   this.clickShare()
     // },
+    // iframe弹出层
     // showIframe({ link, clientX, clientY }) {
     //   this.iframeView = true
     //   this.iframeSrc = Tools.MsgsFilterTools.transHttp2Https(link)
@@ -206,6 +332,7 @@ export default {
     //   })
     //   showIframeframes.complete = done
     // },
+    // 发送礼物时的动画弹层
     async showGiftAnime(giftInfo) {
       this.showGiftView(giftInfo.giftId)
       // const duration = (+giftInfo.duration) * 1000
@@ -221,10 +348,15 @@ export default {
       this.giftSrc = null
     },
     ...mapMutations({
+      setRoomMode: 'SET_ROOM_MODE',
+      setUserInfo: 'SET_USER_INFO',
+      setSessionId: 'SET_SESSION_ID',
       setAssessStatus: 'SET_ASSESS_STATUS',
-      setAssessView: 'SET_ASSESS_VIEW'
+      setAssessView: 'SET_ASSESS_VIEW',
+      setServerTime: 'SET_SERVER_TIME'
     }),
     ...mapActions([
+      'beforeQueue',
       'afterServerFinish'
     ])
   }

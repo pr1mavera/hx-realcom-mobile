@@ -10,6 +10,7 @@
 
 <script>
 import deviceConfig from './config/device'
+import { beforeEnterVideo } from '@/common/js/beforeEnterVideo'
 import { stringEx } from './config/extend'
 // const wx = require('@/common/js/wx').wx
 // import { mapGetters, mapMutations } from 'vuex'
@@ -29,6 +30,7 @@ export default {
   // },
   created() {
     deviceConfig()
+    beforeEnterVideo()
     stringEx()
     // wxConfig()
     window.addEventListener('offline', () => {
@@ -67,10 +69,12 @@ export default {
 </script>
 
 <style type="text/css" lang="less">
-
 /*- 引入关闭按钮 -*/
 /*@import '~vux/src/styles/close.less';*/
-
+/** env = windows **/
+::-webkit-input-placeholder {
+  font-family: -apple-system-font, "Helvetica Neue", sans-serif;
+}
 input, textarea{
   -webkit-appearance: none;
   outline: none;
@@ -84,10 +88,15 @@ ul, li, ol, dl {
 html, body {
   width: 100%;
   height: 100%;
+  line-height: 1.6;
+  font-family: -apple-system-font, "Helvetica Neue", sans-serif, "lucida grande", "lucida sans unicode", lucida, helvetica, "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei";
+  -ms-text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
   /*font-size: 62.5%;*/
 }
 a {
   color: rgb(82, 144, 239);
+  -webkit-touch-callout: none;
 }
 /*防止iPhone X 底部小黑条遮挡页面最底部内容的情况*/
 body {
@@ -96,7 +105,6 @@ body {
 
 #app {
   height: 100%;
-  font-family: "lucida grande", "lucida sans unicode", lucida, helvetica, "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
@@ -193,7 +201,8 @@ body {
       .weui-dialog__hd {
         padding: 1.8em 1.6em 0.5em;
         .weui-dialog__title {
-          font-size: 1.6rem;
+          font-size: 1.5rem;
+          line-height: 2rem;
         }
       }
       .weui-dialog__bd {
@@ -203,6 +212,7 @@ body {
         line-height: 44px;
         a {
           color: rgba(33, 150, 243, 1)!important;
+          font-size: 1.5rem;
         }
       }
     }
