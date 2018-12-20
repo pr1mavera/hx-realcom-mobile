@@ -7,12 +7,19 @@
       @ready="readyToVideo"
     ></line-up> -->
     <!-- 最大化 -->
-    <div class="video-window" :class="server" @click="openVideoBar">
+    <div class="video-window" :class="server">
       <video height=100%
         id="remoteVideo"
         autoplay
         playsinline
       ></video>
+      <div class="video-mask">
+        <div class="full-screen-btn" v-show="!fullScreen" @click="openVideoBar">
+          <svg class="icon" aria-hidden="true">
+            <use xlink:href="#icon-quanping"></use>
+          </svg>
+        </div>
+      </div>
       <img width=100% height=100% v-if="videoScreenShotShow" :src="videoScreenShotSrc" class="video-screen-shot">
     </div>
     <div class="video-window" :class="customer" v-show="fullScreen && !videoScreenShotShow">
@@ -23,6 +30,7 @@
         autoplay
         playsinline
       ></video>
+      <div class="video-mask"></div>
     </div>
     <div class="full-screen-container" v-show="fullScreen && !videoScreenShotShow">
       <div class="video-header">
@@ -41,12 +49,12 @@
       <video-msg-list></video-msg-list>
       <div class="video-fload-btn">
         <div class="item">
-          <div class="item-icon icon-hongxin extend-click" @click.once="sendLike">
+          <div class="item-icon icon-hongxin extend-click" @click="sendLike">
             <svg class="icon" aria-hidden="true">
-              <use xlink:href="#icon-xin-hong"></use>
+              <use :xlink:href="likesCountStyle"></use>
             </svg>
           </div>
-          <div class="text">{{this.likesCount}}</div>
+          <div class="text">{{csInfo.likesCount}}</div>
         </div>
         <!-- <div class="item">
           <div class="item-icon icon-zhuanfa">
@@ -78,6 +86,7 @@
 <script type="text/ecmascript-6">
 import { mapGetters, mapMutations } from 'vuex'
 import { queueStatus } from '@/common/js/status'
+import { ERR_OK, enterVideoRTCRoom } from '@/server/index.js'
 import { RTCRoomMixin, sendMsgsMixin } from '@/common/js/mixin'
 // import IM from '@/server/im.js'
 
@@ -104,6 +113,9 @@ export default {
     // isLineUpShow() {
     //   return this.queueMode === queueStatus.queuing || this.queueMode === queueStatus.queueSuccess
     // },
+    likesCountStyle() {
+      return this.likes ? '#icon-xin-hong' : '#icon-dianzanqian'
+    },
     customer() {
       return this.isChangeCamera ? 'big' : 'small'
     },
@@ -131,13 +143,12 @@ export default {
       isChangeCamera: false,
       // 礼物列表弹层开关：[false 开启 / [true 关闭]
       giftSectionShow: false,
-      likesCount: 0
+      likes: false
     }
   },
   mounted() {
     this.readyToVideo()
     this.startTimeStamp = new Date()
-    this.likesCount = this.csInfo.likesCount
   },
   methods: {
     _getVideoTime(dateBegin) {
@@ -164,8 +175,11 @@ export default {
       this.sendGiftMsg(giftInfo)
     },
     sendLike() {
+      if (this.likes) {
+        return
+      }
       this.sendLikeMsg()
-      this.likesCount++
+      this.likes = true
     },
     closeVideoBar() {
       this.setFullScreen(false)
@@ -173,6 +187,16 @@ export default {
     readyToVideo() {
       // IM.joinGroup(this.roomId, this.userInfo.userId)
       this.initRTC(this.roomId)
+      this.enterVideoRTCRoomAPI(this.roomId, this.userInfo.userId, this.userInfo.openId)
+    },
+    async enterVideoRTCRoomAPI(roomId, userId, openId) {
+      const res = await enterVideoRTCRoom(roomId, userId, openId)
+      debugger
+      if (res.result.code === ERR_OK) {
+        // this.$vux.toast.text('进房成功')
+      } else {
+        // this.$vux.toast.text('进房失败')
+      }
     },
     async hangUpVideo() {
       // 恢复全屏
@@ -254,6 +278,15 @@ export default {
       overflow: hidden;
       z-index: 1;
       background-color: #222;
+      // #remoteVideo {
+      //   &::after {
+      //     content: '';
+      //     width: 100%;
+      //     height: 100%;
+      //     background-color: unset;
+      //     background-image: url();
+      //   }
+      // }
     }
     video {
       position: absolute;
@@ -269,6 +302,31 @@ export default {
       // }
       &::-webkit-media-controls {
         display:none !important;
+      }
+    }
+    .video-mask {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      background-color: unset;
+      .full-screen-btn {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        .icon {
+          position: absolute;
+          top: 0.4rem;
+          left: 0.4rem;
+          width: 2rem;
+          height: 2rem;
+          fill: #fff;
+          opacity: .7;
+        }
       }
     }
     .video-screen-shot {
@@ -308,7 +366,7 @@ export default {
       .name {
         display: inline-block;
         vertical-align: top;
-        background-color: rgba(229, 186, 197, .7);
+        background-color: rgb(228, 169, 183);
         border-radius: 1.5rem;
         font-size: 1.2rem;
         padding: 0.01rem 1rem;

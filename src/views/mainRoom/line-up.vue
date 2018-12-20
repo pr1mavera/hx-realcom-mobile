@@ -20,7 +20,7 @@
 import { mapGetters, mapMutations, mapActions } from 'vuex'
 import { IMMixin } from '@/common/js/mixin'
 import IM from '@/server/im'
-import { ERR_OK, videoQueue, videoQueueCancel, videoQueueHeartBeat } from '@/server/index.js'
+import { ERR_OK, videoQueue, videoQueueHeartBeat } from '@/server/index.js'
 import { roomStatus, queueStatus, systemMsgStatus } from '@/common/js/status'
 
 export default {
@@ -111,11 +111,11 @@ export default {
             toast: this.$vux.toast,
             delay: 30000
           }).then(() => {
-            if (this.$route.query.goindex === 'true') {
-              this.$router.push('/')
-            } else {
-              this.$router.back(-1)
-            }
+            // 取消排队接口
+            this.videoQueueCancelAPI(3)
+            // 排队失败返回
+            this.queueFailedReturn()
+            // 发送排队失败通知
             this.afterQueueFailed()
           })
         } else {
@@ -156,19 +156,21 @@ export default {
         this.heartBeatReq = null
       }
     },
-    async clickToCancelLineUp() {
-      const query = this.$route.query
+    clickToCancelLineUp() {
       // 停止心跳
-      this.stopHeartBeat()
-      // 取消排队
-      const res = await videoQueueCancel(this.userInfo.userId, query.csId, this.accessId)
-      if (res.result.code === ERR_OK) {
-        console.log('===============================> 取消排队 啊 取消排队 <===============================')
-        this.$vux.toast.text('取消排队')
-        this.$emit('cancelVideoLineUp')
-      } else {
-        console.log('error in videoQueueCancel')
+      this.heart && this.stopHeartBeat()
+      const VIDEO_QUEUES_CANCEL_msg = {
+        code: systemMsgStatus.VIDEO_QUEUES_CANCEL,
+        csId: this.$route.query.csId
       }
+      // 取消排队接口
+      this.videoQueueCancelAPI(2)
+      // 排队失败返回
+      this.queueFailedReturn()
+
+      !this.isQueuingTextShow && this.reqTransTimeout({
+        msg: VIDEO_QUEUES_CANCEL_msg
+      })
     },
     // confirmToVideo() {
     //   // 停止心跳

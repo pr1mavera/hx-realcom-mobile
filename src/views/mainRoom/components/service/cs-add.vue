@@ -567,7 +567,8 @@ export default {
     height: 4rem;
     padding: 0 7rem;
     box-sizing: border-box;
-    color: #D6D7DC;
+    color: @text-light;
+    opacity: .7;
     display: flex;
     justify-content: space-between;
     margin-bottom: 1.4rem;
@@ -582,7 +583,7 @@ export default {
         .icon {
           width: 4rem;
           height: 4rem;
-          fill: #000;
+          fill: @text-light;
         }
       }
       .text {

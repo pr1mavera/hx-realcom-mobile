@@ -4,7 +4,8 @@
       <router-view class="router-view" id="router-view"
         @showGiftAnime="showGiftAnime"
         @requestVideoServer="requestVideoServer"
-        @cancelVideoLineUp="videoFailed"
+        @cancelVideoLineUp="iOSVideoFailed"
+        @iOSVideoFailed="iOSVideoFailed"
       ></router-view>
       <!-- @showIosGuide="iosGuide = true"
       @showLowVersion="lowVersion = true" -->
@@ -124,7 +125,11 @@ export default {
       'sessionId'
     ])
   },
-  created() {
+  // created() {
+  //   this.initRoom()
+  // },
+  activated() {
+    debugger
     this.initRoom()
   },
   mounted() {
@@ -136,11 +141,16 @@ export default {
   methods: {
     // 初始化房间
     async initRoom() {
+      Tools.CacheTools.removeCacheData('WE_visitorInfo')
+      Tools.CacheTools.removeCacheData('YB_visitorInfo')
+      Tools.CacheTools.removeCacheData('ZJ_visitorInfo')
+      Tools.CacheTools.removeCacheData('YX_visitorInfo')
+      Tools.CacheTools.removeCacheData('QY_visitorInfo')
       const enterVideoStatus = window.sessionStorage.getItem('enterVideoStatus')
       const query = this.$route.query
 
       if (enterVideoStatus === 'iOS-wx' || enterVideoStatus === 'Android') { // 微信环境
-        this.$router.replace({path: `/room/chat?openId=${query.openId}&origin=${query.origin}`})
+        this.$router.replace({path: `/room/chat?openId=${query.openId}&origin=${query.origin || 'WE'}`})
       }
       else if (enterVideoStatus === 'iOS-Safari') { // Safari环境
         const res = await getQueueTicket(query.openId)
@@ -150,8 +160,8 @@ export default {
           return
         }
         // 会话请求校验失效，或异常情况
-        this.$vux.toast.text('咨询校验失败')
-        this.videoFailed()
+        this.$vux.toast.text('当前视频咨询已经结束，请返回官微进行其他咨询')
+        this.iOSVideoFailed()
       }
 
       // this.$router.replace({path: `/room/chat?openId=${query.openId}&origin=${query.origin}`})
@@ -171,7 +181,7 @@ export default {
       this.$router.replace({path: `/room/line-up?csId=${data.csId}&csName=${data.csName}`})
     },
     // 校验异常
-    videoFailed() {
+    iOSVideoFailed() {
       this.setRoomMode(roomStatus.videoChat)
       this.setAssessStatus(true)
       this.setServerTime('00:00')
@@ -189,11 +199,12 @@ export default {
           // this.iosGuide = true
           break
         case 'iOS-Safari': // 当前为iOS的Safari环境
-          this.$router.push({path: `/room/line-up?csId=${csId}&csName=${csName}`})
-          this.beforeQueue({
-            mode: roomStatus.videoChat,
-            content: `尊敬的${+this.userInfo.userGrade <= 3 ? this.userInfo.userGradeName : ''}客户，正在为您转接视频客服，请稍后。`
-          })
+          // this.$router.push({path: `/room/line-up?csId=${csId}&csName=${csName}`})
+          // this.beforeQueue({
+          //   mode: roomStatus.videoChat,
+          //   content: `尊敬的${+this.userInfo.userGrade <= 3 ? this.userInfo.userGradeName : ''}客户，正在为您转接视频客服，请稍后。`
+          // })
+          this.iOSVideoFailed()
           break
         case 'Android': // 当前为Android环境，进入专属客服
           this.$router.push({path: `/room/line-up?csId=${csId}&csName=${csName}`})
@@ -215,8 +226,8 @@ export default {
         this.sessionId
       )
       if (res.result.code === ERR_OK) {
-        this.$vux.toast.text('已为您保存咨询信息')
-        await Tools.AsyncTools.sleep(2000)
+        // this.$vux.toast.text('已为您保存咨询信息')
+        // await Tools.AsyncTools.sleep(2000)
         this.iosGuide = true
       } else {
         this.$vux.toast.text('咨询失败')

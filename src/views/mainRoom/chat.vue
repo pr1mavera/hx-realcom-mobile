@@ -235,6 +235,13 @@ export default {
     }
   },
   mounted() {
+    const enterVideoStatus = window.sessionStorage.getItem('enterVideoStatus')
+
+    if (enterVideoStatus === 'iOS-Safari' && this.roomMode !== roomStatus.videoChat) { // Safari 环境，只允许进入视频
+      this.$emit('iOSVideoFailed')
+      return
+    }
+
     this.$nextTick(async() => {
       this.inputEle = this.$refs.inputBar.$refs.inputContent
       // 初始化滚动
@@ -528,6 +535,8 @@ export default {
       this._inputBlur()
       this.inputEle.innerText = ''
       text = text.replace(/<\/?.+?>/g, '').replace(/&nbsp;/g, '')
+      text = Tools.strWithLink(text)
+
       if (text && text.trim()) {
         // this.roomMode === roomStatus.AIChat ? await this.sendTextMsgToBot(text) : await this.sendC2CMsgs(text)
         if (this.roomMode === roomStatus.AIChat) {

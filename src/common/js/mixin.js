@@ -2,7 +2,7 @@ import { mapGetters, mapMutations, mapActions } from 'vuex'
 import IM from '@/server/im'
 import MsgsLoader from '@/common/js/MsgsLoader'
 // import WebRTCAPI from 'webRTCAPI'
-import { ERR_OK, getImgUrl, getUserInfoByOpenID, getLoginInfo, getBotInfo, sendMsgToBot, getSessionList, getCsAvatar, onLineQueue, getBotRoamMsgs, requestHistoryMsgs, onLineQueueCancel, chatQueueHeartBeat, getWorkTime } from '@/server/index.js'
+import { ERR_OK, getImgUrl, getUserInfoByOpenID, getLoginInfo, getBotInfo, videoQueueCancel, sendMsgToBot, getSessionList, getCsAvatar, onLineQueue, getBotRoamMsgs, requestHistoryMsgs, onLineQueueCancel, chatQueueHeartBeat, getWorkTime } from '@/server/index.js'
 import Tools from '@/common/js/tools'
 import { TIME_24_HOURS, roomStatus, queueStatus, sessionStatus, systemMsgStatus, msgStatus, cardTypes, msgTypes, tipTypes } from '@/common/js/status'
 
@@ -47,12 +47,13 @@ export const loginMixin = {
         }
       } else {
         console.log('error in getUserInfoByOpenId')
+        return null
       }
     },
     async getVisitorInfo(origin) {
       let data = {}
       // 缓存中有游客信息，直接返回：
-      if (data = Tools.CacheTools.getCacheData({ key: `${origin}_visitorInfo`, check: origin })) return data
+      if (data = Tools.CacheTools.getCacheData({ key: `${origin}_visitor`, check: origin })) return data
 
       // 缓存中没有对应渠道的游客信息：
       // 1. 创建游客信息
@@ -62,7 +63,7 @@ export const loginMixin = {
       // 获取工作时间
       const res = await getWorkTime()
       let workTimeInfo = null
-      if (res.result.code = ERR_OK) {
+      if (res && res.result && res.result.code === ERR_OK) {
         const workTime = res.data.workTime
         // 处理工作时间数据结构
         workTimeInfo = Tools.reduce((val, item) => Object.assign(val, {
@@ -99,7 +100,7 @@ export const loginMixin = {
         workTimeInfo
       }
       // 2. 游客信息存缓存
-      Tools.CacheTools.setCacheData({ key: `${origin}_visitorInfo`, check: origin, data: visitorInfo })
+      Tools.CacheTools.setCacheData({ key: `${origin}_visitor`, check: origin, data: visitorInfo })
       // 3. 返回
       return visitorInfo
     },
@@ -483,11 +484,11 @@ export const IMMixin = {
             toast: this.$vux.toast,
             delay: 30000
           }).then(() => {
-            if (this.$route.query.goindex === 'true') {
-              this.$router.push('/')
-            } else {
-              this.$router.back(-1)
-            }
+            // 取消排队接口
+            this.videoQueueCancelAPI(3)
+            // 排队失败返回
+            this.queueFailedReturn()
+            // 发送排队失败通知
             this.afterQueueFailed()
           })
           break
@@ -642,8 +643,37 @@ export const IMMixin = {
         return
       }
       msgsObj.timestamp = new Date().getTime()
+      if (msgsObj.msgStatus === msgStatus.msg && msgsObj.msgType === msgTypes.msg_normal) {
+        msgsObj.content = Tools.strWithLink(msgsObj.content)
+      }
       this.sendMsgs([msgsObj])
       this.saveCurMsgs({ origin: this.userInfo.origin, msg: msgsObj })
+    },
+    queueFailedReturn() {
+      const enterVideoStatus = window.sessionStorage.getItem('enterVideoStatus')
+      if (enterVideoStatus === 'iOS-Safari') {
+        this.$emit('cancelVideoLineUp')
+      } else {
+        if (this.$route.query.goindex === 'true') {
+          this.$router.push('/')
+        } else {
+          this.$router.back(-1)
+        }
+      }
+    },
+    async videoQueueCancelAPI(assessFlag) {
+      const query = this.$route.query || 'WE'
+      const res = await videoQueueCancel(this.userInfo.userId, query.csId, this.accessId, assessFlag)
+      return res.result.code === ERR_OK
+      // if (res.result.code === ERR_OK) {
+      //   console.log('===============================> 取消排队 啊 取消排队 <===============================')
+      //   return true
+      //   this.$vux.toast.text('取消排队')
+      //   this.$emit('cancelVideoLineUp')
+      // } else {
+      //   console.log('error in videoQueueCancel')
+      //   return false
+      // }
     },
     ...mapMutations({
       setQueueMode: 'SET_QUEUE_MODE',
@@ -1102,7 +1132,6 @@ export const getMsgsMixin = {
       if (this.sessionList === null) {
         if (this.cacheMsgsOver) return
         newMsgs = await this.getRoamMsgs({ origin: this.$route.query.origin || 'WE', page: this.cacheMsgsPage++ })
-        debugger
       } else {
         // 初始化
         !this.MsgsLoader && this.initMsgLoader()

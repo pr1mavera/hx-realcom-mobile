@@ -264,6 +264,7 @@ export const reqTransAnotherTimeout = function({ commit, state }, delay) {
 
 // 排队成功定时器，一定时间内坐席没转接则提示转接失败
 export const reqTransTimeout = function({ commit, state }, { msg, toast, delay = 0 }) {
+  state.userInfo.transTimeout && clearTimeout(state.userInfo.transTimeout)
   return new Promise((resolve) => {
     const timer = setTimeout(async() => {
       // 坐席长时间未转接，推送消息到坐席转接失败
@@ -272,8 +273,10 @@ export const reqTransTimeout = function({ commit, state }, { msg, toast, delay =
         IM.sendSystemMsg(onlineConfig)
       }
       // 本地提示转接失败
-      toast.text('转接失败，请重试', 'default')
-      await Tools.AsyncTools.sleep(2000)
+      if (toast) {
+        toast.text('转接失败，请重试', 'default')
+        await Tools.AsyncTools.sleep(2000)
+      }
       // 回调
       resolve()
       // 清空定时器
@@ -400,7 +403,7 @@ export const sendMsgs = async function({ commit, state }, msg) {
     }
     // 若间隔时间大于约定时间，则生成时间信息tip
     const now = Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss')
-    if (lastT && Tools.DateTools.isTimeDiffLongEnough(lastT, now)) {
+    if (!lastT || (lastT && Tools.DateTools.isTimeDiffLongEnough(lastT, now))) {
       const tip = {
         content: now,
         time: now,
