@@ -1,4 +1,4 @@
-import { msgStatus, msgTypes, sessionStatus } from '@/common/js/status'
+import { TIME_3_MIN, msgStatus, msgTypes, sessionStatus } from '@/common/js/status'
 
 const DateTools = {
   formatDate: function(date, format) {
@@ -34,7 +34,7 @@ const DateTools = {
   isTimeDiffLongEnough: function(cache, next) {
     const cacheT = new Date(cache.replace(/-/g, '/'))
     const nextT = new Date(next.replace(/-/g, '/'))
-    return nextT - cacheT >= 60000
+    return nextT - cacheT >= TIME_3_MIN
   },
 
   isCacheValid: function(cacheT, quality) {
@@ -451,6 +451,16 @@ let Tools = Object.assign({}, {
   paging: curry(function(f, pageSize, arr) {
     const totalPage = Math.ceil(arr.length / pageSize) // 页数
     return new Array(totalPage).fill(0).map(f)
+  }),
+
+  strWithLink: curry(function(str) {
+    // eslint-disable-next-line
+    const regUrl = /((http|https):\/\/)?[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#])?/g
+    const regList = str.match(regUrl)
+    if (!regList) {
+      return str
+    }
+    return regList.reduce((tag, item) => tag.replace(item, `<a href="${item}">${item}</a>`), str)
   }),
 
   // 取一定范围内的随机数

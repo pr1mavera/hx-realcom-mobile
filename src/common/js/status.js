@@ -37,6 +37,7 @@ export const systemMsgStatus = {
   VIDEO_TRANS_BASE_INFO: 3, // 座席端创建会话传递
   VIDEO_CS_INIT_SESSIONID_FAIL: 4, // 坐席端创建会话失败（视频）(坐席 -> 用户)
   VIDEO_CS_REQ_TRANS_FAIL: 5, // 坐席端转接超时（视频）
+  VIDEO_QUEUES_CANCEL: 6, // 用户取消排队
   // 20 - ~ 在线
   ONLINE_QUEUES_REDUCE: 20, // 在线排队位置(system -> 用户)
   ONLINE_QUEUES_SUCCESS: 21, // 客户端排队成功(system -> 用户)

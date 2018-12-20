@@ -386,8 +386,8 @@ export default {
         max-width: 100%;
         word-wrap: break-word;
         -webkit-user-select: text;
-        &.text-XH {
-
+        img, p > img {
+          max-width: 100%;
         }
         &.gift-item {
           padding-left: 2rem;
