@@ -328,7 +328,7 @@ export default {
 
       this.$vux.toast.text('重连成功', 'default')
       // 手动更新用户最后活动时间（更新定时器）
-      this.updateLastAction()
+      // this.updateLastAction()
       return 0
     },
     _showItemByType(type) {
@@ -753,7 +753,7 @@ export default {
       'toggleBar',
       'sendMsgs',
       'deleteTipMsg',
-      'updateLastAction',
+      // 'updateLastAction',
       'saveRoamMsgs'
     ])
   },

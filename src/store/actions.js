@@ -106,7 +106,7 @@ export const afterQueueSuccess = function({ commit, state }, { mode, msgsObj }) 
     sendMsgs({ commit, state }, [tip, msg])
     saveCurMsgs({ commit, state }, { origin: state.userInfo.origin, msg })
     // action 初始化用户最后响应时间
-    updateLastAction({ commit, state })
+    // updateLastAction({ commit, state })
     // 存本地localstorage
     const data = {
       csInfo: csInfo_onLine,
@@ -413,11 +413,11 @@ export const sendMsgs = async function({ commit, state }, msg) {
       commit(types.SET_MSGS, state.msgs.concat(tip))
     }
   }
-  const selfMsg = msg.filter((item) => item.isSelfSend)
-  if ((state.roomMode === roomStatus.menChat) && selfMsg.length) {
-    // 更新用户最后活动时间（更新定时器）
-    updateLastAction({ commit, state })
-  }
+  // const selfMsg = msg.filter((item) => item.isSelfSend)
+  // if ((state.roomMode === roomStatus.menChat) && selfMsg.length) {
+  //   // 更新用户最后活动时间（更新定时器）
+  //   updateLastAction({ commit, state })
+  // }
   commit(types.SET_MSGS, state.msgs.concat(msg))
   return 0
 }
