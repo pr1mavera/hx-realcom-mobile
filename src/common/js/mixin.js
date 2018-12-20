@@ -4,7 +4,7 @@ import MsgsLoader from '@/common/js/MsgsLoader'
 // import WebRTCAPI from 'webRTCAPI'
 import { ERR_OK, getImgUrl, getUserInfoByOpenID, getLoginInfo, getBotInfo, videoQueueCancel, sendMsgToBot, getSessionList, getCsAvatar, onLineQueue, getBotRoamMsgs, requestHistoryMsgs, onLineQueueCancel, chatQueueHeartBeat, getWorkTime } from '@/server/index.js'
 import Tools from '@/common/js/tools'
-import { TIME_24_HOURS, roomStatus, queueStatus, sessionStatus, systemMsgStatus, msgStatus, cardTypes, msgTypes, tipTypes } from '@/common/js/status'
+import { TIME_24_HOURS, roomStatus, queueStatus, sessionStatus, systemMsgStatus, msgStatus, cardTypes, msgTypes, tipTypes, dialogTypes } from '@/common/js/status'
 
 export const loginMixin = {
   computed: {
@@ -646,6 +646,18 @@ export const IMMixin = {
       if (msgsObj.msgStatus === msgStatus.msg && msgsObj.msgType === msgTypes.msg_normal) {
         msgsObj.content = Tools.strWithLink(msgsObj.content)
       }
+      if (msgsObj.msgStatus === msgStatus.msg && msgsObj.msgType === msgTypes.msg_timeout) { // 超时消息
+        const dialog = {
+          time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+          msgStatus: msgStatus.dialog,
+          msgType: dialogTypes.dialog_disconnect,
+          dialogInfo: {
+            disconnectTime: 5
+          }
+        }
+        this.sendMsgs([dialog])
+        return
+      }
       this.sendMsgs([msgsObj])
       this.saveCurMsgs({ origin: this.userInfo.origin, msg: msgsObj })
     },
@@ -693,7 +705,6 @@ export const IMMixin = {
       'afterServerFinish',
       'reqTransAnotherTimeout',
       'reqTransTimeout',
-      'updateLastAction',
       'afterQueueFailed'
     ])
   }
