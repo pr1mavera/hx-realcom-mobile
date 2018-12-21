@@ -1,6 +1,8 @@
 <template>
 <!-- 坐席收到礼物的列表 -->
-  <div class="container"></div>
+  <div class="container">
+    <div class="title" ></div>
+  </div>
 </template>
 
 <script>
@@ -9,6 +11,7 @@
   }
 </script>
 
-<style scoped>
-
+<style scoped lang="less">
+  .container {
+  }
 </style>
