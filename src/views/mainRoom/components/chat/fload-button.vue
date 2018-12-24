@@ -199,6 +199,7 @@ export default {
       this.$vux.confirm.show({
         title: tip,
         async onConfirm() {
+          self.$vux.toast.text('人工服务已结束')
           // 设置评价状态
           self.setAssessStatus(true)
           // 用户主动断开人工客服
@@ -208,11 +209,11 @@ export default {
           }
           const onlineConfig = await self.configSendSystemMsg(sysMsgs)
           await IM.sendSystemMsg(onlineConfig)
-          this.afterServerFinish(sessionStatus.onLine)
+          self.afterServerFinish(sessionStatus.onLine)
           await Tools.AsyncTools.sleep(2000)
           // 进入专属客服
           // self.$emit('enterVideoLineUp')
-          this.$router.push('/room/cusServ/list')
+          self.$router.push('/room/cusServ/list')
         }
       })
     },

@@ -22,7 +22,7 @@ export const videoQueue = (userId, userName, csId, csName, nickName, toCsFlag, o
 /**
  * [videoQueueCancel 客户端视频取消排队]
  */
-export const videoQueueCancel = (userId, csId, assessId, assessFlag) => http.post('RTCRoom', '/video/user/queue/cancel', { userId, csId, assessId, assessFlag })
+export const videoQueueCancel = (userId, csId, assessId, accessFlag) => http.post('RTCRoom', '/video/user/queue/cancel', { userId, csId, assessId, accessFlag })
 
 /**
  * [videoQueueHeartBeat 客户端排队心跳]
@@ -37,7 +37,7 @@ export const getCsStatus = csId => http.get('RTCRoom', `/video/room/status?csId=
 /**
  * [videoQueueHeartBeat 客户端排队心跳]
  */
-export const enterVideoRTCRoom = (roomId, userId, openId) => http.post('RTCRoom', '/comm/room/enter', { roomId, userId, openId })
+export const enterVideoRTCRoom = (roomId, userId, openId, sessionId, clientType) => http.post('RTCRoom', '/comm/room/enter', { roomId, userId, openId, sessionId, clientType })
 
 /**
  ************************************ video ************************************

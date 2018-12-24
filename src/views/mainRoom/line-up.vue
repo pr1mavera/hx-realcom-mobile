@@ -3,10 +3,10 @@
     <!--<div class="top"></div>-->
     <main class="main">
       <div class="img-box">
-          <img src="/video/static/img/lineing.gif">
-        </div>
+        <img src="/video/static/img/lineing.gif">
+      </div>
       <div class="tips">
-        <p class="tips-top" v-if="isQueuingTextShow">当前还有<label class="num">{{this.queueNum}}</label>人排队.</p>
+        <p class="tips-top" v-if="queueNum">当前还有<label class="num">{{queueNum >= 0 ? queueNum : 0}}</label>人排队.</p>
         <p class="tips-top" v-else>排队成功，正在为您转接视频客服</p>
       </div>
       <a type="reset" class="btn-cancel" @click="clickToCancelLineUp">取 消</a>
@@ -20,7 +20,7 @@
 import { mapGetters, mapMutations, mapActions } from 'vuex'
 import { IMMixin } from '@/common/js/mixin'
 import IM from '@/server/im'
-import { ERR_OK, videoQueue, videoQueueHeartBeat } from '@/server/index.js'
+import { ERR_OK, videoQueue, videoQueueHeartBeat, videoQueueCancel } from '@/server/index.js'
 import { roomStatus, queueStatus, systemMsgStatus } from '@/common/js/status'
 
 export default {
@@ -40,11 +40,10 @@ export default {
   data() {
     return {
       accessId: null,
-      isQueuingTextShow: true,
-      heart: false, // 判断心跳变量
-      heartBeatTimer: 0,
-      heartBeatReq: null,
-      heartBeatFailCount: 0 // 心跳包超时失败次数
+      videoHeart: false, // 判断心跳变量
+      videoHeartBeatTimer: null,
+      videoHeartBeatReq: null,
+      videoHeartBeatFailCount: 0 // 心跳包超时失败次数
     }
   },
   mounted() {
@@ -89,14 +88,13 @@ export default {
         this.accessId = data.accessId
         if (+data.queueNum === 0) {
           // 当前队列无人排队，直接推送排队成功的消息给坐席
-          this.isQueuingTextShow = false
           const msg = {
             code: systemMsgStatus.VIDEO_REQUEST_CS_ENTENCE,
             csId: query.csId,
             csName: query.csName,
             accessId: data.accessId,
-            startTime: data.startTime,
-            endTime: data.endTime
+            queueStartTime: data.startTime,
+            queueEndTime: data.endTime
           }
           const config = await this.configSendSystemMsg(msg)
           await IM.sendSystemMsg(config)
@@ -120,45 +118,17 @@ export default {
           })
         } else {
           this.setQueueNum(+data.queueNum)
+          // 开启心跳
+          this.startVideoHeartBeat()
         }
-        // 开启心跳
-        this.startHeartBeat()
       } else {
         console.log('error in videoQueue')
       }
     },
-    startHeartBeat() {
-      this.heart = true
-      const query = this.$route.query
-      this.heartBeatTimer = setInterval(async() => {
-        console.warn('====== 我现在请求心跳 ======')
-        if (!this.heart || !query.csId) {
-          // 非常规退出 & 浏览器回退
-          this.stopHeartBeat()
-          return
-        }
-        this.heartBeatReq = await videoQueueHeartBeat(query.csId, this.userInfo.userId)
-        if (this.heartBeatReq.code === ERR_OK) {
-          console.info('心跳成功')
-          this.heartBeatFailCount = 0
-        } else {
-          this.heartBeatFailCount++
-          if (this.heartBeatFailCount > 2) {
-            console.error('心跳失败 辣')
-          }
-        }
-      }, 7000)
-    },
-    stopHeartBeat() {
-      this.heart = false
-      this.heartBeatTimer = clearInterval(this.heartBeatTimer)
-      if (this.heartBeatReq) {
-        this.heartBeatReq = null
-      }
-    },
     clickToCancelLineUp() {
       // 停止心跳
-      this.heart && this.stopHeartBeat()
+      this.stopVideoHeartBeat()
+
       const VIDEO_QUEUES_CANCEL_msg = {
         code: systemMsgStatus.VIDEO_QUEUES_CANCEL,
         csId: this.$route.query.csId
@@ -168,16 +138,42 @@ export default {
       // 排队失败返回
       this.queueFailedReturn()
 
-      !this.isQueuingTextShow && this.reqTransTimeout({
+      this.queueNum === 0 && this.reqTransTimeout({
         msg: VIDEO_QUEUES_CANCEL_msg
       })
     },
-    // confirmToVideo() {
-    //   // 停止心跳
-    //   this.stopHeartBeat()
-    //   this.$router.replace({path: `/room/chat?openId=${this.userInfo.openId}`})
-    //   this.afterQueueSuccess(roomStatus.videoChat)
-    // },
+    startVideoHeartBeat() {
+      this.videoHeart = true
+      const query = this.$route.query
+      this.videoHeartBeatTimer = setInterval(async() => {
+        console.warn('====== 我现在请求心跳 ======')
+        if (!this.videoHeart || !this.$route.query.csId) {
+          // 非常规退出 & 浏览器回退
+          this.stopVideoHeartBeat()
+          return
+        }
+        this.videoHeartBeatReq = await videoQueueHeartBeat(query.csId, this.userInfo.userId)
+        if (this.videoHeartBeatReq.code === ERR_OK) {
+          console.info('心跳成功, 心跳ID:', this.videoHeartBeatTimer)
+          this.videoHeartBeatFailCount = 0
+        } else {
+          this.videoHeartBeatFailCount++
+          if (this.videoHeartBeatFailCount > 2) {
+            console.error('心跳失败 辣')
+          }
+        }
+      }, 7000)
+      debugger
+    },
+    stopVideoHeartBeat() {
+      this.videoHeart = false
+      debugger
+      clearInterval(this.videoHeartBeatTimer)
+      if (this.videoHeartBeatReq) {
+        this.videoHeartBeatReq = null
+        this.videoHeartBeatTimer = null
+      }
+    },
     ...mapMutations({
       setUserInfo: 'SET_USER_INFO',
       setQueueMode: 'SET_QUEUE_MODE',

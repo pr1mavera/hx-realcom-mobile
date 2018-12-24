@@ -2,7 +2,7 @@ import { mapGetters, mapMutations, mapActions } from 'vuex'
 import IM from '@/server/im'
 import MsgsLoader from '@/common/js/MsgsLoader'
 // import WebRTCAPI from 'webRTCAPI'
-import { ERR_OK, getImgUrl, getUserInfoByOpenID, getLoginInfo, getBotInfo, videoQueueCancel, sendMsgToBot, getSessionList, getCsAvatar, onLineQueue, getBotRoamMsgs, requestHistoryMsgs, onLineQueueCancel, chatQueueHeartBeat, getWorkTime } from '@/server/index.js'
+import { ERR_OK, getImgUrl, getUserInfoByOpenID, getLoginInfo, getBotInfo, sendMsgToBot, getSessionList, getCsAvatar, onLineQueue, getBotRoamMsgs, requestHistoryMsgs, onLineQueueCancel, chatQueueHeartBeat, getWorkTime } from '@/server/index.js'
 import Tools from '@/common/js/tools'
 import { TIME_24_HOURS, roomStatus, queueStatus, sessionStatus, systemMsgStatus, msgStatus, cardTypes, msgTypes, tipTypes, dialogTypes } from '@/common/js/status'
 
@@ -454,22 +454,26 @@ export const IMMixin = {
         /* ******************************** 视频 ******************************** */
         // 人数减少（视频）
         case systemMsgStatus.VIDEO_QUEUES_REDUCE:
-          const video_num = this.queueNum - 1
+          const video_num = +this.queueNum - 1
+          debugger
           this.setQueueNum(video_num)
           break
 
         // 客户端排队成功（视频）
         case systemMsgStatus.VIDEO_QUEUES_SUCCESS:
-          this.isQueuingTextShow = false
           // 停止心跳
-          this.stopHeartBeat()
+          debugger
+          // this.stopVideoHeartBeat()
+
+          this.setQueueNum(0)
+
           const videoQueueSuccMsg = {
             code: systemMsgStatus.VIDEO_REQUEST_CS_ENTENCE,
             csId: this.$route.query.csId,
             csName: this.$route.query.csName,
             accessId: msgsObj.accessId,
-            startTime: msgsObj.startTime,
-            endTime: msgsObj.endTime
+            queueStartTime: msgsObj.queueStartTime,
+            queueEndTime: msgsObj.queueEndTime
           }
           const videoConfig = await this.configSendSystemMsg(videoQueueSuccMsg)
           await IM.sendSystemMsg(videoConfig)
@@ -510,7 +514,7 @@ export const IMMixin = {
           csInfo_video.csNick = msgsObj.csNick
           csInfo_video.likesCount = msgsObj.likesCount
           csInfo_video.csCode = msgsObj.csCode
-
+          debugger
           // 视频坐席基本信息
           this.setCsInfo(csInfo_video)
           // 设置房间ID
@@ -523,7 +527,7 @@ export const IMMixin = {
             status: queueStatus.queueSuccess
           })
           // 延迟三秒显示
-          Tools.AsyncTools.sleep(4000)
+          await Tools.AsyncTools.sleep(4000)
 
           this.$router.replace({path: `/room/chat?openId=${this.userInfo.openId}&origin=${this.userInfo.origin}`})
           this.afterQueueSuccess({
@@ -569,8 +573,8 @@ export const IMMixin = {
             csId: msgsObj.csId,
             csName: msgsObj.csName || '',
             csNick: msgsObj.csNick || '',
-            startTime: msgsObj.queueStartTime,
-            endTime: msgsObj.queueEndTime
+            queueStartTime: msgsObj.queueStartTime,
+            queueEndTime: msgsObj.queueEndTime
           }
           const onlineConfig = await this.configSendSystemMsg(onlineQueueSuccMsg)
           await IM.sendSystemMsg(onlineConfig)
@@ -673,9 +677,9 @@ export const IMMixin = {
         }
       }
     },
-    async videoQueueCancelAPI(assessFlag) {
+    async videoQueueCancelAPI(accessFlag) {
       const query = this.$route.query || 'WE'
-      const res = await videoQueueCancel(this.userInfo.userId, query.csId, this.accessId, assessFlag)
+      const res = await videoQueueCancel(this.userInfo.userId, query.csId, this.accessId, accessFlag)
       return res.result.code === ERR_OK
       // if (res.result.code === ERR_OK) {
       //   console.log('===============================> 取消排队 啊 取消排队 <===============================')
@@ -1312,8 +1316,8 @@ export const onLineQueueMixin = {
           csId: data.csId,
           csName: data.csName || '',
           csNick: data.csNick || '',
-          startTime: data.startTime,
-          endTime: data.endTime
+          queueStartTime: data.startTime,
+          queueEndTime: data.endTime
         }
         const config = await this.configSendSystemMsg(msg)
         await IM.sendSystemMsg(config)
@@ -1407,9 +1411,11 @@ export const onLineQueueMixin = {
     },
     stopHeartBeat() {
       this.heart = false
-      this.heartBeatTimer = clearInterval(this.heartBeatTimer)
+      const id = this.heartBeatTimer
+      clearInterval(id)
       if (this.heartBeatReq) {
         this.heartBeatReq = null
+        this.heartBeatTimer = 0
       }
     },
     botSendLeaveMsg() {

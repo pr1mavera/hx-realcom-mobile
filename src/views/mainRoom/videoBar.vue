@@ -129,6 +129,7 @@ export default {
       'userInfo',
       'csInfo',
       'roomId',
+      'sessionId',
       'hasAssess',
       'serverTime'
     ])
@@ -187,11 +188,12 @@ export default {
     readyToVideo() {
       // IM.joinGroup(this.roomId, this.userInfo.userId)
       this.initRTC(this.roomId)
-      this.enterVideoRTCRoomAPI(this.roomId, this.userInfo.userId, this.userInfo.openId)
+      this.enterVideoRTCRoomAPI(this.csInfo.csId, this.userInfo.userId, this.userInfo.openId, this.sessionId)
     },
-    async enterVideoRTCRoomAPI(roomId, userId, openId) {
-      const res = await enterVideoRTCRoom(roomId, userId, openId)
-      debugger
+    async enterVideoRTCRoomAPI(roomId, userId, openId, sessionId) {
+      const enterVideoStatus = window.sessionStorage.getItem('enterVideoStatus')
+      const clientType = enterVideoStatus === 'Android' ? 'Android' : 'iOS'
+      const res = await enterVideoRTCRoom(roomId, userId, openId, sessionId, clientType)
       if (res.result.code === ERR_OK) {
         // this.$vux.toast.text('进房成功')
       } else {
