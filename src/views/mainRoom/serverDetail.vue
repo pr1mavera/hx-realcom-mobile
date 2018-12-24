@@ -90,7 +90,7 @@
           <svg class="icon icon-arrow" aria-hidden="true"><use xlink:href="#icon-ziyuanldpi"></use></svg>
         </span>
       </div>
-      <send-gift style="height: unset"
+      <send-gift style="height: unset;background-color: unset"
                  :giftType="giftType"
       ></send-gift>
     </div>
@@ -252,6 +252,7 @@
     height: unset;
     padding-bottom: 6.5rem;
     background: @bg-normal;
+    box-sizing: border-box;
     .icon {
       width: 1.3rem;
       height: 1.2rem;
@@ -260,6 +261,7 @@
     }
     .container-top {
       background: url("/video/static/img/service/csDetailBg.png") no-repeat;
+      box-sizing: border-box;
       background-size: contain;
       background-color: #ffffff;
       .img {
@@ -360,7 +362,7 @@
         .icon-arrow {
           width: 1rem;
           height: 1rem;
-          vertical-align: -.15em;
+          vertical-align: .025em;
         }
       }
     }
@@ -403,6 +405,7 @@
       height: 5rem;
       font-size: 1.8rem;
       color: @text-lighter;
+      box-sizing: border-box;
       text-align: center;
       background: linear-gradient(to right, #FF905B, #FF7EAB);
       .btn {
@@ -412,9 +415,6 @@
         line-height: 3.5rem;
         align-self: center;
       }
-      /*.btn-lin-up {*/
-        /*border-left: 2px solid #ffffff;*/
-      /*}*/
     }
     .filter {
       z-index: 2;

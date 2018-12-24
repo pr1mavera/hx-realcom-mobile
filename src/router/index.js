@@ -16,6 +16,7 @@ const leaveMessage = () => import('@/views/mainRoom/leave-message')
 const cusServ = () => import('@/views/mainRoom/cusServ')
 const csList = () => import('@/views/mainRoom/components/service/cs-list')
 const csAdd = () => import('@/views/mainRoom/components/service/cs-add')
+const csGiftsList = () => import('@/views/mainRoom/components/service/cs-gifts-list')
 
 Vue.use(Router)
 
@@ -61,6 +62,11 @@ export default new Router({
               path: '/room/serverDetail',
               name: 'serverDetail',
               component: serverDetail
+            },
+            {
+              path: '/room/csGiftsList',
+              name: 'csGiftsList',
+              component: csGiftsList
             }
           ]
         }

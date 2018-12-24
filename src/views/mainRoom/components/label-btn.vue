@@ -1,8 +1,9 @@
 <template>
   <div class="label-btn-box">
-    <swiper v-model="currentPage" @on-index-change="changePage" height="9.5rem" v-if="labelType === 'all'" style="" :show-dots="showDots" dots-class="custom-bottom" dots-position="center">
+    <swiper v-model="currentPage" @on-index-change="changePage" height="9.5rem"
+            v-if="true" style="" :show-dots="showDots" dots-class="custom-bottom" dots-position="center">
       <swiper-item v-for="(pages, index) in btnList" :key="index">
-        <!--{{index}}-->
+        <!--{{index}} labelType === 'all' -->
         <checker v-model="selTags" type="checkbox" default-item-class="tags-default" @on-change="selChanege"
                  selected-item-class="tags-selected">
           <checker-item
@@ -15,8 +16,9 @@
         </checker>
       </swiper-item>
     </swiper>
-    <!--labels for me-->
-    <checker v-if="labelType === 'notAll'" type="checkbox" default-item-class="tags-default">
+
+    <!--labels for me labelType === 'notAll' -->
+    <checker v-if="false" type="checkbox" default-item-class="tags-default">
       <checker-item :disabled="disable"
                     v-for="(item, index) in btnList"
                     :key="index"
@@ -210,11 +212,15 @@
 .label-btn-box {
   /*未选中状态的样式*/
   .tags-default {
+    width: 5rem;
     color: #FF959C;
     padding: .6rem 0.8rem;
     margin: 1rem 0.5rem;
     border-radius: 5px;
     border: 1px solid #FF959C;
+    white-space: nowrap; // 强制不换行
+    text-overflow: ellipsis; // 超出显示省略号
+    overflow: hidden;
   }
   /*选中之后的状态*/
   .tags-selected {
