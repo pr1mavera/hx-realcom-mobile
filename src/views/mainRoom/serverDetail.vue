@@ -82,7 +82,7 @@
     <!-- the gifts which send to me -->
     <div class="container-item">
       <div class="container-item-tit">
-        <span>送礼物</span>
+        <span @click="showGifts">送礼物</span>
         <span style="color: #909090;" @click="showGiftsRecord">
           <!--收到礼物-->
           <!--<label style="color: #FF959C;">{{giftNum}}</label> 份-->
@@ -127,6 +127,13 @@
       <!--<a class="btn btn-lin-up" v-if="enterVideo" @click="enterLinUp">立即视频</a>-->
     </div>
 
+    <!-- 给客服发送礼物 -->
+    <div class="gift-send" v-if="giftSend" id="giftsSend">
+      <send-gift style="height: unset;background-color: unset"
+                 :giftType="allGifts"
+      ></send-gift>
+    </div>
+
     <!-- 自定义遮罩层 -->
     <div class="filter" v-show="filter">
       <swiper id="swiperImg" class="swiper" dots-class="custom-bottom" dots-position="center">
@@ -160,7 +167,9 @@
        serTimes: '0',
        labelType: 'notAll',
        giftType: 'notAll',
+       allGifts: 'all',
        giftNum: '300', // 收到的礼物的份数
+       giftSend: false,
        filter: false
      }
     },
@@ -179,9 +188,13 @@
     mounted() {
       let self = this
       const bigImg = document.getElementById('swiperImg')
-      const iconImg = document.getElementById('iconImg')
+      const gifts = document.getElementById('giftsSend')
+
       document.addEventListener('click', (e) => {
-        if (!bigImg.contains(e.target) && !iconImg.contains(e.target)) self.filter = false
+        // 发送礼物组件隐藏
+        if (!gifts.contains(e.target)) self.giftSend = false
+        // 点击图片外的其他区域 大图模式隐藏
+        if (!bigImg.contains(e.target)) self.filter = false
       })
 
       this.$nextTick(() => {
@@ -231,9 +244,19 @@
         this.$emit('clickToLineUp', csData)
       },
 
+      // 点击了送礼物
+      showGifts() {
+        this.giftSend = true
+      },
+
       // showGiftsRecord
       showGiftsRecord() {
-        alert('查看礼物记录')
+        this.$router.push({
+          path: '/room/csGiftsList',
+          query: {
+            csId: this.$route.query.cusSerId
+          }
+        })
       },
 
       // showCsImg
@@ -415,6 +438,13 @@
         line-height: 3.5rem;
         align-self: center;
       }
+    }
+    .gift-send{
+      position: fixed;
+      bottom: 0;
+      width: 100vw;
+      background-color: #ffffff;
+      box-shadow: 0 -3px 10px 0 rgba(147, 147, 147, 0.1);
     }
     .filter {
       z-index: 2;

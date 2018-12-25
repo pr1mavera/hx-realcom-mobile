@@ -1,6 +1,6 @@
 <template>
   <div class="label-btn-box">
-    <swiper v-model="currentPage" @on-index-change="changePage" height="9.5rem"
+    <swiper v-model="currentPage" @on-index-change="changePage" height="10rem"
             v-if="true" style="" :show-dots="showDots" dots-class="custom-bottom" dots-position="center">
       <swiper-item v-for="(pages, index) in btnList" :key="index">
         <!--{{index}} labelType === 'all' -->
@@ -17,7 +17,7 @@
       </swiper-item>
     </swiper>
 
-    <!--labels for me labelType === 'notAll' -->
+    <!--labels for me labelType === 'notAll' unused -->
     <checker v-if="false" type="checkbox" default-item-class="tags-default">
       <checker-item :disabled="disable"
                     v-for="(item, index) in btnList"

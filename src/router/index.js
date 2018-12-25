@@ -78,8 +78,8 @@ export default new Router({
       component: share
     },
     {
-      path: '/',
-      redirect: '/room/chat'
+      path: '/'
+      // redirect: '/room/chat'
     }
   ],
   base: '/video/'
