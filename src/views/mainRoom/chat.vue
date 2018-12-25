@@ -248,13 +248,13 @@ export default {
       this._initScroll()
       this._initPullDownRefresh()
       await this._initChat()
-      this.chatScroll.refresh()
-      this.chatScroll.scrollToElement(this.$refs.chatContentEnd, 0)
     })
   },
   activated() {
-    this.$nextTick(() => {
+    this.$nextTick(async() => {
+      await Tools.AsyncTools.sleep(10)
       this.chatScroll.refresh()
+      this.chatScroll.scrollToElement(this.$refs.chatContentEnd, 400)
     })
   },
   methods: {
@@ -305,6 +305,11 @@ export default {
       let data = Tools.CacheTools.getCacheData({ key: `${this.userInfo.origin}_curServInfo`, check: this.userInfo.userId, quality: TIME_5_MIN })
       if (!data) {
         // 当前无缓存
+        return false
+      }
+      if (data === undefined) {
+        // 缓存过期
+        this.$vux.toast.text('上次服务已结束')
         return false
       }
       const res = await getSessionStatus(data.sessionId)
@@ -534,7 +539,7 @@ export default {
       this.resetExtendBar()
       this._inputBlur()
       this.inputEle.innerText = ''
-      text = text.replace(/<\/?.+?>/g, '').replace(/&nbsp;/g, '')
+      text = text.replace(/&nbsp;/g, '')
       text = Tools.strWithLink(text)
 
       if (text && text.trim()) {
@@ -759,7 +764,7 @@ export default {
   },
   watch: {
     msgs() {
-      this.$nextTick(async() => {
+      this.$nextTick(() => {
         // 若当前为在线服务，则更新缓存
         // if (this.roomMode === roomStatus.menChat) {
         //   Tools.CacheTools.updateCacheData({
@@ -768,7 +773,7 @@ export default {
         //     timestamp: new Date().getTime()
         //   })
         // }
-        await Tools.AsyncTools.sleep(30)
+        // await Tools.AsyncTools.sleep(10)
         this.chatScroll.refresh()
         this.chatScroll.scrollToElement(this.$refs.chatContentEnd, 400)
       })

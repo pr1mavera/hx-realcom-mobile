@@ -111,7 +111,7 @@ export default {
       this.$emit('chatInputChange', this.inputText)
     },
     chatCommit() {
-      const str = Tools.CharTools.utf16toEntities(this.$refs.inputContent.innerHTML)
+      const str = Tools.CharTools.utf16toEntities(this.$refs.inputContent.innerText)
       // 存发送过的表情
       this.storageEmoji(str)
       // 提交发送

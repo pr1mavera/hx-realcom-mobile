@@ -17,6 +17,7 @@
       @showGiftAnime="showGiftAnime"
     ></videoBar>
     <div v-transfer-dom>
+      <!-- <div class="dialog-mask-section"></div> -->
       <x-dialog v-model="isVideoOverReportShow" :dialog-style="{'max-width': '100%', width: '100%', height: '100%', 'background-color': 'transparent'}">
         <video-over-toast
           :csId="csInfo.csId"
@@ -129,7 +130,6 @@ export default {
   //   this.initRoom()
   // },
   activated() {
-    debugger
     this.initRoom()
   },
   mounted() {
@@ -154,7 +154,6 @@ export default {
       }
       else if (enterVideoStatus === 'iOS-Safari') { // Safari环境
         const res = await getQueueTicket(query.openId)
-        debugger
         if (res.result.code === ERR_OK && res.data.queueticket) {
           this.afterEnterSafariQueue(res.data.queueticket)
           return
@@ -182,7 +181,9 @@ export default {
     },
     // 校验异常
     iOSVideoFailed() {
-      this.setRoomMode(roomStatus.videoChat)
+      // this.setRoomMode(roomStatus.videoChat)
+      const query = this.$route.query
+      this.$router.replace({path: `/room?openId=${query.openId}&origin=${query.origin || 'WE'}`})
       this.setAssessStatus(true)
       this.setServerTime('00:00')
     },

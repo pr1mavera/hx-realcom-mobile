@@ -1,7 +1,6 @@
 import * as types from './mutation-types'
 import Tools from '@/common/js/tools'
 import IM from '@/server/im'
-// import { isTimeDiffLongEnough, formatDate } from '@/common/js/dateConfig.js'
 import { TIME_3_MIN, TIME_5_MIN, MSG_PAGE_SIZE, sessionStatus, toggleBarStatus, roomStatus, queueStatus, msgStatus, msgTypes, dialogTypes, tipTypes, systemMsgStatus } from '@/common/js/status'
 import { ERR_OK, createSession, getCsAvatar, transTimeoutRedistribution } from '@/server/index.js'
 
@@ -154,8 +153,8 @@ export const configSendSystemMsg = function({ state }, msgsObj) {
         origin: state.userInfo.origin || 'WE',
         robotSessionId: state.sessionId,
         accessId: msgsObj.accessId || '',
-        queueStartTime: msgsObj.startTime,
-        queueEndTime: msgsObj.endTime
+        queueStartTime: msgsObj.queueStartTime,
+        queueEndTime: msgsObj.queueEndTime
       },
       desc: '',
       ext: ''
@@ -182,7 +181,6 @@ export const afterServerFinish = function({ commit, state }, mode) {
     status: queueStatus.noneQueue
   })
   commit(types.SET_ASSESS_STATUS, false)
-  commit(types.SET_SERVER_TIME, '')
   commit(types.SET_ROOM_MODE, roomStatus.AIChat)
   initSession({ commit, state })
   const tip = {
@@ -193,6 +191,7 @@ export const afterServerFinish = function({ commit, state }, mode) {
   }
   sendMsgs({ commit, state }, [tip])
   if (mode === sessionStatus.video) {
+    commit(types.SET_SERVER_TIME, '')
     commit(types.SET_ROOM_ID, '')
   } else
   if (mode === sessionStatus.onLine) {

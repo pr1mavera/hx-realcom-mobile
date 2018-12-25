@@ -211,8 +211,8 @@ const IM = (() => {
       robotSessionId: data.robotSessionId,
       sessionId: data.sessionId,
       accessId: data.accessId,
-      queueStartTime: data.queueStartTime,
-      queueEndTime: data.queueEndTime,
+      queueStartTime: data.queueStartTime || data.startTime,
+      queueEndTime: data.queueEndTime || data.endTime,
       isSystem: true,
       desc
     }

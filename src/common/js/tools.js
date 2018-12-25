@@ -1,4 +1,5 @@
 import { TIME_3_MIN, msgStatus, msgTypes, sessionStatus } from '@/common/js/status'
+const _ = require('ramda')
 
 const DateTools = {
   formatDate: function(date, format) {
@@ -364,11 +365,11 @@ const CacheTools = {
     const cache = window.localStorage.getItem(key) || ''
     if (!cache) {
       // 缓存为null
-      return false
+      return null
     }
     if (quality && !DateTools.isCacheValid(cache.parseJSON().timestamp, quality)) {
       // 缓存过期
-      return false
+      return undefined
     }
     if (cache.parseJSON().check !== check) {
       // 缓存校验不通过
@@ -405,16 +406,6 @@ const CacheTools = {
   }
 }
 
-const curry = function(fn) {
-  const _c = (restNum, argsList) => {
-    // 传递给执行函数的参数是否完整（剩余待传递的参数是否为0） ? 调用fn : 返回递归
-    return restNum === 0
-    ? fn(...argsList)
-    : (...x) => _c(restNum - x.length, argsList.concat(x))
-  }
-  return _c(fn.length, [])
-}
-
 let Tools = Object.assign({}, {
   DateTools: Object.create(DateTools),
   AsyncTools: Object.create(AsyncTools),
@@ -423,44 +414,22 @@ let Tools = Object.assign({}, {
   RectTools: Object.create(RectTools),
   MsgsFilterTools: Object.create(MsgsFilterTools),
   CacheTools: Object.create(CacheTools),
-
-  // 柯里化
-  curry: function(fn) {
-    const _c = (restNum, argsList) => {
-      // 传递给执行函数的参数是否完整（剩余待传递的参数是否为0） ? 调用fn : 返回递归
-      return restNum === 0
-      ? fn(...argsList)
-      : (...x) => _c(restNum - x.length, argsList.concat(x))
-    }
-    return _c(fn.length, [])
-  },
-
-  // 组合
-  compose: (f, g) => (x) => f(g(x)),
-
-  // map :: (a -> b) -> [a] -> [b]
-  map: curry((f, arr) => arr.map(f)),
-
-  // filter :: (a -> bool) -> [a] -> [a]
-  filter: curry((f, arr) => arr.filter(f)),
-
-  // reduce :: (b -> a -> b) -> b -> [a] -> b
-  reduce: curry((f, val, arr) => arr.reduce(f, val)),
-
+  reduce: _.reduce,
   // paging :: (a -> b) -> c -> [a] -> [b]
-  paging: curry(function(f, pageSize, arr) {
+  paging: _.curry(function(f, pageSize, arr) {
     const totalPage = Math.ceil(arr.length / pageSize) // 页数
     return new Array(totalPage).fill(0).map(f)
   }),
-
-  strWithLink: curry(function(str) {
+  strWithLink: _.curry(function(str) {
     // eslint-disable-next-line
-    const regUrl = /((http|https):\/\/)?[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#])?/g
-    const regList = str.match(regUrl)
-    if (!regList) {
-      return str
-    }
-    return regList.reduce((tag, item) => tag.replace(item, `<a href="${item}">${item}</a>`), str)
+    const regUrl = /(<(a|\/a).*?>|((http|https):\/\/)?[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#]))/gi
+    const regA = /<(a|\/a).*?>/g
+    // 数组是否为空，或者为null
+    const isEmpty = (arr) => arr && arr.length === 0
+    // 字符串是否为node节点a
+    const notANode = _.compose(isEmpty, _.match(regA))
+    const getStrWithLink = _.replace(regUrl, item => notANode(item) ? `<a href="${item}" target="_blank">${item}</a>` : item)
+    return getStrWithLink(str)
   }),
 
   // 取一定范围内的随机数
