@@ -2,11 +2,12 @@
   <div
     class="send-gift"
     :style="setTheme">
+    <!-- 当坐席收到的礼物数大于99 时显示‘99+’ （不推荐正则嵌套的写法...）-->
     <send-extend-item
       v-for="(item, index) in giftMap"
       :key="index"
       :icon="`/video/static/img/gift/${item.giftId}.png`"
-      :text="item.giftName + ' ' + (item.giftCount === undefined ? '' : item.giftCount)"
+      :text="item.giftName + ' ' + (item.giftCount === undefined ? '' : (item.giftCount > 99 ? '99+' : item.giftCount))"
       @click.native.prevent="$emit('selectGift', item)"
     ></send-extend-item>
     <!-- 当客服还没有收到礼物时 -->
