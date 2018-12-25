@@ -2,7 +2,7 @@ import { mapGetters, mapMutations, mapActions } from 'vuex'
 import IM from '@/server/im'
 import MsgsLoader from '@/common/js/MsgsLoader'
 // import WebRTCAPI from 'webRTCAPI'
-import { ERR_OK, getImgUrl, getUserInfoByOpenID, getLoginInfo, getBotInfo, sendMsgToBot, getSessionList, getCsAvatar, onLineQueue, getBotRoamMsgs, requestHistoryMsgs, onLineQueueCancel, chatQueueHeartBeat, getWorkTime } from '@/server/index.js'
+import { ERR_OK, getImgUrl, getUserInfoByOpenID, getLoginInfo, getBotInfo, sendMsgToBot, getSessionList, getCsAvatar, onLineQueue, getBotRoamMsgs, requestHistoryMsgs, videoQueueCancel, onLineQueueCancel, chatQueueHeartBeat, getWorkTime } from '@/server/index.js'
 import Tools from '@/common/js/tools'
 import { TIME_24_HOURS, roomStatus, queueStatus, sessionStatus, systemMsgStatus, msgStatus, cardTypes, msgTypes, tipTypes, dialogTypes } from '@/common/js/status'
 
@@ -203,7 +203,9 @@ export const loginMixin = {
 export const RTCRoomMixin = {
   data() {
     return {
-      RTC: null
+      RTC: null,
+      qualityReqToast: false,
+      bpsOverCount: 0
     }
   },
   computed: {
@@ -228,37 +230,44 @@ export const RTCRoomMixin = {
             console.info('ENTER RTC ROOM OK')
         }, (result) => {
           if (result) {
-            console.error('ENTER RTC ROOM failed')
+            console.error('ENTER RTC ROOM failed', result)
             // self.goHomeRouter()
           }
         })
+        // this.RTC.getStats({
+        //   interval: 5000
+        // }, this.RTCStreamControl)
       }, (error) => {
         console.error(error)
       })
+
+      this.RTC.on('onQualityReport', this.handleRTCQualityReport)
 
       this.RTC.on('onLocalStreamAdd', (info) => {
         const videoElement = document.getElementById('localVideo')
         // const fullScreenBtn = document.getElementById('fullScreenBtn')
         if (info && info.stream) {
           videoElement.srcObject = info.stream
-          videoElement.muted = true
-          videoElement.autoplay = true
-          videoElement.playsinline = true
-          videoElement.play()
+          // videoElement.muted = true
+          // videoElement.autoplay = true
+          // videoElement.playsinline = true
+          // videoElement.play()
         }
       })
       this.RTC.on('onRemoteStreamUpdate', (info) => {
         const videoElement = document.getElementById('remoteVideo')
         if (info && info.stream) {
           videoElement.srcObject = info.stream
-          videoElement.autoplay = true
-          videoElement.playsinline = true
+          // videoElement.autoplay = true
+          // videoElement.playsinline = true
           videoElement.play()
         }
       })
 
       this.RTC.on('onRemoteStreamRemove', (info) => {
-        this.hangUpVideo()
+        // this.hangUpVideo()
+        // 停止推流
+        this.quitRTC()
       })
 
       this.RTC.on('onKickOut', () => {
@@ -266,13 +275,13 @@ export const RTCRoomMixin = {
         // self.goHomeRouter()
       })
 
-      this.RTC.on('onWebSocketClose', () => {
-        console.warn('websocket断开')
-        this.$vux.toast.show({
-          text: '当前websocket已断开',
-          position: 'top'
-        })
-      })
+      // this.RTC.on('onWebSocketClose', () => {
+      //   console.warn('websocket断开')
+      //   this.$vux.toast.show({
+      //     text: '当前websocket已断开',
+      //     position: 'top'
+      //   })
+      // })
 
       this.RTC.on('onRelayTimeout', () => {
         console.warn('服务器超时断开')
@@ -281,12 +290,52 @@ export const RTCRoomMixin = {
           position: 'top'
         })
       })
+
+      this.RTC.on('onWebSocketNotify', (info) => {
+        // errorCode=10035，表示websocket被关闭
+        // 凡是webSocket流的关闭都会触发这个事件,将挂断操作从onRemoteStreamRemove移动到这来
+        // console.log(info)
+        (info.errorCode === 10035) && this.hangUpVideo()
+      })
     },
-    quitRTC() {
-      this.RTC && this.RTC.quit({}, () => {
+    async quitRTC() {
+      await this.getVideoScreenShot()
+      this.RTC && this.RTC.quit(() => {
         console.log('退出音视频房间 成功 辣')
       }, () => {
         console.error('退出音视频房间 失败 辣')
+      })
+    },
+    handleRTCQualityReport(data) {
+      const daley = data.WebRTCQualityReq.uint32_delay
+      const bps = data.WebRTCQualityReq.uint32_total_send_bps
+      console.log('video delay', data.WebRTCQualityReq)
+      if (bps === 0) {
+        this.bpsOverCount += 1
+        if (this.bpsOverCount === 10) {
+          this.showConnectStatus('当前网络太差，无法建立视频通话')
+          // 直接挂断
+          this.$emit('videoFailed')
+          // 停止推流
+          this.quitRTC()
+        }
+      } else {
+        // 重置
+        this.bpsOverCount = 0
+      }
+      const isDelayOver = Tools.delayOver(daley)
+      if (!this.qualityReqToast && isDelayOver(1000)) {
+        this.showConnectStatus('当前网络状况不佳')
+        this.qualityReqToast = true
+      }
+    },
+    showConnectStatus(text) {
+      this.$vux.toast.show({
+        type: 'text',
+        text,
+        position: 'top',
+        width: '80%',
+        time: 5000
       })
     }
     // afterCreateRoom(courseInfo) {
@@ -455,14 +504,12 @@ export const IMMixin = {
         // 人数减少（视频）
         case systemMsgStatus.VIDEO_QUEUES_REDUCE:
           const video_num = +this.queueNum - 1
-          debugger
           this.setQueueNum(video_num)
           break
 
         // 客户端排队成功（视频）
         case systemMsgStatus.VIDEO_QUEUES_SUCCESS:
           // 停止心跳
-          debugger
           // this.stopVideoHeartBeat()
 
           this.setQueueNum(0)
@@ -514,7 +561,6 @@ export const IMMixin = {
           csInfo_video.csNick = msgsObj.csNick
           csInfo_video.likesCount = msgsObj.likesCount
           csInfo_video.csCode = msgsObj.csCode
-          debugger
           // 视频坐席基本信息
           this.setCsInfo(csInfo_video)
           // 设置房间ID

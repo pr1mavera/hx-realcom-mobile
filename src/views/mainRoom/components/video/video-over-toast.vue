@@ -1,5 +1,5 @@
 <template>
-  <div class="video-over-toast">
+  <div class="video-over-toast" :class="{ 'status-bg': !status }">
     <div class="header">
       <div class="avatar">
         <img v-lazy="avatar">
@@ -32,6 +32,9 @@ export default {
     },
     time: {
       type: String
+    },
+    status: {
+      type: Boolean
     }
   },
   data() {
@@ -61,10 +64,14 @@ export default {
   height: 100%;
   text-align: center;
   color: @text-lighter;
+  &.status-bg {
+    background-color: #444;
+  }
   .header {
     width: 8.6rem;
     height: 14rem;
     margin: 3.6rem auto;
+    display: inline-block;
     .avatar {
       width: 8.6rem;
       height: 8.6rem;

@@ -54,6 +54,7 @@ export default {
     removeCs(index) {
       // debugger
       this.myCs.splice(index, 1)
+      this.myCs.length === 0 && this.$router.replace('/room/cusServ/add')
     },
     showShare(csId, csName) {
       this.$emit('showShare', csId, csName)
@@ -75,9 +76,9 @@ export default {
       const status = Number(res.data.status || this.csSelected.status)
       // 只有就绪和忙碌可以排队
       switch (true) {
-        case status === 1:
+        case status === 1 || status === 7:
           this.$vux.alert.show({
-            title: '啊呀，当前客服暂时还没准备好呢~'
+            title: '啊呀，客服暂时还没准备好呢~'
           })
           break
         case status === 3 || status === 5:
@@ -94,12 +95,12 @@ export default {
           break
         case status === 4:
           this.$vux.alert.show({
-            title: '啊呀，当前客服正在休息呐~'
+            title: '啊呀，客服正在休息呐~'
           })
           break
         case status === 2:
           this.$vux.alert.show({
-            title: '啊呀，当前客服暂时不在呢~'
+            title: '啊呀，客服暂时不在呢~'
           })
           break
       }
