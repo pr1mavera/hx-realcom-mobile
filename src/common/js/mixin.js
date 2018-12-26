@@ -4,6 +4,7 @@ import MsgsLoader from '@/common/js/MsgsLoader'
 // import WebRTCAPI from 'webRTCAPI'
 import { ERR_OK, getImgUrl, getUserInfoByOpenID, getLoginInfo, getBotInfo, sendMsgToBot, getSessionList, getCsAvatar, onLineQueue, getBotRoamMsgs, requestHistoryMsgs, videoQueueCancel, onLineQueueCancel, chatQueueHeartBeat, getWorkTime } from '@/server/index.js'
 import Tools from '@/common/js/tools'
+import { Either } from '@/common/js/container/either'
 import { TIME_24_HOURS, roomStatus, queueStatus, sessionStatus, systemMsgStatus, msgStatus, cardTypes, msgTypes, tipTypes, dialogTypes } from '@/common/js/status'
 
 export const loginMixin = {
@@ -291,11 +292,15 @@ export const RTCRoomMixin = {
         })
       })
 
-      this.RTC.on('onWebSocketNotify', (info) => {
-        // errorCode=10035，表示websocket被关闭
-        // 凡是webSocket流的关闭都会触发这个事件,将挂断操作从onRemoteStreamRemove移动到这来
-        // console.log(info)
-        (info.errorCode === 10035) && this.hangUpVideo()
+      // this.RTC.on('onWebSocketNotify', (info) => {
+      //   // errorCode=10035，表示websocket被关闭
+      //   // 凡是webSocket流的关闭都会触发这个事件,将挂断操作从onRemoteStreamRemove移动到这来
+      //   // console.log(info)
+      //   (info.errorCode === 10035) && this.hangUpVideo()
+      // })
+
+      this.RTC.on('onStreamNotify', (info) => {
+        !info.stream.active && this.hangUpVideo()
       })
     },
     async quitRTC() {
@@ -308,9 +313,21 @@ export const RTCRoomMixin = {
     },
     handleRTCQualityReport(data) {
       const daley = data.WebRTCQualityReq.uint32_delay
-      const bps = data.WebRTCQualityReq.uint32_total_send_bps
-      console.log('video delay', data.WebRTCQualityReq)
-      if (bps === 0) {
+      const send_bps = data.WebRTCQualityReq.uint32_total_send_bps
+      const recv_bps = data.WebRTCQualityReq.uint32_total_recv_bps
+
+      const daley_CB = (data) => {
+        if (!this.qualityReqToast) {
+          Tools.trace('延迟过高：')(data)
+          this.showConnectStatus('当前网络状况不佳')
+          this.qualityReqToast = true
+          Tools.AsyncTools.sleep(7000)
+          this.qualityReqToast = false
+        }
+      }
+      Tools.compose(Either(Tools.trace('延迟：'), daley_CB), Tools.getState(Tools.over(1000)))(daley)
+
+      const bps_CB = (data) => {
         this.bpsOverCount += 1
         if (this.bpsOverCount === 10) {
           this.showConnectStatus('当前网络太差，无法建立视频通话')
@@ -319,15 +336,28 @@ export const RTCRoomMixin = {
           // 停止推流
           this.quitRTC()
         }
-      } else {
-        // 重置
-        this.bpsOverCount = 0
       }
-      const isDelayOver = Tools.delayOver(daley)
-      if (!this.qualityReqToast && isDelayOver(1000)) {
-        this.showConnectStatus('当前网络状况不佳')
-        this.qualityReqToast = true
-      }
+      Tools.compose(Either(Tools.trace('发送数据：'), bps_CB), Tools.getState(Tools.equals(0)))(send_bps)
+      Tools.compose(Either(Tools.trace('接收数据：'), bps_CB), Tools.getState(Tools.equals(0)))(recv_bps)
+      // console.log('video delay', data.WebRTCQualityReq)
+      // if (bps === 0) {
+      //   this.bpsOverCount += 1
+      //   if (this.bpsOverCount === 10) {
+      //     this.showConnectStatus('当前网络太差，无法建立视频通话')
+      //     // 直接挂断
+      //     this.$emit('videoFailed')
+      //     // 停止推流
+      //     this.quitRTC()
+      //   }
+      // } else {
+      //   // 重置
+      //   this.bpsOverCount = 0
+      // }
+      // const isDelayOver = Tools.delayOver(daley)
+      // if (!this.qualityReqToast && isDelayOver(1000)) {
+      //   this.showConnectStatus('当前网络状况不佳')
+      //   this.qualityReqToast = true
+      // }
     },
     showConnectStatus(text) {
       this.$vux.toast.show({

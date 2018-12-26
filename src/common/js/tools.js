@@ -1,4 +1,5 @@
 import { TIME_3_MIN, msgStatus, msgTypes, sessionStatus } from '@/common/js/status'
+import { Right, Left } from '@/common/js/container/either'
 const _ = require('ramda')
 
 const DateTools = {
@@ -414,8 +415,15 @@ let Tools = Object.assign({}, {
   RectTools: Object.create(RectTools),
   MsgsFilterTools: Object.create(MsgsFilterTools),
   CacheTools: Object.create(CacheTools),
+  compose: _.compose,
   curry: _.curry,
   reduce: _.reduce,
+  equals: _.equals,
+  // trace :: a -> b -> b
+  trace: _.curry(function(tag, x) {
+    console.log(tag, x)
+    return x
+  }),
   // paging :: (a -> b) -> c -> [a] -> [b]
   paging: _.curry(function(f, pageSize, arr) {
     const totalPage = Math.ceil(arr.length / pageSize) // 页数
@@ -433,8 +441,13 @@ let Tools = Object.assign({}, {
     const getStrWithLink = _.replace(regUrl, item => notANode(item) ? `<a href="${item}" target="_blank">${item}</a>` : item)
     return getStrWithLink(str)
   }),
-  delayOver: _.curry(function(delay, limit) {
-    return delay >= limit
+  // over -> Number -> Number -> Bool
+  over: _.curry(function(limit, data) {
+    return data >= limit
+  }),
+  // getState :: Function -> Number -> Either(Number, Number)
+  getState: _.curry(function(f, data) {
+    return f(data) ? Right.of(data) : Left.of(data)
   }),
   // 取一定范围内的随机数
   randomMin2Max: function(min, max) {

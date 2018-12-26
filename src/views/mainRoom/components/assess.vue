@@ -23,7 +23,7 @@
             <!--<swiper-item v-for="(item, index) in btnBoxList" :key="index">-->
             <!--</swiper-item>-->
           <!--</swiper>-->
-          <label-btn ref="labelBar" :labelType="labelType" @seledLabels="selLabels"></label-btn>
+          <label-btn v-if="showAssess" ref="labelBar" :labelType="labelType" @seledLabels="selLabels"></label-btn>
           <x-button :gradients="['#FF8C6A', '#ff80a0']" @click.native="handleToSaveAssess"
                     style="width: 11rem;margin: 2rem auto 0;">
             提交评价

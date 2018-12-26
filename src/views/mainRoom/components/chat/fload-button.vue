@@ -119,7 +119,7 @@ export default {
       switch (this.roomMode) { // 服务中
         case roomStatus.AIChat:
           // this.$emit('enterVideoLineUp')
-          this.$router.push('/room/cusServ/list')
+          this.$router.push({path: '/room/cusServ/list'})
           break
         case roomStatus.videoChat:
           this.$vux.alert.show({
