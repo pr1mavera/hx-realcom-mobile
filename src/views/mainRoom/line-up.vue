@@ -154,8 +154,13 @@ export default {
           return
         }
         this.videoHeartBeatCount++
-        if (this.videoHeartBeatCount === 20) {
-          this.$vux.toast.text('坐席繁忙，请耐心等待', '12rem')
+        if (this.videoHeartBeatCount === 5) {
+          this.$vux.toast.show({
+            type: 'text',
+            text: '坐席繁忙，请耐心等待',
+            width: '50%',
+            time: 5000
+          })
         }
         this.videoHeartBeatReq = await videoQueueHeartBeat(query.csId, this.userInfo.userId)
         if (this.videoHeartBeatReq.code === ERR_OK) {
