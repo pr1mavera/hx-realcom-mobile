@@ -95,8 +95,8 @@ export default {
         // }
       ],
       myGifts: [],
-      giftUrl: getImgUrl('url'), // 礼物图片连接
-      giftCounts: 0 // 收到礼物的总数
+      giftUrl: getImgUrl('url') // 礼物图片连接
+      // giftCounts: 0 // 收到礼物的总数
     }
   },
   mounted() {
@@ -117,13 +117,13 @@ export default {
 
       if (res.result.code === ERR_OK) {
         this.giftMap = res.data.gifts
-        if (this.giftType === 'notAll') {
-          // 若果获取的是坐席收到的礼物则统计礼物的总数量
-          for (const i in res.data.gifts) {
-            this.giftCounts = this.giftCounts + (res.data.gifts[i].giftCount || 0)
-          }
-          this.$emit('giftCounts', this.giftCounts)
-        }
+        // if (this.giftType === 'notAll') {
+        //   // 若果获取的是坐席收到的礼物则统计礼物的总数量
+        //   for (const i in res.data.gifts) {
+        //     this.giftCounts = this.giftCounts + (res.data.gifts[i].giftCount || 0)
+        //   }
+        //   this.$emit('giftCounts', this.giftCounts)
+        // }
       } else {
         console.log('there are some errors about get giftsInfo' + JSON.stringify(res))
       }

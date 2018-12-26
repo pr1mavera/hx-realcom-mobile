@@ -69,7 +69,7 @@
           <p class="tips">服务年限</p>
         </div>
         <div class="flex-box-item">
-          <p><span>{{giftNum}}</span>份</p>
+          <p><span>{{cuSerInfo.giftCount || 0}}</span>份</p>
           <p class="tips">收到礼物</p>
         </div>
         <div class="flex-box-item">
@@ -92,7 +92,6 @@
       </div>
       <send-gift style="height: unset;background-color: unset"
                  :giftType="giftType"
-                 @giftCounts="giftCounts"
       ></send-gift>
     </div>
 
@@ -138,22 +137,33 @@
 
     <!-- 自定义遮罩层 -->
     <div class="filter" v-show="filter">
-      <swiper id="swiperImg" class="swiper" dots-class="custom-bottom" dots-position="center">
-        <swiper-item class="swiper-img" v-for="(item, index) in personalDisplay" :key="index">
+      <swiper id="swiperImg" class="swiper" style="height: 300px" height="300px" dots-class="custom-bottom" dots-position="center">
+        <swiper-item class="swiper-img" height="300px" v-for="(item, index) in personalDisplay" :key="index">
           <img class="cs-img" :src="item" style="">
         </swiper-item>
       </swiper>
     </div>
+
+    <!-- 发送礼物动画效果弹层 -->
+    <transition name="fade">
+      <section class="gift-section" v-if="giftAnimeView">
+        <img :src="giftSrc">
+      </section>
+    </transition>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
   // import Tools from '@/common/js/tools'
   import { mapGetters } from 'vuex'
-  import { Swiper, SwiperItem, XButton, XCircle } from 'vux'
-  import { ERR_OK, getCsInfo, csPhoto, getTimesForMe, getCsAvatar } from '@/server/index.js'
+  import Tools from '@/common/js/tools'
+  import { Swiper, SwiperItem, XButton, XCircle, TransferDomDirective as TransferDom } from 'vux'
+  import { ERR_OK, getCsInfo, csPhoto, getTimesForMe, getCsAvatar, giftSend } from '@/server/index.js'
 
   export default {
+    directives: {
+      TransferDom
+    },
     components: {
       Swiper,
       SwiperItem,
@@ -165,14 +175,16 @@
     data() {
      return {
        personalDisplay: [],
-       cuSerInfo: [],
+       cuSerInfo: {},
        serTimes: '0',
        labelType: 'notAll',
        giftType: 'notAll',
        allGifts: 'all',
-       giftNum: 0, // 收到的礼物的份数
+       giftNum: 0, // 收到的礼物的份数 unused
        giftSend: false,
-       filter: false
+       filter: false,
+       giftAnimeView: false,
+       giftSrc: null
      }
     },
     computed: {
@@ -186,7 +198,6 @@
         return this.$route.query.csStatus
       },
       ...mapGetters([
-        'csInfo',
         'userInfo'
       ])
     },
@@ -217,7 +228,6 @@
         // console.log('=================================' + JSON.stringify(this.csInfo))
         const res = await getCsInfo(cuSerId)
         if (res.result.code === ERR_OK) {
-          // debugger
           this.cuSerInfo = res.data
           const cuSerPic = res.data.photos
 
@@ -258,31 +268,40 @@
         this.giftSend = true
       },
       // 发送某个具体的礼物
-      selectGift(giftInfo) {
+      async selectGift(giftInfo) {
         console.log('发礼物辣：', giftInfo)
-        // this.$emit('showGiftAnime', giftInfo)
-        // this.showGiftAnime(giftInfo)
+        this.showGiftAnime(giftInfo)
         // this.sendGiftMsg(giftInfo)
+        const gift = {
+          'sessionId': '',
+          'userId': this.userInfo.userId,
+          'userName': this.userInfo.userName,
+          'csId': this.$route.query.cusSerId,
+          'csName': this.cuSerInfo.realName,
+          'giftId': giftInfo.giftId,
+          'giftName': giftInfo.giftName
+        }
+        const res = await giftSend(gift)
+        debugger
+        if (res.result.code === ERR_OK) {
+          console.log('发送礼物成功')
+        } else {
+          console.log('there are some errors about send gifts' + JSON.stringify(res.result))
+        }
       },
       // 发送礼物时的动画弹层
-      // async showGiftAnime(giftInfo) {
-      //   this.showGiftView(giftInfo.giftId)
-      //   // const duration = (+giftInfo.duration) * 1000
-      //   await Tools.AsyncTools.sleep(4000)
-      //   this.resetGiftView()
-      // },
-      // showGiftView(id) {
-      //   this.giftAnimeView = true
-      //   this.giftSrc = `/video/static/img/gift/${id}.gif`
-      // },
-      // resetGiftView() {
-      //   this.giftAnimeView = false
-      //   this.giftSrc = null
-      // },
-
-      // 获取子组件的传值（礼物总数）
-      giftCounts(counts) {
-        this.giftNum = counts
+      async showGiftAnime(giftInfo) {
+        this.showGiftView(giftInfo.giftId)
+        await Tools.AsyncTools.sleep(4000)
+        this.resetGiftView()
+      },
+      showGiftView(id) {
+        this.giftAnimeView = true
+        this.giftSrc = `/video/static/img/gift/${id}.gif`
+      },
+      resetGiftView() {
+        this.giftAnimeView = false
+        this.giftSrc = null
       },
 
       // 添加为专属客服
@@ -514,9 +533,10 @@
       width: 100vw;
       height: 100vh;
       cursor: pointer;
-      background: rgba(25, 25, 25, .5);
+      background: rgba(5, 5, 5, .5);
       .swiper {
-        margin: 18vh 0;
+        width: 80%;
+        margin: 18vh auto;
         .swiper-img {
           text-align: center;
           .cs-img {
