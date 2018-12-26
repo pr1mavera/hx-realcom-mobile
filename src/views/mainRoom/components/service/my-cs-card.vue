@@ -117,7 +117,8 @@
           path: '/room/serverDetail',
           query: {
             cusSerId: this.currentCs.id,
-            csStatus: this.currentCs.status || 1
+            csStatus: this.currentCs.status || 1,
+            nickName: this.currentCs.nickName
           }
         })
       },

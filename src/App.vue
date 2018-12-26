@@ -120,15 +120,15 @@ body {
   }
 }
 
-/* 评论组件中轮播图圆点的样式 */
-.popup-main .eva-more .vux-slider > .vux-indicator > a > .vux-icon-dot.active {
-  background-color: #ff444a!important;
+/* 轮播图圆点的样式 .popup-main .eva-more */
+.vux-slider > .vux-indicator > a > .vux-icon-dot.active {
+  background-color: #FF959C!important;
   transform: scale(.7, .7);
 }
-.popup-main .eva-more .vux-slider > .vux-indicator > a > .vux-icon-dot {
-  border: 1px solid #ff444a;
+.vux-slider > .vux-indicator > a > .vux-icon-dot {
+  border: 1px solid #FF959C;
   border-radius: 50%;
-  background-color: #f1f1f1;
+  background-color: #ffffff !important;
   transform: scale(.7, .7);
 }
 
