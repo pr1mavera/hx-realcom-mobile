@@ -14,7 +14,7 @@
 
     <div class="container-top">
       <div class="img" id="iconImg">
-        <svg @click="showCsImg" class="icon icon-img" aria-hidden="true"><use xlink:href="#icon-Group"></use></svg>
+        <svg @click="showCsImg" class="icon icon-img" id="iconImg" aria-hidden="true"><use xlink:href="#icon-Group"></use></svg>
       </div>
       <div class="item-top">
         <div class="left">
@@ -26,7 +26,7 @@
         <div class="right info">
           <p class="name">{{cuSerInfo.nickName}}</p>
           <P>当前状态 &nbsp;&nbsp;<label class="status" :class="{'on-line': isCsOnline}">{{isCsOnline ? '在线' : '离线'}}</label></P>
-          <p>服务总量 &nbsp;&nbsp;{{cuSerInfo.serTimes || 0}}</p>
+          <p>服务总量 &nbsp;&nbsp;{{cuSerInfo.servTimes === null ? 0 : cuSerInfo.servTimes}}</p>
         </div>
       </div>
 
@@ -69,7 +69,7 @@
           <p class="tips">服务年限</p>
         </div>
         <div class="flex-box-item">
-          <p><span>{{ cuSerInfo.servTimes === null ? 0 : cuSerInfo.servTimes }}</span>份</p>
+          <p><span>{{giftNum}}</span>份</p>
           <p class="tips">收到礼物</p>
         </div>
         <div class="flex-box-item">
@@ -82,7 +82,7 @@
     <!-- the gifts which send to me -->
     <div class="container-item">
       <div class="container-item-tit">
-        <span @click="showGifts">送礼物</span>
+        <span @click="showGifts" id="sendGiftBtn">送礼物</span>
         <span style="color: #909090;" @click="showGiftsRecord">
           <!--收到礼物-->
           <!--<label style="color: #FF959C;">{{giftNum}}</label> 份-->
@@ -92,6 +92,7 @@
       </div>
       <send-gift style="height: unset;background-color: unset"
                  :giftType="giftType"
+                 @giftCounts="giftCounts"
       ></send-gift>
     </div>
 
@@ -99,7 +100,7 @@
     <div class="container-item">
       <p class="container-item-tit">对她印象</p>
       <div class="container-item-con">
-        <label-btn :labelType="labelType"></label-btn>
+        <label-btn class="label" :labelType="labelType"></label-btn>
       </div>
     </div>
 
@@ -131,6 +132,7 @@
     <div class="gift-send" v-if="giftSend" id="giftsSend">
       <send-gift style="height: unset;background-color: unset"
                  :giftType="allGifts"
+                 @selectGift="selectGift"
       ></send-gift>
     </div>
 
@@ -168,7 +170,7 @@
        labelType: 'notAll',
        giftType: 'notAll',
        allGifts: 'all',
-       giftNum: '300', // 收到的礼物的份数
+       giftNum: 0, // 收到的礼物的份数
        giftSend: false,
        filter: false
      }
@@ -191,18 +193,21 @@
     mounted() {
       let self = this
       const bigImg = document.getElementById('swiperImg')
-      const gifts = document.getElementById('giftsSend')
+      const iconImg = document.getElementById('iconImg')
+      const sendBtn = document.getElementById('sendGiftBtn')
+      // const gifts = document.getElementById('giftsSend')
 
       document.addEventListener('click', (e) => {
         // 发送礼物组件隐藏
-        if (!gifts.contains(e.target)) self.giftSend = false
+        // if (!gifts.contains(e.target))
+          if (!sendBtn.contains(e.target)) self.giftSend = false
         // 点击图片外的其他区域 大图模式隐藏
-        if (!bigImg.contains(e.target)) self.filter = false
+        if (!bigImg.contains(e.target) && !iconImg.contains(e.target)) self.filter = false
       })
 
       this.$nextTick(() => {
-        this.getCsInfo()
-        this.timesForMe()
+        this.getCsInfo() // 获取坐席信息
+        this.timesForMe() // 获取为我服务次数
       })
     },
     methods: {
@@ -252,10 +257,37 @@
       showGifts() {
         this.giftSend = true
       },
+      // 发送某个具体的礼物
+      selectGift(giftInfo) {
+        console.log('发礼物辣：', giftInfo)
+        // this.$emit('showGiftAnime', giftInfo)
+        // this.showGiftAnime(giftInfo)
+        // this.sendGiftMsg(giftInfo)
+      },
+      // 发送礼物时的动画弹层
+      // async showGiftAnime(giftInfo) {
+      //   this.showGiftView(giftInfo.giftId)
+      //   // const duration = (+giftInfo.duration) * 1000
+      //   await Tools.AsyncTools.sleep(4000)
+      //   this.resetGiftView()
+      // },
+      // showGiftView(id) {
+      //   this.giftAnimeView = true
+      //   this.giftSrc = `/video/static/img/gift/${id}.gif`
+      // },
+      // resetGiftView() {
+      //   this.giftAnimeView = false
+      //   this.giftSrc = null
+      // },
+
+      // 获取子组件的传值（礼物总数）
+      giftCounts(counts) {
+        this.giftNum = counts
+      },
 
       // 添加为专属客服
       addCs() {
-        alert('你要将该客服添加为你的专属客服')
+        alert('她已经是你的专属客服了')
       },
 
       // showGiftsRecord
@@ -268,7 +300,7 @@
         })
       },
 
-      // showCsImg
+      // 点击右上角小图标展示坐席生活照
       showCsImg() {
         this.filter = true
       }
@@ -302,6 +334,7 @@
         .icon-img {
           width: 1.8rem;
           height: 1.6rem;
+          cursor: pointer;
         }
       }
       .item-top {
@@ -317,6 +350,7 @@
               width: 100%;
               height: 100%;
               border-radius: 50%;
+              object-fit: cover;
             }
           }
         }
@@ -487,7 +521,7 @@
           text-align: center;
           .cs-img {
             width: 60vw;
-            object-fit: fill;
+            object-fit: cover;
             margin: 0 auto;
             border-radius: 5px;
           }
