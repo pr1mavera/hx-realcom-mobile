@@ -121,11 +121,11 @@ body {
 }
 
 /* 轮播图圆点的样式 .popup-main .eva-more */
-.vux-slider > .vux-indicator > a > .vux-icon-dot.active {
+.label > .vux-slider > .vux-indicator > a > .vux-icon-dot.active {
   background-color: #FF959C!important;
   transform: scale(.7, .7);
 }
-.vux-slider > .vux-indicator > a > .vux-icon-dot {
+.label >.vux-slider > .vux-indicator > a > .vux-icon-dot {
   border: 1px solid #FF959C;
   border-radius: 50%;
   background-color: #ffffff !important;

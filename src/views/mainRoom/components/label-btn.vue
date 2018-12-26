@@ -63,7 +63,7 @@
         allBtnList: [], // 所有评价我的标签
         selTags: null, // 选中的标签
         isDisabled: '', // unused
-        disable: false, // 标签不能选，只是做展示功能
+        disable: true, // 标签不能选，只是做展示功能
         currentPage: 0, // 当前页
         pageList: [1]
         // showDots: true,
