@@ -113,7 +113,7 @@ export default {
         csId = this.$route.query.cusSerId
       }
       const res = await viewGifts(page, pageSize, csId)
-      // debugger
+      debugger
       if (res.result.code === ERR_OK) {
         this.giftMap = res.data.gifts
       } else {

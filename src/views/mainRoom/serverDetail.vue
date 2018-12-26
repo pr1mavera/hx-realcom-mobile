@@ -25,8 +25,8 @@
 
         <div class="right info">
           <p class="name">{{cuSerInfo.nickName}}</p>
-          <P>当前状态</P>
-          <p>服务总量 {{cuSerInfo.serTimes || 0}}</p>
+          <P>当前状态 &nbsp;&nbsp;<label class="status" :class="{'on-line': isCsOnline}">{{isCsOnline ? '在线' : '离线'}}</label></P>
+          <p>服务总量 &nbsp;&nbsp;{{cuSerInfo.serTimes || 0}}</p>
         </div>
       </div>
 
@@ -42,7 +42,7 @@
         </div>
 
         <div class="flex-box-item" v-if="enterVideo">
-            <div class="bg-box">
+            <div class="bg-box" @click="addCs">
               <svg class="icon" aria-hidden="true">
                 <use xlink:href="#icon-xin"></use>
               </svg>
@@ -127,7 +127,7 @@
       <!--<a class="btn btn-lin-up" v-if="enterVideo" @click="enterLinUp">立即视频</a>-->
     </div>
 
-    <!-- 给客服发送礼物 -->
+    <!-- 页面底部给客服发送礼物 -->
     <div class="gift-send" v-if="giftSend" id="giftsSend">
       <send-gift style="height: unset;background-color: unset"
                  :giftType="allGifts"
@@ -176,6 +176,9 @@
     computed: {
       avatarImgSrc() {
         return getCsAvatar(this.$route.query.cusSerId)
+      },
+      isCsOnline() {
+        return this.$route.query.csStatus === '3' || this.$route.query.csStatus === '5'
       },
       enterVideo() {
         return this.$route.query.csStatus
@@ -239,7 +242,8 @@
       enterLinUp() {
         const csData = {
           id: this.$route.query.cusSerId,
-          status: this.$route.query.csStatus
+          status: this.$route.query.csStatus,
+          nickName: this.$route.query.nickName
         }
         this.$emit('clickToLineUp', csData)
       },
@@ -247,6 +251,11 @@
       // 点击了送礼物
       showGifts() {
         this.giftSend = true
+      },
+
+      // 添加为专属客服
+      addCs() {
+        alert('你要将该客服添加为你的专属客服')
       },
 
       // showGiftsRecord
@@ -319,6 +328,24 @@
           .name {
             font-size: 1.4rem;
             font-weight: 600;
+          }
+          .status {
+            color: @label-line-light;
+          }
+          .status:before {
+            content: '';
+            display: inline-block;
+            width: .8rem;
+            height: .8rem;
+            border-radius: 50%;
+            background: @label-line-light;
+            margin: 0 .3rem 0 0;
+          }
+          .on-line {
+            color: #ffffff;
+          }
+          .on-line:before {
+            background: #ffffff;
           }
         }
       }

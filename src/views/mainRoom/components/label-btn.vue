@@ -1,31 +1,31 @@
 <template>
   <div class="label-btn-box">
     <swiper v-model="currentPage" @on-index-change="changePage" height="10rem"
-            v-if="true" style="" :show-dots="showDots" dots-class="custom-bottom" dots-position="center">
+            v-if="true" style="" dots-class="custom-bottom" dots-position="center">
       <swiper-item v-for="(pages, index) in btnList" :key="index">
-        <!--{{index}} labelType === 'all' -->
+        <!--{{index}} labelType === 'all'   :show-dots="showDots"-->
         <checker v-model="selTags" type="checkbox" default-item-class="tags-default" @on-change="selChanege"
                  selected-item-class="tags-selected">
-          <checker-item
+          <checker-item :disabled="disable"
                         :value="item" v-for="(item, index) in pages.list"
                         :key="index"
                         :text="item.labelName"
                         :likeNum="item.labelCount"
           >{{item.labelName}}
-          </checker-item>
+            {{item.labelCount === undefined ? '' : (item.labelCount > 99 ? '99+' :item.labelCount)}}</checker-item>
         </checker>
       </swiper-item>
     </swiper>
 
     <!--labels for me labelType === 'notAll' unused -->
-    <checker v-if="false" type="checkbox" default-item-class="tags-default">
-      <checker-item :disabled="disable"
-                    v-for="(item, index) in btnList"
-                    :key="index"
-                    :value="item"
-      >{{item.labelName}} {{item.labelCount}}</checker-item>
-      <!--<a class="btn btn-more" v-if="showMoreBtn" @click="showMore">更多···</a>-->
-    </checker>
+    <!--<checker v-if="false" type="checkbox" default-item-class="tags-default">-->
+      <!--<checker-item :disabled="disable"-->
+                    <!--v-for="(item, index) in btnList"-->
+                    <!--:key="index"-->
+                    <!--:value="item"-->
+      <!--&gt;{{item.labelName}} {{item.labelCount}}</checker-item>-->
+      <!--&lt;!&ndash;<a class="btn btn-more" v-if="showMoreBtn" @click="showMore">更多···</a>&ndash;&gt;-->
+    <!--</checker> -->
     <!-- 当没有标签的情况 -->
     <div class="label-none" v-if="btnList.length === 0">
       <svg class="icon" aria-hidden="true">
@@ -62,12 +62,12 @@
         ],
         allBtnList: [], // 所有评价我的标签
         selTags: null, // 选中的标签
-        isDisabled: '',
-        disable: true, // 标签不能选，只是做展示功能
+        isDisabled: '', // unused
+        disable: false, // 标签不能选，只是做展示功能
         currentPage: 0, // 当前页
-        pageList: [1],
-        showDots: true,
-        showMoreBtn: false
+        pageList: [1]
+        // showDots: true,
+        // showMoreBtn: false
       }
     },
     computed: {
@@ -104,17 +104,17 @@
           // 评价当前客服的标签
 
           const res = await viewLabels(page, pageSize, csId)
-          // debugger
           if (res.result.code === ERR_OK) {
             // console.log('=============这是查询到的我的评价标签信息:' + JSON.stringify(res.data.labels))
-            this.showDots = false
-            this.btnList = res.data.labels
-            // debugger
-            this.allBtnList = res.data.labels
-            if (this.btnList.length > 6) {
-              this.btnList.splice(5, this.btnList.length - 5)
-              this.showMoreBtn = true
-            }
+            // this.showDots = false
+            // this.btnList = res.data.labels
+            this.btnList = this.labelPagination(res.data.labels)
+            // debugger 多于6个标签显示‘查看更多’按钮
+            // this.allBtnList = res.data.labels
+            // if (this.btnList.length > 6) {
+            //   this.btnList.splice(5, this.btnList.length - 5)
+            //   this.showMoreBtn = true
+            // }
           } else {
             // console.log('======================= error about query labelTags')
           }
@@ -212,7 +212,7 @@
 .label-btn-box {
   /*未选中状态的样式*/
   .tags-default {
-    width: 5rem;
+    width: 5.8rem;
     color: #FF959C;
     padding: .6rem 0.8rem;
     margin: 1rem 0.5rem;
