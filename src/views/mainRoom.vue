@@ -25,7 +25,7 @@
           :csNick="csInfo.csNick"
           :time="serverTime"
           :status="servStatus"
-          @goBackToChat="afterServerFinish(sessionStatus.video)"
+          @goBackToChat="goBackToChat"
         ></video-over-toast>
         <!-- @showShare="showShare" -->
       </x-dialog>
@@ -274,6 +274,11 @@ export default {
           }
         })
       }
+    },
+    goBackToChat() {
+      const query = this.$route.query
+      this.$router.replace({path: `/room/chat?openId=${query.openId}&origin=${query.origin || 'WE'}`})
+      this.afterServerFinish(sessionStatus.video)
     },
     // 分享
     // async toShare(csId, csName) {

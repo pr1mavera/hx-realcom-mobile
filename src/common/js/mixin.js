@@ -131,7 +131,7 @@ export const loginMixin = {
       let data = {}
       let botInfo = {}
       // TIME_24_HOURS
-      if (data = Tools.CacheTools.getCacheData({ key: 'botInfo', check: userId, quality: 1 })) {
+      if (data = Tools.CacheTools.getCacheData({ key: 'botInfo', check: userId, quality: TIME_24_HOURS })) {
         // 若本地缓存存在且未过期，直接取本地缓存
         botInfo = data
       } else {

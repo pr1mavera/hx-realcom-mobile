@@ -278,7 +278,7 @@ export default {
       this.setUserInfo(userInfo)
 
       // 获取机器人基本信息，及配置机器人欢迎语
-      const { botInfo, welcomeMsg } = await this.getBotBaseInfo(query.openId, this.userInfo.userId)
+      const { botInfo, welcomeMsg } = await this.getBotBaseInfo(query.openId, userInfo.userId)
       this.setBotInfo(botInfo)
 
       // 判断是否重连

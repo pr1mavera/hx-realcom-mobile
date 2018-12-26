@@ -32,7 +32,7 @@
     height: 100vh;
     position: fixed;
     top: 0;
-    opacity: .85;
+    // opacity: .85;
     // background: #626262;
     background-image: url('/video/static/img/ios-guide.png');
     background-size: cover;
