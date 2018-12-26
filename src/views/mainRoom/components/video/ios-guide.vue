@@ -1,14 +1,14 @@
 <template>
   <main class="main">
     <!-- 点击右上角的手指 -->
-    <div class="step-one">
+    <!-- <div class="step-one">
       <img src="/video/static/img/ios-guide1.png">
-    </div>
+    </div> -->
     <!-- 文字提示 -->
-    <div class="step-two">
+    <!-- <div class="step-two">
       <img src="/video/static/img/ios-guide2.png">
-    </div>
-    <div class="step-thr">
+    </div> -->
+    <!-- <div class="step-thr">
       <img src="/video/static/img/ios-guide3.png">
     </div>
    <div class="step-four">
@@ -16,7 +16,7 @@
    </div>
     <div class="step-fif">
       <img style="" src="/video/static/img/ios-guide4.png">
-    </div>
+    </div> -->
   </main>
 </template>
 
@@ -33,7 +33,10 @@
     position: fixed;
     top: 0;
     opacity: .85;
-    background: #626262;
+    // background: #626262;
+    background-image: url('/video/static/img/ios-guide.png');
+    background-size: cover;
+    background-position: center;
     z-index: 6000;
     .step-one {
       text-align: right;

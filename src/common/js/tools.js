@@ -414,12 +414,14 @@ let Tools = Object.assign({}, {
   RectTools: Object.create(RectTools),
   MsgsFilterTools: Object.create(MsgsFilterTools),
   CacheTools: Object.create(CacheTools),
+  curry: _.curry,
   reduce: _.reduce,
   // paging :: (a -> b) -> c -> [a] -> [b]
   paging: _.curry(function(f, pageSize, arr) {
     const totalPage = Math.ceil(arr.length / pageSize) // 页数
     return new Array(totalPage).fill(0).map(f)
   }),
+  // strWithLink :: String -> String
   strWithLink: _.curry(function(str) {
     // eslint-disable-next-line
     const regUrl = /(<(a|\/a).*?>|((http|https):\/\/)?[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#]))/gi
@@ -431,7 +433,9 @@ let Tools = Object.assign({}, {
     const getStrWithLink = _.replace(regUrl, item => notANode(item) ? `<a href="${item}" target="_blank">${item}</a>` : item)
     return getStrWithLink(str)
   }),
-
+  delayOver: _.curry(function(delay, limit) {
+    return delay >= limit
+  }),
   // 取一定范围内的随机数
   randomMin2Max: function(min, max) {
     return Math.floor(Math.random() * (max - min) + min)

@@ -40,7 +40,7 @@
         <div class="name">{{this.csInfo.csNick}}</div>
       </div>
       <video-footer
-        @hangUpVideo="hangUpVideo"
+        @hangUpVideo="handleHangUpVideo"
         @handleAssess="setAssessView(true)"
         @sendGift="giftSectionShow = true"
         @changeCamera="isChangeCamera = !isChangeCamera"
@@ -54,7 +54,7 @@
               <use :xlink:href="likesCountStyle"></use>
             </svg>
           </div>
-          <div class="text">{{csInfo.likesCount}}</div>
+          <div class="text">{{likesCount || 0}}</div>
         </div>
         <!-- <div class="item">
           <div class="item-icon icon-zhuanfa">
@@ -144,12 +144,16 @@ export default {
       isChangeCamera: false,
       // 礼物列表弹层开关：[false 开启 / [true 关闭]
       giftSectionShow: false,
-      likes: false
+      likes: false,
+      likesCount: 0
     }
   },
   mounted() {
     this.readyToVideo()
     this.startTimeStamp = new Date()
+    this.$nextTick(() => {
+      this.likesCount = +this.csInfo.likesCount
+    })
   },
   methods: {
     _getVideoTime(dateBegin) {
@@ -179,6 +183,7 @@ export default {
       if (this.likes) {
         return
       }
+      this.likesCount += 1
       this.sendLikeMsg()
       this.likes = true
     },
@@ -200,15 +205,21 @@ export default {
         // this.$vux.toast.text('进房失败')
       }
     },
+    handleHangUpVideo() {
+      // 停止推流
+      this.quitRTC()
+      // 挂断
+      // this.hangUpVideo()
+    },
     async hangUpVideo() {
       // 恢复全屏
       !this.fullScreen && this.setFullScreen(true)
       // 恢复摄像头默认位置
       this.isChangeCamera && (this.isChangeCamera = false)
       // 截取坐席视频
-      await this.getVideoScreenShot()
+      // await this.getVideoScreenShot()
       // 停止推流
-      this.quitRTC()
+      // this.quitRTC()
       // 记录通话时间
       const time = this._getVideoTime(this.startTimeStamp)
       this.setServerTime(time)

@@ -20,7 +20,7 @@
 import { mapGetters, mapMutations, mapActions } from 'vuex'
 import { IMMixin } from '@/common/js/mixin'
 import IM from '@/server/im'
-import { ERR_OK, videoQueue, videoQueueHeartBeat, videoQueueCancel } from '@/server/index.js'
+import { ERR_OK, videoQueue, videoQueueHeartBeat } from '@/server/index.js'
 import { roomStatus, queueStatus, systemMsgStatus } from '@/common/js/status'
 
 export default {
@@ -41,6 +41,7 @@ export default {
     return {
       accessId: null,
       videoHeart: false, // 判断心跳变量
+      videoHeartBeatCount: 0,
       videoHeartBeatTimer: null,
       videoHeartBeatReq: null,
       videoHeartBeatFailCount: 0 // 心跳包超时失败次数
@@ -152,6 +153,10 @@ export default {
           this.stopVideoHeartBeat()
           return
         }
+        this.videoHeartBeatCount++
+        if (this.videoHeartBeatCount === 20) {
+          this.$vux.toast.text('坐席繁忙，请耐心等待', '12rem')
+        }
         this.videoHeartBeatReq = await videoQueueHeartBeat(query.csId, this.userInfo.userId)
         if (this.videoHeartBeatReq.code === ERR_OK) {
           console.info('心跳成功, 心跳ID:', this.videoHeartBeatTimer)
@@ -172,6 +177,7 @@ export default {
       if (this.videoHeartBeatReq) {
         this.videoHeartBeatReq = null
         this.videoHeartBeatTimer = null
+        this.videoHeartBeatFailCount = 0
       }
     },
     ...mapMutations({

@@ -15,6 +15,7 @@
     <videoBar class="video-bar"
       v-if="isVideoBarOpen"
       @showGiftAnime="showGiftAnime"
+      @videoFailed="iOSVideoFailed"
     ></videoBar>
     <div v-transfer-dom>
       <!-- <div class="dialog-mask-section"></div> -->
@@ -23,6 +24,7 @@
           :csId="csInfo.csId"
           :csNick="csInfo.csNick"
           :time="serverTime"
+          :status="servStatus"
           @goBackToChat="afterServerFinish(sessionStatus.video)"
         ></video-over-toast>
         <!-- @showShare="showShare" -->
@@ -105,7 +107,8 @@ export default {
       // },
       // gift
       giftAnimeView: false,
-      giftSrc: null
+      giftSrc: null,
+      servStatus: true
     }
   },
   computed: {
@@ -141,11 +144,10 @@ export default {
   methods: {
     // 初始化房间
     async initRoom() {
-      Tools.CacheTools.removeCacheData('WE_visitorInfo')
-      Tools.CacheTools.removeCacheData('YB_visitorInfo')
-      Tools.CacheTools.removeCacheData('ZJ_visitorInfo')
-      Tools.CacheTools.removeCacheData('YX_visitorInfo')
-      Tools.CacheTools.removeCacheData('QY_visitorInfo')
+      // 初始化
+      this.setAssessStatus(false)
+      this.setServerTime(null)
+
       const enterVideoStatus = window.sessionStorage.getItem('enterVideoStatus')
       const query = this.$route.query
 
@@ -186,6 +188,7 @@ export default {
       this.$router.replace({path: `/room?openId=${query.openId}&origin=${query.origin || 'WE'}`})
       this.setAssessStatus(true)
       this.setServerTime('00:00')
+      this.servStatus = false
     },
     // 响应用户的视频请求
     requestVideoServer({ csId, csName, csNick }) {
@@ -208,6 +211,7 @@ export default {
           this.iOSVideoFailed()
           break
         case 'Android': // 当前为Android环境，进入专属客服
+          // this.iosGuide = true
           this.$router.push({path: `/room/line-up?csId=${csId}&csName=${csName}`})
           this.beforeQueue({
             mode: roomStatus.videoChat,
