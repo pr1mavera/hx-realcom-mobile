@@ -82,5 +82,9 @@ export default new Router({
       // redirect: '/room/chat'
     }
   ],
-  base: '/video/'
+  base: '/video/',
+  // 路由跳转从顶部开始，个人中心 && 礼物记录页面需要
+  scrollBehavior(to, from, savedPosition) {
+    return {x: 0, y: 0}
+  }
 })

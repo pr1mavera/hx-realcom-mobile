@@ -14,7 +14,7 @@
               <div class="header">
                 <img width=100% class="header-img" src="/video/static/img/chat/csAddBg.png">
                 <div class="header-msg">
-                  <div class="avatar">
+                  <div class="avatar" @click="enterSerCenter">
                     <img width=100% height=100% v-lazy="avatarImg">
                   </div>
                   <!-- @click="enterSerCenter" -->
@@ -274,7 +274,7 @@ export default {
 
       const res = await addCs(data)
       if (res.result.code === ERR_OK) {
-        console.log(JSON.stringify(res))
+        // console.log(JSON.stringify(res))
         this.$emit('resetMyCs', temp)
       } else {
         console.log('error about add the cS' + JSON.stringify(res))
@@ -375,7 +375,8 @@ export default {
         path: '/room/serverDetail',
         query: {
           cusSerId: this.curLabelInfo.id,
-          csStatus: this.curLabelInfo.status || 1
+          csStatus: this.curLabelInfo.status || 1,
+          isMark: 'mark'
         }
       })
     }
@@ -448,6 +449,7 @@ export default {
                 width: 10.2rem;
                 height: 10.2rem;
                 border-radius: 50%;
+                cursor: pointer;
                 overflow: hidden;
                 img {
                   object-fit: cover;

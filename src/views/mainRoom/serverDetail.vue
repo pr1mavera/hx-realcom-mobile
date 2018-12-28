@@ -41,7 +41,7 @@
           </x-button>
         </div>
 
-        <div class="flex-box-item" v-if="enterVideo">
+        <div class="flex-box-item" id="myCs" v-if="myCs">
             <div class="bg-box" @click="addCs">
               <svg class="icon" aria-hidden="true">
                 <use xlink:href="#icon-xin"></use>
@@ -194,8 +194,8 @@
       isCsOnline() {
         return this.$route.query.csStatus === '3' || this.$route.query.csStatus === '5'
       },
-      enterVideo() {
-        return this.$route.query.csStatus
+      myCs() {
+        return this.$route.query.isMark
       },
       ...mapGetters([
         'userInfo'
@@ -225,8 +225,10 @@
       // 获取客服信息
       async getCsInfo() {
         const cuSerId = this.$route.query.cusSerId
-        // console.log('=================================' + JSON.stringify(this.csInfo))
+        // debugger
+        // console.log('==============router' + document.referrer + '===============')
         const res = await getCsInfo(cuSerId)
+        // debugger
         if (res.result.code === ERR_OK) {
           this.cuSerInfo = res.data
           const cuSerPic = res.data.photos
@@ -258,7 +260,7 @@
         const csData = {
           id: this.$route.query.cusSerId,
           status: this.$route.query.csStatus,
-          nickName: this.$route.query.nickName
+          nickName: this.cuSerInfo.nickName
         }
         this.$emit('clickToLineUp', csData)
       },
@@ -282,7 +284,6 @@
           'giftName': giftInfo.giftName
         }
         const res = await giftSend(gift)
-        debugger
         if (res.result.code === ERR_OK) {
           console.log('发送礼物成功')
         } else {
@@ -306,7 +307,13 @@
 
       // 添加为专属客服
       addCs() {
-        alert('她已经是你的专属客服了')
+        const csInfo = {
+          'userId': this.userInfo.userId,
+          'csId': this.$route.query.cusSerId
+        }
+        this.$emit('addCs', csInfo)
+        const myCsBtn = document.getElementById('myCs')
+        myCsBtn.style.display = 'none'
       },
 
       // showGiftsRecord
@@ -333,6 +340,7 @@
 
   .container {
     height: unset;
+    cursor: pointer;
     padding-bottom: 6.5rem;
     background: @bg-normal;
     box-sizing: border-box;
@@ -414,7 +422,7 @@
           color: #FF8787;
           font-size: 1.2rem;
           line-height: 5rem;
-          margin-top: .9rem;
+          margin-top: 1.2rem;
           background: url("/video/static/img/service/csBg1.png") no-repeat;
           background-size: contain;
           .icon {
