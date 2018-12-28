@@ -58,8 +58,8 @@ export const loginMixin = {
 
       // 缓存中没有对应渠道的游客信息：
       // 1. 创建游客信息
-      const randomMin2Max = Tools.curry(Tools.randomMin2Max)
-      const rand = randomMin2Max(1000)(9999) // 随机四位数
+      // const randomMin2Max = Tools.curry(Tools.randomMin2Max)
+      const rand = Tools.randomMin2Max(1000)(9999) // 随机四位数
       const timestamp = new Date().getTime() // 时间戳
       // 获取工作时间
       const res = await getWorkTime()
@@ -228,7 +228,8 @@ export const RTCRoomMixin = {
           this.RTC.enterRoom(
             { roomid: room, role: 'user' },
             () => resolve({ code: ERR_OK, msg: 'ENTER RTC ROOM OK' }),
-            (result) => reject({ code: ERR_FAIL, msg: `ENTER RTC ROOM failed, result: ${result}` })
+            // eslint-disable-next-line
+            (error) => reject({ code: ERR_FAIL, msg: `ENTER RTC ROOM failed, result: ${error}` })
           )
         }, (error) => {
           console.error(error)
@@ -314,25 +315,6 @@ export const RTCRoomMixin = {
       }
       Tools.compose(Either(Tools.trace('发送数据：'), bps_CB), Tools.getState(Tools.equals(0)))(send_bps)
       Tools.compose(Either(Tools.trace('接收数据：'), bps_CB), Tools.getState(Tools.equals(0)))(recv_bps)
-      // console.log('video delay', data.WebRTCQualityReq)
-      // if (bps === 0) {
-      //   this.bpsOverCount += 1
-      //   if (this.bpsOverCount === 10) {
-      //     this.showConnectStatus('当前网络太差，无法建立视频通话')
-      //     // 直接挂断
-      //     this.$emit('videoFailed')
-      //     // 停止推流
-      //     this.quitRTC()
-      //   }
-      // } else {
-      //   // 重置
-      //   this.bpsOverCount = 0
-      // }
-      // const isDelayOver = Tools.delayOver(daley)
-      // if (!this.qualityReqToast && isDelayOver(1000)) {
-      //   this.showConnectStatus('当前网络状况不佳')
-      //   this.qualityReqToast = true
-      // }
     },
     showConnectStatus(text) {
       this.$vux.toast.show({
@@ -698,7 +680,7 @@ export const IMMixin = {
         return
       }
       msgsObj.timestamp = new Date().getTime()
-      if (msgsObj.msgStatus === msgStatus.msg && msgsObj.msgType === msgTypes.msg_normal) {
+      if (msgsObj.msgStatus === msgStatus.msg && msgsObj.msgType === msgTypes.msg_normal) { // 消息封装链接
         msgsObj.content = Tools.strWithLink(msgsObj.content)
       }
       if (msgsObj.msgStatus === msgStatus.msg && msgsObj.msgType === msgTypes.msg_timeout) { // 超时消息
@@ -711,6 +693,11 @@ export const IMMixin = {
           }
         }
         this.sendMsgs([dialog])
+        return
+      }
+      if (msgsObj.msgStatus === msgStatus.msg && msgsObj.msgType === msgTypes.msg_cs_filter) { // 客服暂离消息
+        const state = msgsObj.content === 'true'
+        this.setVideoFilter(state)
         return
       }
       this.sendMsgs([msgsObj])
@@ -750,7 +737,8 @@ export const IMMixin = {
       setQueueNum: 'SET_QUEUE_NUM',
       setServerTime: 'SET_SERVER_TIME',
       setAssessView: 'SET_ASSESS_VIEW',
-      setFullScreen: 'SET_FULL_SCREEN'
+      setFullScreen: 'SET_FULL_SCREEN',
+      setVideoFilter: 'SET_VIDEO_FILTER'
     }),
     ...mapActions([
       'saveCurMsgs',
@@ -1270,6 +1258,7 @@ export const onLineQueueMixin = {
       'userInfo',
       'queueNum',
       'sessionId',
+      'sessionRamId',
       'chatGuid'
     ])
   },
@@ -1310,7 +1299,7 @@ export const onLineQueueMixin = {
         customerImg: '',
         customerNick: this.userInfo.userName,
         identity: this.userInfo.userGrade,
-        robotSessionId: this.sessionId,
+        robotSessionId: this.sessionRamId,
         origin: this.userInfo.origin || 'WE',
         callType: 'ZX',
         type: '2'

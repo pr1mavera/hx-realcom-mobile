@@ -39,6 +39,7 @@ module.exports = {
     'no-use-before-define': 0,
     'vue/no-parsing-error': [2, { 'invalid-first-character-of-tag-name': false, 'x-invalid-end-tag': false }],
     'camelcase': 0,
+    'prefer-promise-reject-errors': ['error', {'allowEmptyReject': true}],
     'no-extend-native': ['error', { 'exceptions': ['Object', 'String'] }],
     'brace-style': 0,
     'no-cond-assign': 0

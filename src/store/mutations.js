@@ -16,6 +16,9 @@ const mutations = {
   [types.SET_SESSION_ID](state, id) {
     state.sessionId = id
   },
+  [types.SET_SESSION_RAM_ID](state, id) {
+    state.sessionRamId = id
+  },
   [types.SET_SESSION_LIST](state, list) {
     state.sessionList = list
   },
@@ -51,6 +54,9 @@ const mutations = {
   },
   [types.SET_SERVER_TIME](state, time) {
     state.serverTime = time
+  },
+  [types.SET_VIDEO_FILTER](state, isFilter) {
+    state.videoFilter = isFilter
   }
 }
 

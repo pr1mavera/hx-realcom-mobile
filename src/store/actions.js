@@ -151,7 +151,7 @@ export const configSendSystemMsg = function({ state }, msgsObj) {
         userPhone: state.userInfo.userPhone,
         openId: state.userInfo.userId,
         origin: state.userInfo.origin || 'WE',
-        robotSessionId: state.sessionId,
+        robotSessionId: state.sessionRamId,
         accessId: msgsObj.accessId || '',
         queueStartTime: msgsObj.queueStartTime,
         queueEndTime: msgsObj.queueEndTime
@@ -182,7 +182,7 @@ export const afterServerFinish = function({ commit, state }, mode) {
   })
   commit(types.SET_ASSESS_STATUS, false)
   commit(types.SET_ROOM_MODE, roomStatus.AIChat)
-  initSession({ commit, state })
+  // initSession({ commit, state })
   const tip = {
     content: '本次服务已结束，如需继续咨询，请重新联系客服',
     time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
@@ -193,6 +193,7 @@ export const afterServerFinish = function({ commit, state }, mode) {
   if (mode === sessionStatus.video) {
     commit(types.SET_SERVER_TIME, '')
     commit(types.SET_ROOM_ID, '')
+    commit(types.SET_VIDEO_FILTER, false)
   } else
   if (mode === sessionStatus.onLine) {
     // 清空定时器

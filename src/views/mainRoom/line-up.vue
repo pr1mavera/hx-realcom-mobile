@@ -34,7 +34,8 @@ export default {
     ...mapGetters([
       'userInfo',
       'queueNum',
-      'sessionId'
+      'sessionId',
+      'sessionRamId'
     ])
   },
   data() {
@@ -73,7 +74,7 @@ export default {
         true,
         this.userInfo.origin || 'WE',
         this.userInfo.userPriority,
-        this.sessionId
+        this.sessionRamId
       )
       if (res.result.code === ERR_OK) {
         console.log('===============================> 排队啊 排队啊 排队啊 <===============================')

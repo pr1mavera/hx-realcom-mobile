@@ -1,5 +1,5 @@
-// eslint-disable-next-line
 import { roomStatus, queueStatus } from '@/common/js/status'
+import Tools from '@/common/js/tools'
 
 const state = {
   userInfo: {},
@@ -13,6 +13,7 @@ const state = {
   },
   roomId: null,
   sessionId: null,
+  sessionRamId: Tools.getRamSessionId(),
   sessionList: null,
   chatGuid: null,
   msgs: [],
@@ -28,7 +29,8 @@ const state = {
   queueNum: 0,
   hasAssess: false,
   isAssessView: false,
-  serverTime: ''
+  serverTime: '',
+  videoFilter: false
 }
 
 export default state

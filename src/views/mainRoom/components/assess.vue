@@ -211,7 +211,6 @@
           padding: 2rem 0 1rem;
         }
       }
-      .eva-more {}
     }
   }
 }
