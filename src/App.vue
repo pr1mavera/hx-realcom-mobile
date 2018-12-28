@@ -19,10 +19,10 @@ import { stringEx } from './config/extend'
 
 export default {
   name: 'App',
-  components: {
-    'MainRoom': () => import('@/views/mainRoom'),
-    'Share': () => import('@/views/share')
-  },
+  // components: {
+  //   'MainRoom': () => import('@/views/mainRoom'),
+  //   'Share': () => import('@/views/share')
+  // },
   // computed: {
     // ...mapGetters([
     //   'msgs'
