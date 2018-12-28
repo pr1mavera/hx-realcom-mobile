@@ -2,7 +2,7 @@ import { mapGetters, mapMutations, mapActions } from 'vuex'
 import IM from '@/server/im'
 import MsgsLoader from '@/common/js/MsgsLoader'
 // import WebRTCAPI from 'webRTCAPI'
-import { ERR_OK, getImgUrl, getUserInfoByOpenID, getLoginInfo, getBotInfo, sendMsgToBot, getSessionList, getCsAvatar, onLineQueue, getBotRoamMsgs, requestHistoryMsgs, videoQueueCancel, onLineQueueCancel, chatQueueHeartBeat, getWorkTime } from '@/server/index.js'
+import { ERR_OK, ERR_FAIL, getImgUrl, getUserInfoByOpenID, getLoginInfo, getBotInfo, sendMsgToBot, getSessionList, getCsAvatar, onLineQueue, getBotRoamMsgs, requestHistoryMsgs, videoQueueCancel, onLineQueueCancel, chatQueueHeartBeat, getWorkTime } from '@/server/index.js'
 import Tools from '@/common/js/tools'
 import { Either } from '@/common/js/container/either'
 import { TIME_24_HOURS, roomStatus, queueStatus, sessionStatus, systemMsgStatus, msgStatus, cardTypes, msgTypes, tipTypes, dialogTypes } from '@/common/js/status'
@@ -216,91 +216,66 @@ export const RTCRoomMixin = {
   },
   methods: {
     initRTC(room) {
-      const self = this
-      // eslint-disable-next-line
-      this.RTC = new WebRTCAPI({
-        'sdkAppId': self.userInfo.sdkAppID,
-        'userId': self.userInfo.userId,
-        'userSig': self.userInfo.userSig,
-        'accountType': self.userInfo.accountType
-      }, () => {
-        this.RTC.createRoom({
-          roomid: room,
-          role: 'user'
+      return new Promise((resolve, reject) => {
+        const self = this
+        // eslint-disable-next-line
+        this.RTC = new WebRTCAPI({
+          'sdkAppId': self.userInfo.sdkAppID,
+          'userId': self.userInfo.userId,
+          'userSig': self.userInfo.userSig,
+          'accountType': self.userInfo.accountType
         }, () => {
-            console.info('ENTER RTC ROOM OK')
-        }, (result) => {
-          if (result) {
-            console.error('ENTER RTC ROOM failed', result)
-            // self.goHomeRouter()
+          this.RTC.enterRoom(
+            { roomid: room, role: 'user' },
+            () => resolve({ code: ERR_OK, msg: 'ENTER RTC ROOM OK' }),
+            (result) => reject({ code: ERR_FAIL, msg: `ENTER RTC ROOM failed, result: ${result}` })
+          )
+        }, (error) => {
+          console.error(error)
+        })
+
+        this.RTC.on('onQualityReport', this.handleRTCQualityReport)
+
+        this.RTC.on('onLocalStreamAdd', (info) => {
+          const videoElement = document.getElementById('localVideo')
+          if (info && info.stream) videoElement.srcObject = info.stream
+        })
+        this.RTC.on('onRemoteStreamUpdate', (info) => {
+          const videoElement = document.getElementById('remoteVideo')
+          if (info && info.stream) {
+            videoElement.srcObject = info.stream
+            videoElement.play()
           }
         })
-        // this.RTC.getStats({
-        //   interval: 5000
-        // }, this.RTCStreamControl)
-      }, (error) => {
-        console.error(error)
-      })
 
-      this.RTC.on('onQualityReport', this.handleRTCQualityReport)
-
-      this.RTC.on('onLocalStreamAdd', (info) => {
-        const videoElement = document.getElementById('localVideo')
-        // const fullScreenBtn = document.getElementById('fullScreenBtn')
-        if (info && info.stream) {
-          videoElement.srcObject = info.stream
-          // videoElement.muted = true
-          // videoElement.autoplay = true
-          // videoElement.playsinline = true
-          // videoElement.play()
-        }
-      })
-      this.RTC.on('onRemoteStreamUpdate', (info) => {
-        const videoElement = document.getElementById('remoteVideo')
-        if (info && info.stream) {
-          videoElement.srcObject = info.stream
-          // videoElement.autoplay = true
-          // videoElement.playsinline = true
-          videoElement.play()
-        }
-      })
-
-      this.RTC.on('onRemoteStreamRemove', (info) => {
-        // this.hangUpVideo()
-        // 停止推流
-        this.quitRTC()
-      })
-
-      this.RTC.on('onKickOut', () => {
-        console.warn('其他地方登录，被踢下线')
-        // self.goHomeRouter()
-      })
-
-      // this.RTC.on('onWebSocketClose', () => {
-      //   console.warn('websocket断开')
-      //   this.$vux.toast.show({
-      //     text: '当前websocket已断开',
-      //     position: 'top'
-      //   })
-      // })
-
-      this.RTC.on('onRelayTimeout', () => {
-        console.warn('服务器超时断开')
-        this.$vux.toast.show({
-          text: '当前网络状况不佳，服务器超时断开',
-          position: 'top'
+        this.RTC.on('onRemoteStreamRemove', (info) => {
+          // 停止推流
+          this.quitRTC()
         })
-      })
 
-      // this.RTC.on('onWebSocketNotify', (info) => {
-      //   // errorCode=10035，表示websocket被关闭
-      //   // 凡是webSocket流的关闭都会触发这个事件,将挂断操作从onRemoteStreamRemove移动到这来
-      //   // console.log(info)
-      //   (info.errorCode === 10035) && this.hangUpVideo()
-      // })
+        this.RTC.on('onKickOut', () => {
+          console.warn('其他地方登录，被踢下线')
+          // self.goHomeRouter()
+        })
 
-      this.RTC.on('onStreamNotify', (info) => {
-        !info.stream.active && this.hangUpVideo()
+        this.RTC.on('onRelayTimeout', () => {
+          console.warn('服务器超时断开')
+          this.$vux.toast.show({
+            text: '当前网络状况不佳，服务器超时断开',
+            position: 'top'
+          })
+        })
+
+        // this.RTC.on('onWebSocketNotify', (info) => {
+        //   // errorCode=10035，表示websocket被关闭
+        //   // 凡是webSocket流的关闭都会触发这个事件,将挂断操作从onRemoteStreamRemove移动到这来
+        //   (info.errorCode === 10035) && this.hangUpVideo()
+        // })
+
+        this.RTC.on('onStreamNotify', (info) => {
+          !info.stream.active && this.hangUpVideo()
+          console.log(info)
+        })
       })
     },
     async quitRTC() {

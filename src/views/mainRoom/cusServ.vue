@@ -98,7 +98,7 @@ export default {
             title: '啊呀，客服正在休息呐~'
           })
           break
-        case status === 2:
+        case status === 2 || status === -1:
           this.$vux.alert.show({
             title: '啊呀，客服暂时不在呢~'
           })

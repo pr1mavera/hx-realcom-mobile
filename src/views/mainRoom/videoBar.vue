@@ -10,6 +10,8 @@
     <div class="video-window" :class="server">
       <video height=100%
         id="remoteVideo"
+        :class="{'video-blur': videoBlur}"
+        :muted="videoBlur"
         autoplay
         playsinline
       ></video>
@@ -32,6 +34,7 @@
       ></video>
       <div class="video-mask"></div>
     </div>
+    <toast v-model="videoBlur" type="text" position="top" width="80%">视频客服{{csInfo.csNick}}当前暂离，请稍后</toast>
     <div class="full-screen-container" v-show="fullScreen && !videoScreenShotShow">
       <div class="video-header">
         <div class="avatar">
@@ -84,6 +87,7 @@
 </template>
 
 <script type="text/ecmascript-6">
+import { Toast } from 'vux'
 import { mapGetters, mapMutations } from 'vuex'
 import { queueStatus } from '@/common/js/status'
 import { ERR_OK, enterVideoRTCRoom } from '@/server/index.js'
@@ -100,7 +104,8 @@ export default {
     'VideoFooter': () => import('@/views/mainRoom/components/video/video-footer'),
     'VideoMsgList': () => import('@/views/mainRoom/components/video/video-msg-list'),
     'SendGift': () => import('@/views/mainRoom/components/chat/send-gift'),
-    'Assess': () => import('@/views/mainRoom/components/assess')
+    'Assess': () => import('@/views/mainRoom/components/assess'),
+    Toast
   },
   computed: {
     // isVideoBarOpen() {
@@ -136,6 +141,7 @@ export default {
   },
   data() {
     return {
+      videoBlur: false,
       videoScreenShotShow: false,
       videoScreenShotSrc: '',
       // 通话开始时间
@@ -190,9 +196,21 @@ export default {
     closeVideoBar() {
       this.setFullScreen(false)
     },
-    readyToVideo() {
+    async readyToVideo() {
       // IM.joinGroup(this.roomId, this.userInfo.userId)
-      this.initRTC(this.roomId)
+      const result = await this.initRTC(this.roomId)
+      console.log(result.msg)
+      if (result.code === ERR_OK) {
+        this.RTC.getLocalStream(
+          { video: true, audio: true },
+          (info) => {
+            this.RTC.startRTC({ stream: info.stream, role: 'user' })
+          }
+        )
+      } else {
+        this.$emit('videoFailed')
+      }
+      
       this.enterVideoRTCRoomAPI(this.csInfo.csId, this.userInfo.userId, this.userInfo.openId, this.sessionId)
     },
     async enterVideoRTCRoomAPI(roomId, userId, openId, sessionId) {
@@ -307,12 +325,16 @@ export default {
       left: 50%;
       transform: translateX(-50%);
       height: 100%;
+      transition: filter ease-in-out .5s;
       // &#remoteVideo {
       //   background-color: #666;
       // }
       // &#localVideo {
       //   background-color: #222;
       // }
+      &.video-blur {
+        filter: blur(50px);
+      }
       &::-webkit-media-controls {
         display:none !important;
       }
@@ -344,7 +366,7 @@ export default {
     }
     .video-screen-shot {
       object-fit: cover;
-      filter: blur(10px);
+      filter: blur(50px);
     }
   }
   .full-screen-container {
