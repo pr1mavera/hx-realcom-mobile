@@ -6,63 +6,62 @@
       <span class="btn btn-back" @click="$router.back(-1)">返回</span>
     </div>
     <!-- 每条礼物记录 -->
-    <div class="list-item" v-for="(item, index) in giftsList" :key="index">
+    <div class="item-container" id="itemContainer">
+      <pull-to
+        :bottom-load-method="loadMore"
+        @bottom-state-change="stateChange"
+      >
+        <div class="list-item" v-for="(item, index) in giftsList" :key="index">
       <span class="right">
         <span class="name">{{item.userName}}</span> <span class="con">送给她一个{{item.giftName}}</span>
       </span>
-      <span class="left time">{{item.sendTime}}</span>
+          <span class="left time">{{item.sendTime}}</span>
+        </div>
+        <!-- 提示没有更多记录了 -->
+        <divider style="margin: 3rem 0" v-if="noMore || giftsList.length === 0"> 啊呀，没有更多了</divider>
+      </pull-to>
     </div>
-    <!-- 提示没有更多记录了 -->
-    <divider v-if="noMore || giftsList.length === 0"> 啊呀，没有啦 </divider>
   </div>
 </template>
 
 <script>
   import {Divider} from 'vux'
   import Tools from '@/common/js/tools'
+  import PullTo from 'vue-pull-to'
   import {ERR_OK, giftsRecording} from '@/server/index.js'
 
   export default {
     // name: "cs-gifts-list"
     components: {
-      Divider
+      Divider,
+      PullTo
     },
     data() {
       return {
-        page: 1,
-        nextPage: 1,
+        page: 1, // 初始化页码
+        // nextPage: 1,
         giftsList: [], // 礼物记录
-        noMore: false
+        noMore: false,
+        status: true,
+        iconLink: ''
       }
     },
-    mounted() {
-      // const self = this
-      // const body = document.getElementById('body') // 获取body
-      // const container = document.getElementById('container')
-      // const scrollHeight = body.scrollHeight // 获取总高度
-      // const screenHeight = window.screen.height // 屏幕高度
-      // const scrollTop = container.scrollTop // 当前滚动位置
-      //
-      // window.addEventListener('scroll', (e) => {
-      //   debugger
-      //   // scrollTop > scrollHeight - 3 / 2 * screenHeight && page <= maxPage && getNextPage
-      //   // 当下滑到剩余1/2个屏幕的时候加载下一页的记录 即当前滚动位置 > 总高度 - 屏幕高度 - 1/2屏幕高度
-      //   if (scrollTop > scrollHeight - 3 / 2 * screenHeight) {
-      //     self.page += 1
-      //     this.getRecording() // 请求下一页的数据
-      //   }
-      // })
-
+    created() {
       this.getRecording()
     },
+    mounted() {
+      this.$nextTick(() => {})
+    },
     methods: {
+      // 获取第一页的数据
       async getRecording() {
-        const page = this.page
+        const page = 1
         const pageSize = 20
         const csId = this.$route.query.csId
-
+        //
+        // debugger
         const res = await giftsRecording(page, pageSize, csId)
-
+        //
         if (res.result.code === ERR_OK) {
           if (res.data.gifts.length === 0) {
             // 如果没有查到更多的记录
@@ -78,27 +77,75 @@
           }
         }
       },
-      getNextPage() {
-      } // h
+
+      loadMore(loaded) {
+        this.page++
+        const pageSize = 20
+        const csId = this.$route.query.csId
+        const tip = document.getElementsByClassName('default-text')[0]
+        // debugger
+
+        if (this.status === false) return
+        giftsRecording(this.page, pageSize, csId)
+          .then((res) => {
+            if (res.data.gifts.length === 0) {
+              this.noMore = true
+              this.status = false
+              loaded('done')
+              tip.style.display = 'none'
+              return
+            }
+            // this.giftsList = res.data.gifts this.giftsList.push(res.data.gifts[i])
+            // 转换时间格式
+            for (const i in res.data.gifts) {
+              const time = new Date(res.data.gifts[i].sendTime) // 将utc时间转换为本地时间
+              res.data.gifts[i].sendTime = Tools.DateTools.formatDate(time, 'yyyy-MM-dd hh:mm:ss')
+            }
+            this.giftsList = this.giftsList.concat(res.data.gifts)
+            loaded('done')
+          })
+      },
+      stateChange(state) {
+        if (state === 'pull' || state === 'trigger') {
+          this.iconLink = '#icon-arrow-bottom'
+        } else if (state === 'loading') {
+          this.iconLink = '#icon-loading'
+        } else if (state === 'loaded-done') {
+          this.iconLink = '#icon-finish'
+        }
+      }
     },
-    watch: {
-      // 监听页面滚动的位置
-    }
+    watch: {}
   }
 </script>
 
 <style scoped lang="less">
   .container {
+    /*height: 100%; default-text*/
     font-size: 1.2rem;
     padding: 1rem 1.2rem 0;
     .title {
+      position: fixed;
+      width: calc(100vw - 5rem);
+      top: 0;
+      height: 4rem;
       display: flex;
-      line-height: 2.5;
+      line-height: 3;
+      box-sizing: border-box;
       justify-content: space-between;
       border-bottom: 1px solid #FF959C;
       .tit-rig {
         color: #FF959C;
       }
+      .btn {
+        cursor: pointer;
+      }
+    }
+    .item-container {
+      /*height: 87vh;*/
+      height: calc(100vh - 10rem);
+      margin-top: 5rem;
+      box-sizing: border-box;
     }
     .list-item {
       display: flex;
@@ -122,8 +169,9 @@
     .list-item:first-child {
       border-top: none;
     }
-    .vux-divider {
-      margin-top: 1rem;
+    .bottom-load-wrapper {
+      line-height: 50px;
+      text-align: center;
     }
   }
 </style>

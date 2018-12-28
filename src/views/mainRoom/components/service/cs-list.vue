@@ -16,18 +16,13 @@
       </svg>
       {{ myCs.length === 3 ? '查看更多': '添加客服' }}
     </x-button>
-    <!--<div v-transfer-dom>-->
-      <!--<confirm v-model='alertTip'>-->
-        <!--<p style="text-align:center;">{{tipCon}}</p>-->
-      <!--</confirm>-->
-    <!--</div>-->
   </div>
 </template>
 
 <script type="text/ecmascript-6">
   import { XButton, TransferDomDirective as TransferDom } from 'vux'
   import { mapGetters } from 'vuex'
-  import { ERR_OK, queryCsInfo } from '@/server/index.js'
+  // import { ERR_OK, queryCsInfo } from '@/server/index.js'
 
 export default {
   components: {
@@ -57,26 +52,26 @@ export default {
     }
   },
   created() {
-    this.getCsList()
+    // this.getCsList()
   },
   methods: {
     // 获取专属客服列表
     async getCsList() {
-      // console.log('获取用户信息=>' + this.userInfo.userId)
-      const page = 1
-      const pageSize = -1
-      const userId = this.userInfo.userId // 获取用户的ID
-      const listType = '1'
-      const res = await queryCsInfo(page, pageSize, userId, listType)
-      // debugger
-      if (res.result.code === ERR_OK) {
-        console.log('========================= 我现在来请求 专属客服 辣 ========================')
-        // this.myCsList = res.data.csList
-        this.$emit('resetMyCs', res.data.csList)
-        res.data.csList.length === 0 && this.$router.replace('/room/cusServ/add')
-      } else {
-        console.log('error in queryCsInfo' + JSON.stringify(res))
-      }
+      // // console.log('获取用户信息=>' + this.userInfo.userId)
+      // const page = 1
+      // const pageSize = -1
+      // const userId = this.userInfo.userId // 获取用户的ID
+      // const listType = '1'
+      // const res = await queryCsInfo(page, pageSize, userId, listType)
+      // // debugger
+      // if (res.result.code === ERR_OK) {
+      //   console.log('========================= 我现在来请求 专属客服 辣 ========================')
+      //   // this.myCsList = res.data.csList
+      //   this.$emit('resetMyCs', res.data.csList)
+      //   res.data.csList.length === 0 && this.$router.replace('/room/cusServ/add')
+      // } else {
+      //   console.log('error in queryCsInfo' + JSON.stringify(res))
+      // }
     },
 
     // 进入客服列表页

@@ -2,13 +2,14 @@
   <div class="cus-serv">
     <router-view
       :myCs="myCs"
-      @resetMyCs="resetMyCs"
       @removeCs="removeCs"
       @goToLineUp="showConfirm"
       @clickToLineUp = "showConfirm"
       @showShare="showShare"
+      @resetMyCs="resetMyCs"
+      @addCs="addCs"
     ></router-view>
-    <!--<div v-transfer-dom>-->
+    <!--<div v-transfer-dom>  -->
       <!--<confirm v-model='alertTip'>-->
         <!--<p style="text-align:center;">{{tipCon}}</p>-->
       <!--</confirm>-->
@@ -20,7 +21,7 @@
 import { mapGetters } from 'vuex'
 import Tools from '@/common/js/tools'
 
-import { getCsStatus } from '@/server/index.js'
+import { ERR_OK, getCsStatus, queryCsInfo, addCs } from '@/server/index.js'
 // import { roomStatus } from '@/common/js/status'
 
 export default {
@@ -32,9 +33,12 @@ export default {
   },
   data() {
     return {
-      myCs: [],
+      myCs: [], // 我的专属客服
       csSelected: {}
     }
+  },
+  created() {
+    this.getCsList()
   },
   methods: {
     showConfirm(cs) {
@@ -103,6 +107,40 @@ export default {
             title: '啊呀，客服暂时不在呢~'
           })
           break
+      }
+    },
+
+    // 查询专属客服 判断路由 change by wnagxj
+    async getCsList() {
+      const page = 1
+      const pageSize = -1
+      const userId = this.userInfo.userId // 获取用户的ID
+      const listType = '1' // 请求我的专属客服
+      const res = await queryCsInfo(page, pageSize, userId, listType)
+
+      if (res.result.code === ERR_OK) {
+        // 如果当前客户的专属客服人数为 0 则到添加页面，否则到list页面
+        this.myCs = res.data.csList
+        if (res.data.csList.length === 0) {
+          this.$router.push('/room/cusServ/add')
+        } else { this.$router.push('/room/cusServ/list') }
+      } else {
+        console.log('error in queryCsInfo' + JSON.stringify(res.result))
+      }
+    },
+
+    // 添加为专属客服
+    async addCs(csInfo) {
+      if (this.myCs.length >= 3) {
+        this.$vux.toast.text('最多只能添加三名专属客服呢', 'default')
+        return
+      }
+      const res = await addCs(csInfo)
+      if (res.result.code === ERR_OK) {
+        // console.log(JSON.stringify(res))
+        this.$vux.toast.text('您已成功添加专属客服', 'default')
+      } else {
+        console.log('error about add the cS' + JSON.stringify(res.result))
       }
     }
   }
