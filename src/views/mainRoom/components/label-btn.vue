@@ -38,7 +38,7 @@
 
 <script>
   import { mapGetters } from 'vuex'
-  import Queue from '@/common/js/Queue'
+  // import Queue from '@/common/js/Queue'
   import { Checker, CheckerItem, Swiper, SwiperItem } from 'vux'
   import { ERR_OK, viewLabels } from '@/server/index.js'
 
@@ -65,9 +65,8 @@
         isDisabled: '', // unused
         disable: true, // 标签不能选，只是做展示功能
         currentPage: 0, // 当前页
-        pageList: [1]
-        // showDots: true,
-        // showMoreBtn: false
+        pageList: [1],
+        limits: 6 // 每个轮播页显示的标签的个数，评价时引用组件显示 6个/页 标签，个人中心显示 8个/页 个标签
       }
     },
     computed: {
@@ -76,9 +75,7 @@
       ])
     },
     mounted() {
-      this.$nextTick(() => {
-        this.getLabels()
-      })
+      this.getLabels()
     },
     methods: {
       // 清空标签
@@ -101,20 +98,12 @@
           const page = 0
           const pageSize = -1
           csId = this.$route.query.cusSerId || this.$route.query.csId
-          // 评价当前客服的标签
+          // 评价当前客服的所有标签
 
           const res = await viewLabels(page, pageSize, csId)
+          // debugger
           if (res.result.code === ERR_OK) {
-            // console.log('=============这是查询到的我的评价标签信息:' + JSON.stringify(res.data.labels))
-            // this.showDots = false
-            // this.btnList = res.data.labels
             this.btnList = this.labelPagination(res.data.labels)
-            // debugger 多于6个标签显示‘查看更多’按钮
-            // this.allBtnList = res.data.labels
-            // if (this.btnList.length > 6) {
-            //   this.btnList.splice(5, this.btnList.length - 5)
-            //   this.showMoreBtn = true
-            // }
           } else {
             // console.log('======================= error about query labelTags')
           }
@@ -126,12 +115,6 @@
           const res = await viewLabels(page, pageSize, csId)
           // debugger
           if (res.result.code === ERR_OK) {
-            // console.log('=============这是当前页查询到所有的标签信息:' + JSON.stringify(res))
-            // const pages = Math.ceil(res.data.totalCount[0].counts / pageSize) // 总页数
-            // for (let i = 2; i <= pages; i++) {
-            //   this.pageList.push(i)
-            // }
-            // this.btnList = res.data.labels
             this.btnList = this.labelPagination(res.data.labels)
           } else {
             console.log('======================= error about query labelTags')
@@ -143,65 +126,34 @@
         if (list.length === 0) {
           return map
         }
-        list.sort((a, b) => b.labelName.length - a.labelName.length) // 原标签数组逆序排列
-
-        // 初始化双向队列
-        let queue = Object.create(Queue)
-        queue.init(list)
+        // 初始化 每页的标签个数
+        if (this.labelType === 'notAll') {
+          this.limit = 8
+        }
 
         // 初始化页数
-        let i = 1
-
-        // 初始化单页最大字符上限
-        const limit = list[0].labelName.length + 1
-
-        while (!queue.isEmpty()) {
+        const pages = Math.ceil(list.length / this.limit) // 总页数
+        for (let i = 0; i < pages; i++) {
           // 初始化单页数据
           let temp = {
             page: i,
             strLen: 0,
             list: []
           }
-
-          while (temp.strLen <= limit && !queue.isEmpty()) {
-            // 第一轮添加
-            const a = queue.dequeueFront()
-            temp.list.push(a)
-            temp.strLen += a.labelName.length
-
-            if (!queue.isEmpty()) {
-              // 第二轮添加
-              const b = queue.dequeueBack()
-              temp.list.push(b)
-              temp.strLen += b.labelName.length
-
-              if (temp.strLen <= limit && !queue.isEmpty()) {
-                // 长度依然小于12
-                const a = queue.dequeueFront()
-                temp.list.push(a)
-                temp.strLen += a.labelName.length
-              } else {
-                break
-              }
-            }
+          const last = Math.min(list.length, (i + 1) * this.limit)
+          for (let j = i * this.limit; j < last; j++) {
+            temp.list.push(list[j])
           }
-
-          // 迭代页数
-          i++
-
-          // 封装单页
           map.push(temp)
-
-          if (queue.isEmpty()) {
-            break
-          }
+          // 封装单页
         }
         return map
       },
+
+      // 选中的标签
       selChanege() {
         // debugger
         this.$emit('seledLabels', this.selTags)
-        // console.log('你选中了这一个选项' + JSON.stringify(this.selTags))
       }
     }
   }

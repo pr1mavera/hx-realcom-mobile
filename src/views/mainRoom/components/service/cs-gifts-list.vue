@@ -17,8 +17,15 @@
       </span>
           <span class="left time">{{item.sendTime}}</span>
         </div>
+        <!-- 没有礼物记录时 -->
+        <div class="none-gift" v-if="none">
+          <svg class="icon" aria-hidden="true">
+            <use xlink:href="#icon-meiyouneirong"></use>
+          </svg>
+          <span>&nbsp;&nbsp;~~咦,我竟然还没有收到礼物~</span>
+        </div>
         <!-- 提示没有更多记录了 -->
-        <divider style="margin: 3rem 0" v-if="noMore || giftsList.length === 0"> 啊呀，没有更多了</divider>
+        <divider style="margin: 3rem 0" v-if="noMore"> 啊呀，没有更多了</divider>
       </pull-to>
     </div>
   </div>
@@ -43,7 +50,8 @@
         giftsList: [], // 礼物记录
         noMore: false,
         status: true,
-        iconLink: ''
+        iconLink: '',
+        none: false
       }
     },
     created() {
@@ -65,7 +73,7 @@
         if (res.result.code === ERR_OK) {
           if (res.data.gifts.length === 0) {
             // 如果没有查到更多的记录
-            this.noMore = true
+            this.none = true
             return
           }
 
@@ -120,6 +128,7 @@
 </script>
 
 <style scoped lang="less">
+  @import '~@/common/style/theme.less';
   .container {
     /*height: 100%; default-text*/
     font-size: 1.2rem;
@@ -130,7 +139,7 @@
       top: 0;
       height: 4rem;
       display: flex;
-      line-height: 3;
+      line-height: 4.5rem;
       box-sizing: border-box;
       justify-content: space-between;
       border-bottom: 1px solid #FF959C;
@@ -146,6 +155,23 @@
       height: calc(100vh - 10rem);
       margin-top: 5rem;
       box-sizing: border-box;
+    }
+    .none-gift {
+      width: 100%;
+      height: 60vh;
+      display: flex;
+      color: #646464;
+      justify-content: center;
+      .icon {
+        width: 4.8rem;
+        height: 4.8rem;
+        fill: #646464;
+        align-self: center;
+        vertical-align: -0.15em;
+      }
+      span {
+        align-self: center;
+      }
     }
     .list-item {
       display: flex;
