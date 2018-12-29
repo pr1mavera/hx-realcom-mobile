@@ -5,7 +5,7 @@
     :class="[{'item-padding-left': msg.isSelfSend, 'item-padding-right': !msg.isSelfSend}]">
     <div class="avatar" v-if="!msg.isSelfSend">
       <div class="bot-avatar bg-image">
-        <img width=100% height=100% v-lazy="avatarUrl">
+        <img width=100% height=100% v-lazy="avatarUrl" @click="enterSerCenter">
         <!-- @click="enterSerCenter" -->
       </div>
       <!-- <svg class="icon extend-click" aria-hidden="true">
@@ -210,10 +210,7 @@ export default {
         default:
           return
       }
-      // 判断是否是人工客服（机器人没有个人中心）
-      // if (!this.csInfo.csId) {
-      //   return
-      // }
+    // （机器人没有个人中心)
       this.$router.push({
         path: '/room/serverDetail',
         query: {

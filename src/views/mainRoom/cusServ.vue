@@ -40,6 +40,9 @@ export default {
   created() {
     this.getCsList()
   },
+  mounted() {
+    this.nextUrl()
+  },
   methods: {
     showConfirm(cs) {
       this.csSelected = cs
@@ -110,7 +113,7 @@ export default {
       }
     },
 
-    // 查询专属客服 判断路由 change by wnagxj
+    // 查询专属客服 change by wnagxj
     async getCsList() {
       const page = 1
       const pageSize = -1
@@ -119,13 +122,19 @@ export default {
       const res = await queryCsInfo(page, pageSize, userId, listType)
 
       if (res.result.code === ERR_OK) {
-        // 如果当前客户的专属客服人数为 0 则到添加页面，否则到list页面
-        this.myCs = res.data.csList
-        if (res.data.csList.length === 0) {
-          this.$router.push('/room/cusServ/add')
-        } else { this.$router.push('/room/cusServ/list') }
+        // 更新当前的专属客服列表
+        this.resetMyCs(res.data.csList)
       } else {
         console.log('error in queryCsInfo' + JSON.stringify(res.result))
+      }
+    },
+
+    // 判断路由 change by wnagxj
+    nextUrl() {
+      if (this.resetMyCs.length === 0) {
+        this.$router.push('/room/cusServ/add')
+      } else {
+        this.$router.push('/room/cusServ/list')
       }
     },
 
@@ -138,6 +147,7 @@ export default {
       const res = await addCs(csInfo)
       if (res.result.code === ERR_OK) {
         // console.log(JSON.stringify(res))
+        this.getCsList() // 更新专属客服列表（重新查询）待优化
         this.$vux.toast.text('您已成功添加专属客服', 'default')
       } else {
         console.log('error about add the cS' + JSON.stringify(res.result))
