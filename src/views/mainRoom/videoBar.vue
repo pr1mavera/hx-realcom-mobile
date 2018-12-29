@@ -210,7 +210,7 @@ export default {
       } else {
         this.$emit('videoFailed')
       }
-      
+
       this.enterVideoRTCRoomAPI(this.csInfo.csId, this.userInfo.userId, this.userInfo.openId, this.sessionId)
     },
     async enterVideoRTCRoomAPI(roomId, userId, openId, sessionId) {
