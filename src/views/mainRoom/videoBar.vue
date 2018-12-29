@@ -10,8 +10,8 @@
     <div class="video-window" :class="server">
       <video height=100%
         id="remoteVideo"
-        :class="{'video-blur': videoBlur}"
-        :muted="videoBlur"
+        :class="{'video-blur': videoFilter}"
+        :muted="videoFilter"
         autoplay
         playsinline
       ></video>
@@ -34,13 +34,13 @@
       ></video>
       <div class="video-mask"></div>
     </div>
-    <toast v-model="videoBlur" type="text" position="top" width="80%">视频客服{{csInfo.csNick}}当前暂离，请稍后</toast>
+    <toast v-model="isVideoFilter" :time="10000" type="text" position="top" width="80%">视频客服{{csInfo.csNick}}当前暂离，请稍后</toast>
     <div class="full-screen-container" v-show="fullScreen && !videoScreenShotShow">
       <div class="video-header">
         <div class="avatar">
           <img v-lazy="this.csInfo.csAvatar">
         </div>
-        <div class="name">{{this.csInfo.csNick}}</div>
+        <div class="name">{{this.csInfo.csNick + '--'}}</div>
       </div>
       <video-footer
         @hangUpVideo="handleHangUpVideo"
@@ -121,6 +121,12 @@ export default {
     likesCountStyle() {
       return this.likes ? '#icon-xin-hong' : '#icon-dianzanqian'
     },
+    isVideoFilter: {
+      get() {
+        return this.videoFilter
+      },
+      set() {}
+    },
     customer() {
       return this.isChangeCamera ? 'big' : 'small'
     },
@@ -136,12 +142,12 @@ export default {
       'roomId',
       'sessionId',
       'hasAssess',
-      'serverTime'
+      'serverTime',
+      'videoFilter'
     ])
   },
   data() {
     return {
-      videoBlur: false,
       videoScreenShotShow: false,
       videoScreenShotSrc: '',
       // 通话开始时间
@@ -201,12 +207,9 @@ export default {
       const result = await this.initRTC(this.roomId)
       console.log(result.msg)
       if (result.code === ERR_OK) {
-        this.RTC.getLocalStream(
-          { video: true, audio: true },
-          (info) => {
-            this.RTC.startRTC({ stream: info.stream, role: 'user' })
-          }
-        )
+        this.RTC.getLocalStream({ video: true, audio: true }, (info) => {
+          this.RTC.startRTC({ stream: info.stream, role: 'user' })
+        })
       } else {
         this.$emit('videoFailed')
       }
@@ -401,6 +404,7 @@ export default {
       .name {
         display: inline-block;
         vertical-align: top;
+        line-height: 1.6;
         background-color: rgb(228, 169, 183);
         border-radius: 1.5rem;
         font-size: 1.2rem;

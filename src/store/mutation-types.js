@@ -8,6 +8,8 @@ export const SET_ROOM_ID = 'SET_ROOM_ID'
 
 export const SET_SESSION_ID = 'SET_SESSION_ID'
 
+export const SET_SESSION_RAM_ID = 'SET_SESSION_RAM_ID'
+
 export const SET_SESSION_LIST = 'SET_SESSION_LIST'
 
 export const SET_CHAT_GUID = 'SET_CHAT_GUID'
@@ -31,3 +33,5 @@ export const SET_ASSESS_STATUS = 'SET_ASSESS_STATUS'
 export const SET_ASSESS_VIEW = 'SET_ASSESS_VIEW'
 
 export const SET_SERVER_TIME = 'SET_SERVER_TIME'
+
+export const SET_VIDEO_FILTER = 'SET_VIDEO_FILTER'

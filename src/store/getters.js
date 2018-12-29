@@ -10,6 +10,8 @@ export const csInfo = state => state.csInfo
 export const roomId = state => state.roomId
 // 会话房间ID（包括机器人，人工客服，视频客服）
 export const sessionId = state => state.sessionId
+// 会话房间ID（客户端）
+export const sessionRamId = state => state.sessionRamId
 // 会话列表
 export const sessionList = state => state.sessionList
 // 人工客服排队ID
@@ -51,3 +53,5 @@ export const hasAssess = state => state.hasAssess
 export const isAssessView = state => state.isAssessView
 // 服务时长
 export const serverTime = state => state.serverTime
+// 视频滤镜（客服暂离）
+export const videoFilter = state => state.videoFilter

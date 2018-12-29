@@ -288,11 +288,11 @@ export default {
         // 若无缓存则清空当前缓存
         Tools.CacheTools.removeCacheData(`${this.userInfo.origin}_curServInfo`)
         // 若无重连，则 action 创建会话
-        this.initSession()
+        // this.initSession()
         // 若无重连，则 配置机器人欢迎语
-        await this.sendMsgs(welcomeMsg)
+        this.sendMsgs(welcomeMsg)
       } else {
-        await this.reConnect(reConnectStatus)
+        this.reConnect(reConnectStatus)
       }
 
       // IM 初始化
@@ -545,6 +545,7 @@ export default {
       if (text && text.trim()) {
         // this.roomMode === roomStatus.AIChat ? await this.sendTextMsgToBot(text) : await this.sendC2CMsgs(text)
         if (this.roomMode === roomStatus.AIChat) {
+          !this.sessionId && await this.initSession()
           await this.sendTextMsgToBot(text)
           if (!this.isBotAssessShow) {
             this.isBotAssessShow = true

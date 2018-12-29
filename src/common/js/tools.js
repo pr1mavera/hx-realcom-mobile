@@ -14,8 +14,7 @@ const DateTools = {
       'h': date.getHours(), // 小时
       'm': date.getMinutes(), // 分
       's': date.getSeconds(), // 秒
-      'q': Math.floor((date.getMonth() + 3) / 3), // 季度
-      'S': date.getMilliseconds() // 毫秒
+      'q': Math.floor((date.getMonth() + 3) / 3) // 季度
     }
     format = format.replace(/([yMdhmsqS])+/g, function(all, t) {
       var v = map[t]
@@ -27,6 +26,9 @@ const DateTools = {
         return v
       } else if (t === 'y') {
         return (date.getFullYear() + '').substr(4 - all.length)
+      } else if (t === 'S') {
+        const ms = `00${date.getMilliseconds()}`
+        return ms.substr(ms.length - 3)
       }
       return all
     })
@@ -450,8 +452,13 @@ let Tools = Object.assign({}, {
     return f(data) ? Right.of(data) : Left.of(data)
   }),
   // 取一定范围内的随机数
-  randomMin2Max: function(min, max) {
+  randomMin2Max: _.curry(function(min, max) {
     return Math.floor(Math.random() * (max - min) + min)
+  }),
+  getRamSessionId: function() {
+    const date = this.DateTools.formatDate('yyyy-MM-dd-hh-mm-ss-SSS').split(/-/g).join('')
+    const ram = this.randomMin2Max(100000)(999999)
+    return `${sessionStatus.robot}${date}${ram}`
   }
 })
 
