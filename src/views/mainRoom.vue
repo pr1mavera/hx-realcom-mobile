@@ -126,7 +126,8 @@ export default {
       'serverTime',
       'csInfo',
       'userInfo',
-      'sessionId'
+      'sessionId',
+      'sessionRamId'
     ])
   },
   // created() {
@@ -172,8 +173,8 @@ export default {
       const userInfo = data.userInfo.parseJSON()
       // 存用户基本信息
       this.setUserInfo(userInfo)
-      // 存会话Id
-      this.setSessionId(data.sessionId)
+      // 存会话Id (iOS端从微信跳转过来存的那份sessionId就是用的sessionRamId，这样无论是在iOS端还是Android端视频排队的时候传入的sessionId都是用的sessionRamId)
+      this.setSessionRamId(data.sessionId)
       // 获取当次会话列表
       this.requestSessionList(userInfo.userId)
       // IM 初始化
@@ -222,13 +223,14 @@ export default {
     },
     // 请求视频后，若当前环境为iOS的微信环境，则存一次会话信息
     async setSessionTicket({ csId, csName, csNick }) {
+      // !this.sessionId && await this.initSession()
       const res = await saveQueueTicket(
         csId,
         csName,
         csNick,
         this.userInfo,
         this.userInfo.openId,
-        this.sessionId
+        this.sessionRamId
       )
       if (res.result.code === ERR_OK) {
         // this.$vux.toast.text('已为您保存咨询信息')
@@ -371,14 +373,15 @@ export default {
     ...mapMutations({
       setRoomMode: 'SET_ROOM_MODE',
       setUserInfo: 'SET_USER_INFO',
-      setSessionId: 'SET_SESSION_ID',
+      setSessionRamId: 'SET_SESSION_RAM_ID',
       setAssessStatus: 'SET_ASSESS_STATUS',
       setAssessView: 'SET_ASSESS_VIEW',
       setServerTime: 'SET_SERVER_TIME'
     }),
     ...mapActions([
       'beforeQueue',
-      'afterServerFinish'
+      'afterServerFinish',
+      'initSession'
     ])
   }
 }
