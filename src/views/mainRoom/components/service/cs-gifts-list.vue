@@ -74,6 +74,7 @@
           if (res.data.gifts.length === 0) {
             // 如果没有查到更多的记录
             this.none = true
+            this.status = false
             return
           }
 
@@ -139,7 +140,7 @@
       top: 0;
       height: 4rem;
       display: flex;
-      line-height: 4.5rem;
+      line-height: 4rem;
       box-sizing: border-box;
       justify-content: space-between;
       border-bottom: 1px solid #FF959C;
