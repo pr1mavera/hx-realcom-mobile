@@ -40,8 +40,11 @@ export default {
   created() {
     this.getCsList()
   },
-  mounted() {
+  activated() {
     this.nextUrl()
+  },
+  mounted() {
+    // this.nextUrl()
   },
   methods: {
     showConfirm(cs) {
@@ -132,9 +135,9 @@ export default {
     // 判断路由 change by wnagxj
     nextUrl() {
       if (this.resetMyCs.length === 0) {
-        this.$router.push('/room/cusServ/add')
+        this.$router.replace('/room/cusServ/add')
       } else {
-        this.$router.push('/room/cusServ/list')
+        this.$router.replace('/room/cusServ/list')
       }
     },
 
