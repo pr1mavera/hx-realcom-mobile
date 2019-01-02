@@ -55,15 +55,22 @@ let webpackConfig = {
         test: /\.js$/,
         loader: 'babel-loader',
         include: [resolve('src'), resolve('test'), resolve('node_modules/webpack-dev-server/client')]
+        // exclude: /node_modules/
       },
-      // {
-      //   test: /\.css$/,
-      //   loader: 'style-loader!css-loader',
-      //   // use: [
-      //   //   'style-loader',
-      //   //   'css-loader'
-      //   // ]
-      // },
+      {
+        test: /\.less$/,
+        use: [
+          'vue-style-loader',
+          'css-loader',
+          {
+            loader: 'postcss-loader',
+            options: {
+              sourceMap: true
+            }
+          },
+          'less-loader'
+        ]
+      },
       {
         test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
         loader: 'url-loader',
