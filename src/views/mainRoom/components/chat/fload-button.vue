@@ -13,7 +13,7 @@
       </button>
       <p class="text">转电话</p>
     </div>
-    <div class="btn-item">
+    <!-- <div class="btn-item">
       <button
         class="item extend-click transition-bezier"
         @click="videoLineUp"
@@ -21,7 +21,7 @@
         <img width=100% height=100% src="/video/static/img/chat/fb_video.png">
       </button>
       <p class="text">转视频</p>
-    </div>
+    </div> -->
     <div class="btn-item">
       <button
         ref="enterMenChat"
@@ -156,7 +156,7 @@ export default {
             // 当前不在工作时间
             if (this.notWorkTimeClicked) {
               // 用户重复点击
-              this.showTips(3, '请勿重复点击')
+              this.showTips(2, '请勿重复点击')
               return 0
             } else {
               // 用户第一次点击
