@@ -1,7 +1,7 @@
 <template>
   <div class="label-btn-box">
     <swiper v-model="currentPage" @on-index-change="changePage" height="10rem"
-            v-if="true" style="" dots-class="custom-bottom" dots-position="center">
+            v-if="btnList.length > 0" style="" dots-class="custom-bottom" dots-position="center">
       <swiper-item v-for="(pages, index) in btnList" :key="index">
         <!--{{index}} labelType === 'all'   :show-dots="showDots"-->
         <checker v-model="selTags" type="checkbox" default-item-class="tags-default" @on-change="selChanege"
@@ -17,15 +17,6 @@
       </swiper-item>
     </swiper>
 
-    <!--labels for me labelType === 'notAll' unused -->
-    <!--<checker v-if="false" type="checkbox" default-item-class="tags-default">-->
-      <!--<checker-item :disabled="disable"-->
-                    <!--v-for="(item, index) in btnList"-->
-                    <!--:key="index"-->
-                    <!--:value="item"-->
-      <!--&gt;{{item.labelName}} {{item.labelCount}}</checker-item>-->
-      <!--&lt;!&ndash;<a class="btn btn-more" v-if="showMoreBtn" @click="showMore">更多···</a>&ndash;&gt;-->
-    <!--</checker> -->
     <!-- 当没有标签的情况 -->
     <div class="label-none" v-if="btnList.length === 0">
       <svg class="icon" aria-hidden="true">
@@ -95,29 +86,29 @@
 
         // debugger
         if (this.labelType === 'notAll') {
-          const page = 0
-          const pageSize = -1
+          let page = 0
+          let pageSize = -1
           csId = this.$route.query.cusSerId || this.$route.query.csId
           // 评价当前客服的所有标签
 
-          const res = await viewLabels(page, pageSize, csId)
+          const result = await viewLabels(page, pageSize, csId)
           // debugger
-          if (res.result.code === ERR_OK) {
-            this.btnList = this.labelPagination(res.data.labels)
-          } else {
-            // console.log('======================= error about query labelTags')
+          if (result.result.code === ERR_OK) {
+            // debugger
+            this.btnList = this.labelPagination(result.data.labels)
+            // debugger
           }
         } else {
           // 查询所有标签
-          const page = 1
-          const pageSize = -1
+          let pages = 0
+          let pageSizes = -1
           this.disable = false // 标签可以选
-          const res = await viewLabels(page, pageSize, csId)
+          const res = await viewLabels(pages, pageSizes, csId)
           // debugger
           if (res.result.code === ERR_OK) {
+            // debugger
             this.btnList = this.labelPagination(res.data.labels)
-          } else {
-            console.log('======================= error about query labelTags')
+            // debugger
           }
         }
       },
@@ -129,6 +120,8 @@
         // 初始化 每页的标签个数
         if (this.labelType === 'notAll') {
           this.limit = 8
+        } else {
+          this.limit = 6
         }
 
         // 初始化页数

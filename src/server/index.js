@@ -87,7 +87,7 @@ export const viewLabels = async(page, pageSize, csId) => http.get('user', `/vide
 // 分页查询礼物记录
 export const giftsRecording = async(page, pageSize, csId) => http.get('user', `/video/user/cs/gifts?page=${page}&pageSize=${pageSize}&csId=${csId}`)
 
-// 用户向坐席发送礼物 TODO
+// 用户向坐席发送礼物 TO DO
 export const giftSend = giftInfo => http.post('user', '/video/cs/user/gift', giftInfo)
 
 /**

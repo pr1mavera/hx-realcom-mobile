@@ -177,6 +177,7 @@
        personalDisplay: [],
        cuSerInfo: {},
        serTimes: '0',
+       // labelType: 'all',
        labelType: 'notAll',
        giftType: 'notAll',
        allGifts: 'all',
