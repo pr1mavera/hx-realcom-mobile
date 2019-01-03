@@ -8,10 +8,10 @@ import { WechatPlugin, AlertPlugin, ToastPlugin, ConfirmPlugin, LoadingPlugin } 
 import router from './router'
 import store from './store'
 
-// 移动端调试 vConsole
-let VConsole = require('../node_modules/vconsole/dist/vconsole.min')
-// eslint-disable-next-line
-let vConsole = new VConsole()
+// // 移动端调试 vConsole
+// let VConsole = require('../node_modules/vconsole/dist/vconsole.min')
+// // eslint-disable-next-line
+// let vConsole = new VConsole()
 
 Vue.use(WechatPlugin)
 Vue.use(AlertPlugin)

@@ -36,8 +36,14 @@ const DateTools = {
   },
 
   isTimeDiffLongEnough: function(cache, next) {
-    const cacheT = new Date(cache.replace(/-/g, '/'))
-    const nextT = new Date(next.replace(/-/g, '/'))
+    if (typeof cache === 'string') {
+      cache.replace(/-/g, '/')
+    }
+    if (typeof next === 'string') {
+      next.replace(/-/g, '/')
+    }
+    const cacheT = new Date(cache)
+    const nextT = new Date(next)
     return nextT - cacheT >= TIME_3_MIN
   },
 
@@ -67,7 +73,19 @@ const DateTools = {
     e.setMinutes(stre[1])
 
     return n.getTime() - b.getTime() > 0 && n.getTime() - e.getTime() < 0
-  }
+  },
+
+  isSendTipMsgTime: (function() {
+    let tipMsgTimeCache = new Date()
+    return function(nextT) {
+      if (!nextT) {
+        return false
+      }
+      const res = this.isTimeDiffLongEnough(tipMsgTimeCache, nextT)
+      res && (tipMsgTimeCache = nextT)
+      return res
+    }
+  })()
 }
 
 const AsyncTools = {

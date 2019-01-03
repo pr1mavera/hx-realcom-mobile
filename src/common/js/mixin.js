@@ -685,7 +685,7 @@ export const IMMixin = {
       }
       if (msgsObj.msgStatus === msgStatus.msg && msgsObj.msgType === msgTypes.msg_timeout) { // 超时消息
         const dialog = {
-          time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+          time: Tools.DateTools.formatDate('yyyy-MM-dd hh:mm:ss'),
           msgStatus: msgStatus.dialog,
           msgType: dialogTypes.dialog_disconnect,
           dialogInfo: {

@@ -390,28 +390,16 @@ export const getRoamMsgs = function({ commit, state }, { origin, page }) {
 
 // 更新本地消息队列
 export const sendMsgs = async function({ commit, state }, msg) {
-  const tipMsg = msg.filter(item => item.msgStatus === msgStatus.msg)
-  if (tipMsg.length) {
-    let lastT = null
-    // 缓存最后一条信息的时间
-    for (let i = state.msgs.length - 1; i > 0; i--) {
-      if (state.msgs[i].msgStatus === msgStatus.tip && state.msgs[i].msgType === tipTypes.tip_time) {
-         lastT = state.msgs[i].time
-         break
-      }
-      console.log(`------------------------------------- 循环了 ${i} -------------------------------------`)
+  const msgT = msg[0].timestamp
+  if (Tools.DateTools.isSendTipMsgTime(msgT)) {
+    const time = Tools.DateTools.formatDate(new Date(msgT), 'yyyy-MM-dd hh:mm:ss')
+    const tip = {
+      content: time,
+      time,
+      msgStatus: msgStatus.tip,
+      msgType: tipTypes.tip_time
     }
-    // 若间隔时间大于约定时间，则生成时间信息tip
-    const now = Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss')
-    if (!lastT || (lastT && Tools.DateTools.isTimeDiffLongEnough(lastT, now))) {
-      const tip = {
-        content: now,
-        time: now,
-        msgStatus: msgStatus.tip,
-        msgType: tipTypes.tip_time
-      }
-      commit(types.SET_MSGS, state.msgs.concat(tip))
-    }
+    commit(types.SET_MSGS, state.msgs.concat(tip))
   }
   // const selfMsg = msg.filter((item) => item.isSelfSend)
   // if ((state.roomMode === roomStatus.menChat) && selfMsg.length) {
