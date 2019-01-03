@@ -212,7 +212,7 @@ export default {
       }
     // （机器人没有个人中心)
       this.$router.push({
-        path: '/room/serverDetail',
+        path: '/room/cusServ/serverDetail',
         query: {
           cusSerId: csId
         }
