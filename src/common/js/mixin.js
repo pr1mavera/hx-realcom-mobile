@@ -274,7 +274,9 @@ export const RTCRoomMixin = {
         // })
 
         this.RTC.on('onStreamNotify', (info) => {
-          !info.stream.active && this.hangUpVideo()
+          if (info.event === 'onended' || info.event === 'inactive') {
+            this.hangUpVideo()
+          }
           console.log(info)
         })
       })
