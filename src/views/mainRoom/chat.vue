@@ -242,19 +242,19 @@ export default {
       return
     }
 
-    this.$nextTick(async() => {
+    this.$nextTick(() => {
       this.inputEle = this.$refs.inputBar.$refs.inputContent
       // 初始化滚动
       this._initScroll()
       this._initPullDownRefresh()
-      await this._initChat()
+      this._initChat()
     })
   },
   activated() {
     this.$nextTick(async() => {
       await Tools.AsyncTools.sleep(10)
       this.chatScroll.refresh()
-      this.chatScroll.scrollToElement(this.$refs.chatContentEnd, 400)
+      // this.chatScroll.scrollToElement(this.$refs.chatContentEnd, 400)
     })
   },
   methods: {
@@ -290,15 +290,13 @@ export default {
         // 若无重连，则 action 创建会话
         // this.initSession()
         // 若无重连，则 配置机器人欢迎语
-        this.sendMsgs(welcomeMsg)
+        this.setMsgs(welcomeMsg)
       } else {
         this.reConnect(reConnectStatus)
       }
 
       // IM 初始化
       this.initIM(userInfo)
-
-      return 0
     },
     async getCurServStatus() {
       // 如果有会话未结束，则重连
@@ -403,6 +401,7 @@ export default {
       }
       this.chatScroll = new BScroll(this.$refs.chatScroll, {
         click: true,
+        // observeDOM: false,
         // autoBlur: false,
         probeType: 3,
         swipeBounceTime: 300,
@@ -748,6 +747,7 @@ export default {
       setUserInfo: 'SET_USER_INFO',
       setBotInfo: 'SET_BOT_INFO',
       setCsInfo: 'SET_CS_INFO',
+      setMsgs: 'SET_MSGS',
       setSessionId: 'SET_SESSION_ID',
       setChatGuid: 'SET_CHAT_GUID',
       setRoomMode: 'SET_ROOM_MODE',
@@ -765,16 +765,8 @@ export default {
   },
   watch: {
     msgs() {
-      this.$nextTick(() => {
-        // 若当前为在线服务，则更新缓存
-        // if (this.roomMode === roomStatus.menChat) {
-        //   Tools.CacheTools.updateCacheData({
-        //     key: 'curServInfo',
-        //     msgs: this.msgs,
-        //     timestamp: new Date().getTime()
-        //   })
-        // }
-        // await Tools.AsyncTools.sleep(10)
+      this.$nextTick(async() => {
+        await Tools.AsyncTools.sleep(10)
         this.chatScroll.refresh()
         this.chatScroll.scrollToElement(this.$refs.chatContentEnd, 400)
       })

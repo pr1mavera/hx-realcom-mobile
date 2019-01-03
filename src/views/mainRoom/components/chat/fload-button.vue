@@ -77,7 +77,7 @@ export default {
     return {
       notWorkTimeClicked: false,
       fastClickTimer: null,
-      tipsTimer: null,
+      // tipsTimer: null,
       tipsIndex: 0,
       tipsText: '',
       tipsShow: false
@@ -120,7 +120,7 @@ export default {
         case roomStatus.AIChat:
           // this.$emit('enterVideoLineUp')
           // this.$router.push({path: '/room/cusServ/list'}) change by WangXj
-          this.$router.push({path: '/room/cusServ'})
+          this.$router.push({ path: '/room/cusServ' })
 
           break
         case roomStatus.videoChat:
@@ -234,8 +234,8 @@ export default {
           break
       }
     },
-    showTips(index, text) {
-      if (this.tipsTimer) {
+    async showTips(index, text) {
+      if (this.tipsShow) {
         // 防止重复
         return 0
       } else {
@@ -244,13 +244,17 @@ export default {
         this.tipsText = text
         this.tipsShow = true
 
-        this.tipsTimer = setTimeout(() => {
-          // 关闭提示
-          this.tipsShow = false
-          // 重置
-          this.tipsTimer && clearTimeout(this.tipsTimer)
-          this.tipsTimer = null
-        }, 3000)
+        await Tools.AsyncTools.sleep(3000)
+        // 关闭提示
+        this.tipsShow = false
+
+        // this.tipsTimer = setTimeout(() => {
+        //   // 关闭提示
+        //   this.tipsShow = false
+        //   // 重置
+        //   this.tipsTimer && clearTimeout(this.tipsTimer)
+        //   this.tipsTimer = null
+        // }, 3000)
       }
     },
     ...mapMutations({
@@ -356,7 +360,7 @@ export default {
         position: absolute;
         top: 0;
         bottom: 0;
-        right: 0;
+        right: 0.2rem;
         margin: auto;
         transform: translateX(100%);
         border-width: 0.8rem 0 0.8rem 0.8rem;
