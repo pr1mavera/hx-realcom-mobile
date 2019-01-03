@@ -1,6 +1,6 @@
 <template>
   <div class="label-btn-box">
-    <swiper v-model="currentPage" @on-index-change="changePage" height="10rem"
+    <swiper v-model="currentPage" @on-index-change="changePage" height="11rem"
             v-if="btnList.length > 0" style="" dots-class="custom-bottom" dots-position="center">
       <swiper-item v-for="(pages, index) in btnList" :key="index">
         <!--{{index}} labelType === 'all'   :show-dots="showDots"-->

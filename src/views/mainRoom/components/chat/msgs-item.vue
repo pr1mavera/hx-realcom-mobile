@@ -5,7 +5,7 @@
     :class="[{'item-padding-left': msg.isSelfSend, 'item-padding-right': !msg.isSelfSend}]">
     <div class="avatar" v-if="!msg.isSelfSend">
       <div class="bot-avatar bg-image">
-        <img width=100% height=100% v-lazy="avatarUrl" @click="enterSerCenter">
+        <img width=100% height=100% v-lazy="avatarUrl">
         <!-- @click="enterSerCenter" -->
       </div>
       <!-- <svg class="icon extend-click" aria-hidden="true">
@@ -212,7 +212,7 @@ export default {
       }
     // （机器人没有个人中心)
       this.$router.push({
-        path: '/room/serverDetail',
+        path: '/room/cusServ/serverDetail',
         query: {
           cusSerId: csId
         }
