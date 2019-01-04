@@ -697,9 +697,14 @@ export const IMMixin = {
         this.sendMsgs([dialog])
         return
       }
-      if (msgsObj.msgStatus === msgStatus.msg && msgsObj.msgType === msgTypes.msg_cs_filter) { // 客服暂离消息
+      if (msgsObj.msgStatus === msgStatus.msg && msgsObj.msgType === msgTypes.msg_video_blur) { // 客服暂离消息
         const state = msgsObj.content === 'true'
-        this.setVideoFilter(state)
+        this.setVideoBlur(state)
+        return
+      }
+      if (msgsObj.msgStatus === msgStatus.msg && msgsObj.msgType === msgTypes.msg_video_muted) { // 客服静音消息
+        const state = msgsObj.content === 'true'
+        this.setVideoMuted(state)
         return
       }
       this.sendMsgs([msgsObj])
@@ -721,15 +726,6 @@ export const IMMixin = {
       const query = this.$route.query || 'WE'
       const res = await videoQueueCancel(this.userInfo.userId, query.csId, this.accessId, accessFlag)
       return res.result.code === ERR_OK
-      // if (res.result.code === ERR_OK) {
-      //   console.log('===============================> 取消排队 啊 取消排队 <===============================')
-      //   return true
-      //   this.$vux.toast.text('取消排队')
-      //   this.$emit('cancelVideoLineUp')
-      // } else {
-      //   console.log('error in videoQueueCancel')
-      //   return false
-      // }
     },
     ...mapMutations({
       setQueueMode: 'SET_QUEUE_MODE',
@@ -750,7 +746,9 @@ export const IMMixin = {
       'afterServerFinish',
       'reqTransAnotherTimeout',
       'reqTransTimeout',
-      'afterQueueFailed'
+      'afterQueueFailed',
+      'setVideoBlur',
+      'setVideoMuted'
     ])
   }
 }

@@ -10,8 +10,8 @@
     <div class="video-window" :class="server">
       <video height=100%
         id="remoteVideo"
-        :class="{'video-blur': videoFilter}"
-        :muted="videoFilter"
+        :class="{'video-blur': videoFilter.blur}"
+        :muted="videoFilter.muted"
         autoplay
         playsinline
       ></video>
@@ -123,7 +123,7 @@ export default {
     },
     isVideoFilter: {
       get() {
-        return this.videoFilter
+        return this.videoFilter.blur
       },
       set() {}
     },

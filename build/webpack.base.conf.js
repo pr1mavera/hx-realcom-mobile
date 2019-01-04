@@ -23,7 +23,8 @@ const createLintingRule = () => ({
 let webpackConfig = {
   context: path.resolve(__dirname, '../'),
   entry: {
-    app: './src/main.js'
+    app: './src/main.js',
+    redirect: './src/redirect.js'
   },
   output: {
     path: config.build.assetsRoot,
@@ -111,9 +112,13 @@ let webpackConfig = {
   }
 }
 
-module.exports = vuxLoader.merge(webpackConfig, {
-  plugins: ['vux-ui', 'progress-bar', 'duplicate-style', 'inline-manifest', {
-    name: 'less-theme',
-    path: 'src/common/style/theme.less'
-  }]
-})
+module.exports = {
+  baseConfig: webpackConfig,
+  vuxConfig: vuxLoader.merge(webpackConfig, {
+    plugins: ['vux-ui', 'progress-bar', 'duplicate-style', 'inline-manifest', {
+      name: 'less-theme',
+      path: 'src/common/style/theme.less'
+    }]
+  })
+}
+

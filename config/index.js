@@ -55,6 +55,8 @@ module.exports = {
   build: {
     // Template for index.html
     index: path.resolve(__dirname, '../dist/index.html'),
+    // Template for redirect.html
+    redirect: path.resolve(__dirname, '../dist/redirect.html'),
 
     // Paths
     assetsRoot: path.resolve(__dirname, '../dist'),

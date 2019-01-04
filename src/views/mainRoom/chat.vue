@@ -168,21 +168,16 @@ export default {
       }
     },
     previewImgList() {
-      let allMsgs = this.historyMsgs.concat(this.msgs)
-      let map = []
+      const allMsgs = this.historyMsgs.concat(this.msgs)
+      const imgMsg = allMsgs.filter(item => item.msgStatus === msgStatus.msg && item.msgType === msgTypes.msg_img)
       // if (this.historyMsgs.length && this.msgs.length) {
       //   allMsgs = this.historyMsgs.concat(this.msgs)
       // }
-      allMsgs.forEach(item => {
-        if (item.msgStatus === msgStatus.msg && item.msgType === msgTypes.msg_img) {
-          map.push({
-            src: item.imgData.big || '',
-            msrc: item.imgData.small || '',
-            id: item.timestamp
-          })
-        }
-      })
-      return map
+      return imgMsg.reduce((val, item) => val.push({
+        src: item.imgData.big || '',
+        msrc: item.imgData.small || '',
+        id: item.timestamp
+      }), [])
     },
     copyButtonRect() {
       const self = this
@@ -222,6 +217,7 @@ export default {
       bubbleY: 0,
       /* pull-down-load  over */
       curPreviewImgId: '',
+      // previewImgList: [],
       isCopyButtonShow: false,
       copyTextTemp: '',
       // 长按对话dom的位置信息

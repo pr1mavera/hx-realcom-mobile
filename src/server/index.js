@@ -100,6 +100,11 @@ export const getShareTicket = url => http.post('user', `/ticket/query`, { url })
  */
 
 /**
+ * [getSessionList 获取会话列表]
+ */
+export const getRedirectUrl = () => http.get('user', '/video/user/openId')
+
+/**
  * [createSession 创建会话]
  */
 export const createSession = (userId, userName, userPhone, chatType) => http.post('user', `/chat/session/create`, { userId, userName, userPhone, chatType })

@@ -30,7 +30,10 @@ const state = {
   hasAssess: false,
   isAssessView: false,
   serverTime: '',
-  videoFilter: false
+  videoFilter: {
+    blur: false,
+    muted: false
+  }
 }
 
 export default state

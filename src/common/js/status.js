@@ -78,7 +78,8 @@ export const msgTypes = {
   msg_XH_express: '10', // 小华表情消息
   msg_bot_thanks: '11', // 小华感谢消息
   msg_timeout: '13', // 超时结束会话
-  msg_cs_filter: '14', // 坐席暂离，设置模糊及静音
+  msg_video_blur: '14', // 坐席暂离，设置模糊及静音
+  msg_video_muted: '15', // 坐席静音
   msg_hand_up: '24' // 结束会话（在线）
 }
 

@@ -13,7 +13,7 @@ const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 
 const env = require('../config/prod.env')
 
-const webpackConfig = merge(baseWebpackConfig, {
+const webpackConfig = merge(baseWebpackConfig.vuxConfig, {
   module: {
     rules: utils.styleLoaders({
       sourceMap: config.build.productionSourceMap,
@@ -74,6 +74,12 @@ const webpackConfig = merge(baseWebpackConfig, {
       chunks: ['manifest', 'vendor', 'app'],
       // necessary to consistently work with multiple chunks via CommonsChunkPlugin
       chunksSortMode: 'dependency'
+    }),
+    new HtmlWebpackPlugin({
+      filename: config.build.redirect,
+      template: 'redirect.html',
+      inject: true,
+      chunks: ['redirect']
     }),
     // keep module.id stable when vendor modules does not change
     new webpack.HashedModuleIdsPlugin(),

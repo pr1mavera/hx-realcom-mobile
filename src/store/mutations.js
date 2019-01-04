@@ -55,8 +55,8 @@ const mutations = {
   [types.SET_SERVER_TIME](state, time) {
     state.serverTime = time
   },
-  [types.SET_VIDEO_FILTER](state, isFilter) {
-    state.videoFilter = isFilter
+  [types.SET_VIDEO_FILTER](state, filterState) {
+    state.videoFilter = filterState
   }
 }
 

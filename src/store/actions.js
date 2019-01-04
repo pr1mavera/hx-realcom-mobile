@@ -11,7 +11,7 @@ export const closeBarBuffer = async function({ commit }, { mutationType, delay }
 }
 
 // 修改键盘和拓展层的弹出状态，统一接口
-export const toggleBar = async function({ dispatch, commit, state }, type) {
+export const toggleBar = async function({ commit, state }, type) {
   switch (type) {
     case toggleBarStatus.allFold:
       commit(types.SET_EXTEND_BAR, false)
@@ -347,13 +347,13 @@ export const updateLastAction = function({ commit, state }) {
 }
 
 // 存当前缓存池消息
-export const saveCurMsgs = function({ commit, state }, { origin, msg }) {
+export const saveCurMsgs = function({}, { origin, msg }) {
   const temp = Tools.CacheTools.getCacheData({ key: `${origin}_cur_msgs`, check: origin }) || []
   Tools.CacheTools.setCacheData({ key: `${origin}_cur_msgs`, check: origin, data: temp.concat(msg) })
 }
 
 // 存历史消息（初始化）
-export const saveRoamMsgs = function({ commit, state }, origin) {
+export const saveRoamMsgs = function({}, origin) {
   // 缓存池消息
   const curTemp = Tools.CacheTools.getCacheData({ key: `${origin}_cur_msgs`, check: origin }) || []
   // 当前缓存池没有上一次聊天的记录，直接退出
@@ -383,9 +383,25 @@ export const saveRoamMsgs = function({ commit, state }, origin) {
 }
 
 // 取历史消息（分页）
-export const getRoamMsgs = function({ commit, state }, { origin, page }) {
+export const getRoamMsgs = function({}, { origin, page }) {
   const list = Tools.CacheTools.getCacheData({ key: `${origin}_roam_msgs`, check: origin })
   return list && list.length && list.length >= page ? list[list.length - page].pageList : []
+}
+
+// 客服暂离，设置视频模糊
+export const setVideoBlur = function({ commit }, fullState) {
+  commit(types.SET_VIDEO_FILTER, {
+    blur: fullState,
+    muted: fullState
+  })
+}
+
+// 客服静音
+export const setVideoMuted = function({ commit, state }, isMuted) {
+  commit(types.SET_VIDEO_FILTER, {
+    blur: state.videoFilter.blur,
+    muted: isMuted
+  })
 }
 
 // 更新本地消息队列

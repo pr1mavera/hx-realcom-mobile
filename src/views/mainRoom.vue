@@ -130,9 +130,6 @@ export default {
       'sessionRamId'
     ])
   },
-  // created() {
-  //   this.initRoom()
-  // },
   activated() {
     this.initRoom()
   },
@@ -145,12 +142,18 @@ export default {
   methods: {
     // 初始化房间
     async initRoom() {
+      let query = this.$route.query
+      debugger
+      // 处理官网路由的query
+      if (query.hasOwnProperty('openid') && query.hasOwnProperty('attach')) {
+        this.$router.replace({path: `/room?openId=${query.openid}&origin=${query.attach}`})
+        query = this.$route.query
+      }
       // 初始化
       this.setAssessStatus(false)
       this.setServerTime(null)
 
       const enterVideoStatus = window.sessionStorage.getItem('enterVideoStatus')
-      const query = this.$route.query
 
       if (enterVideoStatus === 'iOS-wx' || enterVideoStatus === 'Android') { // 微信环境
         this.$router.replace({path: `/room/chat?openId=${query.openId}&origin=${query.origin || 'WE'}`})

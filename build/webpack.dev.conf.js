@@ -13,7 +13,7 @@ const portfinder = require('portfinder')
 const HOST = process.env.HOST
 const PORT = process.env.PORT && Number(process.env.PORT)
 
-const devWebpackConfig = merge(baseWebpackConfig, {
+const devWebpackConfig = merge(baseWebpackConfig.vuxConfig, {
   module: {
     rules: utils.styleLoaders({ sourceMap: config.dev.cssSourceMap, usePostCSS: true })
   },
@@ -58,6 +58,11 @@ const devWebpackConfig = merge(baseWebpackConfig, {
       template: 'index.html',
       inject: true
     }),
+    new HtmlWebpackPlugin({
+      filename: 'redirect.html',
+      template: 'redirect.html',
+      inject: true
+    }),
     // copy custom static assets
     new CopyWebpackPlugin([
       {
@@ -66,7 +71,12 @@ const devWebpackConfig = merge(baseWebpackConfig, {
         ignore: ['.*']
       }
     ])
-  ]
+  ],
+  devServer: {
+    contentBase: path.join(__dirname, '../release'),
+    open: true,
+    port: 8081
+  }
 })
 
 module.exports = new Promise((resolve, reject) => {
