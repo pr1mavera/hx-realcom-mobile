@@ -1,6 +1,6 @@
 <template>
   <div class="label-btn-box">
-    <swiper v-model="currentPage" @on-index-change="changePage" height="11rem"
+    <swiper v-model="currentPage" @on-index-change="changePage" height="14rem"
             v-if="btnList.length > 0" style="" dots-class="custom-bottom" dots-position="center">
       <swiper-item v-for="(pages, index) in btnList" :key="index">
         <!--{{index}} labelType === 'all'   :show-dots="showDots"-->
@@ -11,8 +11,7 @@
                         :key="index"
                         :text="item.labelName"
                         :likeNum="item.labelCount"
-          >{{item.labelName}}
-            {{item.labelCount === undefined ? '' : (item.labelCount > 99 ? '99+' :item.labelCount)}}</checker-item>
+          >{{item.labelName}}&nbsp;{{item.labelCount === undefined ? '' : (item.labelCount > 99 ? '99+' :item.labelCount)}}</checker-item>
         </checker>
       </swiper-item>
     </swiper>
@@ -156,9 +155,11 @@
 @import '~@/common/style/theme.less';
 .label-btn-box {
   /*未选中状态的样式*/
+  text-align: left;
   .tags-default {
-    width: 5.8rem;
+    width: 5.7rem;
     color: #FF959C;
+    font-size: 1rem;
     padding: .6rem 0.8rem;
     margin: 1rem 0.5rem;
     border-radius: 5px;

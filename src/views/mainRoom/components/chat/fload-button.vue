@@ -13,7 +13,7 @@
       </button>
       <p class="text">转电话</p>
     </div>
-    <!-- <div class="btn-item">
+     <div class="btn-item">
       <button
         class="item extend-click transition-bezier"
         @click="videoLineUp"
@@ -21,7 +21,7 @@
         <img width=100% height=100% src="/video/static/img/chat/fb_video.png">
       </button>
       <p class="text">转视频</p>
-    </div> -->
+    </div>
     <div class="btn-item">
       <button
         ref="enterMenChat"

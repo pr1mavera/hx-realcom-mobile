@@ -25,7 +25,7 @@
 
         <div class="right info">
           <p class="name">{{cuSerInfo.nickName}}</p>
-          <P>当前状态 &nbsp;&nbsp;<label class="status" :class="{'on-line': isCsOnline}">{{isCsOnline ? '在线' : '离线'}}</label></P>
+          <P v-if="onlineCs">当前状态 &nbsp;&nbsp;<label class="status" :class="{'on-line': isCsOnline}">{{isCsOnline ? '在线' : '离线'}}</label></P>
           <p>服务总量 &nbsp;&nbsp;{{cuSerInfo.servTimes === null ? 0 : cuSerInfo.servTimes}}</p>
         </div>
       </div>
@@ -33,7 +33,8 @@
       <div class="flex-box" style="height: 5.4rem; margin-top: 2.5rem;">
         <div class="flex-box-item btn-container">
           <!--  @click.native="clickToLineUp" class="btn" :class="{'online': isCsOnline}" -->
-          <x-button mini @click.native="enterLinUp" style="font-size: 1.2rem;color: #ffffff;background: #FF8D88;border: 1px solid #ffffff;">
+          <x-button mini @click.native="enterLinUp" v-if="onlineCs"
+                    style="font-size: 1.2rem;color: #ffffff;background: #FF8D88;border: 1px solid #ffffff;">
             <svg class="icon extend-click" aria-hidden="true">
               <use xlink:href="#icon-zixun"></use>
             </svg>
@@ -128,20 +129,16 @@
     </div>
 
     <!-- 页面底部给客服发送礼物 -->
-    <div class="gift-send" v-if="giftSend" id="giftsSend">
+    <div class="gift-send" v-show="giftSend" id="giftsSend">
       <send-gift style="height: unset;background-color: unset"
                  :giftType="allGifts"
                  @selectGift="selectGift"
       ></send-gift>
     </div>
 
-    <!-- 自定义遮罩层 -->
-    <div class="filter" v-show="filter">
-      <swiper id="swiperImg" class="swiper" style="height: 300px" height="300px" dots-class="custom-bottom" dots-position="center">
-        <swiper-item class="swiper-img" height="300px" v-for="(item, index) in personalDisplay" :key="index">
-          <img class="cs-img" :src="item" style="">
-        </swiper-item>
-      </swiper>
+    <!-- 坐席生活照 -->
+    <div v-transfer-dom>
+      <previewer :list="personalDisplay" ref="previewer" @on-index-change="changeImg"></previewer>
     </div>
 
     <!-- 发送礼物动画效果弹层 -->
@@ -157,7 +154,7 @@
   // import Tools from '@/common/js/tools'
   import { mapGetters } from 'vuex'
   import Tools from '@/common/js/tools'
-  import { Swiper, SwiperItem, XButton, XCircle, TransferDomDirective as TransferDom } from 'vux'
+  import { Swiper, SwiperItem, XButton, XCircle, Previewer, TransferDom } from 'vux'
   import { ERR_OK, getCsInfo, csPhoto, getTimesForMe, getCsAvatar, giftSend } from '@/server/index.js'
 
   export default {
@@ -169,6 +166,7 @@
       SwiperItem,
       XButton,
       XCircle,
+      Previewer,
       'SendGift': () => import('@/views/mainRoom/components/chat/send-gift'),
       'LabelBtn': () => import('@/views/mainRoom/components/label-btn')
     },
@@ -189,6 +187,9 @@
      }
     },
     computed: {
+      onlineCs() {
+        return !this.$route.query.csType
+      },
       avatarImgSrc() {
         return getCsAvatar(this.$route.query.cusSerId)
       },
@@ -204,8 +205,8 @@
     },
     mounted() {
       let self = this
-      const bigImg = document.getElementById('swiperImg')
-      const iconImg = document.getElementById('iconImg')
+      // const bigImg = document.getElementById('swiperImg')
+      // const iconImg = document.getElementById('iconImg')
       const sendBtn = document.getElementById('sendGiftBtn')
       // const gifts = document.getElementById('giftsSend')
 
@@ -214,7 +215,7 @@
         // if (!gifts.contains(e.target))
           if (!sendBtn.contains(e.target)) self.giftSend = false
         // 点击图片外的其他区域 大图模式隐藏
-        if (!bigImg.contains(e.target) && !iconImg.contains(e.target)) self.filter = false
+        // if (!bigImg.contains(e.target) && !iconImg.contains(e.target)) self.filter = false
       })
 
       this.$nextTick(() => {
@@ -236,7 +237,7 @@
 
           for (var i in cuSerPic) {
             // this.getPic(cuSerPic[i].url)
-            this.personalDisplay.push(csPhoto(cuSerPic[i].id))
+            this.personalDisplay.push({src: csPhoto(cuSerPic[i].id)})
           }
         } else {
           console.log('======================= error about get cuSerInfo')
@@ -329,7 +330,10 @@
 
       // 点击右上角小图标展示坐席生活照
       showCsImg() {
-        this.filter = true
+        this.$refs.previewer.show(0)
+      },
+      changeImg(arg) {
+        console.log(arg)
       }
     }
   }
@@ -463,7 +467,7 @@
     .container-item {
       width: 100%;
       margin-top: 1rem;
-      padding: 1.5rem 1rem 2.5rem;
+      padding: 1.5rem 1rem 2rem;
       box-sizing: border-box;
       background: @bg-light;
       .container-item-tit {

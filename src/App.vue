@@ -121,29 +121,29 @@ body {
 }
 
 /* 标签轮播图圆点的样式 .popup-main .eva-more */
-.label > .vux-slider > .vux-indicator > a > .vux-icon-dot.active {
+.label-btn-box > .vux-slider > .vux-indicator > a > .vux-icon-dot.active {
   background-color: #FF959C!important;
   transform: scale(.7, .7);
 }
-.label >.vux-slider > .vux-indicator > a > .vux-icon-dot {
+.label-btn-box >.vux-slider > .vux-indicator > a > .vux-icon-dot {
   border: 1px solid #FF959C;
   border-radius: 50%;
   background-color: #ffffff !important;
   transform: scale(.7, .7);
 }
 /* 个人中心客服照片轮播 */
-.filter > .vux-slider > .vux-indicator > a > .vux-icon-dot.active {
-  background-color: #ffffff !important;
-  transform: scale(1.5, 1.5);
-}
-
-.filter > .vux-slider > .vux-indicator > a > .vux-icon-dot {
-  border: 1px solid #ffffff;
-  border-radius: 100%;
-  margin: 0 .5rem;
-  transform: scale(1.5, 1.5);
+/*.filter > .vux-slider > .vux-indicator > a > .vux-icon-dot.active {*/
   /*background-color: #ffffff !important;*/
-}
+  /*transform: scale(1.5, 1.5);*/
+/*}*/
+
+/*.filter > .vux-slider > .vux-indicator > a > .vux-icon-dot {*/
+  /*border: 1px solid #ffffff;*/
+  /*border-radius: 100%;*/
+  /*margin: 0 .5rem;*/
+  /*transform: scale(1.5, 1.5);*/
+  /*!*background-color: #ffffff !important;*!*/
+/*}*/
 
 /*-,评价组件星星颜色-*/
 .popup-main .vux-rater-box {
