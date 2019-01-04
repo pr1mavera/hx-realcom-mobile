@@ -1,6 +1,6 @@
 <template>
-  <div class="label-btn-box">
-    <swiper v-model="currentPage" @on-index-change="changePage" height="14rem"
+  <div class="label-btn-box" :class="{'my-label': labelType === 'notAll'}">
+    <swiper v-model="currentPage" @on-index-change="changePage" height="12.5rem"
             v-if="btnList.length > 0" style="" dots-class="custom-bottom" dots-position="center">
       <swiper-item v-for="(pages, index) in btnList" :key="index">
         <!--{{index}} labelType === 'all'   :show-dots="showDots"-->
@@ -56,7 +56,7 @@
         disable: true, // 标签不能选，只是做展示功能
         currentPage: 0, // 当前页
         pageList: [1],
-        limits: 6 // 每个轮播页显示的标签的个数，评价时引用组件显示 6个/页 标签，个人中心显示 8个/页 个标签
+        limits: 6 // 每个轮播页显示的标签的个数，评价时引用组件显示 6个/页 标签，个人中心显示 8个/页
       }
     },
     computed: {
@@ -117,14 +117,14 @@
           return map
         }
         // 初始化 每页的标签个数
-        if (this.labelType === 'notAll') {
-          this.limit = 8
-        } else {
-          this.limit = 6
-        }
+        // if (this.labelType === 'notAll') {
+        //   this.limits = 8
+        // } else {
+        //   this.limits = 6
+        // }
 
         // 初始化页数
-        const pages = Math.ceil(list.length / this.limit) // 总页数
+        const pages = Math.ceil(list.length / this.limits) // 总页数
         for (let i = 0; i < pages; i++) {
           // 初始化单页数据
           let temp = {
@@ -132,8 +132,8 @@
             strLen: 0,
             list: []
           }
-          const last = Math.min(list.length, (i + 1) * this.limit)
-          for (let j = i * this.limit; j < last; j++) {
+          const last = Math.min(list.length, (i + 1) * this.limits)
+          for (let j = i * this.limits; j < last; j++) {
             temp.list.push(list[j])
           }
           map.push(temp)
@@ -187,6 +187,13 @@
     span {
       align-self: center;
     }
+  }
+}
+.my-label {
+  text-align: center;
+  .tags-default {
+    width: 20vw;
+    min-width: 5.7rem;
   }
 }
 </style>
