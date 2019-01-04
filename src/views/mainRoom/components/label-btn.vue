@@ -155,7 +155,7 @@
 @import '~@/common/style/theme.less';
 .label-btn-box {
   /*未选中状态的样式*/
-  text-align: left;
+  /*text-align: left;*/
   .tags-default {
     width: 5.7rem;
     color: #FF959C;
@@ -164,6 +164,7 @@
     margin: 1rem 0.5rem;
     border-radius: 5px;
     border: 1px solid #FF959C;
+    text-align: center;
     white-space: nowrap; // 强制不换行
     text-overflow: ellipsis; // 超出显示省略号
     overflow: hidden;
