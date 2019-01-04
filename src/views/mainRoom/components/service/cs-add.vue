@@ -372,7 +372,7 @@ export default {
     // 点击专属客服头像进入客服的个人中心
     enterSerCenter() {
       this.$router.push({
-        path: '/room/serverDetail',
+        path: '/room/cusServ/serverDetail',
         query: {
           cusSerId: this.curLabelInfo.id,
           csStatus: this.curLabelInfo.status || 1,

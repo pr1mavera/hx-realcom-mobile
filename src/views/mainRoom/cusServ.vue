@@ -134,6 +134,17 @@ export default {
 
     // 判断路由 change by wnagxj
     nextUrl() {
+      // debugger
+      if (this.$route.query.csType === 'online') { // 进入在线客服的个人中心
+        this.$router.push({
+          path: '/room/cusServ/serverDetail',
+          query: {
+            cusSerId: this.$route.query.cusSerId,
+            csType: 'online'
+          }
+        })
+        return
+      }
       if (this.resetMyCs.length === 0) {
         this.$router.replace('/room/cusServ/add')
       } else {

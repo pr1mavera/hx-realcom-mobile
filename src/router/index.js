@@ -59,7 +59,7 @@ export default new Router({
               component: csAdd
             },
             {
-              path: '/room/serverDetail',
+              path: '/room/cusServ/serverDetail',
               name: 'serverDetail',
               component: serverDetail
             },
