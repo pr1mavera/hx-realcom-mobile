@@ -66,7 +66,7 @@
 
       <div class="container-item flex-box" style="background: unset; margin-top: 3.5rem">
         <div class="flex-box-item">
-          <p><span style="">{{ cuSerInfo.servYears === null ? 0 : cuSerInfo.servYears }}</span>年</p>
+          <p><span style="">{{ cuSerInfo.servYears || 0 }}</span>年</p>
           <p class="tips">服务年限</p>
         </div>
         <div class="flex-box-item">
@@ -136,10 +136,28 @@
       ></send-gift>
     </div>
 
-    <!-- 坐席生活照 -->
-    <div v-transfer-dom>
-      <previewer :list="personalDisplay" ref="previewer" @on-index-change="changeImg"></previewer>
+    <!-- 自定义遮罩层 -->
+    <div class="filter" v-show="filter">
+      <!--关闭按钮股-->
+      <div class="close">
+        <a @click="closeFilter"><svg class="icon icon-close" aria-hidden="true"><use xlink:href="#icon-guanbi"></use></svg></a>
+      </div>
+      <swiper id="swiperImg" v-model="currentImg" class="swiper" height="300px" :show-dots="false" @on-index-change="changePage">
+        <swiper-item class="swiper-img" height="300px" v-for="(item, index) in personalDisplay" :key="index">
+          <img class="cs-img" :src="item" style="">
+        </swiper-item>
+      </swiper>
+      <p class="name">{{cuSerInfo.nickName}}</p>
+      <p class="tip">华夏客服</p>
+      <div class="bar">
+        <div class="bar-item" :class="{'active': imgIndex === (currentImg + 1)}"
+             v-for="imgIndex in personalDisplay.length" :key="imgIndex"></div>
+      </div>
+      <p class="tag" style="font-size: 3.6rem;">{{currentImg + 1}}/{{personalDisplay.length}}</p>
     </div>
+    <!--<div v-transfer-dom>-->
+      <!--<previewer :list="personalDisplay" ref="previewer" @on-index-change="changeImg"></previewer>-->
+    <!--</div>-->
 
     <!-- 发送礼物动画效果弹层 -->
     <transition name="fade">
@@ -154,7 +172,7 @@
   // import Tools from '@/common/js/tools'
   import { mapGetters } from 'vuex'
   import Tools from '@/common/js/tools'
-  import { Swiper, SwiperItem, XButton, XCircle, Previewer, TransferDom } from 'vux'
+  import { Swiper, SwiperItem, XButton, XCircle, TransferDom } from 'vux'
   import { ERR_OK, getCsInfo, csPhoto, getTimesForMe, getCsAvatar, giftSend } from '@/server/index.js'
 
   export default {
@@ -166,7 +184,6 @@
       SwiperItem,
       XButton,
       XCircle,
-      Previewer,
       'SendGift': () => import('@/views/mainRoom/components/chat/send-gift'),
       'LabelBtn': () => import('@/views/mainRoom/components/label-btn')
     },
@@ -183,7 +200,8 @@
        giftSend: false,
        filter: false,
        giftAnimeView: false,
-       giftSrc: null
+       giftSrc: null,
+       currentImg: 0
      }
     },
     computed: {
@@ -230,14 +248,14 @@
         // debugger
         // console.log('==============router' + document.referrer + '===============')
         const res = await getCsInfo(cuSerId)
-        // debugger
+        debugger
         if (res.result.code === ERR_OK) {
           this.cuSerInfo = res.data
           const cuSerPic = res.data.photos
 
           for (var i in cuSerPic) {
             // this.getPic(cuSerPic[i].url)
-            this.personalDisplay.push({src: csPhoto(cuSerPic[i].id)})
+            this.personalDisplay.push(csPhoto(cuSerPic[i].id))
           }
         } else {
           console.log('======================= error about get cuSerInfo')
@@ -330,10 +348,18 @@
 
       // 点击右上角小图标展示坐席生活照
       showCsImg() {
-        this.$refs.previewer.show(0)
+        // this.$refs.previewer.show(0)
+        this.filter = true
+      },
+      closeFilter() {
+        this.filter = false
       },
       changeImg(arg) {
         console.log(arg)
+      },
+      // 切换轮播页
+      changePage(index) {
+        this.currentImg = index
       }
     }
   }
@@ -546,18 +572,56 @@
       width: 100vw;
       height: 100vh;
       cursor: pointer;
-      background: rgba(5, 5, 5, .5);
+      background: rgba(0, 0, 0, .8);
+      .close {
+        padding: 1.5rem 1.5rem 0;
+        text-align: right;
+        .icon {
+          height: 3.4rem;
+          width: 3.4rem;
+        }
+      }
       .swiper {
         width: 80%;
-        margin: 18vh auto;
+        margin: 8vh auto;
         .swiper-img {
           text-align: center;
           .cs-img {
-            width: 60vw;
+            width: 73vw;
             object-fit: cover;
             margin: 0 auto;
             border-radius: 5px;
           }
+        }
+      }
+      p {
+        line-height: 1.5;
+        color: #fff;
+        text-align: center;
+      }
+      .name {
+        font-size: 2.1rem;
+      }
+      .tip {
+        color: rgba(187, 187, 187, 1);
+        font-size: 2.1rem;
+      }
+      .bar {
+        display: flex;
+        width: 56vw;
+        height: 3px;
+        margin: 2rem auto;
+        border-radius: 2px;
+        background-color: #676767;
+        .bar-item {
+          flex: 1;
+        }
+        .active {
+          height: 5px;
+          align-self: center;
+          border-radius: 3px;
+          background-color: #ffffff;
+          box-shadow: 0 0 0 1px rgba(1, 1, 1, 0.1);
         }
       }
     }
