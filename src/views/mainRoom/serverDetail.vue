@@ -248,14 +248,13 @@
         // debugger
         // console.log('==============router' + document.referrer + '===============')
         const res = await getCsInfo(cuSerId)
-        debugger
+        // debugger
         if (res.result.code === ERR_OK) {
           this.cuSerInfo = res.data
           const cuSerPic = res.data.photos
 
           for (var i in cuSerPic) {
             // this.getPic(cuSerPic[i].url)
-            debugger
             this.personalDisplay.push(csPhoto(cuSerPic[i].id))
           }
         } else {
