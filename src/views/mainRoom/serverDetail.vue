@@ -142,7 +142,7 @@
       <div class="close">
         <a @click="closeFilter"><svg class="icon icon-close" aria-hidden="true"><use xlink:href="#icon-guanbi"></use></svg></a>
       </div>
-      <swiper id="swiperImg" v-model="currentImg" class="swiper" height="300px" :show-dots="false" @on-index-change="changePage">
+      <swiper id="swiperImg" v-model="currentImg" class="swiper" height="50vh" :show-dots="false" @on-index-change="changePage">
         <swiper-item class="swiper-img" height="300px" v-for="(item, index) in personalDisplay" :key="index">
           <img class="cs-img" :src="item" style="">
         </swiper-item>
@@ -255,6 +255,7 @@
 
           for (var i in cuSerPic) {
             // this.getPic(cuSerPic[i].url)
+            debugger
             this.personalDisplay.push(csPhoto(cuSerPic[i].id))
           }
         } else {
@@ -583,7 +584,7 @@
       }
       .swiper {
         width: 80%;
-        margin: 8vh auto;
+        margin: 8vh auto 2rem;
         .swiper-img {
           text-align: center;
           .cs-img {
@@ -621,7 +622,7 @@
           align-self: center;
           border-radius: 3px;
           background-color: #ffffff;
-          box-shadow: 0 0 0 1px rgba(1, 1, 1, 0.1);
+          box-shadow: 0 0 3px 2px rgba(255, 255, 255, 0.3)
         }
       }
     }
