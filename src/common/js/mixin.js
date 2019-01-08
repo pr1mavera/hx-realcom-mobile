@@ -277,8 +277,22 @@ export const RTCRoomMixin = {
           if (info.event === 'onended' || info.event === 'inactive') {
             this.hangUpVideo()
           }
+          // debugger
+          // 本地流断开
+          // if (info.stream.active === false && info.isLocal === true && info.type === 'stream') {
+          //   this.RTC.getLocalStream({ video: true, audio: true }, (info) => {
+          //     this.RTC.startRTC({ stream: info.stream, role: 'user' })
+          //   })
+          // }
           console.log(info)
         })
+      })
+    },
+    stopRTC() {
+      this.RTC.stopRTC({}, () => {
+        console.debug('stop succ')
+      }, () => {
+        console.debug('stop end')
       })
     },
     async quitRTC() {
@@ -682,6 +696,10 @@ export const IMMixin = {
         return
       }
       msgsObj.timestamp = new Date().getTime()
+      if (msgsObj.msgStatus === msgStatus.msg && msgsObj.msgType === msgTypes.msg_img) { // 图片消息
+        // this.addPreviewImg(msgsObj)
+        this.addPreviewImg({ list: this.previewImgList, msgsObj })
+      }
       if (msgsObj.msgStatus === msgStatus.msg && msgsObj.msgType === msgTypes.msg_normal) { // 消息封装链接
         msgsObj.content = Tools.strWithLink(msgsObj.content)
       }
@@ -748,7 +766,8 @@ export const IMMixin = {
       'reqTransTimeout',
       'afterQueueFailed',
       'setVideoBlur',
-      'setVideoMuted'
+      'setVideoMuted',
+      'addPreviewImg'
     ])
   }
 }
@@ -868,7 +887,7 @@ export const sendMsgsMixin = {
           msgType: msgTypes.msg_gift,
           chatType: this.sendType,
           giftInfo,
-          isMsgSync: 2
+          MsgLifeTime: 0
         }, () => {
           this.setMsgStatus(timestamp, 'succ')
         }, () => {
@@ -902,7 +921,7 @@ export const sendMsgsMixin = {
           msgStatus: msgStatus.msg,
           msgType: msgTypes.msg_liked,
           chatType: this.sendType,
-          isMsgSync: 2
+          MsgLifeTime: 0
         }, () => {
           this.setMsgStatus(timestamp, 'succ')
         }, () => {
@@ -912,6 +931,7 @@ export const sendMsgsMixin = {
     },
     sendImgMsg(img, timestamp) {
       if (!timestamp) {
+        // 第一次发送
         const _URL = window.URL || window.webkitURL
         const imgSrc = _URL.createObjectURL(img)
         // 配置图片本地显示
@@ -922,6 +942,7 @@ export const sendMsgsMixin = {
         }
         this.afterSendC2CImgMsgs(timestamp, imgData, img)
       } else {
+        // 重发
         // 重置消息状态
         this.setMsgStatus(timestamp, 'pending')
       }
@@ -940,7 +961,8 @@ export const sendMsgsMixin = {
           identifier: this.userInfo.userId,
           msgStatus: msgStatus.msg,
           msgType: msgTypes.msg_img,
-          chatType: this.sendType
+          chatType: this.sendType,
+          timestamp
         }
         // 上传图片
         let resp = await IM.uploadPic(img, {
@@ -1081,41 +1103,42 @@ export const sendMsgsMixin = {
       this.sendMsgs([msg])
     },
     setMsgStatus(timestamp, status, ...msg) {
-      let index = null
-      const actMsg = this.msgs.filter((item, i) => {
+      const newMsgsList = this.msgs.map(item => {
         if (item.timestamp && (item.timestamp === timestamp)) {
-          index = i
+          const currMsg = Tools.CopyTools.objDeepClone(item)
+          // 修改对应消息的状态
+          currMsg.status = status
+
+          if (status === 'succ' && currMsg.msgType === msgTypes.msg_img) {
+            const imgMsg = msg[0]
+            // 若为图片消息，则对应添加图片的真实地址
+            currMsg.imgData = imgMsg.imgData
+            // 添加进图片相册
+            this.addPreviewImg({ list: this.previewImgList, msgsObj: imgMsg })
+          }
+
+          // 存缓存消息
+          this.saveCurMsgs({ origin: this.userInfo.origin, msg: currMsg })
+          // 更新服务状态时间戳
+          Tools.CacheTools.updateCacheData({
+            key: `${this.userInfo.origin}_curServInfo`,
+            timestamp: new Date().getTime()
+          })
+
+          return currMsg
+        } else {
           return item
         }
-      })[0]
-      if (actMsg) {
-        const currMsg = Tools.CopyTools.objDeepClone(actMsg)
-        // 修改对应消息的状态
-        currMsg.status = status
-        // 若为图片消息，则对应添加图片的真实地址
-        if (currMsg.msgType === msgTypes.msg_img) {
-          const img = msg[0].imgData
-          currMsg.imgData = {
-            big: img.big,
-            small: img.small
-          }
-        }
-        const msgsList = this.msgs.slice(0, index).concat(currMsg, this.msgs.slice(index + 1, this.msgs.length))
-        this.setMsgs(msgsList)
-        this.saveCurMsgs({ origin: this.userInfo.origin, msg: currMsg })
-        // 更新服务状态时间戳
-        Tools.CacheTools.updateCacheData({
-          key: `${this.userInfo.origin}_curServInfo`,
-          timestamp: new Date().getTime()
-        })
-      }
+      })
+      this.setMsgs(newMsgsList)
     },
     ...mapMutations({
       setMsgs: 'SET_MSGS'
     }),
     ...mapActions([
       'sendMsgs',
-      'saveCurMsgs'
+      'saveCurMsgs',
+      'addPreviewImg'
     ])
   }
 }
@@ -1196,11 +1219,29 @@ export const getMsgsMixin = {
       if (newMsgs && newMsgs.length) {
         const list = this.timeTipsFormat(newMsgs)
         this.historyMsgs = list.concat(this.historyMsgs)
+        // 过滤出所有的图片消息，添加到previewImg队头
+        const imgList = this.getAllImg(list)
+        this.previewImgList = imgList.concat(this.previewImgList)
       } else {
         // 没有更多数据
         this.pulldownResult = '别拉了，没有更多消息了！！！'
         this.cacheMsgsOver = true
       }
+    },
+    getAllImg(list) {
+      return list.reduce((val, item) => {
+        if (item.msgType === msgTypes.msg_img) {
+          const data = item.imgData
+          val.push({
+            src: data.big,
+            msrc: data.small,
+            w: data.w,
+            h: data.h,
+            id: item.timestamp
+          })
+        }
+        return val
+      }, [])
     },
     /* 机器人漫游消息 */
     async getBotAPI(userId, sessionId, curPage, pageSize) {

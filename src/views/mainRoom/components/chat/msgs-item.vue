@@ -405,10 +405,10 @@ export default {
             max-width: 100%;
             object-fit: cover;
             &.left-img-style {
-              border-radius: 0.4rem 1.5rem 1.5rem 1.5rem;
+              border-radius: 0.4rem 1.2rem 1.2rem 1.2rem;
             }
             &.right-img-style {
-              border-radius: 1.5rem 0.4rem 1.5rem 1.5rem;
+              border-radius: 1.2rem 0.4rem 1.2rem 1.2rem;
             }
           }
         }

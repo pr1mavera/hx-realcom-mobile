@@ -6,10 +6,11 @@
   "private": true,
   "scripts": {
     "dev": "webpack-dev-server --inline --progress --config build/webpack.dev.conf.js",
-    "devRD": "webpack-dev-server --inline --progress --config build/webpack.devRedirect.conf.js",
+    "devRD": "webpack-dev-server --inline --progress --config build/webpack.devRD.conf.js",
     "start": "npm run dev",
     "lint": "eslint --ext .js,.vue src",
-    "build": "node build/build.js"
+    "build": "node build/build.js",
+    "buildRD": "node build/buildRedirect.js"
   },
   "dependencies": {
     "animejs": "^2.2.0",
@@ -70,6 +71,7 @@
     "semver": "^5.3.0",
     "shelljs": "^0.7.6",
     "spark-md5": "^3.0.0",
+    "speed-measure-webpack-plugin": "^1.2.5",
     "style-loader": "^0.21.0",
     "uglifyjs-webpack-plugin": "^1.1.1",
     "url-loader": "^0.5.8",

@@ -248,7 +248,7 @@ const IM = (() => {
     var msgTime = Math.round(new Date().getTime() / 1000) //消息时间戳
     var subType = webim.GROUP_MSG_SUB_TYPE.COMMON
     var msg = new webim.Msg(selSess, isSend, seq, random, msgTime, from_id, subType, msgInfo.nickName)
-    var custom_obj = new webim.Msg.Elem.Custom(data, desc, ext, isMsgSync)
+    var custom_obj = new webim.Msg.Elem.Custom(data, desc, ext)
     msg.addCustom(custom_obj)
 
     webim.sendMsg(msg, (resp) => {
@@ -294,7 +294,7 @@ const IM = (() => {
     var subType = webim.GROUP_MSG_SUB_TYPE.COMMON
 
     var msg = new webim.Msg(selSess, isSend, seq, random, msgTime, msgInfo.identifier, subType, msgInfo.nickName)
-    var customObj = new webim.Msg.Elem.Custom(data, desc, ext, isMsgSync)
+    var customObj = new webim.Msg.Elem.Custom(data, desc, ext)
     msg.addCustom(customObj)
 
     // 调用发送消息接口
@@ -383,7 +383,8 @@ const IM = (() => {
         "msgType":"${options.msgType}",
         "time":"${options.time}",
         "msgStatus":"${options.msgStatus}",
-        "chatType":"${options.chatType}"
+        "chatType":"${options.chatType}",
+        "MsgLifeTime":"${options.MsgLifeTime}"
       }`,
       ext: `{
         "imgData":${imgDataStr},
@@ -402,25 +403,20 @@ const IM = (() => {
   }
 
   function formatImgMsgOption(images, options) {
-    let big = ''
-    let small = ''
-    for (let i in images.URL_INFO) {
-      const img = images.URL_INFO[i]
-      switch (img.PIC_TYPE) {
-        case 1: // 原图
-          big = img.DownUrl
-          break
-        case 2:// 小图（缩略图）
-          small = img.DownUrl
-          break
+    const imgMap = images.URL_INFO
+    const imgData = imgMap.reduce((option, next) => {
+      if (next.PIC_TYPE === 1) {
+        Object.assign(option, {
+          big: next.DownUrl,
+          w: next.PIC_Width,
+          h: next.PIC_Height
+        })
+      } else if (next.PIC_TYPE === 2) {
+        option.small = next.DownUrl
       }
-    }
-    const imgData = { big, small }
-    // const imgStr = JSON.stringify(imgData).replace(/\s+/g, "")
-    // debugger
-    // options.imgData = imgStr.substr(1, imgStr.length - 2)
-    options.imgData = imgData
-    return options
+      return option
+    }, {})
+    return Object.assign(options, { imgData })
   }
 
   // 上传照片

@@ -37,11 +37,14 @@ export default {
       csSelected: {}
     }
   },
-  created() {
-    this.getCsList()
-  },
-  activated() {
+  // created() {
+
+  // },
+  async activated() {
+    this.$vux.loading.show({ text: '请稍后' })
+    await this.getCsList()
     this.nextUrl()
+    this.$vux.loading.hide()
   },
   mounted() {
     // this.nextUrl()
@@ -145,7 +148,7 @@ export default {
         })
         return
       }
-      if (this.resetMyCs.length === 0) {
+      if (this.myCs.length === 0) {
         this.$router.replace('/room/cusServ/add')
       } else {
         this.$router.replace('/room/cusServ/list')

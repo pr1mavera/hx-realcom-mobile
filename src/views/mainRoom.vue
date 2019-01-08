@@ -143,7 +143,6 @@ export default {
     // 初始化房间
     async initRoom() {
       let query = this.$route.query
-      debugger
       // 处理官网路由的query
       if (query.hasOwnProperty('openid') && query.hasOwnProperty('attach')) {
         this.$router.replace({path: `/room?openId=${query.openid}&origin=${query.attach}`})

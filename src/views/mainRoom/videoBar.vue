@@ -37,7 +37,7 @@
     <toast v-model="isVideoFilter" :time="10000" type="text" position="top" width="80%">视频客服{{csInfo.csNick}}当前暂离，请稍后</toast>
     <div class="full-screen-container" v-show="fullScreen && !videoScreenShotShow">
       <div class="video-header">
-        <div class="avatar">
+        <div class="avatar" @click="stopRTC">
           <img v-lazy="this.csInfo.csAvatar">
         </div>
         <div class="name">{{this.csInfo.csNick + '--'}}</div>
@@ -332,11 +332,11 @@ export default {
       // &#remoteVideo {
       //   background-color: #666;
       // }
-      // &#localVideo {
-      //   background-color: #222;
-      // }
+      &#localVideo {
+        transform: translateX(-50%) rotateY(180deg)
+      }
       &.video-blur {
-        filter: blur(50px);
+        filter: blur(30px);
       }
       &::-webkit-media-controls {
         display:none !important;
@@ -369,7 +369,7 @@ export default {
     }
     .video-screen-shot {
       object-fit: cover;
-      filter: blur(50px);
+      filter: blur(30px);
     }
   }
   .full-screen-container {

@@ -347,13 +347,13 @@ export const updateLastAction = function({ commit, state }) {
 }
 
 // 存当前缓存池消息
-export const saveCurMsgs = function({}, { origin, msg }) {
+export const saveCurMsgs = function({ state }, { origin, msg }) {
   const temp = Tools.CacheTools.getCacheData({ key: `${origin}_cur_msgs`, check: origin }) || []
   Tools.CacheTools.setCacheData({ key: `${origin}_cur_msgs`, check: origin, data: temp.concat(msg) })
 }
 
 // 存历史消息（初始化）
-export const saveRoamMsgs = function({}, origin) {
+export const saveRoamMsgs = function({ state }, origin) {
   // 缓存池消息
   const curTemp = Tools.CacheTools.getCacheData({ key: `${origin}_cur_msgs`, check: origin }) || []
   // 当前缓存池没有上一次聊天的记录，直接退出
@@ -383,7 +383,7 @@ export const saveRoamMsgs = function({}, origin) {
 }
 
 // 取历史消息（分页）
-export const getRoamMsgs = function({}, { origin, page }) {
+export const getRoamMsgs = function({ state }, { origin, page }) {
   const list = Tools.CacheTools.getCacheData({ key: `${origin}_roam_msgs`, check: origin })
   return list && list.length && list.length >= page ? list[list.length - page].pageList : []
 }
@@ -402,6 +402,19 @@ export const setVideoMuted = function({ commit, state }, isMuted) {
     blur: state.videoFilter.blur,
     muted: isMuted
   })
+}
+
+// 添加相册图片
+export const addPreviewImg = function({ state }, { list, msgsObj }) {
+  const data = msgsObj.imgData
+  list.push({
+    src: data.big,
+    msrc: data.small,
+    w: data.w,
+    h: data.h,
+    id: msgsObj.timestamp
+  })
+  return list
 }
 
 // 更新本地消息队列

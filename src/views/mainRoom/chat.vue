@@ -167,18 +167,6 @@ export default {
         }
       }
     },
-    previewImgList() {
-      const allMsgs = this.historyMsgs.concat(this.msgs)
-      const imgMsg = allMsgs.filter(item => item.msgStatus === msgStatus.msg && item.msgType === msgTypes.msg_img)
-      // if (this.historyMsgs.length && this.msgs.length) {
-      //   allMsgs = this.historyMsgs.concat(this.msgs)
-      // }
-      return imgMsg.reduce((val, item) => val.push({
-        src: item.imgData.big || '',
-        msrc: item.imgData.small || '',
-        id: item.timestamp
-      }), [])
-    },
     copyButtonRect() {
       const self = this
       const pos = {
@@ -217,7 +205,7 @@ export default {
       bubbleY: 0,
       /* pull-down-load  over */
       curPreviewImgId: '',
-      // previewImgList: [],
+      previewImgList: [],
       isCopyButtonShow: false,
       copyTextTemp: '',
       // 长按对话dom的位置信息
@@ -350,6 +338,9 @@ export default {
       // return type === 'text_msg' ? 'ContentItem' : type === 'time_msg' ? 'TimeItem' : ''
     },
     onClickImgMsg(id) {
+      if (!this.previewImgList.length) {
+        return
+      }
       this.curPreviewImgId = id
       let curIndex = 0
       for (let i = 0; i < this.previewImgList.length; i++) {
@@ -630,27 +621,6 @@ export default {
       this.inputEle.innerHTML += code
       this.$refs.inputBar.inputText += code
     },
-    // confirmToLineUp() {
-    //   const enterVideoStatus = window.sessionStorage.getItem('enterVideoStatus')
-    //   switch (enterVideoStatus) {
-    //     case 'safari':
-    //       // 正常进入专属客服
-    //       this.$router.push('/room/cusServ/list')
-    //       break
-    //     case 'Android':
-    //       // 正常进入专属客服
-    //       this.$router.push('/room/cusServ/list')
-    //       break
-    //     case 'ios-guide':
-    //       // 当前为iOS的微信环境，需跳转至Safari
-    //       this.$emit('showIosGuide')
-    //       break
-    //     case 'low-version':
-    //       // 当前系统版本过低
-    //       this.$emit('showLowVersion')
-    //       break
-    //   }
-    // },
     _resolveKeyboard() {
       const device = sessionStorage.getItem('device')
       if (device === 'Android') {

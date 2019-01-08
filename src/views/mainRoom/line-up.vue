@@ -88,6 +88,8 @@ export default {
         const data = res.data
         // 记录accessId
         this.accessId = data.accessId
+        // 初始化排队人数
+        this.setQueueNum(+data.queueNum)
         if (+data.queueNum === 0) {
           // 当前队列无人排队，直接推送排队成功的消息给坐席
           const msg = {
@@ -119,7 +121,6 @@ export default {
             this.afterQueueFailed()
           })
         } else {
-          this.setQueueNum(+data.queueNum)
           // 开启心跳
           this.startVideoHeartBeat()
         }

@@ -10,10 +10,13 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 const FriendlyErrorsPlugin = require('friendly-errors-webpack-plugin')
 const portfinder = require('portfinder')
 
+const SpeedMeasurePlugin = require('speed-measure-webpack-plugin')
+const smp = new SpeedMeasurePlugin()
+
 const HOST = process.env.HOST
 const PORT = process.env.PORT && Number(process.env.PORT)
 
-const devWebpackConfig = merge(baseWebpackConfig.vuxConfig, {
+const devWebpackConfig = smp.wrap(merge(baseWebpackConfig, {
   module: {
     rules: utils.styleLoaders({ sourceMap: config.dev.cssSourceMap, usePostCSS: true })
   },
@@ -58,11 +61,6 @@ const devWebpackConfig = merge(baseWebpackConfig.vuxConfig, {
       template: 'index.html',
       inject: true
     }),
-    new HtmlWebpackPlugin({
-      filename: 'redirect.html',
-      template: 'redirect.html',
-      inject: true
-    }),
     // copy custom static assets
     new CopyWebpackPlugin([
       {
@@ -71,13 +69,8 @@ const devWebpackConfig = merge(baseWebpackConfig.vuxConfig, {
         ignore: ['.*']
       }
     ])
-  ],
-  devServer: {
-    contentBase: path.join(__dirname, '../release'),
-    open: true,
-    port: 8081
-  }
-})
+  ]
+}))
 
 module.exports = new Promise((resolve, reject) => {
   portfinder.basePort = process.env.PORT || config.dev.port
