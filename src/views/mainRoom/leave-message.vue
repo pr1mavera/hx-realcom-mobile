@@ -50,7 +50,7 @@
         if (this.leaveWordDescription !== '' && this.callNumber !== '' && reg.test(this.callNumber)) {
           const now = new Date()
           const year = JSON.stringify(now.getFullYear())
-          const month = now.getMonth() + 1 >= 10 ? JSON.stringify(now.getMonth()) : '0' + JSON.stringify(now.getMonth())
+          const month = now.getMonth() + 1 >= 10 ? JSON.stringify(now.getMonth() + 1) : '0' + JSON.stringify(now.getMonth() + 1)
           const day = now.getDate() >= 10 ? JSON.stringify(now.getDate()) : '0' + JSON.stringify(now.getDate())
           const hour = now.getHours() >= 10 ? JSON.stringify(now.getHours()) : '0' + JSON.stringify(now.getHours())
           const min = now.getMinutes() >= 10 ? JSON.stringify(now.getMinutes()) : '0' + JSON.stringify(now.getMinutes())
@@ -70,7 +70,7 @@
             'openId': this.$route.query.openId
           }
           const res = await leaveMsg(data)
-          // debugger
+          debugger
           if (res.data.result_code === '200') {
             this.submitMsgSuc = true // 跳转到留言保存成功,
           } else {
