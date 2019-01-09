@@ -182,8 +182,13 @@
       justify-content: space-between;
       .right {
         .name{
+          max-width: 9rem;
+          display: inline-block;
           color: #646464;
           margin-right: .5rem;
+          white-space: nowrap; // 强制不换行
+          text-overflow: ellipsis; // 超出显示省略号
+          overflow: hidden;
         }
         .con{
           color: #909090;
