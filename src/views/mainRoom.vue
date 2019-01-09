@@ -65,7 +65,7 @@ import { loginMixin, IMMixin, getMsgsMixin } from '@/common/js/mixin'
 import { roomStatus, sessionStatus } from '@/common/js/status'
 import Tools from '@/common/js/tools'
 import { ERR_OK, saveQueueTicket, getQueueTicket } from '@/server/index.js'
-// import GoShare from '@/common/js/share'
+import { wxConfig } from '@/common/js/share'
 // import anime from 'animejs'
 
 export default {
@@ -92,7 +92,6 @@ export default {
     return {
       sessionStatus: sessionStatus,
       // share
-      // shareUrl: '',
       // isShareView: false,
       // shareGuide: false,
       // 异常
@@ -137,6 +136,7 @@ export default {
     this.$nextTick(() => {
       document.getElementById('app').style.display = 'block'
       document.getElementById('appLoading').style.display = 'none'
+      wxConfig(`https://${window.location.host}/video/index.html`)
     })
   },
   methods: {
@@ -288,7 +288,7 @@ export default {
     // async toShare(csId, csName) {
     //   this.isShareView = false
     //   this.shareGuide = true
-    //   this.shareUrl = `https://${window.location.host}/video/share?csId=${csId}&csName=${csName}`
+    //   this.shareUrl = `https://${window.location.host}/video/index.html`
     //   GoShare(this.shareUrl)
     //   await this.initShare()
     //   this.clickShare()

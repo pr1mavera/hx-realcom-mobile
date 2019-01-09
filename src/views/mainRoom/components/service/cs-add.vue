@@ -22,7 +22,7 @@
                 </div>
               </div>
               <div class="video-btn">
-                <button class="button" :class="{'on-line': isCsOnline}" @click.self="clickToLineUp(curLabelInfo)">
+                <button class="button video-res-btn" :class="{'on-line': isCsOnline}" @click.self="clickToLineUp(curLabelInfo)">
                   <svg class="icon extend-click" aria-hidden="true">
                     <use xlink:href="#icon-zixun"></use>
                   </svg>

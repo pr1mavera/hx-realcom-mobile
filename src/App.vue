@@ -12,7 +12,7 @@
 import deviceConfig from './config/device'
 import { beforeEnterVideo } from '@/common/js/beforeEnterVideo'
 import { stringEx } from './config/extend'
-// const wx = require('@/common/js/wx').wx
+// const wx = require('@/common/js/wx')
 // import { mapGetters, mapMutations } from 'vuex'
 // import Tools from '@/common/js/tools'
 // import wxConfig from './config/wechat'

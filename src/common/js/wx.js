@@ -1,17 +1,19 @@
 let wx = {}
-exports.wx = wx
 
-wx.hideMenu = function() {
+wx.showSafariMenu = function() {
   // eslint-disable-next-line
   WeixinJSBridge.call('hideOptionMenu')
 }
+
 if (typeof WeixinJSBridge === 'undefined') {
   if (document.addEventListener) {
-    document.addEventListener('WeixinJSBridgeReady', wx.hideMenu, false)
+    document.addEventListener('WeixinJSBridgeReady', wx.showSafariMenu, false)
   } else if (document.attachEvent) {
-    document.attachEvent('WeixinJSBridgeReady', wx.hideMenu)
-    document.attachEvent('onWeixinJSBridgeReady', wx.hideMenu)
+    document.attachEvent('WeixinJSBridgeReady', wx.showSafariMenu)
+    document.attachEvent('onWeixinJSBridgeReady', wx.showSafariMenu)
   }
 } else {
-  wx.hideMenu()
+  wx.showSafariMenu()
 }
+
+module.exports = wx

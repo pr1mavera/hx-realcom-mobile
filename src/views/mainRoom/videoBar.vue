@@ -43,6 +43,7 @@
         <div class="name">{{this.csInfo.csNick + '--'}}</div>
       </div>
       <video-footer
+        ref="videoFooter"
         @hangUpVideo="handleHangUpVideo"
         @handleAssess="setAssessView(true)"
         @sendGift="giftSectionShow = true"
@@ -157,11 +158,12 @@ export default {
       // 礼物列表弹层开关：[false 开启 / [true 关闭]
       giftSectionShow: false,
       likes: false,
-      likesCount: 0
+      likesCount: 0,
+      isVideoConnectSuccess: false
     }
   },
   mounted() {
-    this.readyToVideo()
+    // this.readyToVideo()
     this.startTimeStamp = new Date()
     this.$nextTick(() => {
       this.likesCount = +this.csInfo.likesCount
@@ -245,7 +247,7 @@ export default {
       const time = this._getVideoTime(this.startTimeStamp)
       this.setServerTime(time)
       // 判断当前是否评价过
-      !this.hasAssess && this.setAssessView(true)
+      this.isVideoConnectSuccess && !this.hasAssess && this.setAssessView(true)
     },
     getVideoScreenShot() {
       return new Promise(resolve => {
@@ -326,17 +328,17 @@ export default {
       position: absolute;
       top: 0;
       left: 50%;
-      transform: translateX(-50%);
+      transform: translateX(-50%) rotateY(180deg);
       height: 100%;
       transition: filter ease-in-out .5s;
       // &#remoteVideo {
       //   background-color: #666;
       // }
-      &#localVideo {
-        transform: translateX(-50%) rotateY(180deg)
-      }
+      // &#localVideo {
+      //   transform: translateX(-50%) rotateY(180deg)
+      // }
       &.video-blur {
-        filter: blur(30px);
+        filter: blur(50px);
       }
       &::-webkit-media-controls {
         display:none !important;

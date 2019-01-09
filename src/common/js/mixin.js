@@ -244,6 +244,7 @@ export const RTCRoomMixin = {
         this.RTC.on('onRemoteStreamUpdate', (info) => {
           const videoElement = document.getElementById('remoteVideo')
           if (info && info.stream) {
+            this.isVideoConnectSuccess = true
             videoElement.srcObject = info.stream
             videoElement.play()
           }
@@ -308,12 +309,12 @@ export const RTCRoomMixin = {
       const send_bps = data.WebRTCQualityReq.uint32_total_send_bps
       const recv_bps = data.WebRTCQualityReq.uint32_total_recv_bps
 
-      const daley_CB = (data) => {
+      const daley_CB = async(data) => {
         if (!this.qualityReqToast) {
           Tools.trace('延迟过高：')(data)
           this.showConnectStatus('当前网络状况不佳')
           this.qualityReqToast = true
-          Tools.AsyncTools.sleep(7000)
+          await Tools.AsyncTools.sleep(7000)
           this.qualityReqToast = false
         }
       }
@@ -323,10 +324,11 @@ export const RTCRoomMixin = {
         this.bpsOverCount += 1
         if (this.bpsOverCount === 10) {
           this.showConnectStatus('当前网络太差，无法建立视频通话')
+          this.$refs.videoFooter.minimizeBtnHighLight()
           // 直接挂断
-          this.$emit('videoFailed')
+          // this.$emit('videoFailed')
           // 停止推流
-          this.quitRTC()
+          // this.quitRTC()
         }
       }
       Tools.compose(Either(Tools.trace('发送数据：'), bps_CB), Tools.getState(Tools.equals(0)))(send_bps)

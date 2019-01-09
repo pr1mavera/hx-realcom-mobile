@@ -1,9 +1,8 @@
 import wx from 'weixin-jsapi'
 import { getShareTicket } from '@/server/index.js'
 
-const shareJs = async function(shareUrl) {
-  // const res = await getShareTicket(shareUrl)
-  getShareTicket(shareUrl).then((res) => {
+export const wxConfig = function(url) {
+  return getShareTicket(url).then((res) => {
     const jssdk = res.data
     console.log(res.data)
     wx.config({
@@ -23,28 +22,21 @@ const shareJs = async function(shareUrl) {
         'showOptionMenu' // 显示右上角的菜单
       ]
     })
-
-    // 调用微信API
+    wx.ready(function() {
+      wx.hideAllNonBaseMenuItem()
+    })
+    const videoResBtn = document.getElementById('video-res-btn')
+    videoResBtn.forEach(node => {
+      node.addEventListener('click', () => {
+        wx.showMenuItems({
+          menuList: ['menuItem:openWithSafari'] // 要显示的菜单项，所有menu项见附录3
+        })
+      }, false)
+    })
   })
-  // if (res.result.code === ERR_OK) {
-  //   const jssdk = res.data
-  //   wx.config({
-  //     debug: false,
-  //     appId: jssdk.appId,
-  //     timestamp: parseInt(jssdk.timestamp),
-  //     nonceStr: jssdk.nonceStr,
-  //     signature: jssdk.signature,
-  //     jsApiList: [
-  //       'hideAllNonBaseMenuItem',
-  //       'showMenuItems',
-  //       'onMenuShareTimeline',
-  //       'onMenuShareAppMessage'
-  //     ]
-  //   })
-  //   console.log('我特娘的配置完微信数据啦！！')
-  // } else {
-  //   console.log('getShareTicket error')
-  // }
+}
+
+export const shareJs = function(shareUrl) {
   const options = {
     title: '田老师红烧肉盖饭',
     desc: '田老师红烧肉盖饭',
@@ -111,5 +103,3 @@ const shareJs = async function(shareUrl) {
     console.log('there are some error about share js' + res + '======')
   })
 }
-
-export default shareJs
