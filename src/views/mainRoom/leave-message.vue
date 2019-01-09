@@ -74,6 +74,10 @@
           if (res.data.result_code === '200') {
             this.submitMsgSuc = true // 跳转到留言保存成功,
           } else {
+            this.$vux.alert.show({
+              title: '尊敬的客户，系统异常，请稍后再试~~'
+            })
+            this.$router.back(-1)
             console.log('there are some error about leave message' + JSON.stringify(res))
           }
         } else if (this.leaveWordDescription === '') {
