@@ -42,7 +42,7 @@ import Tools from '@/common/js/tools'
 export default {
   data() {
     return {
-      isMinimizeBtnHighLight: true
+      isMinimizeBtnHighLight: false
     }
   },
   methods: {

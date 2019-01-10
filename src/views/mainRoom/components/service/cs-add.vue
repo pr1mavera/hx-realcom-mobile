@@ -53,9 +53,8 @@
                   <li class="cs-info-list">
                     <span class="title">客服标签</span>
                     <span class="text">
-                      <label class="cs-label">甜美可爱</label>
-                      <label class="cs-label">善解人意</label>
-                      <label class="cs-label">活泼可爱</label>
+                      <label class="cs-label" v-for="(item,index) in csLabels" :key="index">{{item}}</label>
+                      <span v-show="csLabels.length === 0">--</span>
                     </span>
                   </li>
                 </ul>
@@ -155,6 +154,7 @@ export default {
       targAngle: 10,
       endAngle: 40,
       curLabelInfo: null,
+      csLabels: [],
       cslist: [
         // {
         //   cs_id: 123456,
@@ -260,6 +260,9 @@ export default {
         this.addDis = false // 此时‘添加’按钮可以重新点击
         this.showTip = true
         this.curLabelInfo = this.cslist[0]
+        if (this.curLabelInfo.labels) {
+          this.csLabels = this.curLabelInfo.labels.split(',')
+        }
         return
       }
 
@@ -299,6 +302,12 @@ export default {
       // 更新当前显示的客服
       this.cslist.splice(0, 1)
       this.curLabelInfo = this.cslist[0]
+      // 更新当前客服标签，当前客服没有标签清空上一个
+      if (this.curLabelInfo.labels) {
+        this.csLabels = this.curLabelInfo.labels.split(',')
+      } else {
+        this.csLabels = []
+      }
     },
     resetAngle() {
       this.curLabelInfo = null
@@ -351,17 +360,18 @@ export default {
     async getCsList() {
       const page = 1
       const pageSize = -1
-      // const userId = '123'
       const userId = this.userInfo.userId
       const listType = '2'
       const res = await queryCsInfo(page, pageSize, userId, listType)
+      debugger
+      // labels
       if (res.result.code === ERR_OK) {
-        // console.log('所有客服列表' + JSON.stringify(res.data.csList))
-        // const totalPage = res.data.totalCount
-        // (if totalPage === -1) {不计算}else{pages = Math.flower(total / 5)}
         this.cslist = res.data.csList
 
         this.curLabelInfo = this.cslist[0]
+        if (this.curLabelInfo.labels) {
+          this.csLabels = this.curLabelInfo.labels.split(',')
+        }
         this.avatarImg = getCsAvatar(this.curLabelInfo.id)
         // console.log('===========客服列表:' + JSON.stringify(this.cslist))
       } else {
@@ -541,12 +551,14 @@ export default {
                       color: #56de47;
                     }
                     &.cs-label {
+                      max-width: 6rem;
                       padding: 0.1rem 0.3rem;
                       box-sizing: border-box;
                       line-height: 1.4rem;
                       border: 0.1rem solid rgba(255, 149, 156, 1);
                       border-radius: 2.5rem;
                       color: rgba(255, 149, 156, 1);
+                      text-align: center;
                     }
                   }
                 }

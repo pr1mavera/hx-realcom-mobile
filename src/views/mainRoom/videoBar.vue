@@ -163,7 +163,7 @@ export default {
     }
   },
   mounted() {
-    // this.readyToVideo()
+    this.readyToVideo()
     this.startTimeStamp = new Date()
     this.$nextTick(() => {
       this.likesCount = +this.csInfo.likesCount
