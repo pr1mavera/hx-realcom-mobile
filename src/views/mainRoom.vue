@@ -145,7 +145,7 @@ export default {
       let query = this.$route.query
       // 处理官网路由的query
       if (query.hasOwnProperty('openid') && query.hasOwnProperty('attach')) {
-        this.$router.replace({path: `/room?openId=${query.openid}&origin=${query.attach}`})
+        this.$router.replace({path: `/room?openId=${this.getQueryString('openid')}&origin=${this.getQueryString('attach')}`})
         query = this.$route.query
       }
       // 初始化
@@ -169,6 +169,12 @@ export default {
       }
 
       // this.$router.replace({path: `/room/chat?openId=${query.openId}&origin=${query.origin}`})
+    },
+    getQueryString(name) {
+      let reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)')
+      let r = window.location.search.substr(1).match(reg)
+      if (r !== null) return unescape(r[2]).replace(/\//, '')
+      return null
     },
     // Safari进入排队前
     async afterEnterSafariQueue(data) {

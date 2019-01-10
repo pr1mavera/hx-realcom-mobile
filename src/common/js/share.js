@@ -25,14 +25,13 @@ export const wxConfig = function(url) {
     wx.ready(function() {
       wx.hideAllNonBaseMenuItem()
     })
-    const videoResBtn = document.getElementById('video-res-btn')
-    videoResBtn.forEach(node => {
-      node.addEventListener('click', () => {
-        wx.showMenuItems({
-          menuList: ['menuItem:openWithSafari'] // 要显示的菜单项，所有menu项见附录3
-        })
-      }, false)
-    })
+  })
+}
+
+export const showSafariItem = function() {
+  console.log('====> 显示Safari按钮辣 <====')
+  wx.showMenuItems({
+    menuList: ['menuItem:openWithSafari'] // 要显示的菜单项，所有menu项见附录3
   })
 }
 
