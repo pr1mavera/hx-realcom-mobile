@@ -2,6 +2,7 @@ import { roomStatus, queueStatus } from '@/common/js/status'
 import Tools from '@/common/js/tools'
 
 const state = {
+  sourceUrl: window.location.href,
   userInfo: {},
   botInfo: {},
   csInfo: {

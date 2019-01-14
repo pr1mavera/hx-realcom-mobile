@@ -10,7 +10,6 @@
         <p class="tips-top" v-else>排队成功，正在为您转接视频客服</p>
       </div>
       <a type="reset" class="btn-cancel" @click="clickToCancelLineUp">取 消</a>
-      <connect-success ref="connectSuccess"></connect-success>
        <!-- @confirmToVideo="confirmToVideo" -->
     </main>
   </section>
@@ -27,9 +26,6 @@ export default {
   mixins: [
     IMMixin
   ],
-  components: {
-    'ConnectSuccess': () => import('@/views/mainRoom/components/video/connect-success')
-  },
   computed: {
     ...mapGetters([
       'userInfo',

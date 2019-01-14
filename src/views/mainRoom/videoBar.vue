@@ -7,7 +7,8 @@
       @ready="readyToVideo"
     ></line-up> -->
     <!-- 最大化 -->
-    <div class="video-window" :class="server">
+    <audio id="videoRing" loop v-show="false" src="/video/static/audio/ring.mp3" type="audio/mpeg"></audio>
+    <div class="video-window" :class="remoteVideo">
       <video height=100%
         id="remoteVideo"
         :class="{'video-blur': videoFilter.blur}"
@@ -24,7 +25,7 @@
       </div>
       <img width=100% height=100% v-if="videoScreenShotShow" :src="videoScreenShotSrc" class="video-screen-shot">
     </div>
-    <div class="video-window" :class="customer" v-show="fullScreen && !videoScreenShotShow">
+    <div class="video-window" :class="localVideo" v-show="fullScreen && !videoScreenShotShow">
       <video height=100%
         id="localVideo"
         v-if="!videoScreenShotShow"
@@ -34,13 +35,13 @@
       ></video>
       <div class="video-mask"></div>
     </div>
-    <toast v-model="isVideoFilter" :time="10000" type="text" position="top" width="80%">视频客服{{csInfo.csNick}}当前暂离，请稍后</toast>
+    <toast v-model="isVideoFilter" :time="10000" type="text" position="default" width="80%">视频客服{{csInfo.csNick}}当前暂离，请稍后</toast>
     <div class="full-screen-container" v-show="fullScreen && !videoScreenShotShow">
       <div class="video-header">
         <div class="avatar" @click="stopRTC">
           <img v-lazy="this.csInfo.csAvatar">
         </div>
-        <div class="name">{{this.csInfo.csNick + '--'}}</div>
+        <div class="name">{{this.csInfo.csNick || '--'}}</div>
       </div>
       <video-footer
         ref="videoFooter"
@@ -73,16 +74,6 @@
         <send-gift :theme="`dark`" @selectGift="selectGift"></send-gift>
       </section>
     </div>
-    <!-- 最小化 -->
-    <!-- <div class="mini-container" v-show="isMiniBarOpen" @click="openVideoBar">
-      <div class="server-video-window">
-        <video
-          id="remoteVideoMini"
-          autoplay
-          playsinline
-        ></video>
-      </div>
-    </div> -->
     <canvas id="videoCanvas" v-show="false"></canvas>
   </div>
 </template>
@@ -90,7 +81,6 @@
 <script type="text/ecmascript-6">
 import { Toast } from 'vux'
 import { mapGetters, mapMutations } from 'vuex'
-import { queueStatus } from '@/common/js/status'
 import { ERR_OK, enterVideoRTCRoom } from '@/server/index.js'
 import { RTCRoomMixin, sendMsgsMixin } from '@/common/js/mixin'
 // import IM from '@/server/im.js'
@@ -109,16 +99,6 @@ export default {
     Toast
   },
   computed: {
-    // isVideoBarOpen() {
-    //   // return this.queueMode === queueStatus.queuing || this.queueMode === queueStatus.queueSuccess || this.queueMode === queueStatus.queueOver
-    //   return this.roomMode === roomStatus.videoChat
-    // },
-    isMiniBarOpen() {
-      return (!this.fullScreen && this.queueMode.status === queueStatus.queueOver) && !this.videoScreenShotShow
-    },
-    // isLineUpShow() {
-    //   return this.queueMode === queueStatus.queuing || this.queueMode === queueStatus.queueSuccess
-    // },
     likesCountStyle() {
       return this.likes ? '#icon-xin-hong' : '#icon-dianzanqian'
     },
@@ -128,11 +108,17 @@ export default {
       },
       set() {}
     },
-    customer() {
+    localVideo() {
+      if (!this.fullScreen) {
+        return 'invisible'
+      }
       return this.isChangeCamera ? 'big' : 'small'
     },
-    server() {
-      return this.isChangeCamera || !this.fullScreen ? 'small' : 'big'
+    remoteVideo() {
+      if (!this.fullScreen) {
+        return 'small'
+      }
+      return this.isChangeCamera ? 'small' : 'big'
     },
     ...mapGetters([
       'fullScreen',
@@ -153,8 +139,8 @@ export default {
       videoScreenShotSrc: '',
       // 通话开始时间
       startTimeStamp: null,
-      // 是否切换客服跟用户的摄像头位置：[false 客户窗口大窗] / [true 客户窗口小窗]
-      isChangeCamera: false,
+      // 是否切换客服跟用户的摄像头位置：[false 客户窗口小窗] / [true 客户窗口大窗]
+      isChangeCamera: true,
       // 礼物列表弹层开关：[false 开启 / [true 关闭]
       giftSectionShow: false,
       likes: false,
@@ -163,6 +149,7 @@ export default {
     }
   },
   mounted() {
+    document.getElementById('videoRing').play()
     this.readyToVideo()
     this.startTimeStamp = new Date()
     this.$nextTick(() => {
@@ -205,16 +192,21 @@ export default {
       this.setFullScreen(false)
     },
     async readyToVideo() {
-      // IM.joinGroup(this.roomId, this.userInfo.userId)
-      const result = await this.initRTC(this.roomId)
-      console.log(result.msg)
-      if (result.code === ERR_OK) {
-        this.RTC.getLocalStream({ video: true, audio: true }, (info) => {
-          this.RTC.startRTC({ stream: info.stream, role: 'user' })
+      // 初始化摄像头
+      this.isChangeCamera = true
+
+      this.initRTC()
+        .then(() => this.enterRoom(this.roomId))
+        .then(() => this.getLocalStream(), err => {
+          alert(err)
         })
-      } else {
-        this.$emit('videoFailed')
-      }
+        .then(info => this.startRTC(info.stream), err => {
+          alert(err)
+        })
+        // .catch(err => {
+        //   alert(err)
+        //   // this.$emit('videoFailed')
+        // })
 
       this.enterVideoRTCRoomAPI(this.csInfo.csId, this.userInfo.userId, this.userInfo.openId, this.sessionId)
     },
@@ -287,6 +279,13 @@ export default {
 @import '~@/common/style/mixin.less';
 
 .video-bar {
+  // &.video-mini-screen {
+  //   margin: .5rem .5rem 0 0;
+  //   width: 9rem;
+  //   height: 16.5rem;
+  //   border-radius: .4rem;
+  //   overflow: hidden;
+  // }
   .line-up {
     position: fixed;
     top: 0;
@@ -310,25 +309,18 @@ export default {
       width: 9rem;
       height: 16.5rem;
       border-radius: .4rem;
-      z-index: 200;
+      // z-index: 200;
       overflow: hidden;
       z-index: 1;
-      background-color: #222;
-      // #remoteVideo {
-      //   &::after {
-      //     content: '';
-      //     width: 100%;
-      //     height: 100%;
-      //     background-color: unset;
-      //     background-image: url();
-      //   }
-      // }
+    }
+    &.invisible {
+      visibility: hidden;
     }
     video {
       position: absolute;
       top: 0;
       left: 50%;
-      transform: translateX(-50%) rotateY(180deg);
+      transform: translateX(-50%);
       height: 100%;
       transition: filter ease-in-out .5s;
       // &#remoteVideo {
@@ -341,7 +333,7 @@ export default {
         filter: blur(50px);
       }
       &::-webkit-media-controls {
-        display:none !important;
+        display: none !important;
       }
     }
     .video-mask {

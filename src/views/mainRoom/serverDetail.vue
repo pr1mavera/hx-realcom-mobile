@@ -176,6 +176,7 @@
   import { ERR_OK, getCsInfo, csPhoto, getTimesForMe, getCsAvatar, giftSend } from '@/server/index.js'
 
   export default {
+    name: 'server-detail',
     directives: {
       TransferDom
     },

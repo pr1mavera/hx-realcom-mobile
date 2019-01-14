@@ -1,14 +1,16 @@
 <template>
   <div class="cus-serv">
-    <router-view
-      :myCs="myCs"
-      @removeCs="removeCs"
-      @goToLineUp="showConfirm"
-      @clickToLineUp = "showConfirm"
-      @showShare="showShare"
-      @resetMyCs="resetMyCs"
-      @addCs="addCs"
-    ></router-view>
+    <keep-alive :include="['cs-add']">
+      <router-view
+        :myCs="myCs"
+        @removeCs="removeCs"
+        @goToLineUp="showConfirm"
+        @clickToLineUp = "showConfirm"
+        @showShare="showShare"
+        @resetMyCs="resetMyCs"
+        @addCs="addCs"
+      ></router-view>
+    </keep-alive>
     <!--<div v-transfer-dom>  -->
       <!--<confirm v-model='alertTip'>-->
         <!--<p style="text-align:center;">{{tipCon}}</p>-->

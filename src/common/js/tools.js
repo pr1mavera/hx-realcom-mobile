@@ -473,6 +473,25 @@ let Tools = Object.assign({}, {
   randomMin2Max: _.curry(function(min, max) {
     return Math.floor(Math.random() * (max - min) + min)
   }),
+  getRealHost: function(url) {
+    const getHost = _.compose(_.head, _.split('?'))
+    return getHost(url)
+  },
+  getRealQueryStr: function(url) {
+    const getQueryStr = _.compose(_.last, _.split('?'))
+    return getQueryStr(url)
+  },
+  getRealQuery: function(url) {
+    // if (!url.match(/#/)) url = `${url}#`
+    const toPairs = _.compose(_.map(_.split('=')), _.split('&'))
+    const queryArr = _.compose(toPairs, _.last, _.split('?'))
+    const arr2Obj = (old, cur) => {
+      old[cur[0]] = cur[1].replace('/', '')
+      return old
+    }
+    const getQueryObj = _.compose(_.reduce(arr2Obj, {}), queryArr)
+    return getQueryObj(url)
+  },
   getRamSessionId: function() {
     const date = this.DateTools.formatDate('yyyy-MM-dd-hh-mm-ss-SSS').split(/-/g).join('')
     const ram = this.randomMin2Max(100000)(999999)

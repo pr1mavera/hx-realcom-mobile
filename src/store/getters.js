@@ -1,5 +1,7 @@
 import { msgStatus, msgTypes, roomStatus, sessionStatus } from '@/common/js/status'
 
+// 初始化时记录的初始URL
+export const sourceUrl = state => state.sourceUrl
 // 用户基本信息
 export const userInfo = state => state.userInfo
 // 机器人基本信息
