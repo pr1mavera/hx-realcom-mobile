@@ -38,8 +38,8 @@
         }, 1000)
       },
       goChat() {
-        // this.$router.back(-1)
-        this.$router.push('/room/chat')
+        this.$router.back(-1)
+        // this.$router.push('/room/chat')
         this.totalTime = 0
       }
     }

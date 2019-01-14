@@ -142,7 +142,7 @@
       <div class="close">
         <a @click="closeFilter"><svg class="icon icon-close" aria-hidden="true"><use xlink:href="#icon-guanbi"></use></svg></a>
       </div>
-      <swiper id="swiperImg" v-model="currentImg" class="swiper" height="50vh" :show-dots="false" @on-index-change="changePage">
+      <swiper id="swiperImg" v-model="currentImg" class="swiper" height="36rem" :show-dots="false" @on-index-change="changePage">
         <swiper-item class="swiper-img" height="300px" v-for="(item, index) in personalDisplay" :key="index">
           <img class="cs-img" :src="item" style="">
         </swiper-item>
@@ -153,7 +153,7 @@
         <div class="bar-item" :class="{'active': imgIndex === (currentImg + 1)}"
              v-for="imgIndex in personalDisplay.length" :key="imgIndex"></div>
       </div>
-      <p class="tag" style="font-size: 3.6rem;">{{currentImg + 1}}/{{personalDisplay.length}}</p>
+      <p class="tag" style="font-size: 3.2rem;">{{currentImg + 1}}/{{personalDisplay.length}}</p>
     </div>
     <!--<div v-transfer-dom>-->
       <!--<previewer :list="personalDisplay" ref="previewer" @on-index-change="changeImg"></previewer>-->
@@ -577,13 +577,13 @@
         padding: 1.5rem 1.5rem 0;
         text-align: right;
         .icon {
-          height: 3.4rem;
-          width: 3.4rem;
+          height: 2.4rem;
+          width: 2.4rem;
         }
       }
       .swiper {
         width: 80%;
-        margin: 8vh auto 2rem;
+        margin: 2vh auto 1.5em;
         .swiper-img {
           text-align: center;
           .cs-img {
@@ -604,13 +604,13 @@
       }
       .tip {
         color: rgba(187, 187, 187, 1);
-        font-size: 1.9rem;
+        font-size: 1.6rem;
       }
       .bar {
         display: flex;
         width: 56vw;
         height: 3px;
-        margin: 2rem auto;
+        margin: 1.5rem auto;
         border-radius: 2px;
         background-color: #676767;
         .bar-item {
