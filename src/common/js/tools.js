@@ -257,20 +257,13 @@ const RectTools = {
   },
 
   // 获取dom基于屏幕的位置
-  getRectLimitDoc: function(el) {
-    let actualTop = el.offsetTop
-    let actualLeft = el.offsetLeft
-    let current = el.offsetParent
-    while (current !== null) {
-      actualTop += current.offsetTop
-      actualLeft += current.offsetLeft
-      current = current.offsetParent
-    }
+  getRectLimitDoc: function(e) {
+    const Rect = e.targetTouches[0]
     return {
-      top: actualTop,
-      left: actualLeft,
-      width: el.offsetWidth,
-      height: el.offsetHeight
+      top: Math.round(Rect.clientY),
+      left: Math.round(Rect.clientX),
+      width: e.target.offsetWidth,
+      height: e.target.offsetHeight
     }
   }
 }
@@ -301,7 +294,7 @@ const MsgsFilterTools = {
       nickName: data.botName,
       isSelfSend: false,
       time: data.time,
-      timestamp: new Date().getTime(),
+      timestamp: new Date().getTime() + 500,
       msgStatus: msgStatus.msg,
       chatType: sessionStatus.robot
     }

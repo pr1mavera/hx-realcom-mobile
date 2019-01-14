@@ -14,8 +14,6 @@
     </div>
     <div class="content-box" :class="[{'right-content-box': msg.isSelfSend, 'left-content-box': !msg.isSelfSend}]">
       <p class="name" v-if="!msg.isSelfSend">{{msg.nickName}}</p>
-      <!-- <transition-group name="msg" mode="out-in"> -->
-      <!-- v-show="msgAlready" -->
         <div
           class="content chat-content-shadow"
           :class="[{
@@ -71,7 +69,7 @@
           <!-- 礼物消息 -->
           <span class="text gift-item" v-if="msg.msgType === msgTypes.msg_gift">
             我送给{{this.csInfo.csNick || '客服'}}一个{{msg.giftInfo.giftName}} !
-            <img class="text-gift" :src="`/video/static/img/gift/${msg.giftInfo.giftId}.png`">
+            <img class="text-gift" :src="giftIconSrc">
           </span>
           <!-- 留言 -->
           <span class="text" v-if="msg.msgType === msgTypes.msg_leave">{{msg.content}}，请<span class="button" @click="leaveMsg">点击留言</span>~</span>
@@ -115,7 +113,6 @@
             <!-- <span class="text-extend button" @click="enterOnLineLineUp">人工客服</span> -->
           </span>
         </div>
-      <!-- </transition-group> -->
     </div>
     <!-- <div class="avatar" v-show="false">
       <svg class="icon extend-click" aria-hidden="true">
@@ -142,8 +139,7 @@ export default {
   },
   data() {
     return {
-      msgTypes: msgTypes,
-      msgAlready: false
+      msgTypes: msgTypes
     }
   },
   computed: {
@@ -159,6 +155,9 @@ export default {
           return '/video/static/img/chat/xiaohua@2x.png'
       }
     },
+    giftIconSrc() {
+      return `/video/static/img/gift/${msg.giftInfo.giftId}.png`
+    },
     imgId() {
       return `${this.msg.timestamp}`
     },
@@ -171,9 +170,6 @@ export default {
   },
   mounted() {
     console.log('chat-content-item ===> 你个组件你被引用了哈哈哈')
-    this.$nextTick(() => {
-      this.msgAlready = true
-    })
   },
   methods: {
     callPhone(event) {

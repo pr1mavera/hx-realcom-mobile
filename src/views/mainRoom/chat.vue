@@ -15,50 +15,20 @@
           :pulldownResult="pulldownResult"
         ></pull-down>
         <div class="chat-content" ref="chatContent">
-          <ul>
-            <li class="chat-content-block chat-content-start" ref="chatContentStart"></li>
-            <li class="chat-content-li"
-              v-for="(item, index) in this.historyMsgs"
-              :key="`history-${index}`"
-              :class="{'text-center': item.msgStatus === msgStatus.tip}">
-              <keep-alive>
-                <component
-                  :is="_showItemByType(item.msgStatus)"
-                  :msg="item"
-                  @msgLongPress="showCopy"
-                  @onClickImgMsg="onClickImgMsg"
-                  @targetLink="targetLink"
-                ></component>
-              </keep-alive>
-            </li>
-            <li class="chat-content-li text-center history-block" v-if="historyMsgs.length !== 0">
-              <span class="item line border-1px-before"></span>
-              <span class="item text">以上为历史消息</span>
-              <span class="item line border-1px-before"></span>
-            </li>
-            <li class="chat-content-li"
-              v-for="(msg, index) in this.msgs"
-              :key="`cur-${index}`"
-              :class="{'text-center': msg.msgStatus === msgStatus.tip}">
-              <keep-alive>
-                <component
-                  :is="_showItemByType(msg.msgStatus)"
-                  :msg="msg"
-                  @msgLongPress="showCopy"
-                  @onClickImgMsg="onClickImgMsg"
-                  @handleReConnectToOnlineChat="handleReConnectToOnlineChat"
-                  @clickHotQues="chatInputCommit"
-                  @onLineCancelQueue="onLineCancelQueue"
-                  @toLeaveMsg="toLeaveMsg"
-                  @resendMsgs="resendMsgs"
-                  @targetLink="targetLink"
-                ></component>
-              </keep-alive>
-            </li>
-            <!--@click="$router-->
-            <!--<li class="chat-content-li" @click="toLeaveMsg">请留言</li>-->
-            <li class="chat-content-block chat-content-end" :class="{'bot-assess': isBotAssessShow}" ref="chatContentEnd"></li>
-          </ul>
+          <msgs-queue
+            ref="msgsQueue"
+            :historyMsgs="historyMsgs"
+            :msgs="msgs"
+            :isBotAssessShow="isBotAssessShow"
+            @msgLongPress="showCopy"
+            @onClickImgMsg="onClickImgMsg"
+            @handleReConnectToOnlineChat="handleReConnectToOnlineChat"
+            @clickHotQues="chatInputCommit"
+            @onLineCancelQueue="onLineCancelQueue"
+            @toLeaveMsg="toLeaveMsg"
+            @resendMsgs="resendMsgs"
+            @targetLink="targetLink"
+          ></msgs-queue>
         </div>
         <fload-button
           ref="floadButton"
@@ -141,10 +111,11 @@ export default {
     InputBar,
     Previewer,
     // Confirm,
-    'MsgsItem': () => import('@/views/mainRoom/components/chat/msgs-item'),
-    'TipsItem': () => import('@/views/mainRoom/components/chat/tips-item'),
-    'DialogItem': () => import('@/views/mainRoom/components/chat/dialog-item'),
-    'CardItem': () => import('@/views/mainRoom/components/chat/card-item'),
+    // 'MsgsItem': () => import('@/views/mainRoom/components/chat/msgs-item'),
+    // 'TipsItem': () => import('@/views/mainRoom/components/chat/tips-item'),
+    // 'DialogItem': () => import('@/views/mainRoom/components/chat/dialog-item'),
+    // 'CardItem': () => import('@/views/mainRoom/components/chat/card-item'),
+    'msgsQueue': () => import('@/views/mainRoom/components/chat/msgs-queue'),
     'FloadButton': () => import('@/views/mainRoom/components/chat/fload-button'),
     'FloatBotAssess': () => import('@/views/mainRoom/components/chat/float-bot-assess'),
     'extendBar': () => import('@/views/mainRoom/components/chat/extend-bar'),
@@ -169,9 +140,10 @@ export default {
     },
     copyButtonRect() {
       const self = this
+      const rect = this.targetEleRect
       const pos = {
-        top: self.targetEleRect.top - 50 - self.scrollY,
-        left: self.targetEleRect.left + self.targetEleRect.width / 2 - 30
+        top: rect.top - 70,
+        left: rect.left
       }
       return `transform: translate(${pos.left}px, ${pos.top}px); opacity: ${self.isCopyButtonShow ? 1 : 0};`
     },
@@ -638,12 +610,9 @@ export default {
       }
     },
     /* *********************************** copy btn *********************************** */
-    showCopy(el, msg) {
-      // get window scroll Y
-      let pageYScroll = window.pageYOffset || document.documentElement.scrollTop
+    showCopy({ e, msg }) {
       // get position of element relative to viewport
-      this.targetEleRect = Tools.RectTools.getRectLimitDoc(el)
-      this.targetEleRect.top += pageYScroll
+      this.targetEleRect = Tools.RectTools.getRectLimitDoc(e)
 
       const pureText = msg.replace(/<\/?.+?>/g, '').replace(/&nbsp;/g, '')
       this.copyTextTemp = pureText
@@ -734,7 +703,7 @@ export default {
       this.$nextTick(async() => {
         await Tools.AsyncTools.sleep(10)
         this.chatScroll.refresh()
-        this.chatScroll.scrollToElement(this.$refs.chatContentEnd, 400)
+        this.chatScroll.scrollToElement(this.$refs.msgsQueue.$refs.chatContentEnd, 400)
       })
     }
   }

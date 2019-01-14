@@ -16,19 +16,19 @@
       </div>
     </div>
     <div class="cell suc-con" v-if="msg.msgType === dialogTypes.dialog_success">
-     <div class="avatar">
-       <img src="/video/static/img/avatar@2x.png">
-       <p class="name">{{msg.dialogInfo.csName}}</p>
-     </div>
-     <div class="suc-con-left">
-       <p class="tit" style="padding: .8rem 0 1rem 0">尊贵的{{msg.dialogInfo.rank}}客户</p>
-       <div style="display: flex">
-         <p class="text">人工客服切换成功！祝您沟通愉快！</p>
-         <div class="diamond">
-           <img src="/video/static/img/chat/diamond.png">
-         </div>
-       </div>
-     </div>
+      <div class="avatar">
+        <img src="/video/static/img/avatar@2x.png">
+        <p class="name">{{msg.dialogInfo.csName}}</p>
+      </div>
+      <div class="suc-con-left">
+        <p class="tit" style="padding: .8rem 0 1rem 0">尊贵的{{msg.dialogInfo.rank}}客户</p>
+        <div style="display: flex">
+          <p class="text">人工客服切换成功！祝您沟通愉快！</p>
+          <div class="diamond">
+            <img src="/video/static/img/chat/diamond.png">
+          </div>
+        </div>
+      </div>
    </div>
   </div>
 </template>

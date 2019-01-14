@@ -798,7 +798,7 @@ export const sendMsgsMixin = {
             content: question,
             isSelfSend: true,
             time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
-            timestamp: timestamp,
+            timestamp,
             status: 'pending',
             msgStatus: msgStatus.msg,
             msgType: msgTypes.msg_normal,
@@ -1189,8 +1189,8 @@ export const getMsgsMixin = {
       let timeCache = list[0].time
       let map = []
       list.length && list.forEach((item, i) => {
-        item.timestamp = new Date(item.time.replace(/-/g, '/')).getTime()
-        if (Tools.DateTools.isTimeDiffLongEnough(timeCache, item.time) || i === 0) {
+        // item.timestamp = new Date(item.time.replace(/-/g, '/')).getTime()
+        if (Tools.DateTools.isTimeDiffLongEnough(timeCache, item.timestamp) || i === 0) {
           map.push({
             content: item.time,
             time: item.time,

@@ -1,25 +1,25 @@
 <template>
- <div class="tips-item">
-   <!-- <span class="item-span" v-if="msg.msgType === tipTypes.tip_time">{{msg.content}}</span> -->
-   <span class="item-span" v-if="msg.msgType === tipTypes.tip_time">{{msg.content | timeFilter}}</span>
-   <span class="item-span" v-if="msg.msgType === tipTypes.tip_normal">{{msg.content}}</span>
-   <span class="item-span" v-if="msg.msgType === tipTypes.tip_success">
-     <svg class="icon icon-success extend-click" aria-hidden="true">
-       <use xlink:href="#icon-chenggong"></use>
-     </svg>
-     {{msg.content}}
-   </span>
-   <span class="item-span" v-if="msg.msgType === tipTypes.tip_fail">
-     <svg class="icon icon-fail extend-click" aria-hidden="true">
-       <use xlink:href="#icon-zhuanjiemang"></use>
-     </svg>
-     客服转接失败，请稍后重试~
-   </span>
-   <span class="item-span" v-if="msg.msgType === tipTypes.tip_line_up">
-     当前排队{{msg.queueNum}}人，请耐心等待
-     <span class="button" @click="$emit('onLineCancelQueue')">取消排队</span>
-   </span>
- </div>
+  <div class="tips-item">
+    <!-- <span class="item-span" v-if="msg.msgType === tipTypes.tip_time">{{msg.content}}</span> -->
+    <span class="item-span" v-if="msg.msgType === tipTypes.tip_time">{{msg.content | timeFilter}}</span>
+    <span class="item-span" v-if="msg.msgType === tipTypes.tip_normal">{{msg.content}}</span>
+    <span class="item-span" v-if="msg.msgType === tipTypes.tip_success">
+      <svg class="icon icon-success extend-click" aria-hidden="true">
+        <use xlink:href="#icon-chenggong"></use>
+      </svg>
+      {{msg.content}}
+    </span>
+    <span class="item-span" v-if="msg.msgType === tipTypes.tip_fail">
+      <svg class="icon icon-fail extend-click" aria-hidden="true">
+        <use xlink:href="#icon-zhuanjiemang"></use>
+      </svg>
+      客服转接失败，请稍后重试~
+    </span>
+    <span class="item-span" v-if="msg.msgType === tipTypes.tip_line_up">
+      当前排队{{msg.queueNum}}人，请耐心等待
+      <span class="button" @click="$emit('onLineCancelQueue')">取消排队</span>
+    </span>
+  </div>
 </template>
 
 <script type="text/ecmascript-6">

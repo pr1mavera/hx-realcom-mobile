@@ -124,6 +124,7 @@ import { ERR_OK, addCs, queryCsInfo, getCsAvatar } from '@/server/index.js'
 import { mapGetters } from 'vuex'
 
 export default {
+  name: 'cs-add',
   directives: {
     TransferDom
   },
