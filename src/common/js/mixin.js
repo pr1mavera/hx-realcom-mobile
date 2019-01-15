@@ -2,7 +2,7 @@ import { mapGetters, mapMutations, mapActions } from 'vuex'
 import IM from '@/server/im'
 import MsgsLoader from '@/common/js/MsgsLoader'
 // import WebRTCAPI from 'webRTCAPI'
-import { ERR_OK, ERR_FAIL, getImgUrl, getUserInfoByOpenID, getLoginInfo, getBotInfo, sendMsgToBot, getSessionList, getCsAvatar, onLineQueue, getBotRoamMsgs, requestHistoryMsgs, videoQueueCancel, onLineQueueCancel, chatQueueHeartBeat, getWorkTime } from '@/server/index.js'
+import { ERR_OK, getImgUrl, getUserInfoByOpenID, getLoginInfo, getBotInfo, sendMsgToBot, getSessionList, getCsAvatar, onLineQueue, getBotRoamMsgs, requestHistoryMsgs, videoQueueCancel, onLineQueueCancel, chatQueueHeartBeat, getWorkTime } from '@/server/index.js'
 import Tools from '@/common/js/tools'
 import { Either } from '@/common/js/container/either'
 import { TIME_24_HOURS, roomStatus, queueStatus, sessionStatus, systemMsgStatus, msgStatus, cardTypes, msgTypes, tipTypes, dialogTypes } from '@/common/js/status'
@@ -215,7 +215,7 @@ export const RTCRoomMixin = {
     ])
   },
   methods: {
-    initRTC(room) {
+    initRTC() {
       return new Promise((resolve, reject) => {
         const self = this
         // eslint-disable-next-line
@@ -225,27 +225,29 @@ export const RTCRoomMixin = {
           'userSig': self.userInfo.userSig,
           'accountType': self.userInfo.accountType
         }, () => {
-          this.RTC.enterRoom(
-            { roomid: room, role: 'user' },
-            () => resolve({ code: ERR_OK, msg: 'ENTER RTC ROOM OK' }),
-            // eslint-disable-next-line
-            (error) => reject({ code: ERR_FAIL, msg: `ENTER RTC ROOM failed, result: ${error}` })
-          )
-        }, (error) => {
-          console.error(error)
+          resolve()
+        }, err => {
+          reject(new Error(`error in initRTC: ${err}`))
         })
 
         this.RTC.on('onQualityReport', this.handleRTCQualityReport)
 
         this.RTC.on('onLocalStreamAdd', (info) => {
           const videoElement = document.getElementById('localVideo')
-          if (info && info.stream) videoElement.srcObject = info.stream
+          if (info && info.stream) {
+            videoElement.srcObject = info.stream
+          }
         })
         this.RTC.on('onRemoteStreamUpdate', (info) => {
           const videoElement = document.getElementById('remoteVideo')
           if (info && info.stream) {
             videoElement.srcObject = info.stream
             videoElement.play()
+            videoElement.addEventListener('playing', () => {
+              document.getElementById('videoRing').pause()
+              this.isVideoConnectSuccess = true
+              this.isChangeCamera = false
+            }, false)
           }
         })
 
@@ -288,6 +290,41 @@ export const RTCRoomMixin = {
         })
       })
     },
+
+    // 加入房间
+    enterRoom(room) {
+      return new Promise((resolve, reject) => {
+        this.RTC.enterRoom({ roomid: room, role: 'user' }, () => {
+          resolve()
+        }, err => {
+          reject(new Error(`error in enterRoom: ${err}`))
+        })
+      })
+    },
+
+    // 获取本地流
+    getLocalStream() {
+      return new Promise((resolve, reject) => {
+        this.RTC.getLocalStream({ video: true, audio: true }, info => {
+          resolve(info)
+        }, err => {
+          reject(new Error(`error in getLocalStream: ${err}`))
+        })
+      })
+    },
+
+    // 本地推流
+    startRTC(stream) {
+      return new Promise((resolve, reject) => {
+        this.RTC.startRTC({ stream, role: 'user' }, () => {
+          resolve()
+        }, err => {
+          reject(new Error(`error in startRTC: ${err}`))
+        })
+      })
+    },
+
+    // 停止推流
     stopRTC() {
       this.RTC.stopRTC({}, () => {
         console.debug('stop succ')
@@ -295,6 +332,8 @@ export const RTCRoomMixin = {
         console.debug('stop end')
       })
     },
+
+    // 退出RTC
     async quitRTC() {
       await this.getVideoScreenShot()
       this.RTC && this.RTC.quit(() => {
@@ -303,17 +342,19 @@ export const RTCRoomMixin = {
         console.error('退出音视频房间 失败 辣')
       })
     },
+
+    // 音视频流监控
     handleRTCQualityReport(data) {
       const daley = data.WebRTCQualityReq.uint32_delay
       const send_bps = data.WebRTCQualityReq.uint32_total_send_bps
       const recv_bps = data.WebRTCQualityReq.uint32_total_recv_bps
 
-      const daley_CB = (data) => {
+      const daley_CB = async(data) => {
         if (!this.qualityReqToast) {
           Tools.trace('延迟过高：')(data)
           this.showConnectStatus('当前网络状况不佳')
           this.qualityReqToast = true
-          Tools.AsyncTools.sleep(7000)
+          await Tools.AsyncTools.sleep(7000)
           this.qualityReqToast = false
         }
       }
@@ -323,15 +364,18 @@ export const RTCRoomMixin = {
         this.bpsOverCount += 1
         if (this.bpsOverCount === 10) {
           this.showConnectStatus('当前网络太差，无法建立视频通话')
+          this.$refs.videoFooter.minimizeBtnHighLight()
           // 直接挂断
-          this.$emit('videoFailed')
+          // this.$emit('videoFailed')
           // 停止推流
-          this.quitRTC()
+          // this.quitRTC()
         }
       }
       Tools.compose(Either(Tools.trace('发送数据：'), bps_CB), Tools.getState(Tools.equals(0)))(send_bps)
       Tools.compose(Either(Tools.trace('接收数据：'), bps_CB), Tools.getState(Tools.equals(0)))(recv_bps)
     },
+
+    // 提示插件
     showConnectStatus(text) {
       this.$vux.toast.show({
         type: 'text',
@@ -341,94 +385,6 @@ export const RTCRoomMixin = {
         time: 5000
       })
     }
-    // afterCreateRoom(courseInfo) {
-    //   // const self = this
-    //   this.setRoomId(courseInfo.roomId)
-    //   // 创建房间
-    //   this.RTC.createRoom({
-    //     // roomid: parseInt(self.courseId, 10),
-    //     roomid: courseInfo.roomId,
-    //     role: 'miniwhite'
-    //   }, () => {
-    //       console.info('ENTER RTC ROOM OK')
-    //   }, (result) => {
-    //     if (result) {
-    //       console.error('ENTER RTC ROOM failed')
-    //       // self.goHomeRouter()
-    //     }
-    //   })
-    // },
-    // actionCreateRoom() {
-    //   console.log('-> action create room')
-    //   const self = this
-    //   WebRTCRoom.createRoom(
-    //     self.userInfo.userId,
-    //     self.userInfo.selfName,
-    //     self.roomName,
-    //     (res) => {
-    //       // 发送心跳包
-    //       self.heartBeatTask = WebRTCRoom.startHeartBeat(
-    //         self.userInfo.userId,
-    //         res.data.roomID,
-    //         () => {},
-    //         () => {
-    //           // self.$toast.center('心跳包超时，请重试~')
-    //           console.log('心跳包超时，请重试~')
-    //           // self.goHomeRouter()
-    //         }
-    //       )
-    //       const info = {
-    //         roomId: self.roomId
-    //       }
-    //       self.afterCreateRoom(info)
-    //     },
-    //     () => {
-    //       // error, 返回
-    //     }
-    //   )
-    // },
-    // actionEnterRoom() {
-    //   const self = this
-    //   WebRTCRoom.enterRoom(
-    //     self.userInfo.userId,
-    //     self.userInfo.userName,
-    //     self.roomId,
-    //     (res) => {
-    //       // 发送心跳包
-    //       self.heartBeatTask = WebRTCRoom.startHeartBeat(
-    //         self.userInfo.userId,
-    //         self.roomId,
-    //         () => {},
-    //         () => {
-    //           // self.$toast.center('心跳包超时，请重试~')
-    //           console.log('心跳包超时，请重试~')
-    //           // self.goHomeRouter()
-    //         }
-    //       )
-    //       // 进房间
-    //       self.RTC.createRoom(
-    //         {
-    //           // roomid: parseInt(self.courseId, 10),
-    //           roomid: self.roomId,
-    //           role: 'miniwhite'
-    //         },
-    //         () => {},
-    //         (result) => {
-    //           if (result) {
-    //             console.error('webrtc建房失败')
-    //             // self.goHomeRouter()
-    //           }
-    //         }
-    //       )
-    //     },
-    //     () => {
-    //       // error, 返回
-    //     }
-    //   )
-    // },
-    // ...mapMutations({
-    //   setRoomId: 'SET_ROOM_ID'
-    // })
   }
 }
 
@@ -570,18 +526,18 @@ export const IMMixin = {
           this.setRoomId(csInfo_video.csCode)
           // 设置会话ID
           this.setSessionId(msgsObj.sessionId)
+
+          this.$router.replace({ path: `/room/chat?openId=${this.userInfo.openId}&origin=${this.userInfo.origin}` })
+
+          this.afterQueueSuccess({
+            mode: roomStatus.videoChat,
+            msgsObj
+          })
+
           // 设置排队状态，以便显示转接成功提示
           this.setQueueMode({
             mode: roomStatus.videoChat,
             status: queueStatus.queueSuccess
-          })
-          // 延迟三秒显示
-          await Tools.AsyncTools.sleep(4000)
-
-          this.$router.replace({path: `/room/chat?openId=${this.userInfo.openId}&origin=${this.userInfo.origin}`})
-          this.afterQueueSuccess({
-            mode: roomStatus.videoChat,
-            msgsObj
           })
           break
 

@@ -11,24 +11,22 @@
       <!-- <p class="confirm-tips" v-if="num">{{this.csInfo.csName}}已经为您服务过<label class="num">{{num}}</label>次</p>
       <p class="confirm-tips" v-else>{{this.csInfo.csName}}首次为您服务</p> -->
     </x-dialog>
-    <div class="countdown" v-show="queueSuccess">
+    <!-- <div class="countdown" v-show="queueSuccess">
       <countdown v-model="time" :start="queueSuccess"></countdown>
-       <!-- @on-finish="$emit('confirmToVideo')" -->
-    </div>
+    </div> -->
   </div>
 </template>
 
 <script type="text/ecmascript-6">
   import { mapGetters } from 'vuex'
-  import { XDialog, Icon, Countdown } from 'vux'
+  import { XDialog, Icon } from 'vux'
   import { queueStatus } from '@/common/js/status'
   import { getCsAvatar } from '@/server/index.js'
 
   export default {
     components: {
       XDialog,
-      Icon,
-      Countdown
+      Icon
     },
     computed: {
       ...mapGetters([

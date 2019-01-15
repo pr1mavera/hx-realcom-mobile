@@ -33,7 +33,7 @@
       <div class="flex-box" style="height: 5.4rem; margin-top: 2.5rem;">
         <div class="flex-box-item btn-container">
           <!--  @click.native="clickToLineUp" class="btn" :class="{'online': isCsOnline}" -->
-          <x-button mini @click.native="enterLinUp" v-if="onlineCs"
+          <x-button mini @click.native="enterLinUp" v-if="onlineCs" class="video-res-btn"
                     style="font-size: 1.2rem;color: #ffffff;background: #FF8D88;border: 1px solid #ffffff;">
             <svg class="icon extend-click" aria-hidden="true">
               <use xlink:href="#icon-zixun"></use>
@@ -176,6 +176,7 @@
   import { ERR_OK, getCsInfo, csPhoto, getTimesForMe, getCsAvatar, giftSend } from '@/server/index.js'
 
   export default {
+    name: 'server-detail',
     directives: {
       TransferDom
     },

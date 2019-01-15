@@ -12,14 +12,21 @@
       <!-- @showShare="toShare"
       @showIframe="showIframe" -->
     </keep-alive>
+
+    <!-- 主视频窗口 -->
     <videoBar class="video-bar"
       v-if="isVideoBarOpen"
       @showGiftAnime="showGiftAnime"
       @videoFailed="iOSVideoFailed"
     ></videoBar>
+
+    <!-- 视频初始化倒计时 -->
+    <connect-success ref="connectSuccess"></connect-success>
+
+    <!-- 视频服务结束统计报告 -->
     <div v-transfer-dom>
       <!-- <div class="dialog-mask-section"></div> -->
-      <x-dialog v-model="isVideoOverReportShow" :dialog-style="{'max-width': '100%', width: '100%', height: '100%', 'background-color': 'transparent'}">
+      <x-dialog v-model="isVideoOverReportShow" :dialog-style="{ 'max-width': '100%', width: '100%', height: '100%', 'background-color': 'transparent' }">
         <video-over-toast
           :csId="csInfo.csId"
           :csNick="csInfo.csNick"
@@ -39,6 +46,8 @@
     <ios-guide v-if="iosGuide" @click.native="iosGuide = false"></ios-guide>
     <low-version v-if="lowVersion" @click.native="lowVersion = false"></low-version>
     <!-- <share-guide v-if="shareGuide" @click.native="shareGuide = false"></share-guide> -->
+
+    <!-- 评价 -->
     <assess
       :showAssess="this.isAssessView"
       @handleToCancelAssess="handleToCancelAssess"
@@ -49,6 +58,8 @@
         <iframe-bar class="iframe-bar" :iframeSrc="iframeSrc" @closeIframe="iframeView = false"></iframe-bar>
       </section>
     </transition> -->
+
+    <!-- 礼物动画 -->
     <transition name="fade">
       <section class="gift-section" v-if="giftAnimeView">
         <img :src="giftSrc">
@@ -59,13 +70,13 @@
 
 <script type="text/ecmascript-6">
 // import wx from 'weixin-js-sdk'
+import { wxConfig, showSafariItem } from '@/common/js/share'
 import { mapGetters, mapMutations, mapActions } from 'vuex'
 import { XDialog, TransferDomDirective as TransferDom } from 'vux'
 import { loginMixin, IMMixin, getMsgsMixin } from '@/common/js/mixin'
 import { roomStatus, sessionStatus } from '@/common/js/status'
 import Tools from '@/common/js/tools'
 import { ERR_OK, saveQueueTicket, getQueueTicket } from '@/server/index.js'
-// import GoShare from '@/common/js/share'
 // import anime from 'animejs'
 
 export default {
@@ -74,6 +85,7 @@ export default {
   },
   components: {
     'videoBar': () => import('@/views/mainRoom/videoBar'),
+    'ConnectSuccess': () => import('@/views/mainRoom/components/video/connect-success'),
     'videoOverToast': () => import('@/views/mainRoom/components/video/video-over-toast'),
     // 'ShareDialog': () => import('@/views/mainRoom/components/share-dialog'),
     'IosGuide': () => import('@/views/mainRoom/components/video/ios-guide'),
@@ -92,7 +104,6 @@ export default {
     return {
       sessionStatus: sessionStatus,
       // share
-      // shareUrl: '',
       // isShareView: false,
       // shareGuide: false,
       // 异常
@@ -113,7 +124,6 @@ export default {
   },
   computed: {
     isVideoBarOpen() {
-      // return this.queueMode === queueStatus.queuing || this.queueMode === queueStatus.queueSuccess || this.queueMode === queueStatus.queueOver
       return this.roomMode === roomStatus.videoChat
     },
     isVideoOverReportShow() {
@@ -121,6 +131,7 @@ export default {
       // return true
     },
     ...mapGetters([
+      'sourceUrl',
       'roomMode',
       'isAssessView',
       'serverTime',
@@ -142,12 +153,18 @@ export default {
   methods: {
     // 初始化房间
     async initRoom() {
-      let query = this.$route.query
+      const url = window.location.href
+
+      // 配置微信
+      console.log(`配置微信接口传递的链接：url: ${url}`)
+      await wxConfig(url)
+
+      const query = this.$route.query
       // 处理官网路由的query
-      if (query.hasOwnProperty('openid') && query.hasOwnProperty('attach')) {
-        this.$router.replace({path: `/room?openId=${query.openid}&origin=${query.attach}`})
-        query = this.$route.query
-      }
+      // if (query.hasOwnProperty('openid') && query.hasOwnProperty('attach')) {
+      //   this.$router.replace({path: `/room?openId=${this.getQueryString('openid')}&origin=${this.getQueryString('attach')}`})
+      //   query = this.$route.query
+      // }
       // 初始化
       this.setAssessStatus(false)
       this.setServerTime(null)
@@ -155,10 +172,11 @@ export default {
       const enterVideoStatus = window.sessionStorage.getItem('enterVideoStatus')
 
       if (enterVideoStatus === 'iOS-wx' || enterVideoStatus === 'Android') { // 微信环境
-        this.$router.replace({path: `/room/chat?openId=${query.openId}&origin=${query.origin || 'WE'}`})
+        const self = this
+        this.$router.replace({path: `/room/chat?openId=${query.openId || self.getQueryString('openid')}&origin=${query.origin || self.getQueryString('attach') || 'WE'}`})
       }
       else if (enterVideoStatus === 'iOS-Safari') { // Safari环境
-        const res = await getQueueTicket(query.openId)
+        const res = await getQueueTicket(query.openId || this.getQueryString('openid'))
         if (res.result.code === ERR_OK && res.data.queueticket) {
           this.afterEnterSafariQueue(res.data.queueticket)
           return
@@ -169,6 +187,12 @@ export default {
       }
 
       // this.$router.replace({path: `/room/chat?openId=${query.openId}&origin=${query.origin}`})
+    },
+    getQueryString(name) {
+      let reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)')
+      let r = window.location.search.substr(1).match(reg)
+      if (r !== null) return unescape(r[2]).replace(/\//, '')
+      return null
     },
     // Safari进入排队前
     async afterEnterSafariQueue(data) {
@@ -188,7 +212,7 @@ export default {
     iOSVideoFailed() {
       // this.setRoomMode(roomStatus.videoChat)
       const query = this.$route.query
-      this.$router.replace({path: `/room?openId=${query.openId}&origin=${query.origin || 'WE'}`})
+      this.$router.replace({path: `/room?openId=${query.openId || this.getQueryString('openid')}&origin=${query.origin || this.getQueryString('attach') || 'WE'}`})
       this.setAssessStatus(true)
       this.setServerTime('00:00')
       this.servStatus = false
@@ -202,6 +226,7 @@ export default {
           this.lowVersion = true
           break
         case 'iOS-wx': // 当前为iOS的微信环境，需跳转至Safari，并保持当次机器人会话信息
+          showSafariItem()
           this.setSessionTicket({ csId, csName, csNick })
           // this.iosGuide = true
           break
@@ -288,7 +313,7 @@ export default {
     // async toShare(csId, csName) {
     //   this.isShareView = false
     //   this.shareGuide = true
-    //   this.shareUrl = `https://${window.location.host}/video/share?csId=${csId}&csName=${csName}`
+    //   this.shareUrl = `https://${window.location.host}/video/index.html`
     //   GoShare(this.shareUrl)
     //   await this.initShare()
     //   this.clickShare()
@@ -403,7 +428,7 @@ export default {
   .video-bar {
     position: absolute;
     top: 0;
-    left: 0;
+    right: 0;
     z-index: 101;
   }
   .iframe-section {

@@ -51,12 +51,7 @@ export const beforeQueue = function({ commit, state }, { mode, content }) {
 }
 
 // 人工（视频）排队完成，接通客服后，修改对应的房间模式
-export const afterQueueSuccess = function({ commit, state }, { mode, msgsObj }) {
-  // 排队状态
-  commit(types.SET_QUEUE_MODE, {
-    mode,
-    status: queueStatus.queueOver
-  })
+export const afterQueueSuccess = async function({ commit, state }, { mode, msgsObj }) {
   if (mode === roomStatus.videoChat) {
     // 房间状态
     commit(types.SET_ROOM_MODE, roomStatus.videoChat)
@@ -67,7 +62,21 @@ export const afterQueueSuccess = function({ commit, state }, { mode, msgsObj }) 
       msgType: tipTypes.tip_success
     }
     sendMsgs({ commit, state }, [tip])
+    // 排队状态
+    commit(types.SET_QUEUE_MODE, {
+      mode,
+      status: queueStatus.queueSuccess
+    })
+    await Tools.AsyncTools.sleep(3500)
+    commit(types.SET_QUEUE_MODE, {
+      mode,
+      status: queueStatus.queueOver
+    })
   } else if (mode === roomStatus.menChat) {
+    commit(types.SET_QUEUE_MODE, {
+      mode,
+      status: queueStatus.queueOver
+    })
     // 清空转接定时器
     state.userInfo.transTimeout && clearTimeout(state.userInfo.transTimeout)
     // 设置坐席信息

@@ -1,13 +1,12 @@
 import wx from 'weixin-jsapi'
 import { getShareTicket } from '@/server/index.js'
 
-const shareJs = async function(shareUrl) {
-  // const res = await getShareTicket(shareUrl)
-  getShareTicket(shareUrl).then((res) => {
+export const wxConfig = function(url) {
+  return getShareTicket(url).then((res) => {
     const jssdk = res.data
     console.log(res.data)
     wx.config({
-      debug: true, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印
+      debug: false, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印
       appId: jssdk.appId, // 必填，公众号的唯一标识
       timestamp: parseInt(jssdk.timestamp),
       nonceStr: jssdk.nonceStr, // 必填，生成签名的时间戳
@@ -23,28 +22,25 @@ const shareJs = async function(shareUrl) {
         'showOptionMenu' // 显示右上角的菜单
       ]
     })
-
-    // 调用微信API
+    wx.ready(function() {
+      wx.hideAllNonBaseMenuItem()
+      console.log('wx config success')
+      return Promise.resolve()
+    })
+    wx.error(function(err) {
+      return Promise.reject(new Error(`wx config error: ${err}`))
+    })
   })
-  // if (res.result.code === ERR_OK) {
-  //   const jssdk = res.data
-  //   wx.config({
-  //     debug: false,
-  //     appId: jssdk.appId,
-  //     timestamp: parseInt(jssdk.timestamp),
-  //     nonceStr: jssdk.nonceStr,
-  //     signature: jssdk.signature,
-  //     jsApiList: [
-  //       'hideAllNonBaseMenuItem',
-  //       'showMenuItems',
-  //       'onMenuShareTimeline',
-  //       'onMenuShareAppMessage'
-  //     ]
-  //   })
-  //   console.log('我特娘的配置完微信数据啦！！')
-  // } else {
-  //   console.log('getShareTicket error')
-  // }
+}
+
+export const showSafariItem = function() {
+  console.log('====> 显示Safari按钮辣 <====')
+  wx.showMenuItems({
+    menuList: ['menuItem:openWithSafari'] // 要显示的菜单项，所有menu项见附录3
+  })
+}
+
+export const shareJs = function(shareUrl) {
   const options = {
     title: '田老师红烧肉盖饭',
     desc: '田老师红烧肉盖饭',
@@ -111,5 +107,3 @@ const shareJs = async function(shareUrl) {
     console.log('there are some error about share js' + res + '======')
   })
 }
-
-export default shareJs

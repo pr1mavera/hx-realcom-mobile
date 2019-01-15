@@ -10,7 +10,8 @@
     "start": "npm run dev",
     "lint": "eslint --ext .js,.vue src",
     "build": "node build/build.js",
-    "buildRD": "node build/buildRedirect.js"
+    "buildRD": "node build/buildRedirect.js",
+    "buildAll": "node build/build.js & node build/buildRedirect.js"
   },
   "dependencies": {
     "animejs": "^2.2.0",

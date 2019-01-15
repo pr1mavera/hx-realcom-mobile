@@ -20,7 +20,7 @@
       </div>
     </div>
     <div class="btn-box" style="text-align: center">
-      <x-button mini @click.native="clickToLineUp" class="btn" :class="{'online': isCsOnline}">
+      <x-button mini @click.native="clickToLineUp" class="btn video-res-btn" :class="{'online': isCsOnline}">
         <svg class="icon extend-click" aria-hidden="true">
           <use xlink:href="#icon-zixun"></use>
         </svg>
