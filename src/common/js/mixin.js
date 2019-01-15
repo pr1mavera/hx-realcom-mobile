@@ -240,12 +240,14 @@ export const RTCRoomMixin = {
         })
         this.RTC.on('onRemoteStreamUpdate', (info) => {
           const videoElement = document.getElementById('remoteVideo')
-          document.getElementById('videoRing').pause()
           if (info && info.stream) {
-            this.isVideoConnectSuccess = true
             videoElement.srcObject = info.stream
             videoElement.play()
-            this.isChangeCamera = false
+            videoElement.addEventListener('playing', () => {
+              document.getElementById('videoRing').pause()
+              this.isVideoConnectSuccess = true
+              this.isChangeCamera = false
+            }, false)
           }
         })
 
