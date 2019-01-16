@@ -1173,29 +1173,56 @@ export const getMsgsMixin = {
     /* 消息加时间装饰 */
     timeTipsFormat(list) {
       let timeCache = list[0].time
-      let map = []
-      list.length && list.forEach((item, i) => {
-        // item.timestamp = new Date(item.time.replace(/-/g, '/')).getTime()
-        if (Tools.DateTools.isTimeDiffLongEnough(timeCache, item.timestamp) || i === 0) {
-          map.push({
-            content: item.time,
-            time: item.time,
-            msgStatus: msgStatus.tip,
-            msgType: tipTypes.tip_time
-          })
-          timeCache = item.time
-        }
-        map.push(item)
-      })
-      return map
+      return list.length
+        ? list.reduce((val, item) => {
+          // 格式化timestamp
+          const temp = `history_${Tools.randomMin2Max(1000)(9999)}`
+          if (item.timestamp) {
+            item.timestamp += `_${temp}`
+          } else {
+            item.timestamp = temp
+          }
+          // 加入时间tip
+          if (Tools.DateTools.isTimeDiffLongEnough(timeCache, item.time)) {
+            val.push({
+              content: item.time,
+              time: item.time,
+              msgStatus: msgStatus.tip,
+              msgType: tipTypes.tip_time
+            })
+            timeCache = item.time
+          }
+          return val.concat(item)
+        }, [])
+        : []
+      // list.length && list.forEach((item, i) => {
+      //   if (item.timestamp) {
+      //     item.timestamp += `_history_${Tools.randomMin2Max(1000)(9999)}`
+      //   } else {
+      //     item.timestamp = `history_${Tools.randomMin2Max(1000)(9999)}`
+      //   }
+      //   if (Tools.DateTools.isTimeDiffLongEnough(timeCache, item.time) || i === 0) {
+      //     map.push({
+      //       content: item.time,
+      //       time: item.time,
+      //       msgStatus: msgStatus.tip,
+      //       msgType: tipTypes.tip_time
+      //     })
+      //     timeCache = item.time
+      //   }
+      //   map.push(item)
+      // })
+      // return map
     },
     /* 拉取消息（漫游消息，历史消息） */
     async requestMsgsMixin() {
       let newMsgs = []
       if (this.sessionList === null) {
+        // 从缓存中拉取消息
         if (this.cacheMsgsOver) return
         newMsgs = await this.getRoamMsgs({ origin: this.$route.query.origin || 'WE', page: this.cacheMsgsPage++ })
       } else {
+        // 根据sessionList拉取消息
         // 初始化
         !this.MsgsLoader && this.initMsgLoader()
         // 拉取消息

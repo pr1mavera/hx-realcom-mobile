@@ -11,27 +11,20 @@ export const closeBarBuffer = async function({ commit }, { mutationType, delay }
 }
 
 // 修改键盘和拓展层的弹出状态，统一接口
-export const toggleBar = async function({ commit, state }, type) {
+export const toggleBar = function({ commit, state }, type) {
   switch (type) {
     case toggleBarStatus.allFold:
       commit(types.SET_EXTEND_BAR, false)
       commit(types.SET_INPUT_BAR, false)
-      return 0
+      break
     case toggleBarStatus.inputBar:
-      if (state.extendBarOpen) {
-        // await dispatch('closeBarBuffer', {
-        //   mutationType: types.SET_EXTEND_BAR,
-        //   delay: 1000
-        // })
-        commit(types.SET_EXTEND_BAR, false)
-      }
+      state.extendBarOpen && commit(types.SET_EXTEND_BAR, false)
       commit(types.SET_INPUT_BAR, true)
-      return 0
+      break
     case toggleBarStatus.extendBar:
-      // 如果当前键盘状态为弹出，则关闭键盘除了修改状态外还需要其他操作，所以判断单独在外面做
-      // 这里只修改extendBar的打开状态
+      state.inputBarOpen && commit(types.SET_INPUT_BAR, false)
       commit(types.SET_EXTEND_BAR, true)
-      return 0
+      break
   }
 }
 

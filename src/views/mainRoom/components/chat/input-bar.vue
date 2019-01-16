@@ -135,6 +135,12 @@ export default {
         localStorage.setItem('emoji_cache', JSON.stringify(emojiArr))
       }
     },
+    getInputText() {
+      return this.$refs.inputContent.innerText
+    },
+    setInputText(text) {
+      this.$refs.inputContent.innerHTML = text
+    },
     getInputEditState() {
       return this.$refs.inputContent.getAttribute('contentEditable')
     },

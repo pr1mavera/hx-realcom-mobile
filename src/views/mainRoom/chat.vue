@@ -110,6 +110,7 @@ export default {
     /**
      * 注册组件
      */
+    // HeaderBar,
     InputBar,
     Previewer,
     'msgsQueue': () => import('@/views/mainRoom/components/chat/msgs-queue'),
@@ -158,7 +159,6 @@ export default {
     return {
       clipboard: null,
       scrollY: 0,
-      inputEle: null,
       inputFocPos: 0,
       inputBarTimer: null,
       // inputObserver: null,
@@ -196,7 +196,6 @@ export default {
     }
 
     this.$nextTick(() => {
-      this.inputEle = this.$refs.inputBar.$refs.inputContent
       // 初始化滚动
       this._initScroll()
       this._initPullDownRefresh()
@@ -287,6 +286,25 @@ export default {
       // this.updateLastAction()
       return 0
     },
+    _showItemByType(type) {
+      let component = ''
+      switch (type) {
+        case msgStatus.tip:
+          component = 'TipsItem'
+          break
+        case msgStatus.msg:
+          component = 'MsgsItem'
+          break
+        case msgStatus.dialog:
+          component = 'DialogItem'
+          break
+        case msgStatus.card:
+          component = 'CardItem'
+          break
+      }
+      return component
+      // return type === 'text_msg' ? 'ContentItem' : type === 'time_msg' ? 'TimeItem' : ''
+    },
     onClickImgMsg(id) {
       if (!this.previewImgList.length) {
         return
@@ -354,14 +372,19 @@ export default {
         // }
       })
       this.chatScroll.on('touchEnd', () => {
-        if (this.inputBarOpen) {
-          this.setInputBar(false)
+        if (this.inputBarOpen || this.extendBarOpen) {
+          this.toggleBar(toggleBarStatus.allFold)
           this._inputBlur()
-        } else if (this.extendBarOpen) {
-          this.setExtendBar(false)
           this.resetExtendBar()
-          // this.toggleExtendBar()
         }
+        // if (this.inputBarOpen) {
+        //   this.setInputBar(false)
+        //   this._inputBlur()
+        // } else if (this.extendBarOpen) {
+        //   this.setExtendBar(false)
+        //   this.resetExtendBar()
+        //   // this.toggleExtendBar()
+        // }
       }, this)
     },
     forceUpdate() {
@@ -424,45 +447,33 @@ export default {
     },
     /* *********************************** inputBar *********************************** */
     async targetInputBuffer() {
-
       if (!this.inputBarOpen || this.extendBarOpen) {
-        // 软键盘弹出
-        this._inputFocus()
-        this.setExtendBar(false)
+        this.toggleBar(toggleBarStatus.inputBar)
         this.resetExtendBar()
+        this._inputFocus()
       }
     },
     _inputFocus() {
       console.log('键盘弹出辣=========================')
-      // this.$refs.inputBar.setInputEditState('true')
-      // document.getElementById('input-content-hook').focus()
-      // this.$refs.inputBar.setInputEditState('true')
-      this.setInputBar(true)
       this.$nextTick(() => {
         document.getElementById('input-content-hook').focus()
         this.inputBarTimer && clearTimeout(this.inputBarTimer)
         this.inputBarTimer = setTimeout(function() {
           document.body.scrollTop = document.body.scrollHeight
-        }, 100)
+        }, 10)
       })
-      // this.inputEle.focus()
       // 聊天内容滚动到最底部
       this._resolveKeyboard()
     },
     _inputBlur() {
       console.log('键盘收起辣=========================')
-      // this.inputFocPos = this.$refs.inputBar.getCursortPosition(this.inputEle)
-      // console.log(this.inputFocPos)
-      // this.inputEle.blur()
-      this.setInputBar(false)
       this.$nextTick(() => {
         document.getElementById('input-content-hook').blur()
         this.inputBarTimer && clearTimeout(this.inputBarTimer)
-        document.body.scrollTop = 0
+        this.inputBarTimer = setTimeout(function() {
+          document.body.scrollTop = 0
+        }, 10)
       })
-      // this.$refs.inputBar.setInputEditState('false')
-      this.chatScroll.refresh()
-      this.chatScroll.scrollToElement(this.$refs.chatContentEnd, 400)
     },
     chatInputChange(text) {
       console.log(text)
@@ -471,7 +482,7 @@ export default {
       this.toggleBar(toggleBarStatus.allFold)
       this.resetExtendBar()
       this._inputBlur()
-      this.inputEle.innerText = ''
+      this.$refs.inputBar.setInputText('')
       text = text.replace(/&nbsp;/g, '')
       text = Tools.strWithLink(text)
 
@@ -554,7 +565,6 @@ export default {
         const self = this
         return new Promise((resolve) => {
           self.setInputBar(false)
-          // self.$refs.inputBar.setInputEditState('false')
           Tools.AsyncTools.debounce(() => {
             resolve()
           }, 300)()
@@ -568,14 +578,15 @@ export default {
     },
     onDeleteBtnClick() {
       // 字符串删除
-      let str = this.inputEle.innerText
+      let str = this.$refs.inputBar.getInputText()
       // 当前应该删除的字符所占的位数（因为含有emoji）
       const len = Tools.CharTools.isLastStrEmoji(str) ? 2 : 1
       // 返回删除后的字符
-      this.inputEle.innerText = str.substring(0, str.length - len)
+      this.$refs.inputBar.setInputText(str.substring(0, str.length - len))
     },
     selectEmojiWithCode(code) {
-      this.inputEle.innerHTML += code
+      const t = this.$refs.inputBar.getInputText()
+      this.$refs.inputBar.setInputText(`${t}${code}`)
       this.$refs.inputBar.inputText += code
     },
     _resolveKeyboard() {
