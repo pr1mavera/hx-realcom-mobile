@@ -30,6 +30,7 @@
             @targetLink="targetLink"
           ></msgs-queue>
         </div>
+        <div class="chat-content-end" ref="chatContentEnd" ></div>
         <fload-button
           ref="floadButton"
           :barStatus="inputBarOpen || extendBarOpen"
@@ -49,6 +50,8 @@
         :isFocus="inputBarOpen"
         :expressBarShow="$refs.extendBar && $refs.extendBar.expressSectionShow"
         :class="{'inputFocus': inputBarOpen}"
+        @requestGiftSectionOpen="requestGiftSectionOpen"
+        @requestExpressSectionOpen="requestExpressSectionOpen"
         @targetInputBuffer="targetInputBuffer"
         @chatInputChange="chatInputChange"
         @chatInputCommit="chatInputCommit"
@@ -107,14 +110,8 @@ export default {
     /**
      * 注册组件
      */
-    // HeaderBar,
     InputBar,
     Previewer,
-    // Confirm,
-    // 'MsgsItem': () => import('@/views/mainRoom/components/chat/msgs-item'),
-    // 'TipsItem': () => import('@/views/mainRoom/components/chat/tips-item'),
-    // 'DialogItem': () => import('@/views/mainRoom/components/chat/dialog-item'),
-    // 'CardItem': () => import('@/views/mainRoom/components/chat/card-item'),
     'msgsQueue': () => import('@/views/mainRoom/components/chat/msgs-queue'),
     'FloadButton': () => import('@/views/mainRoom/components/chat/fload-button'),
     'FloatBotAssess': () => import('@/views/mainRoom/components/chat/float-bot-assess'),
@@ -142,8 +139,8 @@ export default {
       const self = this
       const rect = this.targetEleRect
       const pos = {
-        top: rect.top - 70,
-        left: rect.left
+        top: rect.top - 60,
+        left: rect.left - 30
       }
       return `transform: translate(${pos.left}px, ${pos.top}px); opacity: ${self.isCopyButtonShow ? 1 : 0};`
     },
@@ -195,7 +192,7 @@ export default {
 
     if (enterVideoStatus === 'iOS-Safari' && this.roomMode !== roomStatus.videoChat) { // Safari 环境，只允许进入视频
       this.$emit('iOSVideoFailed')
-      return
+      return undefined
     }
 
     this.$nextTick(() => {
@@ -210,7 +207,7 @@ export default {
     this.$nextTick(async() => {
       await Tools.AsyncTools.sleep(10)
       this.chatScroll.refresh()
-      // this.chatScroll.scrollToElement(this.$refs.chatContentEnd, 400)
+      this.chatScroll.scrollToElement(this.$refs.chatContentEnd, 0)
     })
   },
   methods: {
@@ -289,25 +286,6 @@ export default {
       // 手动更新用户最后活动时间（更新定时器）
       // this.updateLastAction()
       return 0
-    },
-    _showItemByType(type) {
-      let component = ''
-      switch (type) {
-        case msgStatus.tip:
-          component = 'TipsItem'
-          break
-        case msgStatus.msg:
-          component = 'MsgsItem'
-          break
-        case msgStatus.dialog:
-          component = 'DialogItem'
-          break
-        case msgStatus.card:
-          component = 'CardItem'
-          break
-      }
-      return component
-      // return type === 'text_msg' ? 'ContentItem' : type === 'time_msg' ? 'TimeItem' : ''
     },
     onClickImgMsg(id) {
       if (!this.previewImgList.length) {
@@ -446,18 +424,12 @@ export default {
     },
     /* *********************************** inputBar *********************************** */
     async targetInputBuffer() {
-      if (this.inputBarOpen || this.extendBarOpen) {
+
+      if (!this.inputBarOpen || this.extendBarOpen) {
         // 软键盘弹出
-        this.resetExtendBar()
-        // 软键盘收起
-        this.toggleBar(toggleBarStatus.allFold)
-        this._inputBlur()
-      } else {
-        // this.toggleBar(toggleBarStatus.inputBar)
-        // self._inputFocus()
-        // this.toggleBar(toggleBarStatus.inputBar)
-        this.setInputBar(true)
         this._inputFocus()
+        this.setExtendBar(false)
+        this.resetExtendBar()
       }
     },
     _inputFocus() {
@@ -465,8 +437,10 @@ export default {
       // this.$refs.inputBar.setInputEditState('true')
       // document.getElementById('input-content-hook').focus()
       // this.$refs.inputBar.setInputEditState('true')
+      this.setInputBar(true)
       this.$nextTick(() => {
         document.getElementById('input-content-hook').focus()
+        this.inputBarTimer && clearTimeout(this.inputBarTimer)
         this.inputBarTimer = setTimeout(function() {
           document.body.scrollTop = document.body.scrollHeight
         }, 100)
@@ -480,10 +454,11 @@ export default {
       // this.inputFocPos = this.$refs.inputBar.getCursortPosition(this.inputEle)
       // console.log(this.inputFocPos)
       // this.inputEle.blur()
+      this.setInputBar(false)
       this.$nextTick(() => {
         document.getElementById('input-content-hook').blur()
+        this.inputBarTimer && clearTimeout(this.inputBarTimer)
         document.body.scrollTop = 0
-        clearTimeout(this.inputBarTimer)
       })
       // this.$refs.inputBar.setInputEditState('false')
       this.chatScroll.refresh()
@@ -550,6 +525,16 @@ export default {
       this.extendBarLaunchOpen = false
       this.$refs.extendBar.giftSectionShow = false
       this.$refs.extendBar.expressSectionShow = false
+    },
+    requestGiftSectionOpen() {
+      this._inputBlur()
+      this.toggleBar(toggleBarStatus.extendBar)
+      this.$refs.extendBar.onSendGiftClick()
+    },
+    requestExpressSectionOpen() {
+      this._inputBlur()
+      this.toggleBar(toggleBarStatus.extendBar)
+      this.$refs.extendBar.onSendExpressClick()
     },
     /* *********************************** entend bar *********************************** */
     async sendImgMsgClick(file) {
@@ -703,7 +688,7 @@ export default {
       this.$nextTick(async() => {
         await Tools.AsyncTools.sleep(10)
         this.chatScroll.refresh()
-        this.chatScroll.scrollToElement(this.$refs.msgsQueue.$refs.chatContentEnd, 400)
+        this.chatScroll.scrollToElement(this.$refs.chatContentEnd, 400)
       })
     }
   }
@@ -796,6 +781,10 @@ export default {
             }
           }
         }
+      }
+      .chat-content-end {
+        width: 100%;
+        height: 0;
       }
       .fload-button {
         position: absolute;

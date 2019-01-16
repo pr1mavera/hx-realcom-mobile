@@ -160,11 +160,7 @@ export default {
       await wxConfig(url)
 
       const query = this.$route.query
-      // 处理官网路由的query
-      // if (query.hasOwnProperty('openid') && query.hasOwnProperty('attach')) {
-      //   this.$router.replace({path: `/room?openId=${this.getQueryString('openid')}&origin=${this.getQueryString('attach')}`})
-      //   query = this.$route.query
-      // }
+
       // 初始化
       this.setAssessStatus(false)
       this.setServerTime(null)

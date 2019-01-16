@@ -6,20 +6,8 @@
       </svg>
     </div> -->
     <div class="input-bar-item input-box">
-      <!-- <div class="input-content"
-        id="input-content-hook"
-        ref="inputContent"
-        contenteditable="true"
-        type="text"
-        @click="chatFocus"
-        @focus.prevent="chatFocus(true)"
-        @blur.prevent="chatFocus(false)"
-        @keyup="chatInput($event, false)"
-        @keyup.enter="chatInput($event, true)">
-        </br>
-      </div> -->
       <section class="input-wrapper">
-        <div class="input-content needsclick"
+        <div class="input-wrapper-item input-content needsclick"
           autofocus
           contenteditable="true"
           placeholder="有问题，找小华"
@@ -29,11 +17,17 @@
           @click="chatFocus($event)"
           @keyup="chatInput($event)"
         ></div>
-        <!-- <button class="input-inline-btn" @click="chatCommit">
-          <svg class="icon extend-click" aria-hidden="true" :class="{'extend-Bar-Open': this.extendBarOpen}">
-            <use xlink:href="#icon-xiaolian1"></use>
+        <button class="input-wrapper-item input-inline-btn" @click="$emit('requestGiftSectionOpen')" :disabled="isRobotChat">
+          <svg class="icon extend-click" aria-hidden="true">
+            <use :xlink:href="isRobotChat ? '#icon-liwuzhihui' : '#icon-liwu'"></use>
+            <!-- <use xlink:href="#icon-liwu"></use> -->
           </svg>
-        </button> -->
+        </button>
+        <button class="input-wrapper-item input-inline-btn" @click="$emit('requestExpressSectionOpen')">
+          <svg class="icon extend-click" aria-hidden="true">
+            <use xlink:href="#icon-xiaolian"></use>
+          </svg>
+        </button>
       </section>
       <!-- <input v-model="inputText" type="text" ref="invisibleInput" v-show="false"> -->
     </div>
@@ -63,6 +57,7 @@
 
 <script type="text/ecmascript-6">
 import { mapGetters, mapMutations } from 'vuex'
+import { roomStatus } from '@/common/js/status'
 // import anime from 'animejs'
 import Tools from '@/common/js/tools'
 // import { XTextarea, Group } from 'vux'
@@ -81,10 +76,14 @@ export default {
     }
   },
   computed: {
+    isRobotChat() {
+      return this.roomMode === roomStatus.AIChat
+    },
     isSendBtnShow() {
       return this.inputBarOpen || this.expressBarShow
     },
     ...mapGetters([
+      'roomMode',
       'extendBarOpen',
       'inputBarOpen'
     ])
@@ -242,6 +241,9 @@ export default {
         background-color: rgba(250, 248, 249, 1);
         padding: 0.5rem 0 0.5rem 1.2rem;
         box-sizing: border-box;
+        .input-wrapper-item {
+          margin-right: 0.6rem;
+        }
         .input-content {
           width: calc(~'100% - 3.4rem');
           line-height: 2.8rem;
@@ -274,17 +276,20 @@ export default {
           width: 2.4rem;
           height: 2.4rem;
           // flex-basis: 4.6rem;
-          margin: 0.2rem;
+          margin-top: 0.2rem;
+          margin-bottom: 0.2rem;
           border: 0;
           padding: 0;
-          // background-color: @text-special;
-          border-radius: 50%;
+          background-color: unset;
+          // border-radius: 50%;
           .icon {
             margin: 0 auto;
             width: 100%;
             height: 100%;
             transition: all 0.4s ease-in-out;
-            fill: @text-normal;
+            background-color: unset;
+            border-radius: 0;
+            fill: unset;
             // transition-delay: 0.65s;
           }
         }

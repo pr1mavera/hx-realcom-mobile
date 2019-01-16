@@ -81,6 +81,7 @@ export const msgTypes = {
   msg_timeout: '13', // 超时结束会话
   msg_video_blur: '14', // 坐席暂离，设置模糊及静音
   msg_video_muted: '15', // 坐席静音
+  msg_hang_up_before_video_connect_succ: '16', // 视频接通前用户提前挂断
   msg_hand_up: '24' // 结束会话（在线）
 }
 

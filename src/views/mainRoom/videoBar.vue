@@ -8,7 +8,7 @@
     ></line-up> -->
     <!-- 最大化 -->
     <audio id="videoRing" loop v-show="false" src="/video/static/audio/ring.mp3" type="audio/mpeg"></audio>
-    <div class="video-window" :class="remoteVideo">
+    <div class="video-window" :class="remoteVideo" >
       <video height=100%
         id="remoteVideo"
         :class="{'video-blur': videoFilter.blur}"
@@ -25,7 +25,7 @@
       </div>
       <img width=100% height=100% v-if="videoScreenShotShow" :src="videoScreenShotSrc" class="video-screen-shot">
     </div>
-    <div class="video-window" :class="localVideo" v-show="fullScreen && !videoScreenShotShow">
+    <div class="video-window bgc" :class="localVideo" v-show="fullScreen && !videoScreenShotShow">
       <video height=100%
         id="localVideo"
         v-if="!videoScreenShotShow"
@@ -83,6 +83,7 @@ import { Toast } from 'vux'
 import { mapGetters, mapMutations } from 'vuex'
 import { ERR_OK, enterVideoRTCRoom } from '@/server/index.js'
 import { RTCRoomMixin, sendMsgsMixin } from '@/common/js/mixin'
+// import { msgStatus, msgTypes } from '@/common/js/status'
 // import IM from '@/server/im.js'
 
 export default {
@@ -118,7 +119,9 @@ export default {
       if (!this.fullScreen) {
         return 'small'
       }
-      return this.isChangeCamera ? 'small' : 'big'
+      const chunk = this.isChangeCamera ? 'small' : 'big'
+      const bgc = this.isVideoConnectSuccess ? 'bgc' : ''
+      return `${chunk} ${bgc}`
     },
     ...mapGetters([
       'fullScreen',
@@ -151,7 +154,6 @@ export default {
   mounted() {
     document.getElementById('videoRing').play()
     this.readyToVideo()
-    this.startTimeStamp = new Date()
     this.$nextTick(() => {
       this.likesCount = +this.csInfo.likesCount
     })
@@ -221,10 +223,21 @@ export default {
       }
     },
     handleHangUpVideo() {
+      if (!this.isVideoConnectSuccess) {
+        // 视频成功接通之前客户点击挂断
+        // 关闭铃声
+        document.getElementById('videoRing').pause()
+        // 发送自定义指令
+        // this.sendCustomDirective({
+        //   msg: '视频成功接通之前客户点击挂断',
+        //   msgStatus: msgStatus.msg,
+        //   msgType: msgTypes.msg_hang_up_before_video_connect_succ
+        // })
+        this.$emit('videoFailed')
+        // return undefined
+      }
       // 停止推流
       this.quitRTC()
-      // 挂断
-      // this.hangUpVideo()
     },
     async hangUpVideo() {
       // 恢复全屏
@@ -302,7 +315,9 @@ export default {
       width: 100%;
       height: 100%;
       z-index: 0;
-      background-color: #666;
+      &.bgc {
+        background-color: #666;
+      }
     }
     &.small {
       margin: .5rem .5rem 0 0;
@@ -312,6 +327,9 @@ export default {
       // z-index: 200;
       overflow: hidden;
       z-index: 1;
+      &.bgc {
+        background-color: #222;
+      }
     }
     &.invisible {
       visibility: hidden;

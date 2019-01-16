@@ -6,24 +6,6 @@ import { sessionStatus } from '@/common/js/status'
 import { InlineLoading } from 'vux'
 
 export default {
-  components: {
-    InlineLoading
-  },
-  directives: {
-    demo: {
-      // 指令的定义
-      // bind: function(el, binding, vnode) {
-      //   const msg = binding.value
-      //   debugger
-      //   if (msg) {
-      //     const template = msgDictionary.getTemplate({ msg, emit: _vm.$emit })
-      //     el.innerHTML = template
-      //   }
-      // }
-    }
-
-    // document.addEventListener('click',
-  },
   render() {
     return (
       <ul class="msgs-queue"
@@ -33,8 +15,7 @@ export default {
         {
           this.historyMsgs.map((msg, index) => (<li class={{ chat_content_li: true, text_center: msg.msgStatus === msgDictionary.getStatusCode('tip') }} key={ msg.timestamp }>
             { msgDictionary.getTemplate.call(this, msg) }
-          </li>)
-          )
+          </li>))
         }
         {
           this.historyMsgs.length !== 0 &&
@@ -47,12 +28,14 @@ export default {
         {
           this.msgs.map((msg, index) => (<li class={{chat_content_li: true, text_center: msg.msgStatus === msgDictionary.getStatusCode('tip')}} key={ msg.timestamp }>
             { msgDictionary.getTemplate.call(this, msg) }
-          </li>)
-          )
+          </li>))
         }
-        <li class={{chat_content_block: true, chat_content_end: true, bot_assess: this.isBotAssessShow}} ref="chatContentEnd" ></li>
+        { /* <li class={{chat_content_block: true, chat_content_end: true, bot_assess: this.isBotAssessShow}} ref="chatContentEnd" ></li> */ }
       </ul>
     )
+  },
+  components: {
+    InlineLoading
   },
   props: {
     historyMsgs: {
@@ -148,12 +131,6 @@ export default {
       return Tools.DateTools.formatDate(temp, 'MM-dd hh:mm')
     }
   }
-//   filters: {
-//     timeFilter(val) {
-//       const temp = new Date(val.replace(/-/g, '/'))
-//       return Tools.DateTools.formatDate(temp, 'MM-dd hh:mm')
-//     }
-//   }
 }
 </script>
 

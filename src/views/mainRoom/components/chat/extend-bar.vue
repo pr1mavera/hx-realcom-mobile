@@ -2,7 +2,7 @@
   <div class="extend-bar">
     <transition @enter="extendBarEnter">
       <div id="extendBarContainer" class="extend-bar-section extend-bar-container" ref="extendBarContainer" v-show="this.extendBarOpen">
-        <div class="extend-bar-button button_1">
+        <!-- <div class="extend-bar-button button_1">
           <button class="img" @click="onSendGiftClick" :disabled="isRobotChat">
             <svg class="icon extend-click" aria-hidden="true">
               <use :xlink:href="sendGiftIcon"></use>
@@ -17,7 +17,7 @@
             </svg>
           </button>
           <div class="text">表情</div>
-        </div>
+        </div> -->
         <div class="extend-bar-button button_3">
           <button class="img" @click="selectImgClick" :disabled="isRobotChat">
             <svg class="icon extend-click" aria-hidden="true">
@@ -83,10 +83,12 @@ export default {
       this.$refs.sendImgInput.click()
     },
     onSendGiftClick() {
+      this.expressSectionShow && (this.expressSectionShow = false)
       this.giftSectionShow = true
       this.$emit('sendSectionShow')
     },
     onSendExpressClick() {
+      this.giftSectionShow && (this.giftSectionShow = false)
       this.expressSectionShow = true
       this.$emit('sendSectionShow')
     },

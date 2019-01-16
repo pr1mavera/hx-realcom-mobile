@@ -239,13 +239,19 @@ export const RTCRoomMixin = {
           }
         })
         this.RTC.on('onRemoteStreamUpdate', (info) => {
+          console.log('onRemoteStreamUpdate ----------------')
           const videoElement = document.getElementById('remoteVideo')
           if (info && info.stream) {
+            // 记录视频开始时间
+            this.startTimeStamp = new Date()
+            // 绑定视频流
             videoElement.srcObject = info.stream
             videoElement.play()
+            // 添加监听，远程流视频加载完全时，关闭铃声，切换摄像头
             videoElement.addEventListener('playing', () => {
-              document.getElementById('videoRing').pause()
+              // 记录视频接通成功状态
               this.isVideoConnectSuccess = true
+              document.getElementById('videoRing').pause()
               this.isChangeCamera = false
             }, false)
           }
@@ -973,6 +979,30 @@ export const sendMsgsMixin = {
           this.setMsgStatus(timestamp, 'succ')
         }, () => {
           this.setMsgStatus(timestamp, 'failed')
+        }
+      )
+    },
+    sendCustomDirective({ msg, msgStatus, msgType }) {
+      IM.sendNormalMsg(
+        this.userInfo.userId,
+        this.csInfo.csId,
+        // '123456789',
+        {
+          sessionId: this.sessionId,
+          chatGuid: this.chatGuid,
+          toUserName: this.csInfo.csName,
+          msg,
+          time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+          nickName: this.userInfo.userName,
+          avatar: this.userInfo.userId,
+          identifier: this.userInfo.userId,
+          msgStatus,
+          msgType,
+          chatType: this.sendType
+        }, () => {
+          console.log('客户端发送自定义自定义指令成功')
+        }, err => {
+          console.log('客户端发送自定义自定义指令失败，err', err)
         }
       )
     },
