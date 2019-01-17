@@ -122,6 +122,11 @@
         } else if (state === 'loaded-done') {
           this.iconLink = '#icon-finish'
         }
+      },
+
+      // 格式化userName
+      format(name) {
+        console.log(name)
       }
     },
     watch: {}
