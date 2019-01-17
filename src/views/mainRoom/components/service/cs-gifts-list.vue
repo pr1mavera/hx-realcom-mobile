@@ -13,7 +13,7 @@
       >
         <div class="list-item" v-for="(item, index) in giftsList" :key="index">
       <span class="right">
-        <span class="name">{{item.userName}}</span> <span class="con">送给她一个{{item.giftName}}</span>
+        <span class="name">{{item.name}}</span> <span class="con">送给她一个{{item.giftName}}</span>
       </span>
           <span class="left time">{{item.sendTime}}</span>
         </div>
@@ -79,10 +79,12 @@
           }
 
           this.giftsList = res.data.gifts
-          // 将UTC时间 格式化
+          // 将UTC时间 格式化 && 处理用户姓名
           for (const i in this.giftsList) {
             const time = new Date(this.giftsList[i].sendTime) // 将utc时间转换为本地时间
             this.giftsList[i].sendTime = Tools.DateTools.formatDate(time, 'yyyy-MM-dd hh:mm:ss')
+            const fName = this.formatName(this.giftsList[i].userName) // 格式化用户名
+            this.giftsList[i].name = fName
           }
         }
       },
@@ -104,11 +106,11 @@
               tip.style.display = 'none'
               return
             }
-            // this.giftsList = res.data.gifts this.giftsList.push(res.data.gifts[i])
-            // 转换时间格式
             for (const i in res.data.gifts) {
               const time = new Date(res.data.gifts[i].sendTime) // 将utc时间转换为本地时间
               res.data.gifts[i].sendTime = Tools.DateTools.formatDate(time, 'yyyy-MM-dd hh:mm:ss')
+              const fName = this.formatName(res.data.gifts[i].userName) // 格式化名字
+              res.data.gifts[i].name = fName
             }
             this.giftsList = this.giftsList.concat(res.data.gifts)
             loaded('done')
@@ -125,8 +127,15 @@
       },
 
       // 格式化userName
-      format(name) {
-        console.log(name)
+      formatName(name) {
+        const reg1 = RegExp(/用户/)
+        const reg2 = RegExp(/游客/)
+        if (name.match(reg1) || name.match(reg2)) {
+          return name
+        } else {
+          const fName = '**' + name.charAt(name.length - 1)
+          return fName
+        }
       }
     },
     watch: {}
@@ -186,6 +195,7 @@
       border-top: 1px solid #F2F2F2;
       justify-content: space-between;
       .right {
+        display: flex;
         .name{
           max-width: 9rem;
           display: inline-block;
