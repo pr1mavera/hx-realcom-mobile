@@ -310,13 +310,7 @@ export default {
         return
       }
       this.curPreviewImgId = id
-      let curIndex = 0
-      for (let i = 0; i < this.previewImgList.length; i++) {
-        if (this.previewImgList[i].id === id) {
-          curIndex = i
-          break
-        }
-      }
+      const curIndex = this.previewImgList.findIndex(item => item.id === id)
       this.$refs.previewer.show(curIndex)
     },
     targetLink(event) {
@@ -483,7 +477,7 @@ export default {
       this.resetExtendBar()
       this._inputBlur()
       this.$refs.inputBar.setInputText('')
-      text = text.replace(/&nbsp;/g, '')
+      text = text.replace(/&nbsp;/g, '').replace(/<(?!a).*?>/g, '')
       text = Tools.strWithLink(text)
 
       if (text && text.trim()) {

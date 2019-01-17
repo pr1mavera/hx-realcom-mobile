@@ -81,7 +81,7 @@ export default {
       this.$emit('clickHotQues', ques)
     },
     clickImgMsg(id) {
-      this.$emit('onClickImgMsg', +id)
+      this.$emit('onClickImgMsg', id)
     },
 
     // 点击留言按钮,进入留言页面

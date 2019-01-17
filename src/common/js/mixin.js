@@ -54,37 +54,17 @@ export const loginMixin = {
     async getVisitorInfo(origin) {
       let data = {}
       // 缓存中有游客信息，直接返回：
-      if (data = Tools.CacheTools.getCacheData({ key: `${origin}_visitor`, check: origin })) return data
+      if (data = Tools.CacheTools.getCacheData({ key: `${origin}_visitor`, check: origin })) {
+        const workTimeInfo = await this.getWorkTimeInfo()
+        return Object.assign(data, { workTimeInfo })
+      }
 
       // 缓存中没有对应渠道的游客信息：
       // 1. 创建游客信息
       // const randomMin2Max = Tools.curry(Tools.randomMin2Max)
       const rand = Tools.randomMin2Max(1000)(9999) // 随机四位数
       const timestamp = new Date().getTime() // 时间戳
-      // 获取工作时间
-      const res = await getWorkTime()
-      let workTimeInfo = null
-      if (res && res.result && res.result.code === ERR_OK) {
-        const workTime = res.data.workTime
-        // 处理工作时间数据结构
-        workTimeInfo = Tools.reduce((val, item) => Object.assign(val, {
-          [item.callType]: {
-            startTime: item.startTime,
-            endTime: item.endTime
-          }
-        }), {})(workTime)
-      } else {
-        workTimeInfo = {
-          'SP': {
-            startTime: '09:00',
-            endTime: '20:00'
-          },
-          'ZX': {
-            startTime: '09:00',
-            endTime: '20:00'
-          }
-        }
-      }
+      const workTimeInfo = await this.getWorkTimeInfo()
       const visitorInfo = {
         avatar: '',
         openId: `visitor_${rand}_${timestamp}`,
@@ -104,6 +84,33 @@ export const loginMixin = {
       Tools.CacheTools.setCacheData({ key: `${origin}_visitor`, check: origin, data: visitorInfo })
       // 3. 返回
       return visitorInfo
+    },
+    async getWorkTimeInfo() {
+      // 获取工作时间
+      const res = await getWorkTime()
+      let workTimeInfo = {
+        'SP': {
+          startTime: '09:00',
+          endTime: '20:00'
+        },
+        'ZX': {
+          startTime: '09:00',
+          endTime: '20:00'
+        }
+      }
+      if (res && res.result && res.result.code === ERR_OK) {
+        const workTime = res.data.workTime
+        // 处理工作时间数据结构
+        if (workTime) {
+          workTimeInfo = Tools.reduce((val, item) => Object.assign(val, {
+            [item.callType]: {
+              startTime: item.startTime,
+              endTime: item.endTime
+            }
+          }), {})(workTime)
+        }
+      }
+      return workTimeInfo
     },
     async getUserSig(openId, userId) {
       // 若本地缓存存在且未过期，直接返回本地缓存
