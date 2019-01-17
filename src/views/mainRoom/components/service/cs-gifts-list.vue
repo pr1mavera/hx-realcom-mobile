@@ -181,6 +181,7 @@
       border-top: 1px solid #F2F2F2;
       justify-content: space-between;
       .right {
+        display: flex;
         .name{
           max-width: 9rem;
           display: inline-block;

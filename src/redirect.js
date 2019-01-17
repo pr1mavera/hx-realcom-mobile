@@ -2,7 +2,14 @@
 // const url = `${dev}/video/user/openId`
 
 import conf from '../src/config/index.js'
-const url = `${conf.userPath}/video/user/openId`
+const url = `${conf.userPath}/video/user/openId?origin=${getQueryString('origin')}`
+
+function getQueryString(name) {
+    let reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)')
+    let r = window.location.search.substr(1).match(reg)
+    if (r !== null) return unescape(r[2]).replace(/\//, '')
+    return null
+}
 
 function redirectAPI(url) {
     return fetch(url, {

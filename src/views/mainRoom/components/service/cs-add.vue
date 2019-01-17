@@ -135,6 +135,9 @@ export default {
   props: {
     myCs: {
       type: Array
+    },
+    updateCsItem: {
+      type: Object
     }
   },
   data() {
@@ -174,12 +177,14 @@ export default {
       // m_csNum: this.$route.query.myCsNum, // 已有的专属客服的个数
       floadTipLeftAnimeCache: null,
       floadTipRightAnimeCache: null,
-      avatarImg: '',
       showTip: false,
       addDis: false // 此时‘添加’按钮可点击
     }
   },
   computed: {
+    avatarImg() {
+      return getCsAvatar(this.curLabelInfo.id)
+    },
     setRotate() {
       return `transform: rotateZ(${this.angle}deg); opacity: ${this.opacityNum};`
     },
@@ -194,6 +199,9 @@ export default {
     this.getCsList()
   },
   methods: {
+    updateCsList(item) {
+      this.cslist.push(item)
+    },
     clickToLineUp(cs) {
       this.$emit('goToLineUp', cs)
     },
@@ -297,7 +305,7 @@ export default {
       // this.avatarImg = getImgUrl(this.curLabelInfo.resultUrl)
       // this.avatarImg = this.getAvatar(this.curLabelInfo.id)
       // this.getAvatar(this.curLabelInfo.id)
-      this.avatarImg = getCsAvatar(this.curLabelInfo.id)
+      // this.avatarImg = getCsAvatar(this.curLabelInfo.id)
     },
     resetCurLabelInfo() {
       // 更新当前显示的客服
@@ -373,7 +381,7 @@ export default {
         if (this.curLabelInfo.labels) {
           this.csLabels = this.curLabelInfo.labels.split(',')
         }
-        this.avatarImg = getCsAvatar(this.curLabelInfo.id)
+        // this.avatarImg = getCsAvatar(this.curLabelInfo.id)
         // console.log('===========客服列表:' + JSON.stringify(this.cslist))
       } else {
         console.log('error about query csInfo')
@@ -390,6 +398,13 @@ export default {
           isMark: 'mark'
         }
       })
+    }
+  },
+  watch: {
+    updateCsItem(newVal) {
+      if (newVal) {
+        this.cslist.push(newVal)
+      }
     }
   }
 }

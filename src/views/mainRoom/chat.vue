@@ -229,6 +229,8 @@ export default {
       const userInfo = Object.assign(baseInfo, userSig)
       this.setUserInfo(userInfo)
 
+      this.$router.replace({path: `/room/chat?openId=${userInfo.openId}&origin=${userInfo.origin}`})
+
       // 获取机器人基本信息，及配置机器人欢迎语
       const { botInfo, welcomeMsg } = await this.getBotBaseInfo(query.openId, userInfo.userId)
       this.setBotInfo(botInfo)

@@ -9,6 +9,7 @@
 </template>
 
 <script>
+import { wxConfig } from '@/common/js/share'
 import deviceConfig from './config/device'
 import { beforeEnterVideo } from '@/common/js/beforeEnterVideo'
 import { stringEx } from './config/extend'
@@ -28,11 +29,19 @@ export default {
     //   'msgs'
     // ])
   // },
-  created() {
+  async created() {
+    const url = window.location.href
+    url.replace('#/', '')
+    // 配置微信
+    console.log(`配置微信接口传递的链接：url: ${url}`)
+    const res = await wxConfig(url)
+    console.log(JSON.stringify(res))
+
     deviceConfig()
     beforeEnterVideo()
     stringEx()
-    // wxConfig()
+    const query = this.$route.query
+    this.$router.replace({path: `/room?openId=${query.openId || this.getQueryString('openid') || 'visitor'}&origin=${query.origin || this.getQueryString('attach') || 'WE'}`})
     window.addEventListener('offline', () => {
       this.$vux.toast.show({
         type: 'text',
@@ -41,15 +50,6 @@ export default {
         width: '80%',
         time: 5000
       })
-      // let msgsList = Tools.CopyTools.arrShallowClone(this.msgs)
-      // msgsList.forEach((item) => {
-      //   if (item.status === 'pending') {
-      //     let newMsg = Tools.CopyTools.objDeepClone(item)
-      //     newMsg.status = 'failed'
-      //     item = newMsg
-      //   }
-      // })
-      // this.sendMsgs([msgsList])
     }, true)
     // 关闭菜单项
     // this.addevent()
@@ -57,6 +57,14 @@ export default {
   },
   activated() {
     this.$setgoindex()
+  },
+  methods: {
+    getQueryString(name) {
+      let reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)')
+      let r = window.location.search.substr(1).match(reg)
+      if (r !== null) return unescape(r[2]).replace(/\//, '')
+      return null
+    }
   }
 }
 

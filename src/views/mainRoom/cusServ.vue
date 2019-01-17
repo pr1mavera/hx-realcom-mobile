@@ -2,6 +2,7 @@
   <div class="cus-serv">
     <keep-alive :include="['cs-add']">
       <router-view
+        :updateCsItem="deleteCsItem"
         :myCs="myCs"
         @removeCs="removeCs"
         @goToLineUp="showConfirm"
@@ -36,7 +37,8 @@ export default {
   data() {
     return {
       myCs: [], // 我的专属客服
-      csSelected: {}
+      csSelected: {},
+      deleteCsItem: null
     }
   },
   // created() {
@@ -66,9 +68,18 @@ export default {
       this.myCs = list
     },
     // 删除
-    removeCs(index) {
-      // debugger
-      this.myCs.splice(index, 1)
+    removeCs(i) {
+      this.myCs = this.myCs.reduce((val = [], item, index) => {
+        if (index === i) {
+          // this.$refs.csComponents.updateCsList(item)
+          this.deleteCsItem = item
+        } else {
+          debugger
+          return val.concat(item)
+        }
+      }, [])
+      // this.myCs = this.myCs.filter((item, index) => index !== i)
+
       this.myCs.length === 0 && this.$router.replace('/room/cusServ/add')
     },
     showShare(csId, csName) {

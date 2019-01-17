@@ -24,8 +24,7 @@ export const wxConfig = function(url) {
     })
     wx.ready(function() {
       wx.hideAllNonBaseMenuItem()
-      console.log('wx config success')
-      return Promise.resolve()
+      return Promise.resolve('wx config success')
     })
     wx.error(function(err) {
       return Promise.reject(new Error(`wx config error: ${err}`))

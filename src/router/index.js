@@ -76,11 +76,11 @@ export default new Router({
       path: '/share',
       name: 'share',
       component: share
-    },
-    {
-      path: '/',
-      redirect: '/room'
     }
+    // {
+    //   path: '/',
+    //   redirect: '/room'
+    // }
   ],
   base: '/video/',
   // 路由跳转从顶部开始，个人中心 && 礼物记录页面需要

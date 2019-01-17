@@ -70,7 +70,7 @@
 
 <script type="text/ecmascript-6">
 // import wx from 'weixin-js-sdk'
-import { wxConfig, showSafariItem } from '@/common/js/share'
+import { showSafariItem } from '@/common/js/share'
 import { mapGetters, mapMutations, mapActions } from 'vuex'
 import { XDialog, TransferDomDirective as TransferDom } from 'vux'
 import { loginMixin, IMMixin, getMsgsMixin } from '@/common/js/mixin'
@@ -80,6 +80,7 @@ import { ERR_OK, saveQueueTicket, getQueueTicket } from '@/server/index.js'
 // import anime from 'animejs'
 
 export default {
+  name: 'room',
   directives: {
     TransferDom
   },
@@ -153,12 +154,6 @@ export default {
   methods: {
     // 初始化房间
     async initRoom() {
-      const url = window.location.href
-
-      // 配置微信
-      console.log(`配置微信接口传递的链接：url: ${url}`)
-      await wxConfig(url)
-
       const query = this.$route.query
 
       // 初始化
@@ -168,11 +163,11 @@ export default {
       const enterVideoStatus = window.sessionStorage.getItem('enterVideoStatus')
 
       if (enterVideoStatus === 'iOS-wx' || enterVideoStatus === 'Android') { // 微信环境
-        const self = this
-        this.$router.replace({path: `/room/chat?openId=${query.openId || self.getQueryString('openid')}&origin=${query.origin || self.getQueryString('attach') || 'WE'}`})
+        // const self = this
+        this.$router.replace({path: `/room/chat?openId=${query.openId}&origin=${query.origin}`})
       }
       else if (enterVideoStatus === 'iOS-Safari') { // Safari环境
-        const res = await getQueueTicket(query.openId || this.getQueryString('openid'))
+        const res = await getQueueTicket(query.openId)
         if (res.result.code === ERR_OK && res.data.queueticket) {
           this.afterEnterSafariQueue(res.data.queueticket)
           return
@@ -183,12 +178,6 @@ export default {
       }
 
       // this.$router.replace({path: `/room/chat?openId=${query.openId}&origin=${query.origin}`})
-    },
-    getQueryString(name) {
-      let reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)')
-      let r = window.location.search.substr(1).match(reg)
-      if (r !== null) return unescape(r[2]).replace(/\//, '')
-      return null
     },
     // Safari进入排队前
     async afterEnterSafariQueue(data) {
@@ -208,7 +197,7 @@ export default {
     iOSVideoFailed() {
       // this.setRoomMode(roomStatus.videoChat)
       const query = this.$route.query
-      this.$router.replace({path: `/room?openId=${query.openId || this.getQueryString('openid')}&origin=${query.origin || this.getQueryString('attach') || 'WE'}`})
+      this.$router.replace({path: `/room?openId=${query.openId}&origin=${query.origin}`})
       this.setAssessStatus(true)
       this.setServerTime('00:00')
       this.servStatus = false
