@@ -4,7 +4,7 @@
             v-if="btnList.length > 0" style="" dots-class="custom-bottom" dots-position="center">
       <swiper-item v-for="(pages, index) in btnList" :key="index">
         <!--{{index}} labelType === 'all'   :show-dots="showDots"-->
-        <checker v-model="selTags" type="checkbox" default-item-class="tags-default" @on-change="selChanege"
+        <checker v-model="selTagsModel" type="checkbox" default-item-class="tags-default" @on-change="selChanege"
                  selected-item-class="tags-selected">
           <checker-item :disabled="disable"
                         :value="item" v-for="(item, index) in pages.list"
@@ -60,6 +60,9 @@
       }
     },
     computed: {
+      selTagsModel() {
+        return this.selTags || []
+      },
       ...mapGetters([
         'csInfo'
       ])

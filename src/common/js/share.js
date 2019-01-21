@@ -29,6 +29,8 @@ export const wxConfig = function(url) {
     wx.error(function(err) {
       return Promise.reject(new Error(`wx config error: ${err}`))
     })
+  }).catch(err => {
+    return Promise.reject(new Error(`getShareTicket API error: ${err}`))
   })
 }
 

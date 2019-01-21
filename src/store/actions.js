@@ -2,7 +2,56 @@ import * as types from './mutation-types'
 import Tools from '@/common/js/tools'
 import IM from '@/server/im'
 import { TIME_3_MIN, TIME_5_MIN, MSG_PAGE_SIZE, sessionStatus, toggleBarStatus, roomStatus, queueStatus, msgStatus, msgTypes, dialogTypes, tipTypes, systemMsgStatus } from '@/common/js/status'
-import { ERR_OK, createSession, getCsAvatar, transTimeoutRedistribution } from '@/server/index.js'
+import { ERR_OK, createSession, getCsAvatar, transTimeoutRedistribution, getSystemConfig } from '@/server/index.js'
+
+// const systemConfigMap = {
+//   localCapacityFlag: value => {
+//       return value
+//   },
+//   queueLimit: value => {
+//       return value
+//   },
+//   cacheExpireTime: timestamp => {
+//       // const cah = new Date(timestamp)
+//       // if (cah. < ) {
+
+//       // }
+//       return new Date(timestamp).getHours()
+//   },
+//   sessionTimeOut: timestamp => {
+//       return new Date(timestamp).getMinutes()
+//   },
+//   connectTimeOut: value => {
+//       return value
+//   }
+// }
+
+async function systemConfigAPI() {
+  const res = await getSystemConfig()
+  if (res.result.code === ERR_OK) {
+    const data = res.data
+    return Object.keys(data).reduce((val, key) => {
+      return Object.assign(val, {
+        // [key]: {
+        //   value: data[key].value,
+        //   getCompareValue: systemConfigMap[key]
+        // }
+        [key]: data[key].value
+      })
+    }, {})
+  } else {
+    console.log('error in getSystemConfig: ', res.result.message)
+  }
+}
+
+let config = null
+
+export const systemConfig = async function({ commit }, key) {
+  if (!config) {
+    config = await systemConfigAPI()
+  }
+  return config[key]
+}
 
 // 键盘弹出延迟（弃用）
 export const closeBarBuffer = async function({ commit }, { mutationType, delay }) {

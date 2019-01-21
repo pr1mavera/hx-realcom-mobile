@@ -5,7 +5,9 @@ export const ERR_OK = '0'
 export const ERR_FAIL = '-1'
 
 // 获取微信签名
-export const wxConfig = url => http.get('video', `/wxConfig?url=${url}`)
+// export const wxConfig = url => http.get('video', `/wxConfig?url=${url}`)
+
+export const getSystemConfig = () => http.get('user', '/video/sys/config')
 
 /**
  ************************************ uat ************************************
@@ -127,7 +129,7 @@ export const getBotInfo = () => http.get('user', `/robot/query`)
 /**
  * [sendMsgToBot 发送消息给机器人]
  */
-export const sendMsgToBot = (question, sessionId, userId, userName) => http.post('user', `/robot/question/send`, {question, sessionId, userId, userName})
+export const sendMsgToBot = (question, sessionId, userId, userName, origin) => http.post('user', `/robot/question/send`, {question, sessionId, userId, userName, origin})
 
 /**
  * [getBotRoamMsgs 拉取机器人漫游消息]

@@ -376,20 +376,22 @@ const MsgsFilterTools = {
 const CacheTools = {
   // 从localStorage取对应字段的缓存
   getCacheData: function({ key, check, quality }) {
-    const cache = window.localStorage.getItem(key) || ''
+    const cache = window.localStorage.getItem(key)
+    const cacheObj = cache ? JSON.parse(cache) : ''
     if (!cache) {
       // 缓存为null
       return null
     }
-    if (quality && !DateTools.isCacheValid(cache.parseJSON().timestamp, quality)) {
+    if (quality && !DateTools.isCacheValid(cacheObj.timestamp, quality)) {
+    // if (quality && quality.getCompareValue(cacheObj.timestamp) > quality.value) {
       // 缓存过期
       return undefined
     }
-    if (cache.parseJSON().check !== check) {
+    if (cacheObj.check !== check) {
       // 缓存校验不通过
       return false
     }
-    return cache.parseJSON().data
+    return cacheObj.data
   },
 
   // 存localStorage
@@ -466,20 +468,12 @@ let Tools = Object.assign({}, {
   randomMin2Max: _.curry(function(min, max) {
     return Math.floor(Math.random() * (max - min) + min)
   }),
-  getRealHost: function(url) {
-    const getHost = _.compose(_.head, _.split('?'))
-    return getHost(url)
-  },
-  getRealQueryStr: function(url) {
-    const getQueryStr = _.compose(_.last, _.split('?'))
-    return getQueryStr(url)
-  },
   getRealQuery: function(url) {
     // if (!url.match(/#/)) url = `${url}#`
     const toPairs = _.compose(_.map(_.split('=')), _.split('&'))
     const queryArr = _.compose(toPairs, _.last, _.split('?'))
     const arr2Obj = (old, cur) => {
-      old[cur[0]] = cur[1].replace('/', '')
+      old[cur[0]] = cur[1].replace(/(\/|#)/g, '')
       return old
     }
     const getQueryObj = _.compose(_.reduce(arr2Obj, {}), queryArr)

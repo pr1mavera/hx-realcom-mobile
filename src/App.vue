@@ -13,6 +13,7 @@ import { wxConfig } from '@/common/js/share'
 import deviceConfig from './config/device'
 import { beforeEnterVideo } from '@/common/js/beforeEnterVideo'
 import { stringEx } from './config/extend'
+import Tools from '@/common/js/tools'
 // const wx = require('@/common/js/wx')
 // import { mapGetters, mapMutations } from 'vuex'
 // import Tools from '@/common/js/tools'
@@ -30,8 +31,7 @@ export default {
     // ])
   // },
   async created() {
-    const url = window.location.href
-    url.replace('#/', '')
+    const url = window.location.href.replace('#/', '')
     // 配置微信
     console.log(`配置微信接口传递的链接：url: ${url}`)
     const res = await wxConfig(url)
@@ -40,8 +40,6 @@ export default {
     deviceConfig()
     beforeEnterVideo()
     stringEx()
-    const query = this.$route.query
-    this.$router.replace({path: `/room?openId=${query.openId || this.getQueryString('openid') || 'visitor'}&origin=${query.origin || this.getQueryString('attach') || 'WE'}`})
     window.addEventListener('offline', () => {
       this.$vux.toast.show({
         type: 'text',
@@ -55,25 +53,21 @@ export default {
     // this.addevent()
     // wx.showSafariMenu()
   },
+  async mounted() {
+    const query = this.$route.query
+    const realQuery = Tools.getRealQuery(window.location.href)
+    const openId = query.openId || realQuery.openId || realQuery.openid || 'visitor'
+    const origin = query.origin || realQuery.origin || realQuery.attach || 'WE'
+    console.log(realQuery)
+    this.$router.replace({path: `/room?openId=${openId}&origin=${origin}`})
+  },
   activated() {
     this.$setgoindex()
   },
   methods: {
-    getQueryString(name) {
-      let reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)')
-      let r = window.location.search.substr(1).match(reg)
-      if (r !== null) return unescape(r[2]).replace(/\//, '')
-      return null
-    }
+
   }
 }
-
-// function refresh() {
-//   var docEle = document.documentElement
-//   docEle.style.fontSize = docEle.clientWidth / 37.5 + 'px'
-// }
-// refresh()
-// window.onresize = refresh
 </script>
 
 <style type="text/css" lang="less">

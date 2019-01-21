@@ -1,8 +1,8 @@
 // const dev = 'http://112.74.159.234:8083/api/v1'
-// const url = `${dev}/video/user/openId`
+// const url = `${dev}/video/user/openId?origin=${getQueryString('origin')}`
 
 import conf from '../src/config/index.js'
-const url = `${conf.userPath}/video/user/openId?origin=${getQueryString('origin')}`
+const url = `${conf.userPath}/video/user/openId?origin=${getQueryString('origin') || 'WE'}`
 
 function getQueryString(name) {
     let reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)')
@@ -15,7 +15,7 @@ function redirectAPI(url) {
     return fetch(url, {
         method: 'get',
         headers: {
-          'Content-Type': 'application/json'
+            'Content-Type': 'application/json'
         }
     })
     .then(res => res.json())
