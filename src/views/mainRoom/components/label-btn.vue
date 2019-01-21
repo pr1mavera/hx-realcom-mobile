@@ -51,7 +51,7 @@
           // {name: '聪明伶俐', id: 3}
         ],
         allBtnList: [], // 所有评价我的标签
-        selTags: null, // 选中的标签
+        selTags: [], // 选中的标签
         isDisabled: '', // unused
         disable: true, // 标签不能选，只是做展示功能
         currentPage: 0, // 当前页
@@ -70,7 +70,7 @@
     methods: {
       // 清空标签
       resetLabelList() {
-        this.selTags = null
+        this.selTags = []
         this.changePage(0)
       },
 
