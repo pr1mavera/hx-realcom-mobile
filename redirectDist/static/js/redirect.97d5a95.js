@@ -743,10 +743,17 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 
 // const dev = 'http://112.74.159.234:8083/api/v1'
-// const url = `${dev}/video/user/openId`
+// const url = `${dev}/video/user/openId?origin=${getQueryString('origin')}`
 
 
-var url = __WEBPACK_IMPORTED_MODULE_2__src_config_index_js__["a" /* default */].userPath + '/video/user/openId';
+var url = __WEBPACK_IMPORTED_MODULE_2__src_config_index_js__["a" /* default */].userPath + '/video/user/openId?origin=' + (getQueryString('origin') || 'WE');
+
+function getQueryString(name) {
+    var reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)');
+    var r = window.location.search.substr(1).match(reg);
+    if (r !== null) return unescape(r[2]).replace(/\//, '');
+    return null;
+}
 
 function redirectAPI(url) {
     return fetch(url, {
@@ -2631,14 +2638,14 @@ var production = {
   // TMPath: 'https://claim.ihxlife.com:8082/api/v1' // 腾讯消息服务
 
   // uat
-  // userPath: 'https://video-uat.ihxlife.com/user-server/api/v1', // 用户服务,整合video-server,chat-server,online
-  // webRTCRoomPath: 'https://video-uat.ihxlife.com/room-server/api/v1', // 房间服务
-  // TMPath: 'https://video-uat.ihxlife.com/tm-server/api/v1' // 腾讯消息服务
+  userPath: 'https://video-uat.ihxlife.com/user-server/api/v1', // 用户服务,整合video-server,chat-server,online
+  webRTCRoomPath: 'https://video-uat.ihxlife.com/room-server/api/v1', // 房间服务
+  TMPath: 'https://video-uat.ihxlife.com/tm-server/api/v1' // 腾讯消息服务
 
   // int
-  userPath: 'https://vnap-webrtctest.ihxlife.com/user-server/api/v1', // 用户服务,整合video-server,chat-server,online
-  webRTCRoomPath: 'https://vnap-webrtctest.ihxlife.com/room-server/api/v1', // 房间服务
-  TMPath: 'https://vnap-webrtctest.ihxlife.com/tm-server/api/v1' // 腾讯消息服务
+  // userPath: 'https://vnap-webrtctest.ihxlife.com/user-server/api/v1', // 用户服务,整合video-server,chat-server,online
+  // webRTCRoomPath: 'https://vnap-webrtctest.ihxlife.com/room-server/api/v1', // 房间服务
+  // TMPath: 'https://vnap-webrtctest.ihxlife.com/tm-server/api/v1' // 腾讯消息服务
 
   // nginx
   // // onlinePath: '/onlinePath', // 腾讯消息服务

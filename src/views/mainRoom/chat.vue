@@ -254,6 +254,7 @@ export default {
     },
     async getCurServStatus() {
       // 如果有会话未结束，则重连
+      // const quality = await this.systemConfig('sessionTimeOut')
       let data = Tools.CacheTools.getCacheData({ key: `${this.userInfo.origin}_curServInfo`, check: this.userInfo.userId, quality: TIME_5_MIN })
       if (!data) {
         // 当前无缓存
@@ -682,6 +683,7 @@ export default {
       setExtendBar: 'SET_EXTEND_BAR'
     }),
     ...mapActions([
+      'systemConfig',
       'initSession',
       'toggleBar',
       'sendMsgs',

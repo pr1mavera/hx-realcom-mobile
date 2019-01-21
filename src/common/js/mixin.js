@@ -14,57 +14,58 @@ export const loginMixin = {
     ])
   },
   methods: {
-    async getUserBaseInfo(openId, origin = 'WE') {
-      let userInfo = null
+    async getUserBaseInfo(openId = 'hehe', origin = 'WE') {
+      let userInfo = {}
       if (origin === 'WE') {
         // 调用openId拿用户信息
         userInfo = await this.getUserInfoFromOpenId(openId)
       }
-      if (!userInfo) {
-        // 当前为游客，或者调用接口失败
-        userInfo = this.getVisitorInfo(origin)
+      if (!userInfo.baseInfo || userInfo.baseInfo.userGrade === '5') {
+        // 配置游客信息
+        userInfo.baseInfo = this.getVisitorInfo(origin)
       }
-      return userInfo
+      if (!userInfo.workTimeInfo) {
+        // 配置工作时间
+        userInfo.workTimeInfo = await this.getWorkTimeInfo()
+      }
+      return Object.assign(userInfo.baseInfo, userInfo.wxUserInfo, { workTimeInfo: userInfo.workTimeInfo })
     },
-    async getUserInfoFromOpenId(openId = 'hehe') {
+    async getUserInfoFromOpenId(openId) {
       const res = await getUserInfoByOpenID(openId)
       if (res.result.code === ERR_OK) {
         console.log('============================= 我现在来请求 loginByOpenID 辣 =============================')
-        if (res.data.userInfo.userGrade === '5') {
-          // 当前通过openId获取userInfo失败，返回的是游客信息，则直接返回
-          return null
-        } else {
-          !res.data.userInfo.openId && (res.data.userInfo.openId = this.$route.query.openId)
-          res.data.userInfo.origin = this.$route.query.origin || 'WE'
-          res.data.userInfo.avatar = res.data.wxUserInfo ? res.data.wxUserInfo.headImgUrl : ''
-          res.data.userInfo.nickName = res.data.wxUserInfo ? res.data.wxUserInfo.nickName : ''
-          res.data.userInfo.workTimeInfo = Tools.reduce((val, item) => Object.assign(val, {
+        let data = res.data
+        const query = this.$route.query
+        return {
+          baseInfo: Object.assign(data.userInfo, {
+            openId: query.openId || openId,
+            origin: query.origin || 'WE'
+          }),
+          wxUserInfo: {
+            avatar: data.wxUserInfo.headImgUrl || '',
+            nickName: data.wxUserInfo.nickName || ''
+          },
+          workTimeInfo: Tools.reduce((val, item) => Object.assign(val, {
             [item.callType]: {
               startTime: item.startTime,
               endTime: item.endTime
             }
-          }), {})(res.data.userInfo.workTimeInfo)
-          return res.data.userInfo
+          }), {})(data.userInfo.workTimeInfo)
         }
       } else {
         console.log('error in getUserInfoByOpenId')
-        return null
+        return {}
       }
     },
-    async getVisitorInfo(origin) {
+    getVisitorInfo(origin) {
       let data = {}
       // 缓存中有游客信息，直接返回：
-      if (data = Tools.CacheTools.getCacheData({ key: `${origin}_visitor`, check: origin })) {
-        const workTimeInfo = await this.getWorkTimeInfo()
-        return Object.assign(data, { workTimeInfo })
-      }
+      if (data = Tools.CacheTools.getCacheData({ key: `${origin}_visitor`, check: origin })) return data
 
       // 缓存中没有对应渠道的游客信息：
       // 1. 创建游客信息
-      // const randomMin2Max = Tools.curry(Tools.randomMin2Max)
       const rand = Tools.randomMin2Max(1000)(9999) // 随机四位数
       const timestamp = new Date().getTime() // 时间戳
-      const workTimeInfo = await this.getWorkTimeInfo()
       const visitorInfo = {
         avatar: '',
         openId: `visitor_${rand}_${timestamp}`,
@@ -75,10 +76,9 @@ export const loginMixin = {
         userGradeName: `游客`,
         userId: `visitor_${rand}_${timestamp}`,
         userName: `游客_${rand}`,
-        userPhone: '000000000000',
+        userPhone: '00000000000',
         origin: origin,
-        userPriority: '5',
-        workTimeInfo
+        userPriority: '5'
       }
       // 2. 游客信息存缓存
       Tools.CacheTools.setCacheData({ key: `${origin}_visitor`, check: origin, data: visitorInfo })
@@ -115,6 +115,7 @@ export const loginMixin = {
     async getUserSig(openId, userId) {
       // 若本地缓存存在且未过期，直接返回本地缓存
       let data = {}
+      // const quality = await this.systemConfig('cacheExpireTime')
       if (data = Tools.CacheTools.getCacheData({ key: 'userSigInfo', check: userId, quality: TIME_24_HOURS })) return data
 
       const res = await getLoginInfo(userId, 1)
@@ -138,6 +139,7 @@ export const loginMixin = {
       let data = {}
       let botInfo = {}
       // TIME_24_HOURS
+      // const quality = await this.systemConfig('cacheExpireTime')
       if (data = Tools.CacheTools.getCacheData({ key: 'botInfo', check: userId, quality: TIME_24_HOURS })) {
         // 若本地缓存存在且未过期，直接取本地缓存
         botInfo = data
@@ -204,7 +206,10 @@ export const loginMixin = {
         botInfo,
         welcomeMsg
       }
-    }
+    },
+    ...mapActions([
+      'systemConfig'
+    ])
   }
 }
 
@@ -777,7 +782,7 @@ export const sendMsgsMixin = {
         }
 
         // 获取机器人返回
-        const res = await sendMsgToBot(question, this.sessionId, this.userInfo.userId, this.userInfo.userName)
+        const res = await sendMsgToBot(question, this.sessionId, this.userInfo.userId, this.userInfo.userName, this.userInfo.origin)
         if (res.result.code === ERR_OK) {
           this.setMsgStatus(timestamp, 'succ')
           // 此处将用户的输入保存至vuex
