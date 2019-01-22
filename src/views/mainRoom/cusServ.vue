@@ -78,8 +78,10 @@ export default {
         }
       }, [])
       // this.myCs = this.myCs.filter((item, index) => index !== i)
-      if (this.myCs === undefined) {
-        this.myCs = []
+      debugger
+      if (this.myCs === undefined || this.myCs.length === 0) {
+        this.$router.replace('/room/cusServ/add')
+        return
       }
 
       this.myCs.length === 0 && this.$router.replace('/room/cusServ/add')
