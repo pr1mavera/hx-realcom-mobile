@@ -217,6 +217,7 @@ export const RTCRoomMixin = {
   data() {
     return {
       RTC: null,
+      RTCQuitFlag: false,
       qualityReqToast: false,
       bpsOverCount: 0
     }
@@ -228,6 +229,7 @@ export const RTCRoomMixin = {
   },
   methods: {
     initRTC() {
+      this.RTCQuitFlag = false
       return new Promise((resolve, reject) => {
         const self = this
         // eslint-disable-next-line
@@ -271,7 +273,7 @@ export const RTCRoomMixin = {
 
         this.RTC.on('onRemoteStreamRemove', (info) => {
           // 停止推流
-          this.quitRTC()
+          // this.quitRTC()
         })
 
         this.RTC.on('onKickOut', () => {
@@ -353,6 +355,10 @@ export const RTCRoomMixin = {
 
     // 退出RTC
     async quitRTC() {
+      if (this.RTCQuitFlag) {
+        return undefined
+      }
+      this.RTCQuitFlag = true
       await this.getVideoScreenShot()
       this.RTC && this.RTC.quit(() => {
         console.log('退出音视频房间 成功 辣')
@@ -699,10 +705,11 @@ export const IMMixin = {
         this.setVideoMuted(state)
         return
       }
-      // if (msgsObj.msgStatus === msgStatus.msg && msgsObj.msgType === msgTypes.msg_video_hang_up) { // 视频挂断
-
-      //   return
-      // }
+      if (msgsObj.msgStatus === msgStatus.msg && msgsObj.msgType === msgTypes.msg_video_hang_up) { // 视频挂断
+        // this.quitRTC()
+        this.$emit('quitRTCResponse')
+        return
+      }
       this.sendMsgs([msgsObj])
       this.saveCurMsgs({ origin: this.userInfo.origin, msg: msgsObj })
     },

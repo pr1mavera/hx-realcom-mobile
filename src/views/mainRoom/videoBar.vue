@@ -82,13 +82,14 @@
 import { Toast } from 'vux'
 import { mapGetters, mapMutations } from 'vuex'
 import { ERR_OK, enterVideoRTCRoom } from '@/server/index.js'
-import { RTCRoomMixin, sendMsgsMixin } from '@/common/js/mixin'
-// import { msgStatus, msgTypes } from '@/common/js/status'
+import { RTCRoomMixin, IMMixin, sendMsgsMixin } from '@/common/js/mixin'
+import { msgStatus, msgTypes } from '@/common/js/status'
 // import IM from '@/server/im.js'
 
 export default {
   mixins: [
     RTCRoomMixin,
+    IMMixin,
     sendMsgsMixin
   ],
   components: {
@@ -227,15 +228,15 @@ export default {
         // 视频成功接通之前客户点击挂断
         // 关闭铃声
         document.getElementById('videoRing').pause()
-        // 发送自定义指令
-        // this.sendCustomDirective({
-        //   msg: '视频成功接通之前客户点击挂断',
-        //   msgStatus: msgStatus.msg,
-        //   msgType: msgTypes.msg_video_hang_up
-        // })
         this.$emit('videoFailed')
         // return undefined
       }
+      // 发送自定义指令
+      this.sendCustomDirective({
+        msg: '客户点击挂断',
+        msgStatus: msgStatus.msg,
+        msgType: msgTypes.msg_video_hang_up
+      })
       // 停止推流
       this.quitRTC()
     },

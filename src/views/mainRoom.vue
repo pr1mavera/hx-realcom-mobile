@@ -6,6 +6,7 @@
         @requestVideoServer="requestVideoServer"
         @cancelVideoLineUp="iOSVideoFailed"
         @iOSVideoFailed="iOSVideoFailed"
+        @quitRTCResponse="quitRTCResponse"
       ></router-view>
       <!-- @showIosGuide="iosGuide = true"
       @showLowVersion="lowVersion = true" -->
@@ -15,6 +16,7 @@
 
     <!-- 主视频窗口 -->
     <videoBar class="video-bar"
+      ref="videoBar"
       v-if="isVideoBarOpen"
       @showGiftAnime="showGiftAnime"
       @videoFailed="iOSVideoFailed"
@@ -251,6 +253,9 @@ export default {
       } else {
         this.$vux.toast.text('咨询失败')
       }
+    },
+    quitRTCResponse() {
+      this.$refs.videoBar.quitRTC()
     },
     // 评价成功
     assessSuccess() {

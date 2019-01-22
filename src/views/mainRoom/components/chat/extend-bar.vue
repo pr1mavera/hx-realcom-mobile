@@ -40,7 +40,7 @@
 </template>
 
 <script type="text/ecmascript-6">
-import { mapGetters } from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
 import anime from 'animejs'
 import { roomStatus } from '@/common/js/status'
 
@@ -95,13 +95,12 @@ export default {
     },
     async onSendImgChange() {
       const file = this.$refs.sendImgInput.files[0]
-      debugger
       const s_file = await this.compressImgFile(file)
-      debugger
       this.$emit('sendImg', s_file)
     },
-    compressImgFile(file) {
-      if (file.size < 500 * 1024) {
+    async compressImgFile(file) {
+      const kb = await this.systemConfig('compressLimit')
+      if (file.size < kb * 1024) {
         // 图片小，无需压缩
         return file
       }
@@ -227,7 +226,10 @@ export default {
         easing: 'easeOutExpo',
         offset: 560
       })
-    }
+    },
+    ...mapActions([
+      'systemConfig'
+    ])
   }
 }
 </script>

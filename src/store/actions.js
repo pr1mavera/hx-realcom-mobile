@@ -25,6 +25,9 @@ const systemConfigCompareMap = {
   },
   connectTimeOut: function(value) {
       return value
+  },
+  compressLimit: function(value) {
+    return value
   }
 }
 
