@@ -231,7 +231,7 @@ export default {
         // this.sendCustomDirective({
         //   msg: '视频成功接通之前客户点击挂断',
         //   msgStatus: msgStatus.msg,
-        //   msgType: msgTypes.msg_hang_up_before_video_connect_succ
+        //   msgType: msgTypes.msg_video_hang_up
         // })
         this.$emit('videoFailed')
         // return undefined

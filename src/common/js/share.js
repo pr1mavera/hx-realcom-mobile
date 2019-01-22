@@ -1,8 +1,9 @@
 import wx from 'weixin-jsapi'
-import { getShareTicket } from '@/server/index.js'
+import { ERR_OK, getShareTicket } from '@/server'
 
-export const wxConfig = function(url) {
-  return getShareTicket(url).then((res) => {
+export const wxConfig = async function(url) {
+  const res = await getShareTicket(url)
+  if (res.result.code === ERR_OK) {
     const jssdk = res.data
     console.log(res.data)
     wx.config({
@@ -13,25 +14,26 @@ export const wxConfig = function(url) {
       signature: jssdk.signature, // 必填，签名
       jsApiList: [
         'hideAllNonBaseMenuItem', // 隐藏所有非基本菜单项
-        'showMenuItems', // 批量显示菜单项
-        'onMenuShareTimeline', // 分享到朋友圈
-        'onMenuShareAppMessage', // 监听“分享给朋友”，按钮点击、自定义分享内容及分享结果接口
-        'hideMenuItems', // 批量隐藏菜单
-        'showMenuItems', // 批量显示菜单
-        'hideOptionMenu', // 隐藏右上角菜单
-        'showOptionMenu' // 显示右上角的菜单
+        'showMenuItems' // 批量显示菜单项
+        // 'onMenuShareTimeline', // 分享到朋友圈
+        // 'onMenuShareAppMessage', // 监听“分享给朋友”，按钮点击、自定义分享内容及分享结果接口
+        // 'hideMenuItems', // 批量隐藏菜单
+        // 'showMenuItems', // 批量显示菜单
+        // 'hideOptionMenu', // 隐藏右上角菜单
+        // 'showOptionMenu' // 显示右上角的菜单
       ]
     })
     wx.ready(function() {
       wx.hideAllNonBaseMenuItem()
-      return Promise.resolve('wx config success')
+      // return Promise.resolve('wx config success')
     })
     wx.error(function(err) {
-      return Promise.reject(new Error(`wx config error: ${err}`))
+      console.log(`wx config error: ${JSON.stringify(err)}`)
     })
-  }).catch(err => {
-    return Promise.reject(new Error(`getShareTicket API error: ${err}`))
-  })
+  } else {
+    console.log(`getShareTicket API error`)
+  }
+  return undefined
 }
 
 export const showSafariItem = function() {

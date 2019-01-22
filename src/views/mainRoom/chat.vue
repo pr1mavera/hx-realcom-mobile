@@ -201,6 +201,51 @@ export default {
       this._initPullDownRefresh()
       this._initChat()
     })
+
+    // 断网
+    window.addEventListener('offline', () => {
+      this.$vux.toast.show({
+        type: 'text',
+        text: '哎呀，断网了 (-_-||)',
+        position: 'top',
+        width: '80%',
+        time: 5000
+      })
+    }, true)
+
+    // 联网
+    window.addEventListener('online', async() => {
+      alert('重新联网！！！')
+      // IM 重新登录
+      this.initIM(this.userInfo)
+
+      const quality = await this.systemConfig('sessionTimeOut')
+      let data = Tools.CacheTools.getCacheData({ key: `${this.userInfo.origin}_curServInfo`, check: this.userInfo.userId, quality })
+      // 如果当前存在人工客服服务，查询当前服务状态，尝试重连
+      debugger
+      if ((this.roomMode === roomStatus.menChat) && data) {
+        // 重连状态
+        const reConnectStatus = await this.getCurServStatus()
+        debugger
+        if (reConnectStatus) {
+          this.$vux.toast.text('重连成功', 'default')
+        } else {
+          // 结束会话
+          this.setServerTime('00:00')
+          this.$vux.toast.text('当前人工服务已结束', 'default')
+          // 清空本地localstorage
+          Tools.CacheTools.removeCacheData(`${this.userInfo.origin}_curServInfo`)
+          await Tools.AsyncTools.sleep(3000)
+          // assess
+          if (!this.hasAssess) {
+            this.setAssessView(true)
+          } else {
+            // action
+            this.afterServerFinish(sessionStatus.onLine)
+          }
+        }
+      }
+    }, true)
   },
   activated() {
     this.$nextTick(async() => {
@@ -254,8 +299,8 @@ export default {
     },
     async getCurServStatus() {
       // 如果有会话未结束，则重连
-      // const quality = await this.systemConfig('sessionTimeOut')
-      let data = Tools.CacheTools.getCacheData({ key: `${this.userInfo.origin}_curServInfo`, check: this.userInfo.userId, quality: TIME_5_MIN })
+      const quality = await this.systemConfig('sessionTimeOut')
+      let data = Tools.CacheTools.getCacheData({ key: `${this.userInfo.origin}_curServInfo`, check: this.userInfo.userId, quality })
       if (!data) {
         // 当前无缓存
         return false

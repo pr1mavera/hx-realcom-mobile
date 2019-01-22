@@ -3,6 +3,14 @@ import { Right, Left } from '@/common/js/container/either'
 const _ = require('ramda')
 
 const DateTools = {
+  minutes2Timestamp: function(m) {
+    return +m * 60 * 1000
+  },
+
+  hours2Timestamp: function(h) {
+    return +h * 60 * 60 * 1000
+  },
+
   formatDate: function(date, format) {
     if (format === undefined) {
       format = date
@@ -48,8 +56,10 @@ const DateTools = {
   },
 
   isCacheValid: function(cacheT, quality) {
-    const now = new Date().getTime()
-    return (now - cacheT) <= quality
+    const now = new Date()
+    const cache = new Date(cacheT)
+    // 缓存时间为当天，且当前时间小于系统配置缓存过期时刻
+    return (cache.getDate() === now.getDate()) && (now.getHours() < +quality)
   },
 
   isWorkTime: function({ startTime, endTime }) {
@@ -382,8 +392,8 @@ const CacheTools = {
       // 缓存为null
       return null
     }
-    if (quality && !DateTools.isCacheValid(cacheObj.timestamp, quality)) {
-    // if (quality && quality.getCompareValue(cacheObj.timestamp) > quality.value) {
+    // if (quality && !DateTools.isCacheValid(cacheObj.timestamp, quality)) {
+    if (quality && !quality.compare(cacheObj.timestamp)) {
       // 缓存过期
       return undefined
     }

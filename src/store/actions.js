@@ -2,29 +2,31 @@ import * as types from './mutation-types'
 import Tools from '@/common/js/tools'
 import IM from '@/server/im'
 import { TIME_3_MIN, TIME_5_MIN, MSG_PAGE_SIZE, sessionStatus, toggleBarStatus, roomStatus, queueStatus, msgStatus, msgTypes, dialogTypes, tipTypes, systemMsgStatus } from '@/common/js/status'
-import { ERR_OK, createSession, getCsAvatar, transTimeoutRedistribution, getSystemConfig } from '@/server/index.js'
+import { ERR_OK, createSession, getCsAvatar, transTimeoutRedistribution, getSessionDetail, getSystemConfig } from '@/server/index.js'
 
-// const systemConfigMap = {
-//   localCapacityFlag: value => {
-//       return value
-//   },
-//   queueLimit: value => {
-//       return value
-//   },
-//   cacheExpireTime: timestamp => {
-//       // const cah = new Date(timestamp)
-//       // if (cah. < ) {
-
-//       // }
-//       return new Date(timestamp).getHours()
-//   },
-//   sessionTimeOut: timestamp => {
-//       return new Date(timestamp).getMinutes()
-//   },
-//   connectTimeOut: value => {
-//       return value
-//   }
-// }
+const systemConfigCompareMap = {
+  localCapacityFlag: function(value) {
+      return value
+  },
+  queueLimit: function(value) {
+      return value
+  },
+  cacheExpireTime: function(cacheT) {
+      const now = new Date()
+      const cache = new Date(cacheT)
+      // 缓存时间为当天，且当前时间小于系统配置缓存过期时刻
+      return (cache.getDate() === now.getDate()) && (now.getHours() < +this.value)
+  },
+  sessionTimeOut: function(cacheT) {
+      const now = new Date()
+      const cache = new Date(cacheT)
+      // 缓存时间为当天，且缓存时间与当前时间差小于系统配置缓存过期时间
+      return (cache.getDate() === now.getDate()) && ((now.getTime() - cacheT) < Tools.DateTools.minutes2Timestamp(this.value))
+  },
+  connectTimeOut: function(value) {
+      return value
+  }
+}
 
 async function systemConfigAPI() {
   const res = await getSystemConfig()
@@ -32,11 +34,11 @@ async function systemConfigAPI() {
     const data = res.data
     return Object.keys(data).reduce((val, key) => {
       return Object.assign(val, {
-        // [key]: {
-        //   value: data[key].value,
-        //   getCompareValue: systemConfigMap[key]
-        // }
-        [key]: data[key].value
+        [key]: {
+          value: data[key].value,
+          compare: systemConfigCompareMap[key]
+        }
+        // [key]: data[key].value
       })
     }, {})
   } else {
@@ -300,7 +302,28 @@ export const reqTransAnotherTimeout = function({ commit, state }, delay) {
         const onlineConfig = await configSendSystemMsg({ state }, onlineQueueSuccMsg)
         await IM.sendSystemMsg(onlineConfig)
         resolve()
-      } else {
+      }
+      else if (res.data.status.result_code === '480') {
+        // 坐席接收到客户的接入请求并且已经成功回推，但客户端没有接收到
+        const info = await getSessionDetail(state.sessionRamId, state.userInfo.userId)
+        if ((info.result.code === ERR_OK) && info.data.sessionId) {
+          const data = info.data
+          const msgsObj = {
+            sessionId: data.sessionId,
+            csId: data.csId,
+            csName: data.csName,
+            csNick: data.nickName
+          }
+          afterQueueSuccess({ commit, state }, {
+            mode: roomStatus.menChat,
+            msgsObj
+          })
+        } else {
+          const err = '查询转接会话详情为空'
+          reject(err)
+        }
+      }
+      else {
         const err = 'error in transTimeoutRedistribution 转接至另外坐席'
         reject(err)
       }

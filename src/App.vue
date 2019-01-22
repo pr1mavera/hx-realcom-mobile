@@ -30,25 +30,19 @@ export default {
     //   'msgs'
     // ])
   // },
-  async created() {
-    const url = window.location.href.replace('#/', '')
+  created() {
+    // 取当前路由 # 之前的
+    const url = window.location.href.split('#')[0]
     // 配置微信
     console.log(`配置微信接口传递的链接：url: ${url}`)
-    const res = await wxConfig(url)
-    console.log(JSON.stringify(res))
+    wxConfig(url)
+    // console.log(JSON.stringify(res))
+    // console.log('11111111');
 
     deviceConfig()
     beforeEnterVideo()
     stringEx()
-    window.addEventListener('offline', () => {
-      this.$vux.toast.show({
-        type: 'text',
-        text: '哎呀，断网了 (-_-||)',
-        position: 'top',
-        width: '80%',
-        time: 5000
-      })
-    }, true)
+
     // 关闭菜单项
     // this.addevent()
     // wx.showSafariMenu()
@@ -63,9 +57,6 @@ export default {
   },
   activated() {
     this.$setgoindex()
-  },
-  methods: {
-
   }
 }
 </script>

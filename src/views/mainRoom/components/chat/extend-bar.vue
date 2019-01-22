@@ -35,6 +35,7 @@
     <section class="extend-bar-section send-express-section" v-if="expressSectionShow">
       <send-express @selectEmojiWithCode="selectEmojiWithCode" @deleteBtn="$emit('deleteBtn')" @sendXiaoHua="sendXiaoHua"></send-express>
     </section>
+    <canvas id="compressImgCanvas"></canvas>
   </div>
 </template>
 
@@ -92,8 +93,69 @@ export default {
       this.expressSectionShow = true
       this.$emit('sendSectionShow')
     },
-    onSendImgChange() {
-      this.$emit('sendImg', this.$refs.sendImgInput.files[0])
+    async onSendImgChange() {
+      const file = this.$refs.sendImgInput.files[0]
+      debugger
+      const s_file = await this.compressImgFile(file)
+      debugger
+      this.$emit('sendImg', s_file)
+    },
+    compressImgFile(file) {
+      if (file.size < 500 * 1024) {
+        // 图片小，无需压缩
+        return file
+      }
+      let canvas = document.getElementById('compressImgCanvas')
+      let context = canvas.getContext('2d')
+      const img = new Image()
+      const _URL = window.URL || window.webkitURL
+      img.src = _URL.createObjectURL(file)
+      const self = this
+      return new Promise(resolve => {
+        img.onload = function() {
+          const originWidth = this.width
+          const originHeight = this.height
+          // 最大尺寸限制，可通过国设置宽高来实现图片压缩程度
+          const maxWidth = 800
+          const maxHeight = 800
+          // 目标尺寸
+          let targetWidth = originWidth
+          let targetHeight = originHeight
+          // 图片尺寸超过400x400的限制
+          if (originWidth > maxWidth || originHeight > maxHeight) {
+            if (originWidth / originHeight > maxWidth / maxHeight) {
+              // 更宽，按照宽度限定尺寸
+              targetWidth = maxWidth
+              targetHeight = Math.round(maxWidth * (originHeight / originWidth))
+            } else {
+              targetHeight = maxHeight
+              targetWidth = Math.round(maxHeight * (originWidth / originHeight))
+            }
+          }
+          // canvas对图片进行缩放
+          canvas.width = targetWidth
+          canvas.height = targetHeight
+          // 清除画布
+          context.clearRect(0, 0, targetWidth, targetHeight)
+          // 图片压缩
+          context.drawImage(img, 0, 0, targetWidth, targetHeight)
+          const newUrl = canvas.toDataURL('image/jpeg', 0.92)
+
+          resolve(self.dataURLtoFile(newUrl))
+        }
+      })
+    },
+    dataURLtoFile(dataurl, filename = 'file') {
+      let arr = dataurl.split(',')
+      let mime = arr[0].match(/:(.*?);/)[1]
+      let suffix = mime.split('/')[1]
+      let bstr = atob(arr[1])
+      let n = bstr.length
+      let u8arr = new Uint8Array(n)
+      while (n--) {
+        u8arr[n] = bstr.charCodeAt(n)
+      }
+      return new File([u8arr], `${filename}.${suffix}`, {type: mime})
     },
     _getPosAndScale() {
       const extendBarMaskBundle = {

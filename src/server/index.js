@@ -183,6 +183,11 @@ export const leaveMsg = async(data) => http.post('user', '/common/leaveword/v1/a
 export const transTimeoutRedistribution = data => http.post('user', '/webchat/queue/chatresult', data)
 
 /**
+ * [getSessionDetail 转接超时，重新分配坐席响应480时，查询人工服务信息（会话Id，坐席信息）]
+ */
+export const getSessionDetail = (robotSessionId, userId) => http.get('user', `/video/session/detail?robotSessionId=${robotSessionId}&userId=${userId}`)
+
+/**
  ************************************ systemMsg ************************************
  */
 

@@ -5,7 +5,7 @@ import MsgsLoader from '@/common/js/MsgsLoader'
 import { ERR_OK, getImgUrl, getUserInfoByOpenID, getLoginInfo, getBotInfo, sendMsgToBot, getSessionList, getCsAvatar, onLineQueue, getBotRoamMsgs, requestHistoryMsgs, videoQueueCancel, onLineQueueCancel, chatQueueHeartBeat, getWorkTime } from '@/server/index.js'
 import Tools from '@/common/js/tools'
 import { Either } from '@/common/js/container/either'
-import { TIME_24_HOURS, roomStatus, queueStatus, sessionStatus, systemMsgStatus, msgStatus, cardTypes, msgTypes, tipTypes, dialogTypes } from '@/common/js/status'
+import { roomStatus, queueStatus, sessionStatus, systemMsgStatus, msgStatus, cardTypes, msgTypes, tipTypes, dialogTypes } from '@/common/js/status'
 
 export const loginMixin = {
   computed: {
@@ -115,8 +115,8 @@ export const loginMixin = {
     async getUserSig(openId, userId) {
       // 若本地缓存存在且未过期，直接返回本地缓存
       let data = {}
-      // const quality = await this.systemConfig('cacheExpireTime')
-      if (data = Tools.CacheTools.getCacheData({ key: 'userSigInfo', check: userId, quality: TIME_24_HOURS })) return data
+      const quality = await this.systemConfig('cacheExpireTime')
+      if (data = Tools.CacheTools.getCacheData({ key: 'userSigInfo', check: userId, quality })) return data
 
       const res = await getLoginInfo(userId, 1)
       if (res.result.code === ERR_OK) {
@@ -139,8 +139,8 @@ export const loginMixin = {
       let data = {}
       let botInfo = {}
       // TIME_24_HOURS
-      // const quality = await this.systemConfig('cacheExpireTime')
-      if (data = Tools.CacheTools.getCacheData({ key: 'botInfo', check: userId, quality: TIME_24_HOURS })) {
+      const quality = await this.systemConfig('cacheExpireTime')
+      if (data = Tools.CacheTools.getCacheData({ key: 'botInfo', check: userId, quality })) {
         // 若本地缓存存在且未过期，直接取本地缓存
         botInfo = data
       } else {
@@ -699,6 +699,10 @@ export const IMMixin = {
         this.setVideoMuted(state)
         return
       }
+      // if (msgsObj.msgStatus === msgStatus.msg && msgsObj.msgType === msgTypes.msg_video_hang_up) { // 视频挂断
+
+      //   return
+      // }
       this.sendMsgs([msgsObj])
       this.saveCurMsgs({ origin: this.userInfo.origin, msg: msgsObj })
     },
