@@ -86,7 +86,6 @@
 
         // debugger
         const res = await removeCs(data)
-        debugger
         if (res.result.code === ERR_OK) {
           this.$emit('removeCs', this.csIndex)
           // console.log(JSON.stringify(res))
