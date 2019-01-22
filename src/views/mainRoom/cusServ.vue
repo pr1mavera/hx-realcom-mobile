@@ -73,16 +73,12 @@ export default {
         if (index === i) {
           // this.$refs.csComponents.updateCsList(item)
           this.deleteCsItem = item
+          return val
         } else {
           return val.concat(item)
         }
       }, [])
       // this.myCs = this.myCs.filter((item, index) => index !== i)
-      debugger
-      if (this.myCs === undefined || this.myCs.length === 0) {
-        this.$router.replace('/room/cusServ/add')
-        return
-      }
 
       this.myCs.length === 0 && this.$router.replace('/room/cusServ/add')
     },
