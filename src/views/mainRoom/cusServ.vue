@@ -74,11 +74,9 @@ export default {
           // this.$refs.csComponents.updateCsList(item)
           this.deleteCsItem = item
         } else {
-          debugger
           return val.concat(item)
         }
       }, [])
-      debugger
       // this.myCs = this.myCs.filter((item, index) => index !== i)
       if (this.myCs === undefined) {
         this.myCs = []
