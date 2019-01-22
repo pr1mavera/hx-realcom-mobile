@@ -78,7 +78,11 @@ export default {
           return val.concat(item)
         }
       }, [])
+      debugger
       // this.myCs = this.myCs.filter((item, index) => index !== i)
+      if (this.myCs === undefined) {
+        this.myCs = []
+      }
 
       this.myCs.length === 0 && this.$router.replace('/room/cusServ/add')
     },
