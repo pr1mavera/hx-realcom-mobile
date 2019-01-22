@@ -4,7 +4,7 @@
             v-if="btnList.length > 0" style="" dots-class="custom-bottom" dots-position="center">
       <swiper-item v-for="(pages, index) in btnList" :key="index">
         <!--{{index}} labelType === 'all'   :show-dots="showDots"-->
-        <checker v-model="selTagsModel" type="checkbox" default-item-class="tags-default" @on-change="selChanege"
+        <checker v-model="selTags" type="checkbox" default-item-class="tags-default" @on-change="selChanege"
                  selected-item-class="tags-selected">
           <checker-item :disabled="disable"
                         :value="item" v-for="(item, index) in pages.list"
@@ -51,7 +51,7 @@
           // {name: '聪明伶俐', id: 3}
         ],
         allBtnList: [], // 所有评价我的标签
-        selTags: null, // 选中的标签
+        selTags: [], // 选中的标签
         isDisabled: '', // unused
         disable: true, // 标签不能选，只是做展示功能
         currentPage: 0, // 当前页
@@ -60,9 +60,9 @@
       }
     },
     computed: {
-      selTagsModel() {
-        return this.selTags || []
-      },
+      // selTagsModel() {
+      //   return this.selTags || []
+      // },
       ...mapGetters([
         'csInfo'
       ])
@@ -73,7 +73,7 @@
     methods: {
       // 清空标签
       resetLabelList() {
-        this.selTags = null
+        this.selTags = []
         this.changePage(0)
       },
 
