@@ -91,7 +91,7 @@ import Tools from '@/common/js/tools'
 import { loginMixin, IMMixin, sendMsgsMixin, getMsgsMixin, onLineQueueMixin } from '@/common/js/mixin'
 // eslint-disable-next-line
 import { TIME_5_MIN, roomStatus, queueStatus, sessionStatus, toggleBarStatus, msgStatus, msgTypes, tipTypes, dialogTypes, cardTypes } from '@/common/js/status'
-import { ERR_OK, getSessionStatus } from '@/server/index.js'
+import { ERR_OK, getSessionStatus, getLoginState } from '@/server/index.js'
 import { Previewer, TransferDom } from 'vux'
 
 export default {
@@ -214,37 +214,19 @@ export default {
     }, true)
 
     // 联网
-    window.addEventListener('online', async() => {
-      alert('重新联网！！！')
-      // IM 重新登录
-      this.initIM(this.userInfo)
+    window.addEventListener('online', () => {
+      // alert('online')
+      this.visibilityChange_cb()
+    }, true)
 
-      const quality = await this.systemConfig('sessionTimeOut')
-      let data = Tools.CacheTools.getCacheData({ key: `${this.userInfo.origin}_curServInfo`, check: this.userInfo.userId, quality })
-      // 如果当前存在人工客服服务，查询当前服务状态，尝试重连
-      debugger
-      if ((this.roomMode === roomStatus.menChat) && data) {
-        // 重连状态
-        const reConnectStatus = await this.getCurServStatus()
-        debugger
-        if (reConnectStatus) {
-          this.$vux.toast.text('重连成功', 'default')
-        } else {
-          // 结束会话
-          this.setServerTime('00:00')
-          this.$vux.toast.text('当前人工服务已结束', 'default')
-          // 清空本地localstorage
-          Tools.CacheTools.removeCacheData(`${this.userInfo.origin}_curServInfo`)
-          await Tools.AsyncTools.sleep(3000)
-          // assess
-          if (!this.hasAssess) {
-            this.setAssessView(true)
-          } else {
-            // action
-            this.afterServerFinish(sessionStatus.onLine)
-          }
-        }
+    // 手机息屏
+    window.addEventListener('visibilitychange', async() => {
+      if (document.hidden) {
+        return undefined
       }
+      // alert('visibilitychange')
+      await Tools.AsyncTools.sleep(2000)
+      this.visibilityChange_cb()
     }, true)
   },
   activated() {
@@ -333,6 +315,50 @@ export default {
       // 手动更新用户最后活动时间（更新定时器）
       // this.updateLastAction()
       return 0
+    },
+    async getIMLoginState() {
+      const res = await getLoginState(this.userInfo.userId)
+      if (res.result.code === ERR_OK) {
+        console.log('查看用户IM登录状态：', res.data.status)
+        return res.data.status === 'Online'
+      } else {
+        return false
+      }
+    },
+    async visibilityChange_cb() {
+      // alert('重新联网！！！')
+      const loginState = await this.getIMLoginState()
+      // IM 重新登录
+      !loginState && this.initIM(this.userInfo)
+
+      const quality = await this.systemConfig('sessionTimeOut')
+      let data = Tools.CacheTools.getCacheData({ key: `${this.userInfo.origin}_curServInfo`, check: this.userInfo.userId, quality })
+      // 如果当前存在人工客服服务，查询当前服务状态，尝试重连
+      if ((this.roomMode === roomStatus.menChat) && data) {
+        // 重连状态
+        const reConnectStatus = await this.getCurServStatus()
+        if (reConnectStatus) {
+          // this.$vux.toast.text('重连成功', 'default')
+        } else {
+          // 结束会话
+          this.setServerTime('00:00')
+          this.$vux.toast.text('当前人工服务已结束', 'default')
+          // 清空本地localstorage
+          Tools.CacheTools.removeCacheData(`${this.userInfo.origin}_curServInfo`)
+          // assess
+          !this.hasAssess && this.setAssessView({
+            show: true,
+            task: {
+              csInfo: Object.assign({}, this.csInfo),
+              sessionId: this.sessionId,
+              chatGuid: this.chatGuid,
+              mode: this.roomMode
+            }
+          })
+          // await Tools.AsyncTools.sleep(3000)
+          this.afterServerFinish(sessionStatus.onLine)
+        }
+      }
     },
     _showItemByType(type) {
       let component = ''
@@ -842,6 +868,7 @@ export default {
       }
       .fload-button {
         position: absolute;
+        top: 1.2rem;
         bottom: 1.2rem;
         right: 1.2rem;
       }

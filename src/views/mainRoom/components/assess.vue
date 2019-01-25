@@ -1,14 +1,14 @@
 <!-- 用户给客服评论的组件 -->
 <template>
   <div class="assess-model" v-transfer-dom>
-    <popup v-model="showAssess" is-transparent>
+    <popup v-model="showAssessFlag" is-transparent>
       <div class="popup-main" style="">
        <div class="avatar">
          <img v-lazy="avatarImgSrc">
        </div>
         <x-icon type="ios-close" @click.native="$emit('handleToCancelAssess')" size="30"></x-icon>
         <div class="eva-part">
-          <p>请对{{this.csInfo.csNick}}本次的服务进行评价</p>
+          <p>请对{{this.assessTask.csInfo.csNick}}本次的服务进行评价</p>
           <!-- fill:#bfbfbf; 未评价时星星的颜色； #FEC656,评价点亮后星星的颜色 -->
           <rater v-model="stars"
                  star="<svg class='icon' style='width:2rem;height:2rem;' aria-hidden='true'>
@@ -23,7 +23,7 @@
             <!--<swiper-item v-for="(item, index) in btnBoxList" :key="index">-->
             <!--</swiper-item>-->
           <!--</swiper>-->
-          <label-btn v-show="showAssess" ref="labelBar" :labelType="labelType" @seledLabels="selLabels"></label-btn>
+          <label-btn v-show="showAssessFlag" ref="labelBar" :labelType="labelType" @seledLabels="selLabels"></label-btn>
           <x-button :gradients="['#FF8C6A', '#ff80a0']" @click.native="handleToSaveAssess"
                     style="width: 11rem;margin: 2rem auto 0;">
             提交评价
@@ -79,14 +79,21 @@
     },
     computed: {
       ...mapGetters([
-        'sessionId',
+        // 'sessionId',
         'chatGuid',
         'userInfo',
-        'csInfo',
-        'sendType'
+        // 'csInfo',
+        'sendType',
+        'assessTask'
       ]),
+      showAssessFlag: {
+        get() {
+          return this.showAssess
+        },
+        set() {}
+      },
       avatarImgSrc() {
-        return this.csInfo.csId && getCsAvatar(this.csInfo.csId)
+        return this.assessTask.csInfo.csId && getCsAvatar(this.assessTask.csInfo.csId)
       }
     },
     methods: {
@@ -104,25 +111,24 @@
         //   return
         // }
 
-        // const data = {
-        //   sessionId: this.sessionId,
-        //   userId: this.userInfo.userId,
-        //   userName: this.userInfo.userName,
-        //   csId: this.csInfo.csId,
-        //   csName: this.csInfo.csName,
-        //   evaluateLevel: this.stars,
-        //   labels: this.labels
-        // }
-        const data = Tools.CopyTools.objDeepClone({
-          'sessionId': this.sessionId,
-          // 'sessionId': '00553330cc4a11e886ec19059d7ca77e',
-          'userId': this.userInfo.userId,
-          'userName': this.userInfo.userName,
-          'csId': this.csInfo.csId,
-          'csName': this.csInfo.csName,
-          'evaluateLevel': this.stars,
-          'labels': this.labels
-        })
+        const data = {
+          sessionId: this.assessTask.sessionId,
+          userId: this.userInfo.userId,
+          userName: this.userInfo.userName,
+          csId: this.assessTask.csInfo.csId,
+          csName: this.assessTask.csInfo.csName,
+          evaluateLevel: this.stars,
+          labels: this.labels
+        }
+        // const data = Tools.CopyTools.objDeepClone({
+        //   'sessionId': this.sessionId,
+        //   'userId': this.userInfo.userId,
+        //   'userName': this.userInfo.userName,
+        //   'csId': this.csInfo.csId,
+        //   'csName': this.csInfo.csName,
+        //   'evaluateLevel': this.stars,
+        //   'labels': this.labels
+        // })
 
         // 发送评价消息，告诉坐席
         IM.sendNormalMsg(
@@ -130,8 +136,8 @@
           data.csId,
           // '123456789',
           {
-            sessionId: this.sessionId,
-            chatGuid: this.chatGuid,
+            sessionId: this.assessTask.sessionId,
+            chatGuid: this.assessTask.chatGuid,
             toUserName: data.csName,
             msg: `${this.userInfo.userName}评价了你`,
             time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
@@ -142,10 +148,10 @@
             msgType: msgTypes.msg_assess,
             chatType: this.sendType,
             assessInfo: data,
-            isMsgSync: 2
+            MsgLifeTime: 0
           })
 
-        this.$emit('assessSuccess')
+        this.$emit('assessSuccess', this.assessTask.mode)
         // 调用评价接口，告诉服务
         const res = await saveAssess(data)
         let text = ''

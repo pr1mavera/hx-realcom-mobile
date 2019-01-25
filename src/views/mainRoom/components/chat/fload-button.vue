@@ -4,6 +4,16 @@
     <div class="popover" :style="tipsPos" :class="{'tipsShow': tipsShow}">
       <span class="text">{{tipsText}}</span>
     </div>
+    <div class="btn-item float-top" v-if="roomMode === roomStatus.menChat">
+      <button
+        class="item extend-click transition-bezier"
+        @click="handleEndService">
+        <svg class="icon extend-click" aria-hidden="true">
+          <use xlink:href="#icon-jiahao"></use>
+        </svg>
+      </button>
+      <p class="text">结束服务</p>
+    </div>
     <div class="btn-item">
       <button
         class="item extend-click transition-bezier"
@@ -70,11 +80,15 @@ export default {
       'roomMode',
       'userInfo',
       'csInfo',
-      'queueMode'
+      'sessionId',
+      'chatGuid',
+      'queueMode',
+      'hasAssess'
     ])
   },
   data() {
     return {
+      roomStatus: roomStatus,
       notWorkTimeClicked: false,
       fastClickTimer: null,
       // tipsTimer: null,
@@ -94,6 +108,34 @@ export default {
         }, 1000)
         return false
       }
+    },
+    handleEndService() {
+      const self = this
+      this.$vux.confirm.show({
+        title: '您确定要结束当前人工服务嘛？',
+        async onConfirm() {
+          // 结束服务
+          self.$vux.toast.text('人工服务已结束')
+          // 设置评价状态
+          !self.hasAssess && self.setAssessView({
+            show: true,
+            task: {
+              csInfo: Object.assign({}, self.csInfo),
+              sessionId: self.sessionId,
+              chatGuid: self.chatGuid,
+              mode: this.roomMode
+            }
+          })
+          // 用户主动断开人工客服
+          const sysMsgs = {
+            code: systemMsgStatus.ONLINE_USER_ACTION_ENDING_SESSION,
+            csId: self.csInfo.csId
+          }
+          const onlineConfig = await self.configSendSystemMsg(sysMsgs)
+          await IM.sendSystemMsg(onlineConfig)
+          self.afterServerFinish(sessionStatus.onLine)
+        }
+      })
     },
     callPhone() {
       if (this.clickTooFast()) return
@@ -187,12 +229,12 @@ export default {
       const self = this
       this.$vux.confirm.show({
         title: tip,
-        async onConfirm() {
+        onConfirm() {
           // 取消排队
           self.$emit('onLineCancelQueue')
-          await Tools.AsyncTools.sleep(2000)
+          // await Tools.AsyncTools.sleep(2000)
           // 进入专属客服
-          this.$router.push('/room/cusServ/list')
+          self.$router.push('/room/cusServ/list')
         }
       })
     },
@@ -212,7 +254,7 @@ export default {
           const onlineConfig = await self.configSendSystemMsg(sysMsgs)
           await IM.sendSystemMsg(onlineConfig)
           self.afterServerFinish(sessionStatus.onLine)
-          await Tools.AsyncTools.sleep(2000)
+          // await Tools.AsyncTools.sleep(2000)
           // 进入专属客服
           // self.$emit('enterVideoLineUp')
           self.$router.push('/room/cusServ/list')
@@ -220,19 +262,21 @@ export default {
       })
     },
     clickAssess() {
-      switch (this.roomMode) {
-        case roomStatus.AIChat:
-          this.$vux.alert.show({
-            title: '当前未接通任何坐席，暂不能评价'
-          })
-          break
-        case roomStatus.videoChat:
-          this.setAssessView(true)
-          break
-        case roomStatus.menChat:
-          this.setAssessView(true)
-          break
+      if (this.roomMode === roomStatus.AIChat) {
+        this.$vux.alert.show({
+          title: '当前未接通任何坐席，暂不能评价'
+        })
+        return undefined
       }
+      this.setAssessView({
+        show: true,
+        task: {
+          csInfo: Object.assign({}, this.csInfo),
+          sessionId: this.sessionId,
+          chatGuid: this.chatGuid,
+          mode: this.roomMode
+        }
+      })
     },
     async showTips(index, text) {
       if (this.tipsShow) {
@@ -275,6 +319,10 @@ export default {
 @import '~@/common/style/theme.less';
 
 .fload-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
   .fload-button-mask {
     position: absolute;
     top: 0;
@@ -287,7 +335,25 @@ export default {
     }
   }
   .btn-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 3.4rem;
     margin-bottom: 1.2rem;
+    &.float-top {
+      // align-self: flex-start;
+      position: absolute;
+      top: 0;
+      .item {
+        .icon {
+          width: 100%;
+          height: 100%;
+          fill: #fff;
+          transform: scale(0.4) rotate(45deg);
+          transform-origin: 50%;
+        }
+      }
+    }
     &:last-child {
       margin-bottom: 0;
     }
@@ -329,6 +395,7 @@ export default {
       line-height: 2.4rem;
       color: @text-light;
       text-align: center;
+      white-space: nowrap;
       transform: scale(0.9);
       transform-origin: 50%;
     }

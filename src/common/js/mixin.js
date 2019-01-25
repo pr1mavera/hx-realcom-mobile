@@ -14,7 +14,7 @@ export const loginMixin = {
     ])
   },
   methods: {
-    async getUserBaseInfo(openId = 'hehe', origin = 'WE') {
+    async getUserBaseInfo(openId, origin = 'WE') {
       let userInfo = {}
       if (origin === 'WE') {
         // 调用openId拿用户信息
@@ -22,7 +22,7 @@ export const loginMixin = {
       }
       if (!userInfo.baseInfo || userInfo.baseInfo.userGrade === '5') {
         // 配置游客信息
-        userInfo.baseInfo = this.getVisitorInfo(origin)
+        userInfo.baseInfo = this.getVisitorInfo(openId, origin)
       }
       if (!userInfo.workTimeInfo) {
         // 配置工作时间
@@ -36,15 +36,12 @@ export const loginMixin = {
         console.log('============================= 我现在来请求 loginByOpenID 辣 =============================')
         let data = res.data
         const query = this.$route.query
-        return {
+        const info = {
           baseInfo: Object.assign(data.userInfo, {
-            openId: query.openId || openId,
+            openId: openId,
             origin: query.origin || 'WE'
           }),
-          wxUserInfo: {
-            avatar: data.wxUserInfo.headImgUrl || '',
-            nickName: data.wxUserInfo.nickName || ''
-          },
+          wxUserInfo: {},
           workTimeInfo: Tools.reduce((val, item) => Object.assign(val, {
             [item.callType]: {
               startTime: item.startTime,
@@ -52,12 +49,16 @@ export const loginMixin = {
             }
           }), {})(data.userInfo.workTimeInfo)
         }
+        const wxUserInfo = data.wxUserInfo
+        wxUserInfo.headImgUrl !== '' && (info.wxUserInfo.avatar = wxUserInfo.headImgUrl)
+        wxUserInfo.nickName !== '' && (info.wxUserInfo.nickName = wxUserInfo.nickName)
+        return info
       } else {
         console.log('error in getUserInfoByOpenId')
         return {}
       }
     },
-    getVisitorInfo(origin) {
+    getVisitorInfo(openId, origin) {
       let data = {}
       // 缓存中有游客信息，直接返回：
       if (data = Tools.CacheTools.getCacheData({ key: `${origin}_visitor`, check: origin })) return data
@@ -68,7 +69,7 @@ export const loginMixin = {
       const timestamp = new Date().getTime() // 时间戳
       const visitorInfo = {
         avatar: '',
-        openId: `visitor_${rand}_${timestamp}`,
+        openId: openId || `visitor_${rand}_${timestamp}`,
         nickName: `游客_${rand}`,
         birthday: '1971-01-01',
         isVip: 'N',
@@ -273,7 +274,7 @@ export const RTCRoomMixin = {
 
         this.RTC.on('onRemoteStreamRemove', (info) => {
           // 停止推流
-          // this.quitRTC()
+          this.quitRTC()
         })
 
         this.RTC.on('onKickOut', () => {
@@ -608,7 +609,11 @@ export const IMMixin = {
           const onlineConfig = await this.configSendSystemMsg(onlineQueueSuccMsg)
           await IM.sendSystemMsg(onlineConfig)
 
-          this.reqTransAnotherTimeout(30000).then(() => {
+          this.reqTransAnotherTimeout(30000).then(state => {
+            if (state === '480') {
+              // 坐席端已经转接成功，直接接通坐席即可
+              return undefined
+            }
             // 客服转接定时器，分配坐席成功回调
             const ONLINE_CS_REQ_TRANS_FAIL_msg = {
               code: systemMsgStatus.ONLINE_CS_REQ_TRANS_FAIL,
@@ -619,7 +624,7 @@ export const IMMixin = {
               toast: this.$vux.toast,
               delay: 30000
             }).then(() => {
-              this.afterQueueFailed()
+              this.afterQueueFailed({ sendFailed: true })
             })
           }, (err) => {
             // 失败回调
@@ -648,15 +653,18 @@ export const IMMixin = {
           this.$vux.toast.text('当前人工服务已结束', 'default')
           // 清空本地localstorage
           Tools.CacheTools.removeCacheData(`${this.userInfo.origin}_curServInfo`)
-          await Tools.AsyncTools.sleep(3000)
           // assess
-          if (!this.hasAssess) {
-            this.setAssessView(true)
-          } else {
-            // action
-            this.afterServerFinish(sessionStatus.onLine)
-            // this.$emit('showShare', csId, csName)
-          }
+          !this.hasAssess && this.setAssessView({
+            show: true,
+            task: {
+              csInfo: Object.assign({}, this.csInfo),
+              sessionId: this.sessionId,
+              chatGuid: this.chatGuid,
+              mode: this.roomMode
+            }
+          })
+          // await Tools.AsyncTools.sleep(3000)
+          this.afterServerFinish(sessionStatus.onLine)
           break
 
         // 坐席端创建会话失败（在线）
@@ -677,7 +685,6 @@ export const IMMixin = {
       }
       msgsObj.timestamp = new Date().getTime()
       if (msgsObj.msgStatus === msgStatus.msg && msgsObj.msgType === msgTypes.msg_img) { // 图片消息
-        // this.addPreviewImg(msgsObj)
         this.addPreviewImg({ list: this.previewImgList, msgsObj })
       }
       if (msgsObj.msgStatus === msgStatus.msg && msgsObj.msgType === msgTypes.msg_normal) { // 消息封装链接
@@ -779,7 +786,7 @@ export const sendMsgsMixin = {
           timestamp = new Date().getTime()
           // 保存用户输入
           const ques = {
-            nickName: this.userInfo.userName,
+            nickName: this.userInfo.nickName || this.userInfo.userName,
             content: question,
             isSelfSend: true,
             time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
@@ -801,9 +808,13 @@ export const sendMsgsMixin = {
           data.botName = this.botInfo.botName
           data.time = Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss')
           const answer = Tools.MsgsFilterTools.botAnswerfilter(data)
-          this.sendMsgs([answer])
+          const answers = this.stripImgInBotMsg(answer)
+          answers.forEach(item => {
+            (item.msgType === msgTypes.msg_img) && this.addPreviewImg({ list: this.previewImgList, msgsObj: item })
+          })
+          this.sendMsgs(answers)
           // 更新缓存
-          this.saveCurMsgs({ origin: this.userInfo.origin, msg: answer })
+          this.saveCurMsgs({ origin: this.userInfo.origin, msg: answers })
           resolve()
           console.log('============================= 我现在来请求 sendMsgToBot 辣 =============================')
         } else {
@@ -811,6 +822,36 @@ export const sendMsgsMixin = {
           this.setMsgStatus(timestamp, 'failed')
         }
       })
+    },
+    stripImgInBotMsg(answer) {
+      if (answer.msgType !== msgTypes.msg_normal) {
+        // 非普通文本
+        return [answer]
+      }
+      const imgL = answer.content.match(/<?img.*?>/g)
+      let imgMsgs = []
+      let textMsg = []
+      if (imgL) {
+        // 存在图片，单独处理成单个图片消息
+        // eslint-disable-next-line
+        const srcRegx = /((http|ftp|https):\/\/)?[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:\/~\+#]*[\w\-\@?^=%&amp;\/~\+#])?/i
+        // img2msgFn :: String -> Object
+        const img2msgFn = (img, idx) => {
+          const url = img.match(srcRegx)[0]
+          return Object.assign({}, answer, {
+            content: '图片消息',
+            timestamp: answer.timestamp + idx,
+            msgType: msgTypes.msg_img,
+            imgData: { big: url, small: url }
+          })
+        }
+        imgMsgs = imgL.map(img2msgFn)
+      }
+      const text = answer.content.replace(/<(?!a|\/a).*?>/g, '')
+      // 文本消息过滤掉图片之后仍然存在文本，则配置文本消息
+      text && textMsg.push(Object.assign({}, answer, { content: text }))
+      // 组合文本消息和图片消息
+      return [...textMsg, ...imgMsgs]
     },
     sendC2CMsgs(text, timestamp) {
       if (!timestamp) {
@@ -832,7 +873,7 @@ export const sendMsgsMixin = {
           toUserName: this.csInfo.csName,
           msg: text,
           time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
-          nickName: this.userInfo.userName,
+          nickName: this.userInfo.nickName || this.userInfo.userName,
           avatar: this.userInfo.userId,
           identifier: this.userInfo.userId,
           msgStatus: msgStatus.msg,
@@ -863,9 +904,9 @@ export const sendMsgsMixin = {
           sessionId: this.sessionId,
           chatGuid: this.chatGuid,
           toUserName: this.csInfo.csName,
-          msg: `${this.userInfo.userName}给你送了一个礼物`,
+          msg: `${this.userInfo.nickName || this.userInfo.userName}给你送了一个礼物`,
           time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
-          nickName: this.userInfo.userName,
+          nickName: this.userInfo.nickName || this.userInfo.userName,
           avatar: this.userInfo.userId,
           identifier: this.userInfo.userId,
           msgStatus: msgStatus.msg,
@@ -898,9 +939,9 @@ export const sendMsgsMixin = {
           sessionId: this.sessionId,
           chatGuid: this.chatGuid,
           toUserName: this.csInfo.csName,
-          msg: `我${this.userInfo.userName}给你点赞`,
+          msg: `我${this.userInfo.nickName || this.userInfo.userName}给你点赞`,
           time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
-          nickName: this.userInfo.userName,
+          nickName: this.userInfo.nickName || this.userInfo.userName,
           avatar: this.userInfo.userId,
           identifier: this.userInfo.userId,
           msgStatus: msgStatus.msg,
@@ -938,7 +979,7 @@ export const sendMsgsMixin = {
         const info = {
           msg: '图片消息',
           time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
-          nickName: this.userInfo.userName,
+          nickName: this.userInfo.nickName || this.userInfo.userName,
           avatar: this.userInfo.userId,
           toUserName: this.csInfo.csName,
           sessionId: this.sessionId,
@@ -988,7 +1029,7 @@ export const sendMsgsMixin = {
           toUserName: this.csInfo.csName,
           msg: `小华表情`,
           time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
-          nickName: this.userInfo.userName,
+          nickName: this.userInfo.nickName || this.userInfo.userName,
           avatar: this.userInfo.userId,
           identifier: this.userInfo.userId,
           msgStatus: msgStatus.msg,
@@ -1016,7 +1057,7 @@ export const sendMsgsMixin = {
           toUserName: this.csInfo.csName,
           msg,
           time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
-          nickName: this.userInfo.userName,
+          nickName: this.userInfo.nickName || this.userInfo.userName,
           avatar: this.userInfo.userId,
           identifier: this.userInfo.userId,
           msgStatus,
@@ -1031,7 +1072,7 @@ export const sendMsgsMixin = {
     },
     afterSendC2CTextMsgs(timestamp, text) {
       const msg = {
-        nickName: this.userInfo.userName,
+        nickName: this.userInfo.nickName,
         avatar: this.userInfo.userId,
         content: text,
         isSelfSend: true,
@@ -1046,9 +1087,9 @@ export const sendMsgsMixin = {
     },
     afterSendC2CGiftMsgs(timestamp, giftInfo) {
       const msg = {
-        nickName: this.userInfo.userName,
+        nickName: this.userInfo.nickName,
         avatar: this.userInfo.userId,
-        content: `${this.userInfo.userName}给你送了一个礼物`,
+        content: `${this.userInfo.nickName}给你送了一个礼物`,
         isSelfSend: true,
         time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
         timestamp: timestamp,
@@ -1062,9 +1103,9 @@ export const sendMsgsMixin = {
     },
     afterSendC2CLikeMsgs(timestamp) {
       const msg = {
-        nickName: this.userInfo.userName,
+        nickName: this.userInfo.nickName,
         avatar: this.userInfo.userId,
-        content: `我${this.userInfo.userName}给你点赞`,
+        content: `我${this.userInfo.nickName}给你点赞`,
         isSelfSend: true,
         time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
         timestamp: timestamp,
@@ -1079,11 +1120,11 @@ export const sendMsgsMixin = {
       // const fileObj = Tools.CopyTools.objWithTypeDeepClone(file_Obj)
       const fileObj = new File([file_Obj], file_Obj.name, { type: file_Obj.type })
       const msg = {
-        nickName: this.userInfo.userName,
+        nickName: this.userInfo.nickName,
         avatar: this.userInfo.userId,
         isSelfSend: true,
         time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
-        timestamp: timestamp,
+        timestamp,
         status: 'pending',
         msgStatus: msgStatus.msg,
         msgType: msgTypes.msg_img,
@@ -1098,7 +1139,7 @@ export const sendMsgsMixin = {
         time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
         timestamp: timestamp,
         status: 'pending',
-        nickName: this.userInfo.userName,
+        nickName: this.userInfo.nickName,
         avatar: this.userInfo.userId,
         isSelfSend: true,
         msgStatus: msgStatus.msg,
@@ -1374,7 +1415,7 @@ export const onLineQueueMixin = {
         chatGuid: `${this.chatGuid}`,
         customerGuid: `${this.userInfo.userId}`,
         customerImg: '',
-        customerNick: this.userInfo.userName,
+        customerNick: this.userInfo.nickName || this.userInfo.userName,
         identity: this.userInfo.userGrade,
         robotSessionId: this.sessionRamId,
         origin: this.userInfo.origin || 'WE',
@@ -1439,7 +1480,11 @@ export const onLineQueueMixin = {
         const config = await this.configSendSystemMsg(msg)
         await IM.sendSystemMsg(config)
 
-        this.reqTransAnotherTimeout(30000).then(() => {
+        this.reqTransAnotherTimeout(30000).then(state => {
+          if (state === '480') {
+            // 坐席端已经转接成功，直接接通坐席即可
+            return undefined
+          }
           // 客服转接定时器
           const ONLINE_CS_REQ_TRANS_FAIL_msg = {
             code: systemMsgStatus.ONLINE_CS_REQ_TRANS_FAIL,
@@ -1450,7 +1495,7 @@ export const onLineQueueMixin = {
             toast: this.$vux.toast,
             delay: 30000
           }).then(() => {
-            this.afterQueueFailed()
+            this.afterQueueFailed({ sendFailed: true })
           })
         }, (err) => {
           // 失败回调

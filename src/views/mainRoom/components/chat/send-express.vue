@@ -327,7 +327,7 @@ export default {
       position: relative;
       width: 100%;
       height: 100%;
-      padding: 1.8rem 2.6rem;
+      padding: 2.8rem 2.6rem;
       box-sizing: border-box;
       .history-text {
         position: absolute;
@@ -348,7 +348,7 @@ export default {
           // width: 2.4rem;
           // height: 2.4rem;
           font-size: 2.4rem;
-          padding-bottom: 1rem;
+          padding: .9rem 0;
           flex-basis: 12.5%;
           text-align: center;
         }
@@ -378,7 +378,7 @@ export default {
           flex-wrap: wrap;
           .swiper-item-li {
             font-size: 2.4rem;
-            padding-bottom: 1.6rem;
+            padding: .9rem 0;
             flex-basis: 12.5%;
             text-align: center;
           }

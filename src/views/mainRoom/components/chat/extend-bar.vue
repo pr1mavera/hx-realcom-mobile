@@ -35,7 +35,7 @@
     <section class="extend-bar-section send-express-section" v-if="expressSectionShow">
       <send-express @selectEmojiWithCode="selectEmojiWithCode" @deleteBtn="$emit('deleteBtn')" @sendXiaoHua="sendXiaoHua"></send-express>
     </section>
-    <canvas id="compressImgCanvas"></canvas>
+    <canvas v-show="false" id="compressImgCanvas"></canvas>
   </div>
 </template>
 

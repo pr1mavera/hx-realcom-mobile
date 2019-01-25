@@ -30,6 +30,12 @@ const state = {
   queueNum: 0,
   hasAssess: false,
   isAssessView: false,
+  assessTask: {
+    csInfo: {},
+    sessionId: '',
+    chatGuid: '',
+    mode: ''
+  },
   serverTime: '',
   videoFilter: {
     blur: false,

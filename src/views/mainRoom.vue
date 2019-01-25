@@ -106,6 +106,7 @@ export default {
   data() {
     return {
       sessionStatus: sessionStatus,
+      isVideoOverReportShow: false,
       // share
       // isShareView: false,
       // shareGuide: false,
@@ -129,10 +130,10 @@ export default {
     isVideoBarOpen() {
       return this.roomMode === roomStatus.videoChat
     },
-    isVideoOverReportShow() {
-      return this.hasAssess && this.serverTime !== ''
-      // return true
-    },
+    // isVideoOverReportShow() {
+    //   return this.isVideoBarOpen && this.hasAssess && this.serverTime !== ''
+    //   // return true
+    // },
     ...mapGetters([
       'sourceUrl',
       'roomMode',
@@ -258,13 +259,16 @@ export default {
       this.$refs.videoBar.quitRTC()
     },
     // 评价成功
-    assessSuccess() {
-      this.setAssessStatus(true)
+    assessSuccess(mode) {
+      this.setAssessStatus(false)
       this.setAssessView(false)
-      if (this.serverTime !== '' && this.roomMode === roomStatus.menChat) {
-        // action
-        this.afterServerFinish(sessionStatus.onLine)
+      if (mode === roomStatus.videoChat) {
+        this.isVideoOverReportShow = true
       }
+      // if (this.serverTime !== '' && this.roomMode === roomStatus.menChat) {
+      //   // action
+      //   this.afterServerFinish(sessionStatus.onLine)
+      // }
     },
     // 手动关闭评价
     handleToCancelAssess() {
@@ -278,23 +282,25 @@ export default {
         this.$vux.confirm.show({
           title: '您真的要放弃评价嘛？？',
           onConfirm() {
-            // 服务结束
-            self.setAssessView(false)
-            self.setAssessStatus(true)
-            // 若当前为人工客服结束，需要手动清空vuex数据
-            if (self.roomMode === roomStatus.menChat) {
-              // action
-              self.afterServerFinish(sessionStatus.onLine)
-              // 分享
-              // const csId = self.csInfo.csId
-              // const csName = self.csInfo.csName
-              // self.toShare(csId, csName)
-            }
+            self.assessSuccess(this.roomMode)
+            // // 服务结束
+            // self.setAssessView(false)
+            // self.setAssessStatus(true)
+            // // 若当前为人工客服结束，需要手动清空vuex数据
+            // if (self.roomMode === roomStatus.menChat) {
+            //   // action
+            //   self.afterServerFinish(sessionStatus.onLine)
+            //   // 分享
+            //   // const csId = self.csInfo.csId
+            //   // const csName = self.csInfo.csName
+            //   // self.toShare(csId, csName)
+            // }
           }
         })
       }
     },
     goBackToChat() {
+      this.isVideoOverReportShow = false
       const query = this.$route.query
       this.$router.replace({path: `/room/chat?openId=${query.openId}&origin=${query.origin || 'WE'}`})
       this.afterServerFinish(sessionStatus.video)

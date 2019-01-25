@@ -280,22 +280,22 @@ const RectTools = {
 
 const MsgsFilterTools = {
   // 机器人答案过滤 a 标签
-  transA2Button: function(answer) {
-    const regA = /<a[^>]*href="(.*?)"[^>]*>(.*?)<\/a>/g
-    if (!answer.match(regA)) {
-      return answer
-    }
-    const regHref = /href="(.*?)"/g
-    // eslint-disable-next-line
-    const regUrl = /((http|ftp|https):\/\/)?[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#])?/g
-    return answer.replace(regHref, `href="javascript:;" onclick="return false;"`)
-    // return answer.replace(regHref, `href="javascript:;"`) answer.match(regUrl)[0] store.commit('SET_ASSESS_VIEW', true)
-  },
+  // transA2Button: function(answer) {
+  //   const regA = /<a[^>]*href="(.*?)"[^>]*>(.*?)<\/a>/g
+  //   if (!answer.match(regA)) {
+  //     return answer
+  //   }
+  //   const regHref = /href="(.*?)"/g
+  //   // eslint-disable-next-line
+  //   const regUrl = /((http|ftp|https):\/\/)?[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#])?/g
+  //   return answer.replace(regHref, `href="javascript:;" onclick="return false;"`)
+  //   // return answer.replace(regHref, `href="javascript:;"`) answer.match(regUrl)[0] store.commit('SET_ASSESS_VIEW', true)
+  // },
 
   // 机器人答案链接统一为https
-  transHttp2Https: function(url) {
-    return url.match(/https/) ? url : url.replace(/http/, 'https')
-  },
+  // transHttp2Https: function(url) {
+  //   return url.match(/https/) ? url : url.replace(/http/, 'https')
+  // },
 
   // 机器人消息解析器
   botAnswerfilter: function(data) {
@@ -442,6 +442,7 @@ let Tools = Object.assign({}, {
   CacheTools: Object.create(CacheTools),
   compose: _.compose,
   curry: _.curry,
+  map: _.map,
   reduce: _.reduce,
   equals: _.equals,
   // trace :: a -> b -> b

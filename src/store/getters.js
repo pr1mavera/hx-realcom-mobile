@@ -53,6 +53,8 @@ export const queueNum = state => state.queueNum
 export const hasAssess = state => state.hasAssess
 // 评价开关
 export const isAssessView = state => state.isAssessView
+// 评价开关
+export const assessTask = state => state.assessTask
 // 服务时长
 export const serverTime = state => state.serverTime
 // 视频滤镜（客服暂离）

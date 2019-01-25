@@ -46,7 +46,6 @@
       <video-footer
         ref="videoFooter"
         @hangUpVideo="handleHangUpVideo"
-        @handleAssess="setAssessView(true)"
         @sendGift="giftSectionShow = true"
         @changeCamera="isChangeCamera = !isChangeCamera"
         @minimizeVideoBar="closeVideoBar"
@@ -253,7 +252,14 @@ export default {
       const time = this._getVideoTime(this.startTimeStamp)
       this.setServerTime(time)
       // 判断当前是否评价过
-      this.isVideoConnectSuccess && !this.hasAssess && this.setAssessView(true)
+      this.isVideoConnectSuccess && !this.hasAssess && this.setAssessView({
+        show: true,
+        task: {
+          csInfo: Object.assign({}, this.csInfo),
+          sessionId: this.sessionId,
+          mode: this.roomMode
+        }
+      })
     },
     getVideoScreenShot() {
       return new Promise(resolve => {

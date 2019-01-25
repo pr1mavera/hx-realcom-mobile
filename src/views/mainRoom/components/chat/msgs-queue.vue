@@ -128,7 +128,7 @@ export default {
     },
     timeFilter(val) {
       const temp = new Date(val.replace(/-/g, '/'))
-      return Tools.DateTools.formatDate(temp, 'MM-dd hh:mm')
+      return Tools.DateTools.formatDate(temp, 'MM月dd日 hh:mm')
     }
   }
 }

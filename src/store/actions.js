@@ -174,7 +174,16 @@ export const afterQueueSuccess = async function({ commit, state }, { mode, msgsO
 }
 
 // 排队失败
-export const afterQueueFailed = function({ commit, state }) {
+export const afterQueueFailed = function({ commit, state }, { sendFailed }) {
+  sendFailed && transTimeoutRedistribution({
+    userId: `${state.userInfo.userId}`,
+    origin: state.userInfo.origin || 'WE',
+    callType: 'ZX',
+    sessionId: `${state.chatGuid}`,
+    chatResult: '02',
+    desc: '坐席转接超时，客户端请求转接其他客服',
+    againAllot: false
+  })
   commit(types.SET_QUEUE_MODE, {
     mode: roomStatus.AIChat,
     status: queueStatus.noneQueue
@@ -202,7 +211,7 @@ export const configSendSystemMsg = function({ state }, msgsObj) {
         csNick: msgsObj.csNick || '',
         userId: state.userInfo.userId,
         userAvatar: state.userInfo.avatar,
-        userName: state.userInfo.userName,
+        userName: state.userInfo.nickName || state.userInfo.userName,
         userNick: state.userInfo.nickName || state.userInfo.userName,
         userPhone: state.userInfo.userPhone,
         openId: state.userInfo.userId,
@@ -321,6 +330,7 @@ export const reqTransAnotherTimeout = function({ commit, state }, delay) {
             mode: roomStatus.menChat,
             msgsObj
           })
+          resolve('480')
         } else {
           const err = '查询转接会话详情为空'
           reject(err)

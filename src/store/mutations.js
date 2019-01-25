@@ -49,7 +49,8 @@ const mutations = {
   [types.SET_ASSESS_STATUS](state, status) {
     state.hasAssess = status
   },
-  [types.SET_ASSESS_VIEW](state, show) {
+  [types.SET_ASSESS_VIEW](state, { show, task }) {
+    show && (state.assessTask = task)
     state.isAssessView = show
   },
   [types.SET_SERVER_TIME](state, time) {
