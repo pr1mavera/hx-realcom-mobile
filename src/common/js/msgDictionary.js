@@ -1,4 +1,5 @@
 import { getCsAvatar } from '@/server'
+import { msgTypes } from '@/common/js/status'
 
 const status = {
     getTypeMap: function() {
@@ -20,11 +21,15 @@ const statusMap = {
                 <div class={{ 'msgs-item': true, 'item-padding-left': msg.isSelfSend, 'item-padding-right': !msg.isSelfSend }}>
                     {
                         !msg.isSelfSend
-                        ? <div class="avatar">
+                        ? <div class="avatar" on-click={ () => this.enterSerCenter(msg) }>
+                            {
+                                this.theme['avatar']['decorate'] && <img class="avatar-decorate"
+                                    src={ this.theme['avatar']['decorate'] }
+                                ></img>
+                            }
                               <div class="bot-avatar bg-image">
                                   <img style={{ width: '100%', height: '100%' }}
-                                    src={ !msg.chatType || msg.chatType === '1' ? '/video/static/img/chat/xiaohua@2x.png' : getCsAvatar(msg.avatar) }
-                                    on-click={ () => this.enterSerCenter(msg) }>
+                                    src={ !msg.chatType || msg.chatType === '1' ? this.theme['avatar']['bot'] : getCsAvatar(msg.avatar) }>
                                   </img>
                               </div>
                           </div>
@@ -44,7 +49,8 @@ const statusMap = {
                             'left-content-style': !msg.isSelfSend,
                             'padding-for-img': msg.msgType === msgDictionary.getTypeCode('msg', 'msg_img'),
                             'padding-for-HX': msg.msgType === msgDictionary.getTypeCode('msg', 'msg_XH_express')
-                            }}>
+                            }}
+                            style={ msg.isSelfSend ? this.theme['msg-content']['background']['right'] : this.theme['msg-content']['background']['left'] }>
 
                             {
                                 msg.isSelfSend &&
@@ -62,14 +68,26 @@ const statusMap = {
                             }
 
                             { slot }
+
+                            {
+                                this.theme['msg-content']['decorate'] &&
+                                (msg.msgType !== msgTypes.msg_XH_express) &&
+                                (msg.msgType !== msgTypes.msg_gift) &&
+                                (msg.msgType !== msgTypes.msg_img) &&
+                                <section class={{'decorate-section': true, 'trans-direct': msg.isSelfSend}}>
+                                    <span class={{ decorate: true, top: true }} style={ this.theme['msg-content']['decorate']['top'] }></span>
+                                    <span class={{ decorate: true, bottom: true, 'trans-direct': msg.isSelfSend }} style={ this.theme['msg-content']['decorate']['bottom'] }></span>
+                                </section>
+                            }
                         </div>
                         {
                             msg.msgType === msgDictionary.getTypeCode('msg', 'msg_guess') &&
-                            <div class="content chat-content-shadow left-content-style content-extend">
+                            <div class="content chat-content-shadow left-content-style content-extend"
+                                style={ this.theme['msg-content']['background']['left'] }>
                                 <span class="text">
                                     {
                                         msg.msgExtend.map((item, index) => {
-                                            return <span class="text-extend button" key={index} on-click={() => this.clickHotQues(item.question)}>{ item.question }</span>
+                                            return <span class="text-extend button" style={ this.theme['button'] } key={index} on-click={() => this.clickHotQues(item.question)}>{ item.question }</span>
                                         })
                                     }
                                 </span>
@@ -152,14 +170,19 @@ const typeMap = {
             template: function(h, msg) {
                 return (
                     <div class="card-container">
-                        <div class="card">
-                        <div class="avatar">
-                            <img style={{ width: '100%', height: '100%' }} src="/video/static/img/chat/xiaohua@2x.png"></img>
-                        </div>
-                        <div class="text">
-                            <span class="name">{ msg.cardInfo.nickName }</span>
-                            智能客服
-                        </div>
+                        <div class="card" style={ this.theme['card-bg'] }>
+                            <div class="avatar">
+                                {
+                                    this.theme['avatar']['decorate'] && <img class="avatar-decorate"
+                                        src={ this.theme['avatar']['decorate'] }
+                                    ></img>
+                                }
+                                <img style={{ width: '100%', height: '100%' }} src={ this.theme['avatar']['bot'] }></img>
+                            </div>
+                            <div class="text" style={ this.theme['text'] }>
+                                <span class="name" style={ this.theme['button'] }>{ msg.cardInfo.nickName }</span>
+                                &nbsp;智能客服
+                            </div>
                         </div>
                         { /* <!-- <div class="label">${msg.cardInfo.nickName}进入会话竭诚为您服务~</div> --> */ }
                     </div>
@@ -226,12 +249,18 @@ const typeMap = {
                 return (
                     <span class="text">
                         { msg.content }
-                        <span class="line"></span>
+                        <span class="line" style={ this.theme['msg-content']['line'] }></span>
                         <span class="text-extend-hot">
-                            <span class="text-extend">您可能想问：</span>
+                            <span class="text-extend" style={ this.theme['text'] }>您可能想问：</span>
                             {
                                 msg.msgExtend.map((item, index) => {
-                                    return <span class="text-extend button" key={index} on-click={() => this.clickHotQues(item.question)}> { item.question } </span>
+                                    return <span
+                                        style={ this.theme['button'] }
+                                        class="text-extend button"
+                                        key={index}
+                                        on-click={() => this.clickHotQues(item.question)}>
+                                        { item.question }
+                                    </span>
                                 })
                             }
                         </span>
@@ -257,7 +286,7 @@ const typeMap = {
                 return (
                     <span class="text">
                         小华好像听不太懂您的问题呢，可转
-                        <span class="button" on-click={() => this.enterOnLineLineUp()}>人工客服</span>
+                        <span class="button" style={ this.theme['button'] } on-click={() => this.enterOnLineLineUp()}>人工客服</span>
                     </span>
                 )
             }
@@ -266,8 +295,8 @@ const typeMap = {
             type: 'msg_img', // 图片消息
             template: function(h, msg) {
                 return (
-                    <span class={{text: true, 'text-img': true, 'right-img-style': msg.isSelfSend, 'left-img-style': !msg.isSelfSend}}>
-                        <img class="text-img-cell"
+                    <span class={{text: true, 'text-img': true}}>
+                        <img class={{'text-img-cell': true, 'right-img-style': msg.isSelfSend, 'left-img-style': !msg.isSelfSend}}
                             style={{ height: '100%' }}
                             id={ msg.timestamp }
                             src={ msg.imgData.small }

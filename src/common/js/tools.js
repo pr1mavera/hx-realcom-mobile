@@ -456,7 +456,7 @@ let Tools = Object.assign({}, {
     return new Array(totalPage).fill(0).map(f)
   }),
   // strWithLink :: String -> String
-  strWithLink: _.curry(function(str) {
+  strWithLink: _.curry(function(str, style) {
     // eslint-disable-next-line
     const regUrl = /(<(a|\/a).*?>|((http|https):\/\/)?[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#]))/gi
     const regA = /<(a|\/a).*?>/g

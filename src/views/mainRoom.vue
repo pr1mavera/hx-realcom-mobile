@@ -149,7 +149,7 @@ export default {
     this.initRoom()
   },
   mounted() {
-    this.$nextTick(() => {
+    this.$nextTick(async() => {
       document.getElementById('app').style.display = 'block'
       document.getElementById('appLoading').style.display = 'none'
     })
@@ -204,6 +204,7 @@ export default {
       this.setAssessStatus(true)
       this.setServerTime('00:00')
       this.servStatus = false
+      this.isVideoOverReportShow = true
     },
     // 响应用户的视频请求
     requestVideoServer({ csId, csName, csNick }) {
@@ -262,6 +263,7 @@ export default {
     assessSuccess(mode) {
       this.setAssessStatus(false)
       this.setAssessView(false)
+      debugger
       if (mode === roomStatus.videoChat) {
         this.isVideoOverReportShow = true
       }
@@ -279,10 +281,11 @@ export default {
       } else {
         // 当前视频已结束
         const self = this
+        debugger
         this.$vux.confirm.show({
           title: '您真的要放弃评价嘛？？',
           onConfirm() {
-            self.assessSuccess(this.roomMode)
+            self.assessSuccess(self.roomMode)
             // // 服务结束
             // self.setAssessView(false)
             // self.setAssessStatus(true)
@@ -402,6 +405,7 @@ export default {
       setServerTime: 'SET_SERVER_TIME'
     }),
     ...mapActions([
+      'systemConfig',
       'beforeQueue',
       'afterServerFinish',
       'initSession'

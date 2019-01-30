@@ -74,7 +74,8 @@ export default {
       return this.isVip ? 'chat_vip' : 'chat'
     },
     tipsPos() {
-      return `transform: translateY(${(this.tipsIndex - 1) * 7}rem)`
+      const h = document.body.clientHeight || document.documentElement.clientHeight
+      return `transform: translateY(${(h * 0.1 - 39.5 + (this.tipsIndex - 1) * 7).toFixed(1)}rem)`
     },
     ...mapGetters([
       'roomMode',
@@ -345,6 +346,7 @@ export default {
       position: absolute;
       top: 0;
       .item {
+        background: #ff959c;
         .icon {
           width: 100%;
           height: 100%;

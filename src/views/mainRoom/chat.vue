@@ -5,7 +5,7 @@
       class="chat-room transition-bezier"
       ref="chatRoom"
       :class="[{'extend-bar-open': this.extendBarOpen, 'extend-bar-launch-open': extendBarLaunchOpen}]">
-      <div class="chat-wrapper" ref="chatScroll">
+      <div class="chat-wrapper" ref="chatScroll" :style="chatBG">
         <pull-down
           :pullDownStyle="pullDownStyle"
           :isRebounding="isRebounding"
@@ -90,7 +90,7 @@ import Tools from '@/common/js/tools'
 // import { formatDate } from '@/common/js/dateConfig.js'
 import { loginMixin, IMMixin, sendMsgsMixin, getMsgsMixin, onLineQueueMixin } from '@/common/js/mixin'
 // eslint-disable-next-line
-import { TIME_5_MIN, roomStatus, queueStatus, sessionStatus, toggleBarStatus, msgStatus, msgTypes, tipTypes, dialogTypes, cardTypes } from '@/common/js/status'
+import { TIME_5_MIN, roomStatus, queueStatus, sessionStatus, toggleBarStatus, msgStatus, msgTypes, tipTypes, dialogTypes, cardTypes, themeMap } from '@/common/js/status'
 import { ERR_OK, getSessionStatus, getLoginState } from '@/server/index.js'
 import { Previewer, TransferDom } from 'vux'
 
@@ -120,6 +120,9 @@ export default {
     'PullDown': () => import('@/views/mainRoom/components/chat/pull-down')
   },
   computed: {
+    chatBG() {
+      return this.theme && this.theme['chat-bg']
+    },
     previewImgOptions() {
       const self = this
       return {
@@ -146,6 +149,7 @@ export default {
       return `transform: translate(${pos.left}px, ${pos.top}px); opacity: ${self.isCopyButtonShow ? 1 : 0};`
     },
     ...mapGetters([
+      'theme',
       'userInfo',
       'botInfo',
       'msgs',
@@ -158,6 +162,7 @@ export default {
   data() {
     return {
       clipboard: null,
+      chatScroll: {},
       scrollY: 0,
       inputFocPos: 0,
       inputBarTimer: null,
@@ -197,6 +202,7 @@ export default {
 
     this.$nextTick(() => {
       // 初始化滚动
+      this._setTheme()
       this._initScroll()
       this._initPullDownRefresh()
       this._initChat()
@@ -237,6 +243,12 @@ export default {
     })
   },
   methods: {
+    async _setTheme() {
+      // 配置主题
+      const themeConfig = await this.systemConfig('theme')
+      const theme = themeConfig.getTheme()
+      this.setTheme(theme)
+    },
     async _initChat() {
       const query = this.$route.query
 
@@ -278,6 +290,7 @@ export default {
 
       // IM 初始化
       this.initIM(userInfo)
+      return undefined
     },
     async getCurServStatus() {
       // 如果有会话未结束，则重连
@@ -552,7 +565,7 @@ export default {
       this._inputBlur()
       this.$refs.inputBar.setInputText('')
       text = text.replace(/&nbsp;/g, '').replace(/<(?!a).*?>/g, '')
-      text = Tools.strWithLink(text)
+      text = Tools.strWithLink(text, this.theme['button'])
 
       if (text && text.trim()) {
         // this.roomMode === roomStatus.AIChat ? await this.sendTextMsgToBot(text) : await this.sendC2CMsgs(text)
@@ -743,6 +756,7 @@ export default {
     },
     // 删除msgs里面对应时间戳的一条提示消息
     ...mapMutations({
+      setTheme: 'SET_THEME',
       setUserInfo: 'SET_USER_INFO',
       setBotInfo: 'SET_BOT_INFO',
       setCsInfo: 'SET_CS_INFO',

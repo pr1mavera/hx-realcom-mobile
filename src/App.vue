@@ -14,6 +14,7 @@ import deviceConfig from './config/device'
 import { beforeEnterVideo } from '@/common/js/beforeEnterVideo'
 import { stringEx } from './config/extend'
 import Tools from '@/common/js/tools'
+// import { mapGetters, mapActions, mapMutations } from 'vuex'
 // const wx = require('@/common/js/wx')
 // import { mapGetters, mapMutations } from 'vuex'
 // import Tools from '@/common/js/tools'
@@ -25,11 +26,11 @@ export default {
   //   'MainRoom': () => import('@/views/mainRoom'),
   //   'Share': () => import('@/views/share')
   // },
-  // computed: {
+  computed: {
     // ...mapGetters([
-    //   'msgs'
+    //   'theme'
     // ])
-  // },
+  },
   created() {
     // 取当前路由 # 之前的
     const url = window.location.href.split('#')[0]
@@ -47,13 +48,21 @@ export default {
     // this.addevent()
     // wx.showSafariMenu()
   },
-  async mounted() {
+  mounted() {
     const query = this.$route.query
     const realQuery = Tools.getRealQuery(window.location.href)
     const openId = query.openId || realQuery.openId || realQuery.openid || 'visitor'
     const origin = query.origin || realQuery.origin || realQuery.attach || 'WE'
     console.log(realQuery)
     this.$router.replace({path: `/room?openId=${openId}&origin=${origin}`})
+  },
+  methods: {
+    // ...mapMutations({
+    //   setTheme: 'SET_THEME'
+    // }),
+    // ...mapActions([
+    //   'systemConfig'
+    // ])
   },
   activated() {
     this.$setgoindex()
@@ -88,7 +97,8 @@ html, body {
   /*font-size: 62.5%;*/
 }
 a {
-  color: rgb(82, 144, 239);
+  // color: rgb(82, 144, 239);
+  color: unset;
   -webkit-touch-callout: none;
 }
 /*防止iPhone X 底部小黑条遮挡页面最底部内容的情况*/

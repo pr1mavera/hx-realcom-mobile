@@ -62,6 +62,7 @@ export default {
   },
   computed: {
     ...mapGetters([
+      'theme',
       'csInfo'
     ])
   },
@@ -140,6 +141,7 @@ export default {
 
 .chat-content {
   width: 100%;
+  overflow: hidden;
   ul {
     .chat_content_block {
       width: 100%;
@@ -298,11 +300,24 @@ export default {
               width: 4.6rem;
               height: 4.6rem;
               border-radius: 50%;
-              overflow: hidden;
+              // overflow: hidden;
               margin: 0 auto;
               border: 0.3rem solid rgb(244, 244, 244);
               box-sizing: border-box;
+              .avatar-decorate {
+                position: absolute;
+                top: -.3rem;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
+                z-index: 1;
+                transform: scale(1.4)
+              }
               img {
+                border-radius: 50%;
                 object-fit: cover;
               }
             }
@@ -344,8 +359,20 @@ export default {
           background-color: @text-light;
           border-radius: 50%;
           margin: 0 1rem;
-          overflow: hidden;
+          // overflow: hidden;
           align-items: flex-start;
+          .avatar-decorate {
+            position: absolute;
+            top: -.3rem;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            z-index: 1;
+            transform: scale(1.4)
+          }
           .bot-avatar {
             position: absolute;
             top: 0;
@@ -353,6 +380,8 @@ export default {
             left: 0;
             right: 0;
             img {
+              border-radius: 50%;
+              overflow: hidden;
               width: 100%;
               height: 100%;
               object-fit: cover;
@@ -454,7 +483,9 @@ export default {
             &.padding-for-HX {
               padding: 0;
               box-shadow: none;
-              background-color: unset;
+              background: unset!important;
+              background-color: unset!important;
+              background-image: unset!important;
               border-radius: 0;
               .text {
                 display: inline-block;
@@ -483,17 +514,18 @@ export default {
                 margin: auto;
               }
               &.text-img {
-                overflow: hidden;
-                &.left-img-style {
-                  border-radius: 0.4rem 1.2rem 1.2rem 1.2rem;
-                }
-                &.right-img-style {
-                  border-radius: 1.2rem 0.4rem 1.2rem 1.2rem;
-                }
+                // overflow: hidden;
                 .text-img-cell {
                   vertical-align: middle;
                   max-width: 100%;
                   object-fit: cover;
+                  overflow: hidden;
+                  &.left-img-style {
+                    border-radius: 0.4rem 1.2rem 1.2rem 1.2rem;
+                  }
+                  &.right-img-style {
+                    border-radius: 1.2rem 0.4rem 1.2rem 1.2rem;
+                  }
                 }
               }
               .button {
@@ -574,6 +606,32 @@ export default {
                       }
                     }
                   }
+                }
+              }
+            }
+            .decorate-section {
+              display: block;
+              position: absolute;
+              top: 0;
+              right: 0;
+              height: 100%;
+              &.trans-direct {
+                left: 0;
+                transform: rotateY(180deg);
+                transform-origin: 0;
+              }
+              .decorate{
+                position: absolute;
+                width: 4rem;
+                height: 4rem;
+                z-index: 100;
+                background-size: contain;
+                background-repeat: no-repeat;
+                &.top {
+                  top: 0;
+                }
+                &.bottom {
+                  bottom: 0;
                 }
               }
             }

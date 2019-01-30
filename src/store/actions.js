@@ -1,49 +1,65 @@
 import * as types from './mutation-types'
 import Tools from '@/common/js/tools'
 import IM from '@/server/im'
-import { TIME_3_MIN, TIME_5_MIN, MSG_PAGE_SIZE, sessionStatus, toggleBarStatus, roomStatus, queueStatus, msgStatus, msgTypes, dialogTypes, tipTypes, systemMsgStatus } from '@/common/js/status'
+import { TIME_3_MIN, TIME_5_MIN, MSG_PAGE_SIZE, sessionStatus, toggleBarStatus, roomStatus, queueStatus, msgStatus, msgTypes, dialogTypes, tipTypes, systemMsgStatus, themeMap } from '@/common/js/status'
 import { ERR_OK, createSession, getCsAvatar, transTimeoutRedistribution, getSessionDetail, getSystemConfig } from '@/server/index.js'
 
-const systemConfigCompareMap = {
-  localCapacityFlag: function(value) {
-      return value
+// 系统配置附属函数
+const systemConfigCallbackMap = {
+  // 本地身份开启标识
+  'localCapacityFlag': function get(value) {
+    return value
   },
-  queueLimit: function(value) {
-      return value
+  // 排队人数上限
+  'queueLimit': function get(value) {
+    return value
   },
-  cacheExpireTime: function(cacheT) {
+  // 缓存过期时间（24小时制）
+  'cacheExpireTime': function compare(cacheT) {
       const now = new Date()
       const cache = new Date(cacheT)
       // 缓存时间为当天，且当前时间小于系统配置缓存过期时刻
       return (cache.getDate() === now.getDate()) && (now.getHours() < +this.value)
   },
-  sessionTimeOut: function(cacheT) {
+  // 会话超时时间（分钟）
+  'sessionTimeOut': function compare(cacheT) {
       const now = new Date()
       const cache = new Date(cacheT)
       // 缓存时间为当天，且缓存时间与当前时间差小于系统配置缓存过期时间
       return (cache.getDate() === now.getDate()) && ((now.getTime() - cacheT) < Tools.DateTools.minutes2Timestamp(this.value))
   },
-  connectTimeOut: function(value) {
-      return value
-  },
-  compressLimit: function(value) {
+  // 转接超时时间
+  'connectTimeOut': function get(value) {
     return value
+  },
+  // 图片压缩下限
+  'compressLimit': function get(value) {
+    return value
+  },
+  // 主题
+  'theme': function getTheme() {
+    const themeKey = Object.keys(this.value).filter(key => this.value[key] == 1)[0] // eslint-disable-line
+    console.log('themeKey!!!', themeMap[themeKey])
+
+    return themeMap[themeKey]
   }
 }
 
+// 初始化
 async function systemConfigAPI() {
   const res = await getSystemConfig()
   if (res.result.code === ERR_OK) {
     const data = res.data
-    return Object.keys(data).reduce((val, key) => {
+    // 初始化配置信息
+    const configMap = Tools.reduce((val, key) => {
       return Object.assign(val, {
         [key]: {
           value: data[key].value,
-          compare: systemConfigCompareMap[key]
+          [systemConfigCallbackMap[key].name]: systemConfigCallbackMap[key]
         }
-        // [key]: data[key].value
       })
     }, {})
+    return configMap(Object.keys(data))
   } else {
     console.log('error in getSystemConfig: ', res.result.message)
   }
@@ -55,6 +71,8 @@ export const systemConfig = async function({ commit }, key) {
   if (!config) {
     config = await systemConfigAPI()
   }
+  // console.log('themeKey!!!', config)
+
   return config[key]
 }
 

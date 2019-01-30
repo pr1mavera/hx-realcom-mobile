@@ -416,6 +416,7 @@ export const RTCRoomMixin = {
 export const IMMixin = {
   computed: {
     ...mapGetters([
+      'theme',
       'userInfo',
       'csInfo',
       'roomMode',
@@ -688,7 +689,7 @@ export const IMMixin = {
         this.addPreviewImg({ list: this.previewImgList, msgsObj })
       }
       if (msgsObj.msgStatus === msgStatus.msg && msgsObj.msgType === msgTypes.msg_normal) { // 消息封装链接
-        msgsObj.content = Tools.strWithLink(msgsObj.content)
+        msgsObj.content = Tools.strWithLink(msgsObj.content, this.theme['button'])
       }
       if (msgsObj.msgStatus === msgStatus.msg && msgsObj.msgType === msgTypes.msg_timeout) { // 超时消息
         const dialog = {
@@ -767,6 +768,7 @@ export const IMMixin = {
 export const sendMsgsMixin = {
   computed: {
     ...mapGetters([
+      'theme',
       'roomMode',
       'botInfo',
       'userInfo',
@@ -847,7 +849,8 @@ export const sendMsgsMixin = {
         }
         imgMsgs = imgL.map(img2msgFn)
       }
-      const text = answer.content.replace(/<(?!a|\/a).*?>/g, '')
+      let text = answer.content.replace(/<(?!a|\/a).*?>/g, '')
+      text = Tools.strWithLink(text, this.theme['button'])
       // 文本消息过滤掉图片之后仍然存在文本，则配置文本消息
       text && textMsg.push(Object.assign({}, answer, { content: text }))
       // 组合文本消息和图片消息

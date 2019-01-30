@@ -1,5 +1,7 @@
 import { msgStatus, msgTypes, roomStatus, sessionStatus } from '@/common/js/status'
 
+// 主题
+export const theme = state => state.theme
 // 初始化时记录的初始URL
 export const sourceUrl = state => state.sourceUrl
 // 用户基本信息

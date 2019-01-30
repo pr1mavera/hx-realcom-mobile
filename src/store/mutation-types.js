@@ -1,3 +1,5 @@
+export const SET_THEME = 'SET_THEME'
+
 export const SET_USER_INFO = 'SET_USER_INFO'
 
 export const SET_BOT_INFO = 'SET_BOT_INFO'

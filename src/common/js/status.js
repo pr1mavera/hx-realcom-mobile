@@ -93,3 +93,56 @@ export const dialogTypes = {
 export const cardTypes = {
   bot_card: '0' // 刚进入时机器人卡片
 }
+
+export const themeMap = {
+  // 基本
+  'normal': {
+    // chat 背景图
+    'chat-bg': `background-image: url('/video/static/img/chat/bg.jpg');`,
+    // 智能小华卡片背景
+    'card-bg': 'background: #fff',
+    // 文本
+    'text': 'color: #646464;',
+    // button标签、a标签
+    'button': 'color: rgb(82, 144, 239); text-decoration: none;',
+    // 单个消息体
+    'msg-content': {
+      'background': {
+        left: 'background-color: #fff!important; color: #646464!important;',
+        right: 'background-color: rgb(255, 149, 156)!important; color: #fff!important;'
+      },
+      // 上下装饰
+      'decorate': null,
+      // 虚线
+      'line': `background: linear-gradient(to right, #D6D7DC, #D6D7DC 0.5rem, transparent 0.5rem, transparent ); background-size: 1rem 100%;`
+    },
+    // 头像
+    'avatar': {
+      bot: '/video/static/img/chat/xiaohua@2x.png',
+      decorate: null
+    }
+  },
+  // 新春主题
+  'spring': {
+    'chat-bg': `background-image: url('/video/static/img/theme/spring/chat-bg.jpg');`,
+    'card-bg': `background-image: url('/video/static/img/theme/spring/msg-content-bg.png');`,
+    'text': 'color: #FFFF6C!important;',
+    'button': 'color: #FFFF6C!important; text-decoration: underline!important;',
+    'msg-content': {
+      'background': {
+        left: `background-image: url('/video/static/img/theme/spring/msg-content-bg.png'); color: #FFFF6C!important; box-shadow: none;`,
+        right: `background-image: url('/video/static/img/theme/spring/msg-content-bg.png'); color: #FFFF6C!important; box-shadow: none;`
+      },
+      'decorate': {
+        top: `background-image: url('/video/static/img/theme/spring/msg-content-decorate-top.png'); transform: translate(-1.5rem, -1.3rem) scale(0.8);`,
+        bottom: `background-image: url('/video/static/img/theme/spring/msg-content-decorate-bottom.png'); transform: translate(-4.5rem, 3.5rem) scale(1.5);`
+      },
+      'line': `background: linear-gradient(to right, #FFFF6C, #FFFF6C 0.5rem, transparent 0.5rem, transparent ); background-size: 1rem 100%;`
+    },
+    'avatar': {
+      bot: '/video/static/img/theme/spring/avatar-bot.png',
+      // decorate: null
+      decorate: '/video/static/img/theme/spring/avatar-decorate.png'
+    }
+  }
+}

@@ -1,6 +1,9 @@
 import * as types from './mutation-types'
 
 const mutations = {
+  [types.SET_THEME](state, theme) {
+    state.theme = theme
+  },
   [types.SET_USER_INFO](state, info) {
     state.userInfo = info
   },
