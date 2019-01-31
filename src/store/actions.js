@@ -5,76 +5,81 @@ import { TIME_3_MIN, TIME_5_MIN, MSG_PAGE_SIZE, sessionStatus, toggleBarStatus, 
 import { ERR_OK, createSession, getCsAvatar, transTimeoutRedistribution, getSessionDetail, getSystemConfig } from '@/server/index.js'
 
 // 系统配置附属函数
-const systemConfigCallbackMap = {
+const config_cb = {
   // 本地身份开启标识
-  'localCapacityFlag': function get(value) {
-    return value
+  'localCapacityFlag': {
+    get: function() {
+      return this.value
+    }
   },
   // 排队人数上限
-  'queueLimit': function get(value) {
-    return value
+  'queueLimit': {
+    get: function() {
+      return this.value
+    }
   },
   // 缓存过期时间（24小时制）
-  'cacheExpireTime': function compare(cacheT) {
+  'cacheExpireTime': {
+    compare: function(cacheT) {
       const now = new Date()
       const cache = new Date(cacheT)
       // 缓存时间为当天，且当前时间小于系统配置缓存过期时刻
       return (cache.getDate() === now.getDate()) && (now.getHours() < +this.value)
+    }
   },
   // 会话超时时间（分钟）
-  'sessionTimeOut': function compare(cacheT) {
+  'sessionTimeOut': {
+    compare: function(cacheT) {
       const now = new Date()
       const cache = new Date(cacheT)
       // 缓存时间为当天，且缓存时间与当前时间差小于系统配置缓存过期时间
       return (cache.getDate() === now.getDate()) && ((now.getTime() - cacheT) < Tools.DateTools.minutes2Timestamp(this.value))
+    }
   },
   // 转接超时时间
-  'connectTimeOut': function get(value) {
-    return value
+  'connectTimeOut': {
+    get: function() {
+      return this.value
+    }
   },
   // 图片压缩下限
-  'compressLimit': function get(value) {
-    return value
+  'compressLimit': {
+    get: function() {
+      return this.value
+    }
   },
   // 主题
-  'theme': function getTheme() {
-    const themeKey = Object.keys(this.value).filter(key => this.value[key] == 1)[0] // eslint-disable-line
-    console.log('themeKey!!!', themeMap[themeKey])
-
-    return themeMap[themeKey]
+  'theme': {
+    getTheme: function() {
+      const themeKey = Object.keys(this.value).filter(key => this.value[key] == 1)[0] // eslint-disable-line
+      console.log('themeKey!!!', themeMap[themeKey])
+      return themeMap[themeKey]
+    }
   }
 }
 
-// 初始化
 async function systemConfigAPI() {
   const res = await getSystemConfig()
   if (res.result.code === ERR_OK) {
-    const data = res.data
-    // 初始化配置信息
-    const configMap = Tools.reduce((val, key) => {
-      return Object.assign(val, {
-        [key]: {
-          value: data[key].value,
-          [systemConfigCallbackMap[key].name]: systemConfigCallbackMap[key]
-        }
-      })
-    }, {})
-    return configMap(Object.keys(data))
+    let data = res.data
+    // 初始化合并系统配置信息
+    return Tools.merge(data, config_cb)
   } else {
     console.log('error in getSystemConfig: ', res.result.message)
   }
 }
 
-let config = null
+// 系统配置
+export const systemConfig = (function() {
+  let config = null
 
-export const systemConfig = async function({ commit }, key) {
-  if (!config) {
-    config = await systemConfigAPI()
+  return async function getConfig({ commit }, key) {
+    if (!config) {
+      config = await systemConfigAPI()
+    }
+    return config[key]
   }
-  // console.log('themeKey!!!', config)
-
-  return config[key]
-}
+})()
 
 // 键盘弹出延迟（弃用）
 export const closeBarBuffer = async function({ commit }, { mutationType, delay }) {

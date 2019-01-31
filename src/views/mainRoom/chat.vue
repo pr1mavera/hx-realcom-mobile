@@ -199,10 +199,11 @@ export default {
       this.$emit('iOSVideoFailed')
       return undefined
     }
+    // 初始化主题
+    this._setTheme()
 
     this.$nextTick(() => {
       // 初始化滚动
-      this._setTheme()
       this._initScroll()
       this._initPullDownRefresh()
       this._initChat()

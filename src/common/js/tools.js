@@ -1,5 +1,14 @@
-import { TIME_3_MIN, msgStatus, msgTypes, sessionStatus } from '@/common/js/status'
-import { Right, Left } from '@/common/js/container/either'
+import {
+  TIME_3_MIN,
+  msgStatus,
+  msgTypes,
+  sessionStatus
+} from '@/common/js/status'
+import {
+  Right,
+  Left
+} from '@/common/js/container/either'
+
 const _ = require('ramda')
 
 const DateTools = {
@@ -62,7 +71,10 @@ const DateTools = {
     return (cache.getDate() === now.getDate()) && (now.getHours() < +quality)
   },
 
-  isWorkTime: function({ startTime, endTime }) {
+  isWorkTime: function({
+    startTime,
+    endTime
+  }) {
     const strb = startTime.split(':')
     if (strb.length !== 2) {
       return false
@@ -321,8 +333,7 @@ const MsgsFilterTools = {
     } else if (data.info.length === 3) {
       // 猜问题
       msg.msgType = msgTypes.msg_guess
-      msg.msgExtend = [
-        {
+      msg.msgExtend = [{
           question: data.info[0].question,
           answer: data.info[0].answer
           // answer: this.transA2Button(data.info[0].answer)
@@ -385,7 +396,11 @@ const MsgsFilterTools = {
 
 const CacheTools = {
   // 从localStorage取对应字段的缓存
-  getCacheData: function({ key, check, quality }) {
+  getCacheData: function({
+    key,
+    check,
+    quality
+  }) {
     const cache = window.localStorage.getItem(key)
     const cacheObj = cache ? JSON.parse(cache) : ''
     if (!cache) {
@@ -405,7 +420,11 @@ const CacheTools = {
   },
 
   // 存localStorage
-  setCacheData: function({ key, check, data }) {
+  setCacheData: function({
+    key,
+    check,
+    data
+  }) {
     window.localStorage.setItem(key, JSON.stringify({
       timestamp: new Date().getTime(),
       check,
@@ -414,7 +433,11 @@ const CacheTools = {
   },
 
   // 跟新当前服务缓存消息
-  updateCacheData: function({ key, msgs, timestamp }) {
+  updateCacheData: function({
+    key,
+    msgs,
+    timestamp
+  }) {
     let cache = window.localStorage.getItem(key)
     if (!cache) {
       // 当前无对应key值的缓存，
@@ -479,6 +502,7 @@ let Tools = Object.assign({}, {
   randomMin2Max: _.curry(function(min, max) {
     return Math.floor(Math.random() * (max - min) + min)
   }),
+  // 获取路径中的所有query
   getRealQuery: function(url) {
     // if (!url.match(/#/)) url = `${url}#`
     const toPairs = _.compose(_.map(_.split('=')), _.split('&'))
@@ -490,10 +514,25 @@ let Tools = Object.assign({}, {
     const getQueryObj = _.compose(_.reduce(arr2Obj, {}), queryArr)
     return getQueryObj(url)
   },
+  // 生成会话id
   getRamSessionId: function() {
     const date = this.DateTools.formatDate('yyyy-MM-dd-hh-mm-ss-SSS').split(/-/g).join('')
     const ram = this.randomMin2Max(100000)(999999)
     return `${sessionStatus.robot}${date}${ram}`
+  },
+  // 递归合并两个深度为2，且含有相同 key 的对象
+  merge: function(obj1, obj2) {
+    function merger(inital, curKey, ...keyArr) {
+      // 当前需要合并的对象
+      const mergeObj = obj2[curKey]
+      // 合并
+      mergeObj && Object.assign(inital[curKey], mergeObj)
+
+      return keyArr.length
+        ? merger(inital, ...keyArr)
+        : inital
+    }
+    return merger(obj1, ...Object.keys(obj1))
   }
 })
 
