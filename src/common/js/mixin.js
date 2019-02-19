@@ -385,6 +385,11 @@ export const RTCRoomMixin = {
       const send_bps = data.WebRTCQualityReq.uint32_total_send_bps
       const recv_bps = data.WebRTCQualityReq.uint32_total_recv_bps
 
+      const rsv_br = data.WebRTCQualityReq.VideoReportState.uint32_video_rcv_br
+      const snd_br = data.WebRTCQualityReq.VideoReportState.uint32_video_snd_br
+      Tools.trace('rsv_br：=== ')(rsv_br)
+      Tools.trace('snd_br：=== ')(snd_br)
+
       const daley_CB = async(data) => {
         if (!this.qualityReqToast) {
           // Tools.trace('延迟过高：')(data)
@@ -395,11 +400,11 @@ export const RTCRoomMixin = {
         }
       }
       Tools.compose(
-        Either(() =>{}, daley_CB),
+        Either(() => {}, daley_CB),
         Tools.getState(Tools.over(1000)),
         Tools.trace('总延迟：'))(daley)
       Tools.compose(
-        Either(() =>{}, daley_CB),
+        Either(() => {}, daley_CB),
         Tools.getState(Tools.over(600)),
         Tools.trace('视频延迟：'))(daley_inside)
 

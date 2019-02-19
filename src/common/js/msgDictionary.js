@@ -395,7 +395,7 @@ const msgDictionary = {
     },
     getTypeCode: function(status, type) {
         const TMap = typeMap[status]
-        return Object.keys(TMap).find(key => TMap[`${key}`].type === type)
+        return Object.keys(TMap).find(key => TMap[key].type === type)
     },
     getTemplate: function(msg) {
         // 当前 this 为消息队列组件
