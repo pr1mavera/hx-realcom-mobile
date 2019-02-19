@@ -8,8 +8,8 @@
           </svg>
         </button>
       </div>
-      <div class="menu">
-        <button class="footer-btn footer-btn-gift extend-click" @click="$emit('sendGift')">
+      <div class="menu" :style="canTouch">
+        <button class="footer-btn footer-btn-gift extend-click" @click="videoConnected && $emit('sendGift')">
           <svg class="icon" aria-hidden="true">
             <use xlink:href="#icon-liwu"></use>
           </svg>
@@ -19,17 +19,17 @@
             <use xlink:href="#icon-pingjia"></use>
           </svg>
         </button> -->
-        <button class="footer-btn footer-btn-switch extend-click" @click="$emit('changeCamera')">
+        <button class="footer-btn footer-btn-switch extend-click" @click="videoConnected && $emit('changeCamera')">
           <svg class="icon" aria-hidden="true">
             <use xlink:href="#icon-qiehuanshexiangtou"></use>
           </svg>
         </button>
-        <button class="footer-btn footer-btn-screen extend-click" @click="$emit('minimizeVideoBar')">
+        <button class="footer-btn footer-btn-screen extend-click" @click="videoConnected && $emit('minimizeVideoBar')">
            <!-- :class="{'isBtnHighLight': isMinimizeBtnHighLight}" -->
           <svg class="icon" aria-hidden="true">
             <use xlink:href="#icon-suoxiao"></use>
           </svg>
-          <div class="tips" v-if="isMinimizeBtnHighLight">点击文字交流</div>
+          <div class="tips" v-if="false">点击文字交流</div>
         </button>
       </div>
     </div>
@@ -43,6 +43,16 @@ export default {
   data() {
     return {
       isMinimizeBtnHighLight: false
+    }
+  },
+  props: {
+    videoConnected: {
+      type: Boolean
+    }
+  },
+  computed: {
+    canTouch() {
+      return !this.videoConnected ? 'opacity: .4;' : undefined
     }
   },
   methods: {

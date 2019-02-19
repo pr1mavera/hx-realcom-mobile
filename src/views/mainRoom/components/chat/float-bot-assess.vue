@@ -9,9 +9,10 @@
     @touchmove.capture="!isBotAssessToggle && slideMove($event)"
     @touchend.capture="!isBotAssessToggle && endSlide()">
     <div class="assess-area border-1px-right">
-      <p class="text-content">是否已解决您的问题？</p>
-      <div class="btn-area border-1px-before">
-        <button type="button" class="bot-assess-btn yes border-1px-right" @click.self="$emit('targetBotAssess', true)">
+      <p class="text-content" v-if="false">是否已解决您的问题？</p>
+      <!-- <div class="btn-area border-1px-before"> -->
+      <div class="btn-area">
+        <button type="button" class="bot-assess-btn yes border-1px-after" @click.self="$emit('targetBotAssess', true)">
           <svg class="icon extend-click" aria-hidden="true">
             <use xlink:href="#icon-dianzan"></use>
           </svg>
@@ -42,7 +43,7 @@ export default {
   data() {
     return {
       isBotAssessToggle: false,
-      toggle: 40,
+      toggle: 10,
       start: null,
       move: 0
     }
@@ -65,7 +66,10 @@ export default {
     slideMove(event) {
       // debugger
       const e = event.targetTouches[0]
-      this.move = e.clientX - this.start
+      const change = e.clientX - this.start
+      // 限制不能向右滑动
+      change < 0 && (this.move = change)
+      // this.move = e.clientX - this.start
       console.log(`move: ${this.move}`)
     },
     endSlide() {
@@ -104,20 +108,26 @@ export default {
 
 .float-bot-assess {
   position: relative;
-  width: 18rem;
-  height: 8rem;
+  // width: 18rem;
+  width: 4.4rem;
+  // height: 8rem;
+  height: 16rem;
   background-color: @text-lighter;
-  border-radius: 1.2rem;
+  // border-radius: 1.2rem;
+  border-top-right-radius: 1rem;
+  border-bottom-right-radius: 1rem;
   box-shadow: 0 0.3rem 1rem 0rem rgba(147, 147, 147, 0.1);
   transition: all 0.4s cubic-bezier(0, 0, 0.2, 1);
   &.bot-assess-close {
-    transform: translateX(-99%)!important;
+    // transform: translateX(-99%)!important;
+    transform: translateX(-80%)!important;
   }
   &.anime {
     transition-duration: 0s;
   }
   .assess-area {
-    width: calc(~'100% - 1.4rem');
+    // width: calc(~'100% - 1.4rem');
+    width: calc(~'100% - 0.8rem');
     height: 100%;
     .border-1px-right(@label-line-light);
     .text-content {
@@ -127,27 +137,36 @@ export default {
       line-height: 4.8rem;
     }
     .btn-area {
-      .border-1px-before(@label-line-light);
+      // .border-1px-before(@label-line-light);
       display: flex;
       justify-content: space-between;
+      flex-direction: column;
       width: 100%;
-      height: 3.2rem;
+      // height: 3.2rem;
+      height: 100%;
       .bot-assess-btn {
         margin: 0;
         padding: 0;
         border: 0;
         background-color: unset;
-        width: 50%;
+        // width: 50%;
+        width: 100%;
         height: 100%;
-        font-size: 1.4rem;
-        line-height: 3.2rem;
+        // font-size: 1.4rem;
+        font-size: 1.2rem;
+        // line-height: 3.2rem;
+        line-height: 1.4rem;
+        padding: 1rem;
         .icon {
-          transform: translateY(0.2rem);
+          // transform: translateY(0.2rem);
           width: 1.4rem;
           height: 1.4rem;
+          display: block;
+          margin: 0 auto .7rem;
         }
         &.yes {
-          .border-1px-right(@label-line-light);
+          // .border-1px-right(@label-line-light);
+          .border-1px-after(@label-line-light);
           color: rgb(82, 144, 239);
           .icon {
             fill: rgb(82, 144, 239);
@@ -165,11 +184,13 @@ export default {
   }
   .slide-btn {
     position: absolute;
-    right: 0.8rem;
+    // right: 0.8rem;
+    right: 0.5rem;
     top: 0;
     bottom: 0;
     margin: auto;
-    height: 20%;
+    // height: 20%;
+    height: .8rem;
     width: 0.1rem;
     display: flex;
     justify-content: space-between;
@@ -177,10 +198,12 @@ export default {
     &.open {
       .slide-item {
         &.top {
-          transform: rotateZ(20deg);
+          // transform: rotateZ(20deg);
+          transform: rotateZ(40deg);
         }
         &.bottom {
-          transform: rotateZ(-20deg);
+          // transform: rotateZ(-20deg);
+          transform: rotateZ(-40deg);
         }
       }
     }

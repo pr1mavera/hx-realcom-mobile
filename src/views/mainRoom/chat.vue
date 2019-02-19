@@ -890,7 +890,8 @@ export default {
       .float-bot-assess {
         position: absolute;
         bottom: 1.2rem;
-        left: 1.2rem;
+        // left: 1.2rem;
+        left: 0;
       }
       .fade-enter-active, .fade-leave-active {
         // backdrop-filter: blur(2px);

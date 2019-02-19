@@ -520,19 +520,23 @@ let Tools = Object.assign({}, {
     const ram = this.randomMin2Max(100000)(999999)
     return `${sessionStatus.robot}${date}${ram}`
   },
-  // 递归合并两个深度为2，且含有相同 key 的对象
+  // 尾递归合并两个深度为2，且含有相同 key 的对象
   merge: function(obj1, obj2) {
-    function merger(inital, curKey, ...keyArr) {
+    function merger(inital, curKey, ...restKey) {
+      // warn: 会更改 inital 对象
       // 当前需要合并的对象
       const mergeObj = obj2[curKey]
       // 合并
       mergeObj && Object.assign(inital[curKey], mergeObj)
 
-      return keyArr.length
-        ? merger(inital, ...keyArr)
+      return restKey.length
+        ? merger(inital, ...restKey)
         : inital
     }
-    return merger(obj1, ...Object.keys(obj1))
+    // deepCopy obj1
+    let target = JSON.parse(JSON.stringify(obj1))
+
+    return merger(target, ...Object.keys(target))
   }
 })
 

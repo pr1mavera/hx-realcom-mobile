@@ -24,6 +24,7 @@
       <p class="text">转电话</p>
     </div>
     <div class="btn-item" v-if="userInfo.videoVisible || false">
+    <!-- <div class="btn-item"> -->
       <button
         class="item extend-click transition-bezier"
         @click="videoLineUp"
@@ -74,8 +75,9 @@ export default {
       return this.isVip ? 'chat_vip' : 'chat'
     },
     tipsPos() {
-      const h = document.body.clientHeight || document.documentElement.clientHeight
-      return `transform: translateY(${(h * 0.1 - 39.5 + (this.tipsIndex - 1) * 7).toFixed(1)}rem)`
+      // const h = document.body.clientHeight || document.documentElement.clientHeight
+      // debugger
+      return `transform: translateY(${-((3 - this.tipsIndex) * 7 + 2.5)}rem)`
     },
     ...mapGetters([
       'roomMode',
@@ -282,7 +284,7 @@ export default {
     async showTips(index, text) {
       if (this.tipsShow) {
         // 防止重复
-        return 0
+        return undefined
       } else {
         // showTips
         this.tipsIndex = index
@@ -292,14 +294,6 @@ export default {
         await Tools.AsyncTools.sleep(3000)
         // 关闭提示
         this.tipsShow = false
-
-        // this.tipsTimer = setTimeout(() => {
-        //   // 关闭提示
-        //   this.tipsShow = false
-        //   // 重置
-        //   this.tipsTimer && clearTimeout(this.tipsTimer)
-        //   this.tipsTimer = null
-        // }, 3000)
       }
     },
     ...mapMutations({
@@ -404,7 +398,7 @@ export default {
   }
   .popover {
     position: absolute;
-    top: 0;
+    bottom: 0;
     right: 4.4rem;
     z-index: 5000;
     opacity: 0;

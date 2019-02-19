@@ -266,8 +266,13 @@ export const RTCRoomMixin = {
             videoElement.addEventListener('playing', () => {
               // 记录视频接通成功状态
               this.isVideoConnectSuccess = true
+              // 暂停铃声
               document.getElementById('videoRing').pause()
+              // 初始化视频窗口位置
               this.isChangeCamera = false
+              // this.$vux.toast.isVisible() && this.$vux.toast.hide()
+              // 关闭视频提示
+              this.isToastTextShow = false
             }, false)
           }
         })
@@ -284,10 +289,11 @@ export const RTCRoomMixin = {
 
         this.RTC.on('onRelayTimeout', () => {
           console.warn('服务器超时断开')
-          this.$vux.toast.show({
-            text: '当前网络状况不佳，服务器超时断开',
-            position: 'top'
-          })
+          this.showConnectStatus('当前网络状况不佳，服务器超时断开')
+          // this.$vux.toast.show({
+          //   text: '当前网络状况不佳，服务器超时断开',
+          //   position: 'top'
+          // })
         })
 
         // this.RTC.on('onWebSocketNotify', (info) => {
@@ -298,7 +304,9 @@ export const RTCRoomMixin = {
 
         this.RTC.on('onStreamNotify', (info) => {
           if (info.event === 'onended' || info.event === 'inactive') {
-            this.hangUpVideo()
+            // this.hangUpVideo()
+            // 停止推流
+            this.quitRTC()
           }
           // debugger
           // 本地流断开
@@ -318,7 +326,7 @@ export const RTCRoomMixin = {
         this.RTC.enterRoom({ roomid: room, role: 'user' }, () => {
           resolve()
         }, err => {
-          reject(new Error(`error in enterRoom: ${err}`))
+          reject(new Error(`error in enterRoom: ${JSON.stringify(err)}`))
         })
       })
     },
@@ -329,7 +337,7 @@ export const RTCRoomMixin = {
         this.RTC.getLocalStream({ video: true, audio: true }, info => {
           resolve(info)
         }, err => {
-          reject(new Error(`error in getLocalStream: ${err}`))
+          reject(new Error(`error in getLocalStream: ${JSON.stringify(err)}`))
         })
       })
     },
@@ -340,7 +348,7 @@ export const RTCRoomMixin = {
         this.RTC.startRTC({ stream, role: 'user' }, () => {
           resolve()
         }, err => {
-          reject(new Error(`error in startRTC: ${err}`))
+          reject(new Error(`error in startRTC: ${JSON.stringify(err)}`))
         })
       })
     },
@@ -363,6 +371,7 @@ export const RTCRoomMixin = {
       await this.getVideoScreenShot()
       this.RTC && this.RTC.quit(() => {
         console.log('退出音视频房间 成功 辣')
+        this.hangUpVideo()
       }, () => {
         console.error('退出音视频房间 失败 辣')
       })
@@ -370,20 +379,29 @@ export const RTCRoomMixin = {
 
     // 音视频流监控
     handleRTCQualityReport(data) {
+      Tools.trace('视频质量报告：---> ')(data)
       const daley = data.WebRTCQualityReq.uint32_delay
+      const daley_inside = data.WebRTCQualityReq.VideoReportState.uint32_video_delay
       const send_bps = data.WebRTCQualityReq.uint32_total_send_bps
       const recv_bps = data.WebRTCQualityReq.uint32_total_recv_bps
 
       const daley_CB = async(data) => {
         if (!this.qualityReqToast) {
-          Tools.trace('延迟过高：')(data)
-          this.showConnectStatus('当前网络状况不佳')
+          // Tools.trace('延迟过高：')(data)
+          this.$toast.text('当前网络状况不佳')
           this.qualityReqToast = true
           await Tools.AsyncTools.sleep(7000)
           this.qualityReqToast = false
         }
       }
-      Tools.compose(Either(Tools.trace('延迟：'), daley_CB), Tools.getState(Tools.over(1000)))(daley)
+      Tools.compose(
+        Either(() =>{}, daley_CB),
+        Tools.getState(Tools.over(1000)),
+        Tools.trace('总延迟：'))(daley)
+      Tools.compose(
+        Either(() =>{}, daley_CB),
+        Tools.getState(Tools.over(600)),
+        Tools.trace('视频延迟：'))(daley_inside)
 
       const bps_CB = (data) => {
         this.bpsOverCount += 1
@@ -402,13 +420,15 @@ export const RTCRoomMixin = {
 
     // 提示插件
     showConnectStatus(text) {
-      this.$vux.toast.show({
-        type: 'text',
-        text,
-        position: 'top',
-        width: '80%',
-        time: 5000
-      })
+      this.toastText = text
+      this.isToastTextShow = true
+      // this.$vux.toast.show({
+      //   type: 'text',
+      //   text,
+      //   position: 'top',
+      //   width: '80%',
+      //   time: 1000000
+      // })
     }
   }
 }
@@ -706,11 +726,13 @@ export const IMMixin = {
       if (msgsObj.msgStatus === msgStatus.msg && msgsObj.msgType === msgTypes.msg_video_blur) { // 客服暂离消息
         const state = msgsObj.content === 'true'
         this.setVideoBlur(state)
+        // this.isToastTextShow = state
         return
       }
       if (msgsObj.msgStatus === msgStatus.msg && msgsObj.msgType === msgTypes.msg_video_muted) { // 客服静音消息
         const state = msgsObj.content === 'true'
         this.setVideoMuted(state)
+        // this.isToastTextShow = state
         return
       }
       if (msgsObj.msgStatus === msgStatus.msg && msgsObj.msgType === msgTypes.msg_video_hang_up) { // 视频挂断
@@ -1049,7 +1071,7 @@ export const sendMsgsMixin = {
         }
       )
     },
-    sendCustomDirective({ msg, msgStatus, msgType }) {
+    sendCustomDirective({ msg, msgStatus, msgType, MsgLifeTime }) {
       IM.sendNormalMsg(
         this.userInfo.userId,
         this.csInfo.csId,
@@ -1065,6 +1087,7 @@ export const sendMsgsMixin = {
           identifier: this.userInfo.userId,
           msgStatus,
           msgType,
+          MsgLifeTime,
           chatType: this.sendType
         }, () => {
           console.log('客户端发送自定义自定义指令成功')

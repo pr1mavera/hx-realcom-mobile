@@ -52,7 +52,6 @@ const config_cb = {
   'theme': {
     getTheme: function() {
       const themeKey = Object.keys(this.value).filter(key => this.value[key] == 1)[0] // eslint-disable-line
-      console.log('themeKey!!!', themeMap[themeKey])
       return themeMap[themeKey]
     }
   }
@@ -264,6 +263,7 @@ export const deleteTipMsg = function({ commit, state }) {
 export const afterServerFinish = function({ commit, state }, mode) {
   commit(types.SET_CS_INFO, {})
   commit(types.SET_QUEUE_NUM, 0)
+  commit(types.SET_SESSION_ID, '')
   commit(types.SET_QUEUE_MODE, {
     mode: roomStatus.AIChat,
     status: queueStatus.noneQueue
@@ -299,7 +299,7 @@ export const afterServerFinish = function({ commit, state }, mode) {
 // 创建会话
 export const initSession = async function({ commit, state }) {
   // 创建机器人会话
-  const res = await createSession(state.userInfo.userId, state.userInfo.userName, state.userInfo.userPhone, sessionStatus.robot)
+  const res = await createSession(state.userInfo.userId, state.userInfo.userName, state.userInfo.userPhone, sessionStatus.robot, state.sessionRamId)
   if (res.result.code === ERR_OK) {
     console.log('============================= 会话创建成功 辣 =============================')
     commit(types.SET_SESSION_ID, res.data.id)
@@ -386,6 +386,7 @@ export const reqTransTimeout = function({ commit, state }, { msg, toast, delay =
       if (toast) {
         toast.text('转接失败，请重试', 'default')
         await Tools.AsyncTools.sleep(2000)
+        // toast.hide()
       }
       // 回调
       resolve()

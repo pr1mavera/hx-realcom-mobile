@@ -16,6 +16,7 @@
         autoplay
         playsinline
       ></video>
+      <img width=40% v-show="isVideoFilter" src="/video/static/img/video/video-filter.png" class="video-watermark">
       <div class="video-mask">
         <div class="full-screen-btn" v-show="!fullScreen" @click="openVideoBar">
           <svg class="icon" aria-hidden="true">
@@ -35,7 +36,7 @@
       ></video>
       <div class="video-mask"></div>
     </div>
-    <toast v-model="isVideoFilter" :time="10000" type="text" position="default" width="80%">视频客服{{csInfo.csNick}}当前暂离，请稍后</toast>
+    <toast v-model="isToastTextShow" :time="10000000" type="text" position="default" width="80%">{{isVideoFilter ? `视频客服${csInfo.csNick}当前暂离，请稍后` : toastText}}</toast>
     <div class="full-screen-container" v-show="fullScreen && !videoScreenShotShow">
       <div class="video-header">
         <div class="avatar" @click="stopRTC">
@@ -45,6 +46,7 @@
       </div>
       <video-footer
         ref="videoFooter"
+        :videoConnected="isVideoConnectSuccess"
         @hangUpVideo="handleHangUpVideo"
         @sendGift="giftSectionShow = true"
         @changeCamera="isChangeCamera = !isChangeCamera"
@@ -148,7 +150,10 @@ export default {
       giftSectionShow: false,
       likes: false,
       likesCount: 0,
-      isVideoConnectSuccess: false
+      isVideoConnectSuccess: false,
+      // 视频提示信息
+      isToastTextShow: false,
+      toastText: ''
     }
   },
   mounted() {
@@ -234,7 +239,8 @@ export default {
       this.sendCustomDirective({
         msg: '客户点击挂断',
         msgStatus: msgStatus.msg,
-        msgType: msgTypes.msg_video_hang_up
+        msgType: msgTypes.msg_video_hang_up,
+        MsgLifeTime: 0
       })
       // 停止推流
       this.quitRTC()
@@ -244,10 +250,6 @@ export default {
       !this.fullScreen && this.setFullScreen(true)
       // 恢复摄像头默认位置
       this.isChangeCamera && (this.isChangeCamera = false)
-      // 截取坐席视频
-      // await this.getVideoScreenShot()
-      // 停止推流
-      // this.quitRTC()
       // 记录通话时间
       const time = this._getVideoTime(this.startTimeStamp)
       this.setServerTime(time)
@@ -360,6 +362,15 @@ export default {
       &::-webkit-media-controls {
         display: none !important;
       }
+    }
+    .video-watermark {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      margin: auto;
+      object-fit: contain;
     }
     .video-mask {
       position: absolute;
