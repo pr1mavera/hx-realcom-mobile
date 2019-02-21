@@ -11,7 +11,7 @@ import Tools from '@/common/js/tools'
 /**
  * [MsgsLoader MsgsLoader]
  */
-const MsgsLoader = {
+export const MsgsLoader = {
   info: {},
   page: {},
   roamMsgsIterator: {},
@@ -71,10 +71,11 @@ const MsgsLoader = {
       map.push(item)
     })
     return map
+  },
+  formatRoamMsgs: function(task) {
+    return Creator.IMMsgsparse(task)
   }
 }
-
-export default MsgsLoader
 
 /**
  * [Session 会话]
@@ -332,4 +333,9 @@ const Creator = {
     msgsLoader.history = this.createHistory(getHistoryMsgsAPI)
     return msgsLoader
   }
+}
+
+export const formatRoamMsgs = {
+  IMMsgsparse: Creator.IMMsgsparse,
+  parseMsg: Creator.parseMsg
 }

@@ -83,6 +83,7 @@
 
 <script type="text/ecmascript-6">
 import { mapGetters, mapMutations, mapActions } from 'vuex'
+import { formatRoamMsgs } from '@/common/js/MsgsLoader'
 import BScroll from 'better-scroll'
 import Clipboard from 'clipboard'
 import InputBar from '@/views/mainRoom/components/chat/input-bar'
@@ -189,7 +190,8 @@ export default {
         width: 0,
         height: 0
       },
-      isBotAssessShow: false
+      isBotAssessShow: false,
+      lastMsgTimestamp: ''
     }
   },
   mounted() {
@@ -229,6 +231,8 @@ export default {
     // 手机息屏
     window.addEventListener('visibilitychange', async() => {
       if (document.hidden) {
+        // 记录离线时间
+        this.lastMsgTimestamp = new Date().getTime()
         return undefined
       }
       // alert('visibilitychange')
@@ -256,7 +260,7 @@ export default {
       // 漫游消息初始化分页
       await this.saveRoamMsgs(query.origin || 'WE')
       // 加载一次缓存消息消息
-      this.requestMsgsMixin()
+      const roamMsgs = await this.requestMsgsMixin()
 
       // 初始化时当前房间状态为视频，则跳出
       if (this.roomMode === roomStatus.videoChat) return
@@ -275,6 +279,9 @@ export default {
       const { botInfo, welcomeMsg } = await this.getBotBaseInfo(query.openId, userInfo.userId)
       this.setBotInfo(botInfo)
 
+      // IM 初始化
+      await this.initIM(userInfo)
+
       // 判断是否重连
       const reConnectStatus = await this.getCurServStatus()
 
@@ -286,11 +293,18 @@ export default {
         // 若无重连，则 配置机器人欢迎语
         this.setMsgs(welcomeMsg)
       } else {
+        // 重连
         this.reConnect(reConnectStatus)
+        // 初始化本地缓存消息最后一条的时间
+        this.lastMsgTimestamp = (roamMsgs.length && roamMsgs[roamMsgs.length - 1].time) || new Date().getTime()
+        // 拉取离线消息
+        const offlineMsgs = await this.getOfflineMsgs(this.lastMsgTimestamp)(Tools.DateTools.formatDate('yyyy-MM-dd hh:mm:ss'))
+        if (offlineMsgs.length) {
+          this.sendMsgs(offlineMsgs)
+          this.saveCurMsgs({ origin: this.userInfo.origin, msg: offlineMsgs })
+        }
       }
 
-      // IM 初始化
-      this.initIM(userInfo)
       return undefined
     },
     async getCurServStatus() {
@@ -339,6 +353,24 @@ export default {
         return false
       }
     },
+    // 获取离线消息
+    getOfflineMsgs(initTimestamp) {
+      // 递归查找离线消息
+      const self = this
+      return async function reqOfflineMsgs(timeTask, ...msgsTask) {
+        const task = await self.getVideoAPI(self.userInfo.userId, self.csInfo.csId, timeTask, 15)
+        const msgs = formatRoamMsgs.IMMsgsparse(task.MsgList)
+        // 过滤出离线时间之后的消息
+        const offlineMsgs = msgs.filter(msg => {
+          debugger
+          return msg.time && (new Date(msg.time).getTime() >= initTimestamp)
+        })
+        // 若最后拿到的消息条数小于15，则一定为完整的离线消息
+        return offlineMsgs.length < 15
+              ? offlineMsgs.concat(msgsTask || [])
+              : await reqOfflineMsgs(offlineMsgs[0].time, ...offlineMsgs) // eslint-disable-line
+      }
+    },
     async visibilityChange_cb() {
       // alert('重新联网！！！')
       const loginState = await this.getIMLoginState()
@@ -352,7 +384,12 @@ export default {
         // 重连状态
         const reConnectStatus = await this.getCurServStatus()
         if (reConnectStatus) {
-          // this.$vux.toast.text('重连成功', 'default')
+          // 拉取离线消息
+          const offlineMsgs = await this.getOfflineMsgs(this.lastMsgTimestamp)(Tools.DateTools.formatDate('yyyy-MM-dd hh:mm:ss'))
+          if (offlineMsgs.length) {
+            this.sendMsgs(offlineMsgs)
+            this.saveCurMsgs({ origin: this.userInfo.origin, msg: offlineMsgs })
+          }
         } else {
           // 结束会话
           this.setServerTime('00:00')
@@ -775,7 +812,8 @@ export default {
       'sendMsgs',
       'deleteTipMsg',
       // 'updateLastAction',
-      'saveRoamMsgs'
+      'saveRoamMsgs',
+      'saveCurMsgs'
     ])
   },
   watch: {

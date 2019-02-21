@@ -1,6 +1,6 @@
 import { mapGetters, mapMutations, mapActions } from 'vuex'
 import IM from '@/server/im'
-import MsgsLoader from '@/common/js/MsgsLoader'
+import { MsgsLoader } from '@/common/js/MsgsLoader'
 // import WebRTCAPI from 'webRTCAPI'
 import { ERR_OK, getImgUrl, getUserInfoByOpenID, getLoginInfo, getBotInfo, sendMsgToBot, getSessionList, getCsAvatar, onLineQueue, getBotRoamMsgs, requestHistoryMsgs, videoQueueCancel, onLineQueueCancel, chatQueueHeartBeat, getWorkTime } from '@/server/index.js'
 import Tools from '@/common/js/tools'
@@ -346,11 +346,36 @@ export const RTCRoomMixin = {
     startRTC(stream) {
       return new Promise((resolve, reject) => {
         this.RTC.startRTC({ stream, role: 'user' }, () => {
+          // 初始化 bytesSent
+          const getDiffOfBytesSent = this.getDiffAndRecordWithInitVal(0)
+          // 初始化 packetsSent
+          const getDiffOfPacketsSent = this.getDiffAndRecordWithInitVal(0)
+          this.RTC.getStats({
+            interval: 1000
+          }, (res) => {
+            const video = res.video
+            console.log('getStats => !!!!!!!')
+            console.log('getStats => bytesReceived:', video.bytesReceived)
+            console.log('getStats => bytesSent:', getDiffOfBytesSent(video.bytesSent) / 1024)
+            console.log('getStats => packetsLost:', video.packetsLost)
+            console.log('getStats => packetsReceived:', video.packetsReceived)
+            console.log('getStats => packetsSent:', getDiffOfPacketsSent(video.packetsSent))
+          })
           resolve()
         }, err => {
           reject(new Error(`error in startRTC: ${JSON.stringify(err)}`))
         })
       })
+    },
+
+    // 记录差值
+    getDiffAndRecordWithInitVal(initVal) {
+      let oldVal = initVal
+      return (newVal) => {
+        const diff = newVal - oldVal
+        oldVal = newVal
+        return diff
+      }
     },
 
     // 停止推流
@@ -386,9 +411,9 @@ export const RTCRoomMixin = {
       const recv_bps = data.WebRTCQualityReq.uint32_total_recv_bps
 
       const rsv_br = data.WebRTCQualityReq.VideoReportState.uint32_video_rcv_br
-      const snd_br = data.WebRTCQualityReq.VideoReportState.uint32_video_snd_br
-      Tools.trace('rsv_br：=== ')(rsv_br)
-      Tools.trace('snd_br：=== ')(snd_br)
+      // const snd_br = data.WebRTCQualityReq.VideoReportState.uint32_video_snd_br
+      Tools.trace('rsv_br：=== ')(rsv_br / 1024)
+      // Tools.trace('snd_br：=== ')(snd_br)
 
       const daley_CB = async(data) => {
         if (!this.qualityReqToast) {
@@ -419,8 +444,8 @@ export const RTCRoomMixin = {
           // this.quitRTC()
         }
       }
-      Tools.compose(Either(Tools.trace('发送数据：'), bps_CB), Tools.getState(Tools.equals(0)))(send_bps)
-      Tools.compose(Either(Tools.trace('接收数据：'), bps_CB), Tools.getState(Tools.equals(0)))(recv_bps)
+      Tools.compose(Either(() => {}, bps_CB), Tools.getState(Tools.equals(0)))(send_bps)
+      Tools.compose(Either(Tools.trace('接收数据：'), bps_CB), Tools.getState(Tools.equals(0)))(recv_bps / 1024)
     },
 
     // 提示插件
@@ -746,6 +771,7 @@ export const IMMixin = {
         return
       }
       this.sendMsgs([msgsObj])
+      // this.lastMsgTimestamp = msgsObj.time
       this.saveCurMsgs({ origin: this.userInfo.origin, msg: msgsObj })
     },
     queueFailedReturn() {
@@ -1187,6 +1213,8 @@ export const sendMsgsMixin = {
       const newMsgsList = this.msgs.map(item => {
         if (item.timestamp && (item.timestamp === timestamp)) {
           const currMsg = Tools.CopyTools.objDeepClone(item)
+          // 缓存最后一条消息时间
+          // status === 'succ' && (this.lastMsgTimestamp = currMsg.time)
           // 修改对应消息的状态
           currMsg.status = status
 
@@ -1326,15 +1354,18 @@ export const getMsgsMixin = {
 
       if (newMsgs && newMsgs.length) {
         const list = this.timeTipsFormat(newMsgs)
-        this.historyMsgs = list.concat(this.historyMsgs)
+        this.historyMsgs = [...list, ...this.historyMsgs]
+        // list.concat(this.historyMsgs)
         // 过滤出所有的图片消息，添加到previewImg队头
         const imgList = this.getAllImg(list)
-        this.previewImgList = imgList.concat(this.previewImgList)
+        this.previewImgList = [...imgList, ...this.previewImgList]
+        // imgList.concat(this.previewImgList)
       } else {
         // 没有更多数据
         this.pulldownResult = '别拉了，没有更多消息了！！！'
         this.cacheMsgsOver = true
       }
+      return newMsgs
     },
     getAllImg(list) {
       return list.reduce((val, item) => {
