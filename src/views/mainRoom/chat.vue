@@ -92,7 +92,7 @@ import Tools from '@/common/js/tools'
 import { loginMixin, IMMixin, sendMsgsMixin, getMsgsMixin, onLineQueueMixin } from '@/common/js/mixin'
 // eslint-disable-next-line
 import { TIME_5_MIN, roomStatus, queueStatus, sessionStatus, toggleBarStatus, msgStatus, msgTypes, tipTypes, dialogTypes, cardTypes, themeMap } from '@/common/js/status'
-import { ERR_OK, getSessionStatus, getLoginState } from '@/server/index.js'
+import { ERR_OK, getSessionStatus, getLoginState, saveVisitorRecord } from '@/server/index.js'
 import { Previewer, TransferDom } from 'vux'
 
 export default {
@@ -304,6 +304,9 @@ export default {
           this.saveCurMsgs({ origin: this.userInfo.origin, msg: offlineMsgs })
         }
       }
+
+      // 保存访客记录
+      saveVisitorRecord(userInfo.userId, userInfo.nickName, userInfo.origin, userInfo.openId)
 
       return undefined
     },
@@ -606,7 +609,6 @@ export default {
       text = Tools.strWithLink(text, this.theme['button'])
 
       if (text && text.trim()) {
-        // this.roomMode === roomStatus.AIChat ? await this.sendTextMsgToBot(text) : await this.sendC2CMsgs(text)
         if (this.roomMode === roomStatus.AIChat) {
           !this.sessionId && await this.initSession()
           await this.sendTextMsgToBot(text)
@@ -619,6 +621,7 @@ export default {
             this.isBotAssessShow = false
           }
         }
+        // await this.sendC2CMsgs(text)
       } else {
         this.$vux.alert.show({
           title: '消息为空'

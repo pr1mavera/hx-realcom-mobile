@@ -125,19 +125,8 @@ const IM = (() => {
         textMsgs.push(parseMsg(item))
       }
     })
-    // var whiteBoardMsgs = []
-    // for (var i in newMsgList) { // 遍历新消息
-      // var msg = {}
-      // parseMsg(newMsgList[i])
-      // if (msg && msg.type === 'TXWhiteBoardExt') {
-      //   whiteBoardMsgs.push(msg.data)
-      // } else {
-      //   textMsgs.push(msg)
-      // }
-    // }
     return {
       textMsgs: textMsgs
-      // whiteBoardMsgs: whiteBoardMsgs
     }
   }
 

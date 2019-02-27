@@ -1450,8 +1450,8 @@ export const onLineQueueMixin = {
       // const msg = {
       //   code: systemMsgStatus.ONLINE_REQUEST_CS_ENTANCE,
       //   chatGuid: this.chatGuid,
-      //   csId: 'webchat6',
-      //   csName: 'webchat6',
+      //   csId: 'webchat2',
+      //   csName: 'webchat2',
       //   csNick: '我才是csNick',
       //   startTime: '',
       //   endTime: ''

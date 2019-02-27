@@ -102,6 +102,11 @@ export const getShareTicket = url => http.post('user', `/ticket/query`, { url })
  */
 
 /**
+ * [saveVisitorRecord 保存访客记录]
+ */
+export const saveVisitorRecord = (userId, userNick, origin, openId) => http.post('user', `/video/visit/save`, { userId, userNick, origin, openId })
+
+/**
  * [getSessionList 获取会话列表]
  */
 export const getRedirectUrl = () => http.get('user', '/video/user/openId')

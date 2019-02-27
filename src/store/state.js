@@ -7,11 +7,11 @@ const state = {
   userInfo: {},
   botInfo: {},
   csInfo: {
-    // csId: '123456789',
-    // csAvatar: 'http://video-servertest.ihxlife.com:8083/api/v1/video/image/csHeader?id=123456789',
-    // csName: '贾少游',
+    // csId: 'webchat2',
+    // csAvatar: 'http://video-servertest.ihxlife.com:8083/api/v1/video/image/csHeader?id=webchat2',
+    // csName: 'webchat2',
     // likesCount: 12,
-    // csCode: '123456789'
+    // csCode: 'webchat2'
   },
   roomId: null,
   sessionId: null,
