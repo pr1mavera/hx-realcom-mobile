@@ -262,8 +262,10 @@ export default {
     // 评价成功
     assessSuccess(mode) {
       this.setAssessStatus(false)
-      this.setAssessView(false)
-      debugger
+      this.setAssessView({
+        show: false,
+        task: null
+      })
       if (mode === roomStatus.videoChat) {
         this.isVideoOverReportShow = true
       }
@@ -277,11 +279,13 @@ export default {
       // 用户主动关闭评价
       if (this.serverTime === '') {
         // 当前视频未结束
-        this.setAssessView(false)
+        this.setAssessView({
+          show: false,
+          task: null
+        })
       } else {
         // 当前视频已结束
         const self = this
-        debugger
         this.$vux.confirm.show({
           title: '您真的要放弃评价嘛？？',
           onConfirm() {

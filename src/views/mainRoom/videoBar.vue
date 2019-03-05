@@ -28,8 +28,8 @@
     </div>
     <div class="video-window bgc" :class="localVideo" v-show="fullScreen && !videoScreenShotShow">
       <video height=100%
+        :style="{'display': videoScreenShotShow ? 'none' : 'block'}"
         id="localVideo"
-        v-if="!videoScreenShotShow"
         muted
         autoplay
         playsinline

@@ -10,21 +10,21 @@ export function beforeEnterVideo() {
   const device = sessionStorage.getItem('device')
   const browser = sessionStorage.getItem('browser')
   const ua = navigator.userAgent.toLowerCase()
+  let version = 0
 
   if (device === 'Android') {
     // 若为Android设备
     const reg = /android [\d._]+/gi
-    const version = (ua.match(reg) + '').replace(/[^0-9|_.]/ig, '').replace(/_/ig, '.')
+    version = parseFloat((ua.match(reg) + '').replace(/[^0-9|_.]/ig, '').replace(/_/ig, '.'))
     console.log('该Android的系统版本为：' + version)
     // this.$emit('enterVideoLineUp') // 进入排队页面
     sessionStorage.setItem('enterVideoStatus', 'Android')
   } else if (device === 'iPhone') {
     //  若为ios设备，则需判断iOS的系统版本
     const ver = ua.match(/cpu iphone os (.*?) like mac os/)
-    const version = parseFloat(ver[1].replace(/_/g, '.'))
-
+    version = parseFloat(ver[1].replace(/_/g, '.'))
     // 若用户当前设备的版本过低，则提示用户升级系统
-    if (version < 11) {
+    if (version < 12) {
       // this.$emit('low-version', 'true')
       sessionStorage.setItem('enterVideoStatus', 'low-version')
     } else if (device === 'iPhone' && browser === 'wx') {

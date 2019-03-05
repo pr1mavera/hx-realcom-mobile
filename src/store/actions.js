@@ -269,6 +269,10 @@ export const afterServerFinish = function({ commit, state }, mode) {
     status: queueStatus.noneQueue
   })
   commit(types.SET_ASSESS_STATUS, false)
+  commit(types.SET_ASSESS_VIEW, {
+    show: false,
+    task: null
+  })
   commit(types.SET_ROOM_MODE, roomStatus.AIChat)
   // initSession({ commit, state })
   const tip = {

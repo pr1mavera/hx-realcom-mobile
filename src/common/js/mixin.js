@@ -399,6 +399,7 @@ export const RTCRoomMixin = {
         this.hangUpVideo()
       }, () => {
         console.error('退出音视频房间 失败 辣')
+        this.hangUpVideo()
       })
     },
 
