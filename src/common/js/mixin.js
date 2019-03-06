@@ -50,8 +50,8 @@ export const loginMixin = {
           }), {})(data.userInfo.workTimeInfo)
         }
         const wxUserInfo = data.wxUserInfo
-        wxUserInfo.headImgUrl !== '' && (info.wxUserInfo.avatar = wxUserInfo.headImgUrl)
-        wxUserInfo.nickName !== '' && (info.wxUserInfo.nickName = wxUserInfo.nickName)
+        info.wxUserInfo.avatar = wxUserInfo.headImgUrl || ''
+        info.wxUserInfo.nickName = wxUserInfo.nickName || data.userName
         return info
       } else {
         console.log('error in getUserInfoByOpenId')

@@ -51,7 +51,7 @@
 
     <!-- 评价 -->
     <assess
-      :showAssess="this.isAssessView"
+      :showAssess="isAssessView"
       @handleToCancelAssess="handleToCancelAssess"
       @assessSuccess="assessSuccess"
     ></assess>
