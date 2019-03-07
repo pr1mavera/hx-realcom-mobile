@@ -205,10 +205,10 @@ export default {
       this.initRTC()
         .then(() => this.enterRoom(this.roomId))
         .then(() => this.getLocalStream(), err => {
-          alert(err)
+          alert('打开摄像头失败！')
         })
         .then(info => this.startRTC(info.stream), err => {
-          alert(err)
+          alert('视频通话建立失败！')
         })
         // .catch(err => {
         //   alert(err)

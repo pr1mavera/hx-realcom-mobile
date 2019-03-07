@@ -191,7 +191,10 @@ export default {
         height: 0
       },
       isBotAssessShow: false,
-      lastMsgTimestamp: ''
+      lastMsgTimestamp: {
+        timestramp: '',
+        length: 0
+      }
     }
   },
   mounted() {
@@ -232,7 +235,10 @@ export default {
     window.addEventListener('visibilitychange', async() => {
       if (document.hidden) {
         // 记录离线时间
-        this.lastMsgTimestamp = new Date().getTime()
+        this.lastMsgTimestamp = {
+          timestramp: new Date().getTime(),
+          length: this.msgs.length
+        }
         return undefined
       }
       // alert('visibilitychange')
@@ -386,9 +392,9 @@ export default {
       if ((this.roomMode === roomStatus.menChat) && data) {
         // 重连状态
         const reConnectStatus = await this.getCurServStatus()
-        if (reConnectStatus) {
+        if (reConnectStatus && this.msgs.length === this.lastMsgTimestamp.length) {
           // 拉取离线消息
-          const offlineMsgs = await this.getOfflineMsgs(this.lastMsgTimestamp)(Tools.DateTools.formatDate('yyyy-MM-dd hh:mm:ss'))
+          const offlineMsgs = await this.getOfflineMsgs(this.lastMsgTimestamp.timestramp)(Tools.DateTools.formatDate('yyyy-MM-dd hh:mm:ss'))
           if (offlineMsgs.length) {
             this.sendMsgs(offlineMsgs)
             this.saveCurMsgs({ origin: this.userInfo.origin, msg: offlineMsgs })

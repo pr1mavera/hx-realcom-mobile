@@ -421,7 +421,7 @@ export const RTCRoomMixin = {
           // Tools.trace('延迟过高：')(data)
           this.$toast.text('当前网络状况不佳')
           this.qualityReqToast = true
-          await Tools.AsyncTools.sleep(7000)
+          await Tools.AsyncTools.sleep(3000)
           this.qualityReqToast = false
         }
       }
