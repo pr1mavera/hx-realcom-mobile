@@ -2633,14 +2633,14 @@ $export($export.S, 'Promise', { 'try': function (callbackfn) {
 var env = "production";
 var production = {
   // 生产
-  userPath: 'https://claim.ihxlife.com:8080/api/v1', // 用户服务,整合video-server,chat-server,online
-  webRTCRoomPath: 'https://claim.ihxlife.com:8081/api/v1', // 房间服务
-  TMPath: 'https://claim.ihxlife.com:8082/api/v1' // 腾讯消息服务
+  // userPath: 'https://claim.ihxlife.com:8080/api/v1', // 用户服务,整合video-server,chat-server,online
+  // webRTCRoomPath: 'https://claim.ihxlife.com:8081/api/v1', // 房间服务
+  // TMPath: 'https://claim.ihxlife.com:8082/api/v1' // 腾讯消息服务
 
   // uat
-  // userPath: 'https://video-uat.ihxlife.com/user-server/api/v1', // 用户服务,整合video-server,chat-server,online
-  // webRTCRoomPath: 'https://video-uat.ihxlife.com/room-server/api/v1', // 房间服务
-  // TMPath: 'https://video-uat.ihxlife.com/tm-server/api/v1' // 腾讯消息服务
+  userPath: 'https://video-uat.ihxlife.com/user-server/api/v1', // 用户服务,整合video-server,chat-server,online
+  webRTCRoomPath: 'https://video-uat.ihxlife.com/room-server/api/v1', // 房间服务
+  TMPath: 'https://video-uat.ihxlife.com/tm-server/api/v1' // 腾讯消息服务
 
   // int
   // userPath: 'https://vnap-webrtctest.ihxlife.com/user-server/api/v1', // 用户服务,整合video-server,chat-server,online

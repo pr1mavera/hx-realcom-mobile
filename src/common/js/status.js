@@ -82,6 +82,8 @@ export const msgTypes = {
   msg_video_blur: '14', // 坐席暂离，设置模糊及静音
   msg_video_muted: '15', // 坐席静音
   msg_video_hang_up: '16', // 视频接通前用户提前挂断
+  msg_video_reconnect: '17', // 视频服务，客户端点击重连
+  msg_video_quality: '18', // 视频质量
   msg_hand_up: '24' // 结束会话（在线）
 }
 

@@ -18,8 +18,8 @@ const csList = () => import('@/views/mainRoom/components/service/cs-list')
 const csAdd = () => import('@/views/mainRoom/components/service/cs-add')
 const csGiftsList = () => import('@/views/mainRoom/components/service/cs-gifts-list')
 
-const test = () => import('@/views/test')
-const testT = () => import('@/views/testT')
+// const test = () => import('@/views/test')
+// const testT = () => import('@/views/testT')
 
 Vue.use(Router)
 
@@ -79,19 +79,19 @@ export default new Router({
       path: '/share',
       name: 'share',
       component: share
-    },
-    {
-      path: '/test',
-      name: 'test',
-      component: test,
-      children: [
-        {
-          path: '/test/:id',
-          name: 'testT',
-          component: testT
-        }
-      ]
     }
+    // {
+    //   path: '/test',
+    //   name: 'test',
+    //   component: test,
+    //   children: [
+    //     {
+    //       path: '/test/:id',
+    //       name: 'testT',
+    //       component: testT
+    //     }
+    //   ]
+    // }
     // {
     //   path: '/',
     //   redirect: '/room'

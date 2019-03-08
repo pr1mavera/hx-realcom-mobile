@@ -286,7 +286,7 @@ export default {
       this.setBotInfo(botInfo)
 
       // IM 初始化
-      await this.initIM(userInfo)
+      this.initIM(userInfo)
 
       // 判断是否重连
       const reConnectStatus = await this.getCurServStatus()
@@ -371,7 +371,6 @@ export default {
         const msgs = formatRoamMsgs.IMMsgsparse(task.MsgList)
         // 过滤出离线时间之后的消息
         const offlineMsgs = msgs.filter(msg => {
-          debugger
           return msg.time && (new Date(msg.time).getTime() >= initTimestamp)
         })
         // 若最后拿到的消息条数小于15，则一定为完整的离线消息
@@ -390,16 +389,18 @@ export default {
       let data = Tools.CacheTools.getCacheData({ key: `${this.userInfo.origin}_curServInfo`, check: this.userInfo.userId, quality })
       // 如果当前存在人工客服服务，查询当前服务状态，尝试重连
       if ((this.roomMode === roomStatus.menChat) && data) {
-        // 重连状态
-        const reConnectStatus = await this.getCurServStatus()
-        if (reConnectStatus && this.msgs.length === this.lastMsgTimestamp.length) {
+        // 拉取离线消息
+        if (this.msgs.length === this.lastMsgTimestamp.length) {
           // 拉取离线消息
           const offlineMsgs = await this.getOfflineMsgs(this.lastMsgTimestamp.timestramp)(Tools.DateTools.formatDate('yyyy-MM-dd hh:mm:ss'))
           if (offlineMsgs.length) {
             this.sendMsgs(offlineMsgs)
             this.saveCurMsgs({ origin: this.userInfo.origin, msg: offlineMsgs })
           }
-        } else {
+        }
+        // 重连状态
+        const reConnectStatus = await this.getCurServStatus()
+        if (!reConnectStatus) {
           // 结束会话
           this.setServerTime('00:00')
           this.$vux.toast.text('当前人工服务已结束', 'default')

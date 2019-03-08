@@ -38,12 +38,18 @@
     </div>
     <toast v-model="isToastTextShow" :time="10000000" type="text" position="default" width="80%">{{isVideoFilter ? `视频客服${csInfo.csNick}当前暂离，请稍后` : toastText}}</toast>
     <div class="full-screen-container" v-show="fullScreen && !videoScreenShotShow">
+      <!-- 重连按钮 -->
+      <div class="reconnect" v-if="serviceBreakOff">
+        <button class="reconnect-btn" @click="reconnectVideo">重新连接</button>
+      </div>
+      <!-- 客服头像 -->
       <div class="video-header">
         <div class="avatar" @click="stopRTC">
           <img v-lazy="this.csInfo.csAvatar">
         </div>
         <div class="name">{{this.csInfo.csNick || '--'}}</div>
       </div>
+      <!-- 底部操作按钮区 -->
       <video-footer
         ref="videoFooter"
         :videoConnected="isVideoConnectSuccess"
@@ -52,7 +58,9 @@
         @changeCamera="isChangeCamera = !isChangeCamera"
         @minimizeVideoBar="closeVideoBar"
       ></video-footer>
+      <!-- 礼物点赞消息区 -->
       <video-msg-list></video-msg-list>
+      <!-- 侧边按钮区 -->
       <div class="video-fload-btn">
         <div class="item">
           <div class="item-icon icon-hongxin extend-click" @click="sendLike">
@@ -71,6 +79,7 @@
           <div class="text">100</div>
         </div> -->
       </div>
+      <!-- 礼物列表区 -->
       <section class="send-gift-section" v-show="giftSectionShow" @click.stop="giftSectionShow = false">
         <send-gift :theme="`dark`" @selectGift="selectGift"></send-gift>
       </section>
@@ -205,9 +214,11 @@ export default {
       this.initRTC()
         .then(() => this.enterRoom(this.roomId))
         .then(() => this.getLocalStream(), err => {
+          console.log(err)
           alert('打开摄像头失败！')
         })
         .then(info => this.startRTC(info.stream), err => {
+          console.log(err)
           alert('视频通话建立失败！')
         })
         // .catch(err => {
@@ -216,6 +227,17 @@ export default {
         // })
 
       this.enterVideoRTCRoomAPI(this.csInfo.csId, this.userInfo.userId, this.userInfo.openId, this.sessionId)
+    },
+    reconnectVideo() {
+      this.getLocalStream()
+        .then(info => this.startRTC(info.stream), err => {
+          console.log(err)
+          alert('打开摄像头失败！')
+        })
+        .catch(err => {
+          console.log(err)
+          alert('视频通话建立失败！')
+        })
     },
     async enterVideoRTCRoomAPI(roomId, userId, openId, sessionId) {
       const enterVideoStatus = window.sessionStorage.getItem('enterVideoStatus')
@@ -409,6 +431,32 @@ export default {
     top: 0;
     bottom: 0;
     z-index: 101;
+    .reconnect {
+      --btnHeight: 3rem;
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      margin: auto;
+      max-width: 80%;
+      height: var(--btnHeight);
+      display: flex;
+      justify-content: center;
+      .reconnect-btn {
+        --fontColor: #ccc;
+        // width: max-content;
+        // height: max-content;
+        display: inline-block;
+        border: 1px solid var(--fontColor);
+        border-radius: .5rem;
+        background-color: unset;
+        color: var(--fontColor);
+        font-size: 1.4rem;
+        padding: .5rem 1rem;
+        margin: 0;
+      }
+    }
     .video-header {
       position: absolute;
       top: 2.6rem;

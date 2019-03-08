@@ -220,7 +220,8 @@ export const RTCRoomMixin = {
       RTC: null,
       RTCQuitFlag: false,
       qualityReqToast: false,
-      bpsOverCount: 0
+      bpsOverCount: 0,
+      serviceBreakOff: false
     }
   },
   computed: {
@@ -266,6 +267,8 @@ export const RTCRoomMixin = {
             videoElement.addEventListener('playing', () => {
               // 记录视频接通成功状态
               this.isVideoConnectSuccess = true
+              // 初始化重连按钮
+              this.serviceBreakOff = false
               // 暂停铃声
               document.getElementById('videoRing').pause()
               // 初始化视频窗口位置
@@ -279,7 +282,9 @@ export const RTCRoomMixin = {
 
         this.RTC.on('onRemoteStreamRemove', (info) => {
           // 停止推流
-          this.quitRTC()
+          // this.quitRTC()
+          // 显示重连按钮
+          this.serviceBreakOff = true
         })
 
         this.RTC.on('onKickOut', () => {
@@ -289,7 +294,7 @@ export const RTCRoomMixin = {
 
         this.RTC.on('onRelayTimeout', () => {
           console.warn('服务器超时断开')
-          this.showConnectStatus('当前网络状况不佳，服务器超时断开')
+          this.showToast('当前网络状况不佳，服务器超时断开')
           // this.$vux.toast.show({
           //   text: '当前网络状况不佳，服务器超时断开',
           //   position: 'top'
@@ -306,7 +311,7 @@ export const RTCRoomMixin = {
           if (info.event === 'onended' || info.event === 'inactive') {
             // this.hangUpVideo()
             // 停止推流
-            this.quitRTC()
+            // this.quitRTC()
           }
           // debugger
           // 本地流断开
@@ -403,6 +408,28 @@ export const RTCRoomMixin = {
       })
     },
 
+    daley_cb: (function() {
+      let flag = false
+      return async function cb(text, time) {
+        if (!flag) {
+          flag = true
+          await this.showToast(text, time)
+          flag = false
+        }
+      }
+    })(),
+
+    bps_cb: (function() {
+      let count = 0
+      return function cb(text) {
+        if (count < 10) {
+          return undefined
+        } else {
+          this.showToast(text)
+        }
+      }
+    })(),
+
     // 音视频流监控
     handleRTCQualityReport(data) {
       Tools.trace('视频质量报告：---> ')(data)
@@ -416,50 +443,34 @@ export const RTCRoomMixin = {
       Tools.trace('rsv_br：=== ')(rsv_br / 1024)
       // Tools.trace('snd_br：=== ')(snd_br)
 
-      const daley_CB = async(data) => {
-        if (!this.qualityReqToast) {
-          // Tools.trace('延迟过高：')(data)
-          this.$toast.text('当前网络状况不佳')
-          this.qualityReqToast = true
-          await Tools.AsyncTools.sleep(3000)
-          this.qualityReqToast = false
-        }
+      Tools.trace('总延迟：')(daley)
+      Tools.trace('视频延迟：')(daley_inside)
+      if (daley >= 1000 || daley_inside >= 600) {
+        this.daley_cb('当前网络状况不佳', 3000)
       }
-      Tools.compose(
-        Either(() => {}, daley_CB),
-        Tools.getState(Tools.over(1000)),
-        Tools.trace('总延迟：'))(daley)
-      Tools.compose(
-        Either(() => {}, daley_CB),
-        Tools.getState(Tools.over(600)),
-        Tools.trace('视频延迟：'))(daley_inside)
 
-      const bps_CB = (data) => {
-        this.bpsOverCount += 1
-        if (this.bpsOverCount === 10) {
-          this.showConnectStatus('当前网络太差，无法建立视频通话')
-          this.$refs.videoFooter.minimizeBtnHighLight()
-          // 直接挂断
-          // this.$emit('videoFailed')
-          // 停止推流
-          // this.quitRTC()
-        }
+      Tools.trace('接收数据：')(recv_bps / 1024)
+      if (send_bps === 0 || recv_bps === 0) {
+        this.bps_cb('当前网络太差，无法建立视频通话')
+        this.$refs.videoFooter.minimizeBtnHighLight()
       }
-      Tools.compose(Either(() => {}, bps_CB), Tools.getState(Tools.equals(0)))(send_bps)
-      Tools.compose(Either(Tools.trace('接收数据：'), bps_CB), Tools.getState(Tools.equals(0)))(recv_bps / 1024)
     },
 
     // 提示插件
-    showConnectStatus(text) {
-      this.toastText = text
-      this.isToastTextShow = true
-      // this.$vux.toast.show({
-      //   type: 'text',
-      //   text,
-      //   position: 'top',
-      //   width: '80%',
-      //   time: 1000000
-      // })
+    async showToast( text, time ) { // 默认不消失
+      // this.toastText = text
+      // this.isToastTextShow = true
+      this.$vux.toast.show({
+        type: 'text',
+        text,
+        width: '80%',
+        time: time || 1000000
+      })
+      if (!time) {
+        return undefined
+      }
+      await Tools.AsyncTools.sleep(3000)
+      return Promise.resolve()
     }
   }
 }
@@ -768,7 +779,7 @@ export const IMMixin = {
       }
       if (msgsObj.msgStatus === msgStatus.msg && msgsObj.msgType === msgTypes.msg_video_hang_up) { // 视频挂断
         // this.quitRTC()
-        this.$emit('quitRTCResponse')
+        // this.$emit('quitRTCResponse')
         return
       }
       this.sendMsgs([msgsObj])
