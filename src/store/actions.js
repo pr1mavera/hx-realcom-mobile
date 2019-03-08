@@ -342,7 +342,7 @@ export const reqTransAnotherTimeout = function({ commit, state }, delay) {
         await IM.sendSystemMsg(onlineConfig)
         resolve()
       }
-      else if (res.data.status.result_code === '480') {
+      else if ((res.result.code === ERR_OK) && (res.data.status.result_code === '480')) {
         // 坐席接收到客户的接入请求并且已经成功回推，但客户端没有接收到
         const info = await getSessionDetail(state.sessionRamId, state.userInfo.userId)
         if ((info.result.code === ERR_OK) && info.data.sessionId) {
@@ -364,6 +364,7 @@ export const reqTransAnotherTimeout = function({ commit, state }, delay) {
         }
       }
       else {
+        debugger
         const err = 'error in transTimeoutRedistribution 转接至另外坐席'
         reject(err)
       }

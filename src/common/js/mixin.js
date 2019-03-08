@@ -4,7 +4,7 @@ import { MsgsLoader } from '@/common/js/MsgsLoader'
 // import WebRTCAPI from 'webRTCAPI'
 import { ERR_OK, getImgUrl, getUserInfoByOpenID, getLoginInfo, getBotInfo, sendMsgToBot, getSessionList, getCsAvatar, onLineQueue, getBotRoamMsgs, requestHistoryMsgs, videoQueueCancel, onLineQueueCancel, chatQueueHeartBeat, getWorkTime } from '@/server/index.js'
 import Tools from '@/common/js/tools'
-import { Either } from '@/common/js/container/either'
+// import { Either } from '@/common/js/container/either'
 import { roomStatus, queueStatus, sessionStatus, systemMsgStatus, msgStatus, cardTypes, msgTypes, tipTypes, dialogTypes } from '@/common/js/status'
 
 export const loginMixin = {
@@ -218,9 +218,9 @@ export const RTCRoomMixin = {
   data() {
     return {
       RTC: null,
-      RTCQuitFlag: false,
-      qualityReqToast: false,
-      bpsOverCount: 0,
+      // RTCQuitFlag: false,
+      // qualityReqToast: false,
+      // bpsOverCount: 0,
       serviceBreakOff: false
     }
   },
@@ -231,7 +231,7 @@ export const RTCRoomMixin = {
   },
   methods: {
     initRTC() {
-      this.RTCQuitFlag = false
+      // this.RTCQuitFlag = false
       return new Promise((resolve, reject) => {
         const self = this
         // eslint-disable-next-line
@@ -587,7 +587,7 @@ export const IMMixin = {
             // 排队失败返回
             this.queueFailedReturn()
             // 发送排队失败通知
-            this.afterQueueFailed()
+            this.afterQueueFailed({ sendFailed: false })
           })
           break
 
@@ -640,7 +640,7 @@ export const IMMixin = {
             } else {
               this.$router.back(-1)
             }
-            this.afterQueueFailed()
+            this.afterQueueFailed({ sendFailed: false })
           })
           break
 
@@ -692,7 +692,8 @@ export const IMMixin = {
           }, (err) => {
             // 失败回调
             console.log(err)
-            this.afterQueueFailed()
+            debugger
+            this.afterQueueFailed({ sendFailed: false })
           })
           break
 
@@ -737,7 +738,7 @@ export const IMMixin = {
             msg: null,
             toast: this.$vux.toast
           }).then(() => {
-            this.afterQueueFailed()
+            this.afterQueueFailed({ sendFailed: false })
           })
           break
       }
@@ -1574,7 +1575,7 @@ export const onLineQueueMixin = {
         }, (err) => {
           // 失败回调
           console.log(err)
-          this.afterQueueFailed()
+          this.afterQueueFailed({ sendFailed: false })
         })
       } else {
         // 排队等待

@@ -36,7 +36,7 @@
       ></video>
       <div class="video-mask"></div>
     </div>
-    <toast v-model="isToastTextShow" :time="10000000" type="text" position="default" width="80%">{{isVideoFilter ? `视频客服${csInfo.csNick}当前暂离，请稍后` : toastText}}</toast>
+    <!-- <toast v-model="isToastTextShow" :time="10000000" type="text" position="default" width="80%">{{isVideoFilter ? `视频客服${csInfo.csNick}当前暂离，请稍后` : toastText}}</toast> -->
     <div class="full-screen-container" v-show="fullScreen && !videoScreenShotShow">
       <!-- 重连按钮 -->
       <div class="reconnect" v-if="serviceBreakOff">
@@ -161,8 +161,8 @@ export default {
       likesCount: 0,
       isVideoConnectSuccess: false,
       // 视频提示信息
-      isToastTextShow: false,
-      toastText: ''
+      // isToastTextShow: false,
+      // toastText: ''
     }
   },
   mounted() {

@@ -114,7 +114,7 @@ export default {
             // 排队失败返回
             this.queueFailedReturn()
             // 发送排队失败通知
-            this.afterQueueFailed()
+            this.afterQueueFailed({ sendFailed: false })
           })
         } else {
           // 开启心跳
