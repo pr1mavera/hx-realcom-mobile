@@ -412,7 +412,7 @@ export const RTCRoomMixin = {
           (this.endTimeTrunk.length === this.startTimeTrunk.length - 1) && this.endTimeTrunk.push(new Date().getTime())
           resolve()
         }, err => {
-          console.error('退出音视频房间 失败 辣')
+          console.error('退出音视频房间 失败 辣', err)
           reject()
         })
       })

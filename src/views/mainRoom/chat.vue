@@ -207,11 +207,13 @@ export default {
     // 初始化主题
     this._setTheme()
 
-    this.$nextTick(() => {
+    this.$nextTick(async() => {
+      this.$vux.loading.show({ text: '请稍后' })
       // 初始化滚动
       this._initScroll()
       this._initPullDownRefresh()
-      this._initChat()
+      await this._initChat()
+      this.$vux.loading.hide()
     })
 
     // 断网
