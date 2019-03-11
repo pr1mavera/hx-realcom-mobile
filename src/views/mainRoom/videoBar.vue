@@ -36,8 +36,8 @@
       ></video>
       <div class="video-mask"></div>
     </div>
-    <!-- <toast v-model="isToastTextShow" :time="10000000" type="text" position="default" width="80%">{{isVideoFilter ? `视频客服${csInfo.csNick}当前暂离，请稍后` : toastText}}</toast> -->
-    <div class="full-screen-container" v-show="fullScreen && !videoScreenShotShow">
+    <toast v-model="isUnsmoothTextShow" :time="10000000" type="text" position="default" width="80%">您的网络上行速度较差</toast>
+    <div class="full-screen-container" v-show="fullScreen">
       <!-- 重连按钮 -->
       <div class="reconnect" v-if="serviceBreakOff">
         <button class="reconnect-btn" @click="reconnectVideo">重新连接</button>
@@ -90,11 +90,12 @@
 
 <script type="text/ecmascript-6">
 import { Toast } from 'vux'
+import Tools from '@/common/js/tools'
 import { mapGetters, mapMutations } from 'vuex'
-import { ERR_OK, enterVideoRTCRoom } from '@/server/index.js'
+import { ERR_OK, enterVideoRTCRoom, getSessionDetail } from '@/server'
 import { RTCRoomMixin, IMMixin, sendMsgsMixin } from '@/common/js/mixin'
 import { msgStatus, msgTypes } from '@/common/js/status'
-// import IM from '@/server/im.js'
+import IM from '@/server/im.js'
 
 export default {
   mixins: [
@@ -103,7 +104,6 @@ export default {
     sendMsgsMixin
   ],
   components: {
-    // 'LineUp': () => import('@/views/mainRoom/components/video/line-up'),
     'VideoFooter': () => import('@/views/mainRoom/components/video/video-footer'),
     'VideoMsgList': () => import('@/views/mainRoom/components/video/video-msg-list'),
     'SendGift': () => import('@/views/mainRoom/components/chat/send-gift'),
@@ -144,15 +144,18 @@ export default {
       'sessionId',
       'hasAssess',
       'serverTime',
-      'videoFilter'
+      'videoFilter',
+      'sessionRamId'
     ])
   },
   data() {
     return {
       videoScreenShotShow: false,
       videoScreenShotSrc: '',
-      // 通话开始时间
-      startTimeStamp: null,
+      // 通话开始时间表
+      startTimeTrunk: [],
+      // 通话结束时间表
+      endTimeTrunk: [],
       // 是否切换客服跟用户的摄像头位置：[false 客户窗口小窗] / [true 客户窗口大窗]
       isChangeCamera: true,
       // 礼物列表弹层开关：[false 开启 / [true 关闭]
@@ -160,22 +163,29 @@ export default {
       likes: false,
       likesCount: 0,
       isVideoConnectSuccess: false,
-      // 视频提示信息
-      // isToastTextShow: false,
+      // 视频网络提示信息
+      isUnsmoothTextShow: false
       // toastText: ''
     }
   },
   mounted() {
+    // 响铃
     document.getElementById('videoRing').play()
+    // 初始化视频
     this.readyToVideo()
+    // 进入 RTC 房间
+    this.enterVideoRTCRoomAPI(this.csInfo.csId, this.userInfo.userId, this.userInfo.openId, this.sessionId)
+
     this.$nextTick(() => {
       this.likesCount = +this.csInfo.likesCount
     })
   },
   methods: {
-    _getVideoTime(dateBegin) {
-      const dateEnd = new Date() // 获取当前时间
-      const dateDiff = dateEnd.getTime() - dateBegin.getTime() // 时间差的毫秒数
+    _getVideoTime([ dateBegin, dateEnd ]) {
+      debugger
+      const dateDiff = Tools.getVideoDateDiff([ dateBegin, dateEnd ])
+      // const dateEnd = new Date() // 获取当前时间
+      // const dateDiff = dateEnd.getTime() - dateBegin.getTime() // 时间差的毫秒数
       // 计算出相差天数
       // const day = Math.floor(dateDiff / (24 * 3600 * 1000))
       const leave1 = dateDiff % (24 * 3600 * 1000) // 计算天数后剩余的毫秒数
@@ -211,45 +221,69 @@ export default {
       // 初始化摄像头
       this.isChangeCamera = true
 
+      // new Promise((resolve, reject) => {
+      //   return this.RTC
+      //           ? resolve()
+      //           : resolve(this.initRTC())
+      // })
       this.initRTC()
-        .then(() => this.enterRoom(this.roomId))
-        .then(() => this.getLocalStream(), err => {
-          console.log(err)
-          alert('打开摄像头失败！')
-        })
-        .then(info => this.startRTC(info.stream), err => {
-          console.log(err)
-          alert('视频通话建立失败！')
-        })
-        // .catch(err => {
-        //   alert(err)
-        //   // this.$emit('videoFailed')
-        // })
-
-      this.enterVideoRTCRoomAPI(this.csInfo.csId, this.userInfo.userId, this.userInfo.openId, this.sessionId)
+      .then(() => this.enterRoom(this.roomId))
+      .then(() => this.getLocalStream(), err => {
+        console.log(err)
+        alert('进房失败！')
+      })
+      .then(info => this.startRTC(info.stream), err => {
+        console.log(err)
+        alert('获取本地视频失败！')
+      })
+      .then(() => {
+        // 记录视频开始时间节点
+        this.startTimeTrunk.push(new Date().getTime())
+      })
+      .catch(err => {
+        console.log(err)
+        alert('视频通话建立失败！')
+      })
     },
-    reconnectVideo() {
-      this.getLocalStream()
-        .then(info => this.startRTC(info.stream), err => {
-          console.log(err)
-          alert('打开摄像头失败！')
+    async reconnectVideo() {
+      const res = await getSessionDetail(this.sessionRamId, this.userInfo.userId)
+      if (res.result.code === ERR_OK && !res.data.sectionId) {
+        IM.sendNormalMsg(this.userInfo.userId, this.csInfo.csId, {
+          sessionId: this.sessionId,
+          toUserName: this.csInfo.csName,
+          msg: '重连',
+          time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+          nickName: this.userInfo.nickName || this.userInfo.userName,
+          avatar: this.userInfo.userId,
+          identifier: this.userInfo.userId,
+          msgStatus: msgStatus.msg,
+          msgType: msgTypes.msg_video_reconnect,
+          MsgLifeTime: 0
         })
-        .catch(err => {
-          console.log(err)
-          alert('视频通话建立失败！')
-        })
+      } else {
+        this.$vux.toast.text('通话已过期')
+        await Tools.AsyncTools.sleep(2000)
+        return this.hangUpVideo()
+      }
+      // 重启视频
+      document.getElementById('videoRing').play()
+      this.readyToVideo()
+      // 重置截图
+      this.videoScreenShotShow = false
+      // 关闭重连按钮
+      this.serviceBreakOff = false
     },
     async enterVideoRTCRoomAPI(roomId, userId, openId, sessionId) {
       const enterVideoStatus = window.sessionStorage.getItem('enterVideoStatus')
       const clientType = enterVideoStatus === 'Android' ? 'Android' : 'iOS'
-      const res = await enterVideoRTCRoom(roomId, userId, openId, sessionId, clientType)
-      if (res.result.code === ERR_OK) {
-        // this.$vux.toast.text('进房成功')
-      } else {
-        // this.$vux.toast.text('进房失败')
-      }
+      await enterVideoRTCRoom(roomId, userId, openId, sessionId, clientType)
+      // if (res.result.code === ERR_OK) {
+      //   // this.$vux.toast.text('进房成功')
+      // } else {
+      //   // this.$vux.toast.text('进房失败')
+      // }
     },
-    handleHangUpVideo() {
+    async handleHangUpVideo() {
       if (!this.isVideoConnectSuccess) {
         // 视频成功接通之前客户点击挂断
         // 关闭铃声
@@ -265,16 +299,22 @@ export default {
         MsgLifeTime: 0
       })
       // 停止推流
-      this.quitRTC()
+      await this.quitRTC()
+      this.hangUpVideo()
     },
     async hangUpVideo() {
+      // 初始化重连按钮
+      this.serviceBreakOff = false
       // 恢复全屏
       !this.fullScreen && this.setFullScreen(true)
       // 恢复摄像头默认位置
       this.isChangeCamera && (this.isChangeCamera = false)
       // 记录通话时间
-      const time = this._getVideoTime(this.startTimeStamp)
+      const time = this._getVideoTime([ this.startTimeTrunk, this.endTimeTrunk ])
       this.setServerTime(time)
+      // 清空时间
+      this.startTimeTrunk = []
+      this.endTimeTrunk = []
       // 判断当前是否评价过
       this.isVideoConnectSuccess && !this.hasAssess && this.setAssessView({
         show: true,
@@ -300,6 +340,33 @@ export default {
         resolve()
       })
     },
+
+    daley_cb: (function() {
+      let flag = false
+      return async function cb(text, time) {
+        if (!flag) {
+          flag = true
+          await this.showToast(text, time)
+          flag = false
+        }
+      }
+    })(),
+
+    bps_cb: (function() {
+      let count = 0
+      return function cb(text) {
+        if (count < 10) {
+          return undefined
+        } else {
+          this.showToast(text)
+        }
+      }
+    })(),
+
+    changeUnsmoothTextShow(state) {
+      this.isUnsmoothTextShow = state
+    },
+
     showShare(csId, csName) {
       this.$emit('showShare', csId, csName)
     },
@@ -323,6 +390,7 @@ export default {
 @import '~@/common/style/mixin.less';
 
 .video-bar {
+  position: relative;
   // &.video-mini-screen {
   //   margin: .5rem .5rem 0 0;
   //   width: 9rem;
@@ -379,7 +447,7 @@ export default {
       //   transform: translateX(-50%) rotateY(180deg)
       // }
       &.video-blur {
-        filter: blur(50px);
+        filter: blur(500px);
       }
       &::-webkit-media-controls {
         display: none !important;
@@ -431,32 +499,6 @@ export default {
     top: 0;
     bottom: 0;
     z-index: 101;
-    .reconnect {
-      --btnHeight: 3rem;
-      position: absolute;
-      left: 0;
-      right: 0;
-      top: 0;
-      bottom: 0;
-      margin: auto;
-      max-width: 80%;
-      height: var(--btnHeight);
-      display: flex;
-      justify-content: center;
-      .reconnect-btn {
-        --fontColor: #ccc;
-        // width: max-content;
-        // height: max-content;
-        display: inline-block;
-        border: 1px solid var(--fontColor);
-        border-radius: .5rem;
-        background-color: unset;
-        color: var(--fontColor);
-        font-size: 1.4rem;
-        padding: .5rem 1rem;
-        margin: 0;
-      }
-    }
     .video-header {
       position: absolute;
       top: 2.6rem;
@@ -572,6 +614,33 @@ export default {
         width: 100%;
         box-sizing: border-box;
       }
+    }
+  }
+  .reconnect {
+    --btnHeight: 3rem;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 1000;
+    margin: auto;
+    max-width: 80%;
+    height: var(--btnHeight);
+    display: flex;
+    justify-content: center;
+    .reconnect-btn {
+      --fontColor: #ccc;
+      // width: max-content;
+      // height: max-content;
+      display: inline-block;
+      border: 1px solid var(--fontColor);
+      border-radius: .5rem;
+      background-color: unset;
+      color: var(--fontColor);
+      font-size: 1.4rem;
+      padding: .5rem 1rem;
+      margin: 0;
     }
   }
   // .mini-container {

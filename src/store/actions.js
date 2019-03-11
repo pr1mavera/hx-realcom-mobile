@@ -335,8 +335,8 @@ export const reqTransAnotherTimeout = function({ commit, state }, delay) {
           csId: data.userCode,
           csName: data.userName || '',
           csNick: data.userNick || '',
-          startTime: data.queueStartTime,
-          endTime: data.queueEndTime
+          queueStartTime: data.queueStartTime,
+          queueEndTime: data.queueEndTime
         }
         const onlineConfig = await configSendSystemMsg({ state }, onlineQueueSuccMsg)
         await IM.sendSystemMsg(onlineConfig)

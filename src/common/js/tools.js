@@ -419,6 +419,18 @@ const CacheTools = {
     return cacheObj.data
   },
 
+  // 获取上一次的服务状态
+  getLastServiceData: function({
+    origin,
+    userId
+  }) {
+    const cache = window.localStorage.getItem(`${origin}_curServInfo`)
+    const cacheObj = cache ? JSON.parse(cache) : ''
+    return (cache && cacheObj.check === userId)
+              ? cacheObj
+              : null
+  },
+
   // 存localStorage
   setCacheData: function({
     key,
@@ -519,6 +531,13 @@ let Tools = Object.assign({}, {
     const date = this.DateTools.formatDate('yyyy-MM-dd-hh-mm-ss-SSS').split(/-/g).join('')
     const ram = this.randomMin2Max(100000)(999999)
     return `${sessionStatus.robot}${date}${ram}`
+  },
+  // 拿总的视频时长
+  getVideoDateDiff: function([ dateBegin, dateEnd ]) {
+    return _.pipe(
+      _.zip(dateBegin),
+      _.reduce((num, [ start, end ]) => num + end - start, 0)
+    )(dateEnd)
   },
   // 尾递归合并两个深度为2，且含有相同 key 的对象
   merge: function(obj1, obj2) {

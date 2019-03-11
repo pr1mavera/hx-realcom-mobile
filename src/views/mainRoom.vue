@@ -7,6 +7,7 @@
         @cancelVideoLineUp="iOSVideoFailed"
         @iOSVideoFailed="iOSVideoFailed"
         @quitRTCResponse="quitRTCResponse"
+        @videoQuality="videoQuality"
       ></router-view>
       <!-- @showIosGuide="iosGuide = true"
       @showLowVersion="lowVersion = true" -->
@@ -312,79 +313,6 @@ export default {
       this.$router.replace({path: `/room/chat?openId=${query.openId}&origin=${query.origin || 'WE'}`})
       this.afterServerFinish(sessionStatus.video)
     },
-    // 分享
-    // async toShare(csId, csName) {
-    //   this.isShareView = false
-    //   this.shareGuide = true
-    //   this.shareUrl = `https://${window.location.host}/video/index.html`
-    //   GoShare(this.shareUrl)
-    //   await this.initShare()
-    //   this.clickShare()
-    // },
-    // iframe弹出层
-    // showIframe({ link, clientX, clientY }) {
-    //   this.iframeView = true
-    //   this.iframeSrc = Tools.MsgsFilterTools.transHttp2Https(link)
-    //   // this.iframeSrc = 'http://www.baidu.com'
-    //   // this.iframePos = {
-    //   //   clientX,
-    //   //   clientY
-    //   // }
-    // },
-    // showIframeEnter(el, done) {
-    //   const showIframeframes = anime.timeline()
-    //   showIframeframes.add({
-    //     targets: '#router-view',
-    //     scale: [1, 0.92],
-    //     duration: 200,
-    //     easing: 'easeOutQuint',
-    //     offset: 0
-    //   }).add({
-    //     targets: '#iframe-section',
-    //     backdropFilter: [blur(0), blur('4px')],
-    //     opacity: [0, 1],
-    //     duration: 300,
-    //     easing: 'easeOutQuint',
-    //     offset: 0
-    //   }).add({
-    //     targets: '#iframe-section .iframe-bar',
-    //     // translateX: [this.iframePos.clientX, 0],
-    //     // translateY: [this.iframePos.clientY, 0],
-    //     opacity: [0, 1],
-    //     scale: [0, 1],
-    //     duration: 300,
-    //     easing: 'easeOutQuint',
-    //     offset: 0
-    //   })
-    //   showIframeframes.complete = done
-    // },
-    // showIframeLeave(el, done) {
-    //   const showIframeframes = anime.timeline()
-    //   showIframeframes.add({
-    //     targets: '#router-view',
-    //     scale: [0.92, 1],
-    //     duration: 200,
-    //     easing: 'easeInOutQuad',
-    //     offset: 0
-    //   }).add({
-    //     targets: '#iframe-section',
-    //     backdropFilter: [blur('4px'), blur(0)],
-    //     opacity: [1, 0],
-    //     duration: 300,
-    //     easing: 'easeInOutQuad',
-    //     offset: 0
-    //   }).add({
-    //     targets: '#iframe-section .iframe-bar',
-    //     // translateX: [0, this.iframePos.clientX],
-    //     // translateY: [0, this.iframePos.clientX],
-    //     opacity: [1, 0],
-    //     scale: [1, 0],
-    //     duration: 300,
-    //     easing: 'easeInOutQuad',
-    //     offset: 0
-    //   })
-    //   showIframeframes.complete = done
-    // },
     // 发送礼物时的动画弹层
     async showGiftAnime(giftInfo) {
       this.showGiftView(giftInfo.giftId)
@@ -399,6 +327,9 @@ export default {
     resetGiftView() {
       this.giftAnimeView = false
       this.giftSrc = null
+    },
+    videoQuality(state) {
+      this.$refs.videoBar.changeUnsmoothTextShow(state)
     },
     ...mapMutations({
       setRoomMode: 'SET_ROOM_MODE',

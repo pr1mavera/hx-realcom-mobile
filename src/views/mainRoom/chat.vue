@@ -191,7 +191,7 @@ export default {
         height: 0
       },
       isBotAssessShow: false,
-      lastMsgTimestamp: {
+      lastMsgRecord: {
         timestramp: '',
         length: 0
       }
@@ -235,7 +235,7 @@ export default {
     window.addEventListener('visibilitychange', async() => {
       if (document.hidden) {
         // 记录离线时间
-        this.lastMsgTimestamp = {
+        this.lastMsgRecord = {
           timestramp: new Date().getTime(),
           length: this.msgs.length
         }
@@ -286,33 +286,50 @@ export default {
       this.setBotInfo(botInfo)
 
       // IM 初始化
-      this.initIM(userInfo)
+      await this.initIM(userInfo)
+      // 保存访客记录
+      saveVisitorRecord(userInfo.userId, userInfo.nickName, userInfo.origin, userInfo.openId)
 
       // 判断是否重连
-      const reConnectStatus = await this.getCurServStatus()
+      // const reConnectStatus = await this.getCurServStatus()
+      const quality = await this.systemConfig('sessionTimeOut')
+      const lastServ = Tools.CacheTools.getLastServiceData({ origin: userInfo.origin, userId: userInfo.userId })
 
-      if (!reConnectStatus) { // 当前无在线服务，或服务过期，不重连
-        // 若无缓存则清空当前缓存
-        Tools.CacheTools.removeCacheData(`${this.userInfo.origin}_curServInfo`)
-        // 若无重连，则 action 创建会话
-        // this.initSession()
-        // 若无重连，则 配置机器人欢迎语
-        this.setMsgs(welcomeMsg)
-      } else {
-        // 重连
-        this.reConnect(reConnectStatus)
+      if (lastServ) {
+        // 存在上一次服务记录
         // 初始化本地缓存消息最后一条的时间
-        this.lastMsgTimestamp = (roamMsgs.length && roamMsgs[roamMsgs.length - 1].time) || new Date().getTime()
+        const lastMsgT = roamMsgs.length && roamMsgs[roamMsgs.length - 1].timestamp.split('_')[0]
+        this.lastMsgRecord.timestramp = lastMsgT || new Date().getTime()
         // 拉取离线消息
-        const offlineMsgs = await this.getOfflineMsgs(this.lastMsgTimestamp)(Tools.DateTools.formatDate('yyyy-MM-dd hh:mm:ss'))
+        const offlineMsgs = await this.getOfflineMsgs(+this.lastMsgRecord.timestramp, lastServ.data.csInfo.csId)(Tools.DateTools.formatDate('yyyy-MM-dd hh:mm:ss'))
         if (offlineMsgs.length) {
           this.sendMsgs(offlineMsgs)
           this.saveCurMsgs({ origin: this.userInfo.origin, msg: offlineMsgs })
         }
-      }
 
-      // 保存访客记录
-      saveVisitorRecord(userInfo.userId, userInfo.nickName, userInfo.origin, userInfo.openId)
+        // 查看当前坐席是否结束会话
+        const res = await getSessionStatus(lastServ.data.sessionId)
+        if (
+          res.result.code === ERR_OK &&
+          res.data.status === 'true' &&
+          quality &&
+          quality.compare(lastServ.timestamp)
+        ) {
+          // 重连
+          this.reConnect(lastServ.data)
+        } else {
+          // 会话已结束
+          // 清空当前缓存
+          Tools.CacheTools.removeCacheData(`${this.userInfo.origin}_curServInfo`)
+          // 配置机器人欢迎语
+          this.setMsgs(welcomeMsg)
+        }
+      }
+      else {
+        // 无缓存
+        // 配置机器人欢迎语
+        this.setMsgs(welcomeMsg)
+      }
 
       return undefined
     },
@@ -347,11 +364,9 @@ export default {
       data.sessionId && this.setSessionId(data.sessionId)
       // 设置chatGuid
       data.chatGuid && this.setChatGuid(data.chatGuid)
-
-      this.$vux.toast.text('重连成功', 'default')
       // 手动更新用户最后活动时间（更新定时器）
       // this.updateLastAction()
-      return 0
+      return this.$vux.toast.text('重连成功', 'default')
     },
     async getIMLoginState() {
       const res = await getLoginState(this.userInfo.userId)
@@ -363,11 +378,11 @@ export default {
       }
     },
     // 获取离线消息
-    getOfflineMsgs(initTimestamp) {
+    getOfflineMsgs(initTimestamp, csId = this.csInfo.csId) {
       // 递归查找离线消息
       const self = this
       return async function reqOfflineMsgs(timeTask, ...msgsTask) {
-        const task = await self.getVideoAPI(self.userInfo.userId, self.csInfo.csId, timeTask, 15)
+        const task = await self.getVideoAPI(self.userInfo.userId, csId, timeTask, 15)
         const msgs = formatRoamMsgs.IMMsgsparse(task.MsgList)
         // 过滤出离线时间之后的消息
         const offlineMsgs = msgs.filter(msg => {
@@ -390,9 +405,9 @@ export default {
       // 如果当前存在人工客服服务，查询当前服务状态，尝试重连
       if ((this.roomMode === roomStatus.menChat) && data) {
         // 拉取离线消息
-        if (this.msgs.length === this.lastMsgTimestamp.length) {
+        if (this.msgs.length === this.lastMsgRecord.length) {
           // 拉取离线消息
-          const offlineMsgs = await this.getOfflineMsgs(this.lastMsgTimestamp.timestramp)(Tools.DateTools.formatDate('yyyy-MM-dd hh:mm:ss'))
+          const offlineMsgs = await this.getOfflineMsgs(this.lastMsgRecord.timestramp)(Tools.DateTools.formatDate('yyyy-MM-dd hh:mm:ss'))
           if (offlineMsgs.length) {
             this.sendMsgs(offlineMsgs)
             this.saveCurMsgs({ origin: this.userInfo.origin, msg: offlineMsgs })

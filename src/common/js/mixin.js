@@ -248,23 +248,24 @@ export const RTCRoomMixin = {
 
         this.RTC.on('onQualityReport', this.handleRTCQualityReport)
 
-        this.RTC.on('onLocalStreamAdd', (info) => {
-          const videoElement = document.getElementById('localVideo')
-          if (info && info.stream) {
-            videoElement.srcObject = info.stream
-          }
-        })
+        // this.RTC.on('onLocalStreamAdd', (info) => {
+        //   const videoElement = document.getElementById('localVideo')
+        //   if (info && info.stream) {
+        //     debugger
+        //     videoElement.srcObject = info.stream
+        //   }
+        // })
         this.RTC.on('onRemoteStreamUpdate', (info) => {
           console.log('onRemoteStreamUpdate ----------------')
           const videoElement = document.getElementById('remoteVideo')
           if (info && info.stream) {
-            // 记录视频开始时间
-            this.startTimeStamp = new Date()
             // 绑定视频流
             videoElement.srcObject = info.stream
             videoElement.play()
             // 添加监听，远程流视频加载完全时，关闭铃声，切换摄像头
             videoElement.addEventListener('playing', () => {
+              // 提示视频加载成功
+              this.$vux.toast.text('客服视频载入成功', 'default')
               // 记录视频接通成功状态
               this.isVideoConnectSuccess = true
               // 初始化重连按钮
@@ -274,15 +275,15 @@ export const RTCRoomMixin = {
               // 初始化视频窗口位置
               this.isChangeCamera = false
               // this.$vux.toast.isVisible() && this.$vux.toast.hide()
-              // 关闭视频提示
-              this.isToastTextShow = false
+              // 初始化结束状态
+              this.RTCQuitFlag = false
             }, false)
           }
         })
 
-        this.RTC.on('onRemoteStreamRemove', (info) => {
+        this.RTC.on('onRemoteStreamRemove', () => {
           // 停止推流
-          // this.quitRTC()
+          this.quitRTC()
           // 显示重连按钮
           this.serviceBreakOff = true
         })
@@ -341,6 +342,10 @@ export const RTCRoomMixin = {
       return new Promise((resolve, reject) => {
         this.RTC.getLocalStream({ video: true, audio: true }, info => {
           resolve(info)
+          const videoElement = document.getElementById('localVideo')
+          if (info && info.stream) {
+            videoElement.srcObject = info.stream
+          }
         }, err => {
           reject(new Error(`error in getLocalStream: ${JSON.stringify(err)}`))
         })
@@ -393,45 +398,34 @@ export const RTCRoomMixin = {
     },
 
     // 退出RTC
-    async quitRTC() {
-      if (this.RTCQuitFlag) {
-        return undefined
-      }
-      this.RTCQuitFlag = true
-      await this.getVideoScreenShot()
-      this.RTC && this.RTC.quit(() => {
-        console.log('退出音视频房间 成功 辣')
-        this.hangUpVideo()
-      }, () => {
-        console.error('退出音视频房间 失败 辣')
-        this.hangUpVideo()
+    quitRTC() {
+      return new Promise(async(resolve, reject) => {
+        if (this.RTCQuitFlag) {
+          resolve()
+          return undefined
+        }
+        this.RTCQuitFlag = true
+        await this.getVideoScreenShot()
+        this.RTC && this.RTC.quit(() => {
+          console.log('退出音视频房间 成功 辣'); // eslint-disable-line
+          // 记录视频结束时间节点
+          (this.endTimeTrunk.length === this.startTimeTrunk.length - 1) && this.endTimeTrunk.push(new Date().getTime())
+          resolve()
+        }, err => {
+          console.error('退出音视频房间 失败 辣')
+          reject()
+        })
       })
     },
 
-    daley_cb: (function() {
-      let flag = false
-      return async function cb(text, time) {
-        if (!flag) {
-          flag = true
-          await this.showToast(text, time)
-          flag = false
-        }
-      }
-    })(),
-
-    bps_cb: (function() {
-      let count = 0
-      return function cb(text) {
-        if (count < 10) {
-          return undefined
-        } else {
-          this.showToast(text)
-        }
-      }
-    })(),
-
     // 音视频流监控
     handleRTCQualityReport(data) {
+      // 当前远程流已经断开，显示重连按钮
+      console.log('this.serviceBreakOff: ', this.serviceBreakOff)
+      if (this.serviceBreakOff) {
+        return undefined
+      }
+
       Tools.trace('视频质量报告：---> ')(data)
       const daley = data.WebRTCQualityReq.uint32_delay
       const daley_inside = data.WebRTCQualityReq.VideoReportState.uint32_video_delay
@@ -457,7 +451,7 @@ export const RTCRoomMixin = {
     },
 
     // 提示插件
-    async showToast( text, time ) { // 默认不消失
+    async showToast(text, time) { // 默认不消失
       // this.toastText = text
       // this.isToastTextShow = true
       this.$vux.toast.show({
@@ -748,40 +742,44 @@ export const IMMixin = {
         return
       }
       msgsObj.timestamp = new Date().getTime()
-      if (msgsObj.msgStatus === msgStatus.msg && msgsObj.msgType === msgTypes.msg_img) { // 图片消息
-        this.addPreviewImg({ list: this.previewImgList, msgsObj })
-      }
-      if (msgsObj.msgStatus === msgStatus.msg && msgsObj.msgType === msgTypes.msg_normal) { // 消息封装链接
-        msgsObj.content = Tools.strWithLink(msgsObj.content, this.theme['button'])
-      }
-      if (msgsObj.msgStatus === msgStatus.msg && msgsObj.msgType === msgTypes.msg_timeout) { // 超时消息
-        const dialog = {
-          time: Tools.DateTools.formatDate('yyyy-MM-dd hh:mm:ss'),
-          msgStatus: msgStatus.dialog,
-          msgType: dialogTypes.dialog_disconnect,
-          dialogInfo: {
-            disconnectTime: 5
-          }
+      if (msgsObj.msgStatus === msgStatus.msg) {
+        if (msgsObj.msgType === msgTypes.msg_img) { // 图片消息
+          this.addPreviewImg({ list: this.previewImgList, msgsObj })
         }
-        this.sendMsgs([dialog])
-        return
-      }
-      if (msgsObj.msgStatus === msgStatus.msg && msgsObj.msgType === msgTypes.msg_video_blur) { // 客服暂离消息
-        const state = msgsObj.content === 'true'
-        this.setVideoBlur(state)
-        // this.isToastTextShow = state
-        return
-      }
-      if (msgsObj.msgStatus === msgStatus.msg && msgsObj.msgType === msgTypes.msg_video_muted) { // 客服静音消息
-        const state = msgsObj.content === 'true'
-        this.setVideoMuted(state)
-        // this.isToastTextShow = state
-        return
-      }
-      if (msgsObj.msgStatus === msgStatus.msg && msgsObj.msgType === msgTypes.msg_video_hang_up) { // 视频挂断
-        // this.quitRTC()
-        // this.$emit('quitRTCResponse')
-        return
+        if (msgsObj.msgType === msgTypes.msg_normal) { // 消息封装链接
+          msgsObj.content = Tools.strWithLink(msgsObj.content, this.theme['button'])
+        }
+        if (msgsObj.msgType === msgTypes.msg_timeout) { // 超时消息
+          const dialog = {
+            time: Tools.DateTools.formatDate('yyyy-MM-dd hh:mm:ss'),
+            msgStatus: msgStatus.dialog,
+            msgType: dialogTypes.dialog_disconnect,
+            dialogInfo: {
+              disconnectTime: 5
+            }
+          }
+          return this.sendMsgs([dialog])
+        }
+        if (msgsObj.msgType === msgTypes.msg_video_blur) { // 客服暂离消息
+          const state = msgsObj.content === 'true'
+          return this.setVideoBlur(state)
+        }
+        if (msgsObj.msgType === msgTypes.msg_video_muted) { // 客服静音消息
+          const state = msgsObj.content === 'true'
+          return this.setVideoMuted(state)
+        }
+        if (msgsObj.msgType === msgTypes.msg_video_hang_up) { // 视频挂断
+          // this.quitRTC()
+          // this.$emit('quitRTCResponse')
+          return
+        }
+        if (msgsObj.msgType === msgTypes.msg_video_quality) { // 视频卡顿
+          const state = msgsObj.content === 'unsmooth'
+          if (state && this.$vux.toast.isVisible()) {
+            return undefined
+          }
+          return this.$emit('videoQuality', state)
+        }
       }
       this.sendMsgs([msgsObj])
       // this.lastMsgTimestamp = msgsObj.time

@@ -357,24 +357,27 @@ const IM = (() => {
     if (options.assessInfo) {
       assessInfoStr = JSON.stringify(options.assessInfo)
     }
+    let desc = {
+      "sessionId": options.sessionId,
+      "chatGuid": options.chatGuid,
+      "sendUserId": from_id,
+      "sendUserType": "1",
+      "toUserId": to_id,
+      "toUserName": options.toUserName,
+      "toUserType":"2",
+      "nickName": options.nickName,
+      "avatar": options.avatar,
+      "msgType": options.msgType,
+      "time": options.time,
+      "msgStatus": options.msgStatus,
+      "chatType": options.chatType
+    }
+    if (options.MsgLifeTime === 0) {
+      desc['MsgLifeTime'] = options.MsgLifeTime
+    }
     sendC2CCustomMsg(from_id, to_id, {
       data: options.msg,
-      desc: `{
-        "sessionId":"${options.sessionId}",
-        "chatGuid":"${options.chatGuid}",
-        "sendUserId":"${from_id}",
-        "sendUserType":"1",
-        "toUserId":"${to_id}",
-        "toUserName":"${options.toUserName}",
-        "toUserType":"2",
-        "nickName":"${options.nickName}",
-        "avatar":"${options.avatar}",
-        "msgType":"${options.msgType}",
-        "time":"${options.time}",
-        "msgStatus":"${options.msgStatus}",
-        "chatType":"${options.chatType}",
-        "MsgLifeTime":"${options.MsgLifeTime}"
-      }`,
+      desc: JSON.stringify(desc),
       ext: `{
         "imgData":${imgDataStr},
         "proxyInfo":${proxyInfoStr},
