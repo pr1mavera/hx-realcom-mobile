@@ -265,7 +265,7 @@ export const RTCRoomMixin = {
             // 添加监听，远程流视频加载完全时，关闭铃声，切换摄像头
             videoElement.addEventListener('playing', () => {
               // 提示视频加载成功
-              this.$vux.toast.text('客服视频载入成功', 'default')
+              // this.$vux.toast.text('客服视频载入成功', 'default')
               // 记录视频接通成功状态
               this.isVideoConnectSuccess = true
               // 初始化重连按钮
@@ -296,17 +296,7 @@ export const RTCRoomMixin = {
         this.RTC.on('onRelayTimeout', () => {
           console.warn('服务器超时断开')
           this.showToast('当前网络状况不佳，服务器超时断开')
-          // this.$vux.toast.show({
-          //   text: '当前网络状况不佳，服务器超时断开',
-          //   position: 'top'
-          // })
         })
-
-        // this.RTC.on('onWebSocketNotify', (info) => {
-        //   // errorCode=10035，表示websocket被关闭
-        //   // 凡是webSocket流的关闭都会触发这个事件,将挂断操作从onRemoteStreamRemove移动到这来
-        //   (info.errorCode === 10035) && this.hangUpVideo()
-        // })
 
         this.RTC.on('onStreamNotify', (info) => {
           if (info.event === 'onended' || info.event === 'inactive') {
@@ -354,6 +344,16 @@ export const RTCRoomMixin = {
 
     // 本地推流
     startRTC(stream) {
+      // 记录差值
+      function getDiffAndRecordWithInitVal(initVal) {
+        let oldVal = initVal
+        return (newVal) => {
+          const diff = newVal - oldVal
+          oldVal = newVal
+          return diff
+        }
+      }
+
       return new Promise((resolve, reject) => {
         this.RTC.startRTC({ stream, role: 'user' }, () => {
           // 初始化 bytesSent
@@ -362,7 +362,7 @@ export const RTCRoomMixin = {
           const getDiffOfPacketsSent = this.getDiffAndRecordWithInitVal(0)
           this.RTC.getStats({
             interval: 1000
-          }, (res) => {
+          }, res => {
             const video = res.video
             console.log('getStats => !!!!!!!')
             console.log('getStats => bytesReceived:', video.bytesReceived)
@@ -376,16 +376,6 @@ export const RTCRoomMixin = {
           reject(new Error(`error in startRTC: ${JSON.stringify(err)}`))
         })
       })
-    },
-
-    // 记录差值
-    getDiffAndRecordWithInitVal(initVal) {
-      let oldVal = initVal
-      return (newVal) => {
-        const diff = newVal - oldVal
-        oldVal = newVal
-        return diff
-      }
     },
 
     // 停止推流
@@ -440,15 +430,25 @@ export const RTCRoomMixin = {
       Tools.trace('总延迟：')(daley)
       Tools.trace('视频延迟：')(daley_inside)
       if (daley >= 1000 || daley_inside >= 600) {
-        this.daley_cb('当前网络状况不佳', 3000)
+        // this.daley_cb('当前网络状况不佳', 3000)
+        this.$vux.toast.isVisible() ? undefined : this.showToast('当前网络状况不佳', 3000)
       }
 
       Tools.trace('接收数据：')(recv_bps / 1024)
       if (send_bps === 0 || recv_bps === 0) {
-        this.bps_cb('当前网络太差，无法建立视频通话')
-        this.$refs.videoFooter.minimizeBtnHighLight()
+        this.bps_cb(this.showToast, '当前网络太差，无法建立视频通话')
+        // this.$refs.videoFooter.minimizeBtnHighLight()
       }
     },
+
+    bps_cb: (function() {
+      let count = 0
+      return function cb(toast, text) {
+        return count > 10
+                ? toast(text)
+                : ++count
+      }
+    })(),
 
     // 提示插件
     async showToast(text, time) { // 默认不消失

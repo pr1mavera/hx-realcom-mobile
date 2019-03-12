@@ -16,7 +16,8 @@
         autoplay
         playsinline
       ></video>
-      <img width=40% v-show="isVideoFilter" src="/video/static/img/video/video-filter.png" class="video-watermark">
+      <water-mark v-show="isVideoFilter" :img="`/video/static/img/video/hx-watermark.png`"></water-mark>
+      <img width=60% v-show="isVideoFilter" src="/video/static/img/video/video-filter.png" class="video-watermark">
       <div class="video-mask">
         <div class="full-screen-btn" v-show="!fullScreen" @click="openVideoBar">
           <svg class="icon" aria-hidden="true">
@@ -108,6 +109,7 @@ export default {
     'VideoMsgList': () => import('@/views/mainRoom/components/video/video-msg-list'),
     'SendGift': () => import('@/views/mainRoom/components/chat/send-gift'),
     'Assess': () => import('@/views/mainRoom/components/assess'),
+    'WaterMark': () => import('@/views/mainRoom/components/video/water-mark'),
     Toast
   },
   computed: {
@@ -182,7 +184,6 @@ export default {
   },
   methods: {
     _getVideoTime([ dateBegin, dateEnd ]) {
-      debugger
       const dateDiff = Tools.getVideoDateDiff([ dateBegin, dateEnd ])
       // const dateEnd = new Date() // 获取当前时间
       // const dateDiff = dateEnd.getTime() - dateBegin.getTime() // 时间差的毫秒数
@@ -341,28 +342,6 @@ export default {
       })
     },
 
-    daley_cb: (function() {
-      let flag = false
-      return async function cb(text, time) {
-        if (!flag) {
-          flag = true
-          await this.showToast(text, time)
-          flag = false
-        }
-      }
-    })(),
-
-    bps_cb: (function() {
-      let count = 0
-      return function cb(text) {
-        if (count < 10) {
-          return undefined
-        } else {
-          this.showToast(text)
-        }
-      }
-    })(),
-
     changeUnsmoothTextShow(state) {
       this.isUnsmoothTextShow = state
     },
@@ -452,6 +431,17 @@ export default {
       &::-webkit-media-controls {
         display: none !important;
       }
+    }
+    .water-mark {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      margin: auto;
+      width: 100%;
+      height: 100%;
+      // z-index: 1000000;
     }
     .video-watermark {
       position: absolute;
