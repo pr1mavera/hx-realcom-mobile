@@ -24,7 +24,7 @@ export function beforeEnterVideo() {
     const ver = ua.match(/cpu iphone os (.*?) like mac os/)
     version = parseFloat(ver[1].replace(/_/g, '.'))
     // 若用户当前设备的版本过低，则提示用户升级系统
-    if (version < 12) {
+    if (version < 11) {
       // this.$emit('low-version', 'true')
       sessionStorage.setItem('enterVideoStatus', 'low-version')
     } else if (device === 'iPhone' && browser === 'wx') {

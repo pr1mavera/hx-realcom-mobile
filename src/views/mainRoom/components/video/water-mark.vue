@@ -1,5 +1,5 @@
 <template>
-    <div class="water-mark" ref="bg">
+    <div class="water-mark" ref="bg" :style="`background-color: ${blur ? 'unset' : '#333'}`">
         <canvas class="water-mark-canvas" ref="canvas"></canvas>
     </div>
 </template>
@@ -7,6 +7,9 @@
 <script>
 export default {
     props: {
+        blur: {
+            type: Boolean
+        },
         img: {
             type: String
         },
@@ -47,20 +50,23 @@ export default {
                 const self = this
                 const doc = document.documentElement
                 const canvasEle = self.$refs.canvas
-                canvasEle.width = doc.clientWidth
-                canvasEle.height = doc.clientHeight
+                canvasEle.width = doc.clientWidth * 2
+                canvasEle.height = doc.clientHeight * 2
                 const context = canvasEle.getContext('2d')
 
+                // 宽高比
                 const proportion = img.width / img.height
                 // 水印最大显示
-                const max = self.space * 0.8
+                const max = self.space * 0.8 * 2
+                // 水印图像在 canvas 上的真实大小
                 const [ width, height ] = img.width >= img.height
                                             ? [ max, parseInt(max / proportion) ]
                                             : [ parseInt(max * proportion), max ]
 
                 drawImg(...pos)
                 function drawImg([ x, y ], ...restPos) {
-                    context.drawImage(img, x, y, width, height)
+                    // 绘制水印
+                    context.drawImage(img, x * 2, y * 2, width, height)
 
                     return restPos.length
                             ? drawImg(...restPos)
@@ -74,26 +80,37 @@ export default {
             const [ width, height ] = [ doc.clientWidth, doc.clientHeight ]
 
             // 递归添加 x 轴点坐标
-            function pushMatrix(w, h, m) {
-                m.push([ w, h ])
+            function pushMatrix(w, h, p) {
+                p.push([ w, h ])
                 w -= self.space
                 h -= self.offset_y
                 return w > -self.space
-                        ? pushMatrix(w, h, m)
+                        ? pushMatrix(w, h, p)
                         : undefined
             }
 
             // 递归添加点坐标
-            function getPos(width, height, matrix) {
-                pushMatrix(width, height, matrix)
+            function getPos(width, height, pos) {
+                pushMatrix(width, height, pos)
                 width -= self.offset_x
                 height -= self.space
                 return height > -self.space
-                        ? getPos(width, height, matrix)
-                        : matrix
+                        ? getPos(width, height, pos)
+                        : pos
             }
             return getPos(width, height, [])
         }
     }
 }
 </script>
+
+<style lang="less">
+.water-mark {
+    background-color: #333;
+    transition: opacity ease-in-out 0.3s;
+    .water-mark-canvas {
+        width: 100%;
+        height: 100%;
+    }
+}
+</style>

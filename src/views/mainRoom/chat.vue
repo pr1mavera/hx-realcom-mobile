@@ -87,6 +87,9 @@ import { formatRoamMsgs } from '@/common/js/MsgsLoader'
 import BScroll from 'better-scroll'
 import Clipboard from 'clipboard'
 import InputBar from '@/views/mainRoom/components/chat/input-bar'
+import FloadButton from '@/views/mainRoom/components/chat/fload-button'
+// import ExtendBar from '@/views/mainRoom/components/chat/extend-bar'
+// import PullDown from '@/views/mainRoom/components/chat/pull-down'
 import Tools from '@/common/js/tools'
 // import { formatDate } from '@/common/js/dateConfig.js'
 import { loginMixin, IMMixin, sendMsgsMixin, getMsgsMixin, onLineQueueMixin } from '@/common/js/mixin'
@@ -114,10 +117,13 @@ export default {
     // HeaderBar,
     InputBar,
     Previewer,
+    FloadButton,
+    // ExtendBar,
+    // PullDown,
     'msgsQueue': () => import('@/views/mainRoom/components/chat/msgs-queue'),
-    'FloadButton': () => import('@/views/mainRoom/components/chat/fload-button'),
+    // 'FloadButton': () => import('@/views/mainRoom/components/chat/fload-button'),
     'FloatBotAssess': () => import('@/views/mainRoom/components/chat/float-bot-assess'),
-    'extendBar': () => import('@/views/mainRoom/components/chat/extend-bar'),
+    'ExtendBar': () => import('@/views/mainRoom/components/chat/extend-bar'),
     'PullDown': () => import('@/views/mainRoom/components/chat/pull-down')
   },
   computed: {
@@ -208,12 +214,12 @@ export default {
     this._setTheme()
 
     this.$nextTick(async() => {
-      this.$vux.loading.show({ text: '请稍后' })
+      // this.$vux.loading.show({ text: '请稍后' })
       // 初始化滚动
       this._initScroll()
       this._initPullDownRefresh()
       await this._initChat()
-      this.$vux.loading.hide()
+      // this.$vux.loading.hide()
     })
 
     // 断网
@@ -250,7 +256,7 @@ export default {
   },
   activated() {
     this.$nextTick(async() => {
-      await Tools.AsyncTools.sleep(10)
+      await Tools.AsyncTools.sleep(1)
       this.chatScroll.refresh()
       this.chatScroll.scrollToElement(this.$refs.chatContentEnd, 0)
     })
@@ -281,29 +287,27 @@ export default {
       const userInfo = Object.assign(baseInfo, userSig)
       this.setUserInfo(userInfo)
 
-      this.$router.replace({path: `/room/chat?openId=${userInfo.openId}&origin=${userInfo.origin}`})
+      const setBotWelcome = async(userInfo) => {
+        // 获取机器人基本信息，及配置机器人欢迎语
+        const { botInfo, welcomeMsg } = await this.getBotBaseInfo(query.openId, userInfo.userId)
+        this.setBotInfo(botInfo)
+        // 配置机器人欢迎语
+        this.setMsgs(welcomeMsg)
+      }
 
-      // 获取机器人基本信息，及配置机器人欢迎语
-      const { botInfo, welcomeMsg } = await this.getBotBaseInfo(query.openId, userInfo.userId)
-      this.setBotInfo(botInfo)
-
-      // IM 初始化
-      await this.initIM(userInfo)
-      // 保存访客记录
-      saveVisitorRecord(userInfo.userId, userInfo.nickName, userInfo.origin, userInfo.openId)
-
-      // 判断是否重连
-      // const reConnectStatus = await this.getCurServStatus()
-      const quality = await this.systemConfig('sessionTimeOut')
+      // 获取当前服务状态缓存
       const lastServ = Tools.CacheTools.getLastServiceData({ origin: userInfo.origin, userId: userInfo.userId })
 
       if (lastServ) {
         // 存在上一次服务记录
+        // IM 初始化
+        await this.initIM(userInfo)
         // 初始化本地缓存消息最后一条的时间
-        const lastMsgT = roamMsgs.length && roamMsgs[roamMsgs.length - 1].timestamp.split('_')[0]
+        const lastMsgT = roamMsgs.length && new Date(roamMsgs[roamMsgs.length - 1].time).getTime()
         this.lastMsgRecord.timestramp = lastMsgT || new Date().getTime()
         // 拉取离线消息
         const offlineMsgs = await this.getOfflineMsgs(+this.lastMsgRecord.timestramp, lastServ.data.csInfo.csId)(Tools.DateTools.formatDate('yyyy-MM-dd hh:mm:ss'))
+        debugger
         if (offlineMsgs.length) {
           this.sendMsgs(offlineMsgs)
           this.saveCurMsgs({ origin: this.userInfo.origin, msg: offlineMsgs })
@@ -311,6 +315,7 @@ export default {
 
         // 查看当前坐席是否结束会话
         const res = await getSessionStatus(lastServ.data.sessionId)
+        const quality = await this.systemConfig('sessionTimeOut')
         if (
           res.result.code === ERR_OK &&
           res.data.status === 'true' &&
@@ -323,15 +328,21 @@ export default {
           // 会话已结束
           // 清空当前缓存
           Tools.CacheTools.removeCacheData(`${this.userInfo.origin}_curServInfo`)
-          // 配置机器人欢迎语
-          this.setMsgs(welcomeMsg)
+          // 设置机器人欢迎语
+          setBotWelcome(this.userInfo)
         }
       }
       else {
         // 无缓存
-        // 配置机器人欢迎语
-        this.setMsgs(welcomeMsg)
+        // IM 初始化
+        this.initIM(userInfo)
+        // 设置机器人欢迎语
+        setBotWelcome(this.userInfo)
       }
+
+      this.$router.replace({path: `/room/chat?openId=${userInfo.openId}&origin=${userInfo.origin}`})
+      // 保存访客记录
+      saveVisitorRecord(userInfo.userId, userInfo.nickName, userInfo.origin, userInfo.openId)
 
       return undefined
     },

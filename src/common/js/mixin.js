@@ -284,6 +284,8 @@ export const RTCRoomMixin = {
         this.RTC.on('onRemoteStreamRemove', () => {
           // 停止推流
           this.quitRTC()
+          // 重置视频模糊状态
+          this.setVideoBlur(false)
           // 显示重连按钮
           this.serviceBreakOff = true
         })
@@ -357,9 +359,9 @@ export const RTCRoomMixin = {
       return new Promise((resolve, reject) => {
         this.RTC.startRTC({ stream, role: 'user' }, () => {
           // 初始化 bytesSent
-          const getDiffOfBytesSent = this.getDiffAndRecordWithInitVal(0)
+          const getDiffOfBytesSent = getDiffAndRecordWithInitVal(0)
           // 初始化 packetsSent
-          const getDiffOfPacketsSent = this.getDiffAndRecordWithInitVal(0)
+          const getDiffOfPacketsSent = getDiffAndRecordWithInitVal(0)
           this.RTC.getStats({
             interval: 1000
           }, res => {
@@ -390,11 +392,11 @@ export const RTCRoomMixin = {
     // 退出RTC
     quitRTC() {
       return new Promise(async(resolve, reject) => {
-        if (this.RTCQuitFlag) {
-          resolve()
-          return undefined
-        }
-        this.RTCQuitFlag = true
+        // if (this.RTCQuitFlag) {
+        //   resolve()
+        //   return undefined
+        // }
+        // this.RTCQuitFlag = true
         await this.getVideoScreenShot()
         this.RTC && this.RTC.quit(() => {
           console.log('退出音视频房间 成功 辣'); // eslint-disable-line
@@ -430,8 +432,7 @@ export const RTCRoomMixin = {
       Tools.trace('总延迟：')(daley)
       Tools.trace('视频延迟：')(daley_inside)
       if (daley >= 1000 || daley_inside >= 600) {
-        // this.daley_cb('当前网络状况不佳', 3000)
-        this.$vux.toast.isVisible() ? undefined : this.showToast('当前网络状况不佳', 3000)
+        !this.$vux.toast.isVisible() && this.showToast('当前网络状况不佳', 3000)
       }
 
       Tools.trace('接收数据：')(recv_bps / 1024)
@@ -465,7 +466,11 @@ export const RTCRoomMixin = {
       }
       await Tools.AsyncTools.sleep(3000)
       return Promise.resolve()
-    }
+    },
+
+    ...mapActions([
+      'setVideoBlur'
+    ])
   }
 }
 

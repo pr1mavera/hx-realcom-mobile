@@ -88,6 +88,10 @@
       ]),
       showAssessFlag: {
         get() {
+          // debugger
+          // if (this.showAssess && this.$refs.labelBar.btnList === 0) {
+          //   this.$refs.labelBar.getLabels()
+          // }
           return this.showAssess
         },
         set() {}

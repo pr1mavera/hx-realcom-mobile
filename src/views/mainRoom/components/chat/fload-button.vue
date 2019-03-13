@@ -84,6 +84,7 @@ export default {
       'userInfo',
       'csInfo',
       'sessionId',
+      'sessionRamId',
       'chatGuid',
       'queueMode',
       'hasAssess'
@@ -141,12 +142,23 @@ export default {
       })
     },
     callPhone() {
-      if (this.clickTooFast()) return
-      // const fc = Tools.AsyncTools.fastClickTimer()
-      // if (!fc.state) return
+      if (this.queueMode.status === queueStatus.queuing || this.queueMode.mode === roomStatus.menChat || this.queueMode.mode === roomStatus.videoChat) { // 排队中
+        return this.$vux.toast.text('请先结束当前服务')
+      }
 
+      if (this.clickTooFast()) return
       window.location.href = 'tel:95300'
+      // this.sendUserDataToIVR()
     },
+    // sendUserDataToIVR() {
+    //   const data = {
+    //     customerId: this.userInfo.userId,
+    //     sessionId: this.sessionId || this.sessionRamId
+    //   }
+    //   const dataStr = JSON.stringify(data)
+    //   const sign = Tools.getMD5(dataStr)
+    //   debugger
+    // },
     // 视频客服
     videoLineUp() {
       if (this.clickTooFast()) return

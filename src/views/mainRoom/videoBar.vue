@@ -11,14 +11,17 @@
     <div class="video-window" :class="remoteVideo" >
       <video height=100%
         id="remoteVideo"
-        :class="{'video-blur': videoFilter.blur}"
         :muted="videoFilter.muted"
         autoplay
         playsinline
       ></video>
-      <water-mark v-show="isVideoFilter" :img="`/video/static/img/video/hx-watermark.png`"></water-mark>
-      <img width=60% v-show="isVideoFilter" src="/video/static/img/video/video-filter.png" class="video-watermark">
+      <!-- :class="{'video-blur': videoFilter.blur}" -->
       <div class="video-mask">
+        <!-- 视频水印 -->
+        <water-mark :style="`opacity: ${isVideoFilter ? 1 : 0}`" :blur="false" :img="`/video/static/img/video/hx-watermark.png`"></water-mark>
+        <!-- 客服暂离icon -->
+        <img width=60% v-show="isVideoFilter" src="/video/static/img/video/video-filter.png" class="video-watermark">
+        <!-- 最小化时的缩放按钮 -->
         <div class="full-screen-btn" v-show="!fullScreen" @click="openVideoBar">
           <svg class="icon" aria-hidden="true">
             <use xlink:href="#icon-quanping"></use>
@@ -26,6 +29,7 @@
         </div>
       </div>
       <img width=100% height=100% v-if="videoScreenShotShow" :src="videoScreenShotSrc" class="video-screen-shot">
+      <!-- <img width=100% height=100% v-if="true" src="https://video-uat.ihxlife.com/user-server/api/v1/video/image/csHeader?id=1007" class="video-screen-shot"> -->
     </div>
     <div class="video-window bgc" :class="localVideo" v-show="fullScreen && !videoScreenShotShow">
       <video height=100%
@@ -41,6 +45,7 @@
     <div class="full-screen-container" v-show="fullScreen">
       <!-- 重连按钮 -->
       <div class="reconnect" v-if="serviceBreakOff">
+      <!-- <div class="reconnect" v-if="true"> -->
         <button class="reconnect-btn" @click="reconnectVideo">重新连接</button>
       </div>
       <!-- 客服头像 -->
@@ -159,7 +164,7 @@ export default {
       // 通话结束时间表
       endTimeTrunk: [],
       // 是否切换客服跟用户的摄像头位置：[false 客户窗口小窗] / [true 客户窗口大窗]
-      isChangeCamera: true,
+      isChangeCamera: false,
       // 礼物列表弹层开关：[false 开启 / [true 关闭]
       giftSectionShow: false,
       likes: false,
@@ -247,7 +252,7 @@ export default {
       })
     },
     async reconnectVideo() {
-      const res = await getSessionDetail(this.sessionRamId, this.userInfo.userId)
+      const res = await getSessionDetail(this.sessionRamId, this.userInfo.userId, this.sessionId)
       if (res.result.code === ERR_OK && !res.data.sectionId) {
         IM.sendNormalMsg(this.userInfo.userId, this.csInfo.csId, {
           sessionId: this.sessionId,
@@ -299,11 +304,13 @@ export default {
         msgType: msgTypes.msg_video_hang_up,
         MsgLifeTime: 0
       })
+      debugger
       // 停止推流
       await this.quitRTC()
       this.hangUpVideo()
     },
     async hangUpVideo() {
+      this.$vux.toast.hide()
       // 初始化重连按钮
       this.serviceBreakOff = false
       // 恢复全屏
@@ -425,32 +432,13 @@ export default {
       // &#localVideo {
       //   transform: translateX(-50%) rotateY(180deg)
       // }
-      &.video-blur {
-        filter: blur(500px);
-      }
+      // &.video-blur {
+      //   filter: blur(50px);
+
+      // }
       &::-webkit-media-controls {
         display: none !important;
       }
-    }
-    .water-mark {
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      margin: auto;
-      width: 100%;
-      height: 100%;
-      // z-index: 1000000;
-    }
-    .video-watermark {
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      margin: auto;
-      object-fit: contain;
     }
     .video-mask {
       position: absolute;
@@ -460,6 +448,26 @@ export default {
       right: 0;
       z-index: 1000;
       background-color: unset;
+      .water-mark {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        margin: auto;
+        width: 100%;
+        height: 100%;
+        // z-index: 1000000;
+      }
+      .video-watermark {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        margin: auto;
+        object-fit: contain;
+      }
       .full-screen-btn {
         position: absolute;
         top: 0;
@@ -489,6 +497,31 @@ export default {
     top: 0;
     bottom: 0;
     z-index: 101;
+    .reconnect {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      z-index: 1000;
+      margin: auto;
+      max-width: 80%;
+      height: 3rem;
+      display: flex;
+      justify-content: center;
+      .reconnect-btn {
+        // width: max-content;
+        // height: max-content;
+        display: inline-block;
+        border: 1px solid #ccc;
+        border-radius: .5rem;
+        background-color: unset;
+        color: #ccc;
+        font-size: 1.4rem;
+        padding: .5rem 1rem;
+        margin: 0;
+      }
+    }
     .video-header {
       position: absolute;
       top: 2.6rem;
@@ -606,57 +639,5 @@ export default {
       }
     }
   }
-  .reconnect {
-    --btnHeight: 3rem;
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    z-index: 1000;
-    margin: auto;
-    max-width: 80%;
-    height: var(--btnHeight);
-    display: flex;
-    justify-content: center;
-    .reconnect-btn {
-      --fontColor: #ccc;
-      // width: max-content;
-      // height: max-content;
-      display: inline-block;
-      border: 1px solid var(--fontColor);
-      border-radius: .5rem;
-      background-color: unset;
-      color: var(--fontColor);
-      font-size: 1.4rem;
-      padding: .5rem 1rem;
-      margin: 0;
-    }
-  }
-  // .mini-container {
-  //   position: fixed;
-  //   top: 0;
-  //   right: 0;
-  //   margin: .5rem .5rem 0 0;
-  //   width: 9rem;
-  //   height: 16.5rem;
-  //   border-radius: .4rem;
-  //   z-index: 200;
-  //   background-color: #222;
-  //   overflow: hidden;
-  //   .server-video-window {
-  //     width: 100%;
-  //     height: 100%;
-  //     background-color: #666;
-  //     video {
-  //       width: 100%;
-  //       height: 100%;
-  //       object-fit: cover;
-  //       &::-webkit-media-controls {
-  //         display:none !important;
-  //       }
-  //     }
-  //   }
-  // }
 }
 </style>

@@ -190,7 +190,7 @@ export const transTimeoutRedistribution = data => http.post('user', '/webchat/qu
 /**
  * [getSessionDetail 转接超时，重新分配坐席响应480时，查询人工服务信息（会话Id，坐席信息）]
  */
-export const getSessionDetail = (robotSessionId, userId) => http.get('user', `/video/session/detail?robotSessionId=${robotSessionId}&userId=${userId}`)
+export const getSessionDetail = (robotSessionId, userId, sessionId) => http.get('user', `/video/session/detail?sessionId=${sessionId}&robotSessionId=${robotSessionId}&userId=${userId}`)
 
 /**
  ************************************ systemMsg ************************************
