@@ -93,7 +93,7 @@ export default {
                 return [
                     w,
                     h + Math.ceil(w / space) * offset_y
-                ]   
+                ]
             }
 
             // 递归添加 x 轴点坐标

@@ -22,8 +22,8 @@ const state = {
   extendBarOpen: false,
   inputBarOpen: false,
   fullScreen: true, // 视频客服开启时，videoRoom的全屏或缩小状态
-  // roomMode: roomStatus.AIChat,
-  roomMode: roomStatus.videoChat,
+  roomMode: roomStatus.AIChat,
+  // roomMode: roomStatus.videoChat,
   queueMode: {
     mode: roomStatus.AIChat,
     status: queueStatus.noneQueue
@@ -39,7 +39,7 @@ const state = {
   },
   serverTime: '',
   videoFilter: {
-    blur: true,
+    blur: false,
     muted: false
   }
 }

@@ -1,16 +1,15 @@
 <template>
   <div class="video-bar">
     <audio id="videoRing" loop v-show="false" src="/video/static/audio/ring.mp3" type="audio/mpeg"></audio>
-    <div class="video-window" :class="remoteVideo" :style="remoteVideoBg">
+    <div class="video-window" v-show="!RTCconnecting" :class="remoteVideo" :style="remoteVideoBg">
       <video height=100%
-        v-show="isVideoConnectSuccess && !serviceBreakOff"
+        v-show="!RTCconnecting && !serviceBreakOff"
         id="remoteVideo"
         :muted="videoFilter.muted"
         autoplay
         playsinline
       ></video>
       <div class="video-mask">
-        <!-- <div class="screen-shot-section" v-if="videoScreenShotShow" :style="screenShotBg"></div> -->
         <!-- 视频水印 -->
         <water-mark :style="`opacity: ${isVideoFilter ? 1 : 0}`" :blur="false" :img="`/video/static/img/video/hx-watermark.png`"></water-mark>
         <!-- 客服暂离icon -->
@@ -25,7 +24,7 @@
       <!-- <img width=100% height=100% v-if="videoScreenShotShow" :src="videoScreenShotSrc" class="video-screen-shot"> -->
       <!-- <img width=100% height=100% v-if="true" src="https://video-uat.ihxlife.com/user-server/api/v1/video/image/csHeader?id=1007" class="video-screen-shot"> -->
     </div>
-    <div class="video-window bgc" :class="localVideo" v-show="fullScreen">
+    <div class="video-window" :class="localVideo" v-show="fullScreen && !serviceBreakOff">
       <video height=100%
         :style="{'display': videoScreenShotShow ? 'none' : 'block'}"
         id="localVideo"
@@ -38,7 +37,10 @@
     <div class="full-screen-container" v-show="fullScreen">
       <!-- 重连按钮 -->
       <div class="reconnect" v-show="serviceBreakOff">
-        <button class="reconnect-btn" @click="reconnectVideo">重新连接</button>
+        <img class="xiaohua" src="/video/static/img/video/xiaohua.png">
+        <p class="text">视频已经结束啦~</p>
+        <x-button class="reconnect-btn" :gradients="['#FF8C6A', '#FF80A0']" @click.native="reconnectVideo">重新连接</x-button>
+        <!-- <button class="reconnect-btn" @click="reconnectVideo">重新连接</button> -->
       </div>
       <!-- 客服头像 -->
       <div class="video-header">
@@ -50,7 +52,7 @@
       <!-- 底部操作按钮区 -->
       <video-footer
         ref="videoFooter"
-        :videoConnected="isVideoConnectSuccess"
+        :videoConnected="!RTCconnecting"
         @hangUpVideo="handleHangUpVideo"
         @sendGift="giftSectionShow = true"
         @changeCamera="isChangeCamera = !isChangeCamera"
@@ -79,7 +81,7 @@
 </template>
 
 <script type="text/ecmascript-6">
-import { Toast } from 'vux'
+import { Toast, XButton } from 'vux'
 import Tools from '@/common/js/tools'
 import { mapGetters, mapMutations } from 'vuex'
 import { ERR_OK, enterVideoRTCRoom, getSessionDetail } from '@/server'
@@ -102,7 +104,8 @@ export default {
     'SendGift': () => import('@/views/mainRoom/components/chat/send-gift'),
     'Assess': () => import('@/views/mainRoom/components/assess'),
     'WaterMark': () => import('@/views/mainRoom/components/video/water-mark'),
-    Toast
+    Toast,
+    XButton
   },
   computed: {
     likesCountStyle() {
@@ -113,11 +116,6 @@ export default {
         return this.videoFilter.blur
       },
       set() {}
-    },
-    screenShotBg() {
-      return this.videoScreenShotShow
-              ? `background-image: url('${this.videoScreenShotSrc}');`
-              : `background-image: none;`
     },
     localVideo() {
       if (!this.fullScreen) {
@@ -130,30 +128,11 @@ export default {
         return 'small'
       }
       return this.isChangeCamera ? 'small' : 'big'
-      // const bgc = this.isVideoConnectSuccess ? 'bgc' : ''
-      // return `${chunk} ${bgc}`
     },
     remoteVideoBg() {
-      // if (this.isVideoConnectSuccess) {
-      //   if (this.videoScreenShotShow) {
-      //     return `background-image: url('${this.videoScreenShotSrc}');`
-      //   } else {
-      //     return 'background-color: #666;'
-      //   }
-      // } else {
-      //   return 'background-color: unset;'
-      // }
-
-      if (this.videoScreenShotSrc) {
-        return `background-image: url('${this.videoScreenShotSrc}');`
-      } else if (this.isVideoConnectSuccess) {
-        return 'background-color: #666;'
-      } else {
-        return 'background-color: unset;'
-      }
-      // return this.isVideoConnectSuccess
-      //         ? 'background-color: #666;'
-      //         : 'background-color: unset;'
+      return this.videoScreenShotSrc
+              ? `background-image: url('${this.videoScreenShotSrc}');`
+              : 'background-color: #666;'
     },
     ...mapGetters([
       'fullScreen',
@@ -184,24 +163,25 @@ export default {
       likes: false,
       likesCount: 0,
       isVideoConnectSuccess: false,
-      RTCconnect: false,
+      RTCconnecting: false,
+      serviceBreakOff: false,
       // 视频网络提示信息
       isUnsmoothTextShow: false
       // toastText: ''
     }
   },
-  // mounted() {
-  //   // 响铃
-  //   document.getElementById('videoRing').play()
-  //   // 初始化视频
-  //   this.readyToVideo()
-  //   // 进入 RTC 房间
-  //   this.enterVideoRTCRoomAPI(this.csInfo.csId, this.userInfo.userId, this.userInfo.openId, this.sessionId)
+  mounted() {
+    // 响铃
+    document.getElementById('videoRing').play()
+    // 初始化视频
+    this.readyToVideo()
+    // 进入 RTC 房间
+    this.enterVideoRTCRoomAPI(this.csInfo.csId, this.userInfo.userId, this.userInfo.openId, this.sessionId)
 
-  //   this.$nextTick(() => {
-  //     this.likesCount = +this.csInfo.likesCount
-  //   })
-  // },
+    this.$nextTick(() => {
+      this.likesCount = +this.csInfo.likesCount
+    })
+  },
   methods: {
     _getVideoTime([ dateBegin, dateEnd ]) {
       const dateDiff = Tools.getVideoDateDiff([ dateBegin, dateEnd ])
@@ -241,7 +221,8 @@ export default {
     async readyToVideo() {
       // 初始化摄像头
       this.isChangeCamera = true
-
+      // 初始化视频连接中状态
+      this.RTCconnecting = true
       // new Promise((resolve, reject) => {
       //   return this.RTC
       //           ? resolve()
@@ -294,8 +275,6 @@ export default {
       this.videoScreenShotShow = false
       // 关闭重连按钮
       this.serviceBreakOff = false
-      // 重置视频连接成功状态
-      this.isVideoConnectSuccess = false
       // 重置截图
       this.videoScreenShotSrc = ''
     },
@@ -310,13 +289,13 @@ export default {
       // }
     },
     async handleHangUpVideo() {
-      if (!this.isVideoConnectSuccess) {
-        // 视频成功接通之前客户点击挂断
-        // 关闭铃声
-        document.getElementById('videoRing').pause()
-        this.$emit('videoFailed')
-        // return undefined
-      }
+      // if (!this.isVideoConnectSuccess) {
+      //   // 视频成功接通之前客户点击挂断
+      //   // 关闭铃声
+      //   document.getElementById('videoRing').pause()
+      //   this.$emit('videoFailed')
+      //   // return undefined
+      // }
       // 发送自定义指令
       this.sendCustomDirective({
         msg: '客户点击挂断',
@@ -324,9 +303,8 @@ export default {
         msgType: msgTypes.msg_video_hang_up,
         MsgLifeTime: 0
       })
-      debugger
       // 停止推流
-      await this.quitRTC()
+      this.quitRTC()
       this.hangUpVideo()
     },
     async hangUpVideo() {
@@ -403,6 +381,7 @@ export default {
 
 .video-bar {
   position: relative;
+  color: #333;
   // &.video-mini-screen {
   //   margin: .5rem .5rem 0 0;
   //   width: 9rem;
@@ -439,9 +418,6 @@ export default {
       // z-index: 200;
       overflow: hidden;
       z-index: 1;
-    }
-    &.bgc {
-      background-color: #666;
     }
     &.invisible {
       visibility: hidden;
@@ -540,21 +516,28 @@ export default {
       bottom: 0;
       z-index: 1000;
       margin: auto;
-      max-width: 80%;
-      height: 3rem;
+      background-color: rgba(0, 0, 0, .1);
+      // max-width: 80%;
+      font-size: 1.4rem;
+      color: #fff;
+      // height: 3rem;
       display: flex;
+      flex-direction: column;
       justify-content: center;
+      .xiaohua {
+        height: 15rem;
+        object-fit: contain;
+      }
+      .text {
+        margin-top: 2rem;
+        text-align: center;
+        font-size: 1.6rem;
+      }
       .reconnect-btn {
-        // width: max-content;
-        // height: max-content;
-        display: inline-block;
-        border: 1px solid #ccc;
-        border-radius: .5rem;
-        background-color: unset;
-        color: #ccc;
-        font-size: 1.4rem;
-        padding: .5rem 1rem;
-        margin: 0;
+        width: 9rem;
+        height: 3rem;
+        line-height: 3rem;
+        margin-top: 2rem;
       }
     }
     .video-header {

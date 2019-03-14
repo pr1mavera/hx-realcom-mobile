@@ -217,10 +217,9 @@ export const loginMixin = {
 export const RTCRoomMixin = {
   data() {
     return {
-      RTC: null,
+      RTC: null
       // qualityReqToast: false,
-      // bpsOverCount: 0,
-      serviceBreakOff: false
+      // bpsOverCount: 0
     }
   },
   computed: {
@@ -230,7 +229,6 @@ export const RTCRoomMixin = {
   },
   methods: {
     initRTC() {
-      // this.RTCconnect = false
       return new Promise((resolve, reject) => {
         const self = this
         // eslint-disable-next-line
@@ -276,16 +274,14 @@ export const RTCRoomMixin = {
               // 初始化提示按钮
               this.$vux.toast.hide()
               // 初始化连接状态
-              // this.RTCconnect = true
+              this.RTCconnecting = false
               // 截图
-              this.getVideoScreenShot()
+              !this.videoScreenShotSrc && this.getVideoScreenShot()
             }, false)
           }
         })
 
         this.RTC.on('onRemoteStreamRemove', () => {
-          // 初始化连接状态
-          // this.RTCconnect = false
           // 停止推流
           this.quitRTC()
           // 重置视频模糊状态
@@ -351,36 +347,38 @@ export const RTCRoomMixin = {
     // 本地推流
     startRTC(stream) {
       // 记录差值
-      function getDiffAndRecordWithInitVal(initVal) {
-        let oldVal = initVal
-        return (newVal) => {
-          const diff = newVal - oldVal
-          oldVal = newVal
-          return diff
-        }
-      }
+      // function getDiffAndRecordWithInitVal(initVal) {
+      //   let oldVal = initVal
+      //   return (newVal) => {
+      //     const diff = newVal - oldVal
+      //     oldVal = newVal
+      //     return diff
+      //   }
+      // }
 
       return new Promise((resolve, reject) => {
-        this.RTC.startRTC({ stream, role: 'user' }, () => {
-          // 初始化 bytesSent
-          const getDiffOfBytesSent = getDiffAndRecordWithInitVal(0)
-          // 初始化 packetsSent
-          const getDiffOfPacketsSent = getDiffAndRecordWithInitVal(0)
-          this.RTC.getStats({
-            interval: 1000
-          }, res => {
-            const video = res.video
-            console.log('getStats => !!!!!!!')
-            console.log('getStats => bytesReceived:', video.bytesReceived)
-            console.log('getStats => bytesSent:', getDiffOfBytesSent(video.bytesSent) / 1024)
-            console.log('getStats => packetsLost:', video.packetsLost)
-            console.log('getStats => packetsReceived:', video.packetsReceived)
-            console.log('getStats => packetsSent:', getDiffOfPacketsSent(video.packetsSent))
-          })
-          resolve()
-        }, err => {
-          reject(new Error(`error in startRTC: ${JSON.stringify(err)}`))
-        })
+        this.RTC.startRTC({ stream, role: 'user' }
+          // () => {
+          //   // 初始化 bytesSent
+          //   const getDiffOfBytesSent = getDiffAndRecordWithInitVal(0)
+          //   // 初始化 packetsSent
+          //   const getDiffOfPacketsSent = getDiffAndRecordWithInitVal(0)
+          //   this.RTC.getStats({
+          //     interval: 1000
+          //   }, res => {
+          //     const video = res.video
+          //     console.log('getStats => !!!!!!!')
+          //     console.log('getStats => bytesReceived:', video.bytesReceived)
+          //     console.log('getStats => bytesSent:', getDiffOfBytesSent(video.bytesSent) / 1024)
+          //     console.log('getStats => packetsLost:', video.packetsLost)
+          //     console.log('getStats => packetsReceived:', video.packetsReceived)
+          //     console.log('getStats => packetsSent:', getDiffOfPacketsSent(video.packetsSent))
+          //   })
+          //   resolve()
+          // }, err => {
+          //   reject(new Error(`error in startRTC: ${JSON.stringify(err)}`))
+          // }
+        )
       })
     },
 
@@ -778,9 +776,9 @@ export const IMMixin = {
         }
         if (msgsObj.msgType === msgTypes.msg_video_quality) { // 视频卡顿
           const state = msgsObj.content === 'unsmooth'
-          if (state && this.$vux.toast.isVisible()) {
-            return undefined
-          }
+          // if (state && this.$vux.toast.isVisible()) {
+          //   return undefined
+          // }
           return this.$emit('videoQuality', state)
         }
       }

@@ -329,6 +329,7 @@ export default {
       this.giftSrc = null
     },
     videoQuality(state) {
+      debugger
       this.$refs.videoBar.changeUnsmoothTextShow(state)
     },
     ...mapMutations({
@@ -363,7 +364,10 @@ export default {
   .video-bar {
     position: absolute;
     top: 0;
+    bottom: 0;
     right: 0;
+    left: 0;
+    margin: auto;
     z-index: 101;
   }
   .iframe-section {
