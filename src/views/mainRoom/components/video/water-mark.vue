@@ -43,7 +43,7 @@ export default {
             }
             // 初始化点阵
             this.pos.length === 0 && (this.pos = this.calcPos())
-            this.draw(this.pos)
+            this.pos.length && this.draw(this.pos)
         })
     },
     methods: {
@@ -81,28 +81,33 @@ export default {
             }
         },
         calcPos() {
-            const self = this
+            const {
+                space, // 矩阵间距
+                offset_x, // x 轴偏移量
+                offset_y // y 轴偏移量
+            } = this
             const doc = document.documentElement
-            const [ width, height ] = [ doc.clientWidth, doc.clientHeight ]
+            const [ width, height ] = normalizeOrigin(doc.clientWidth, doc.clientHeight)
 
-            // 递归添加 x 轴点坐标
-            function pushMatrix(w, h, p) {
-                p.push([ w, h ])
-                w -= self.space
-                h -= self.offset_y
-                return w > -self.space
-                        ? pushMatrix(w, h, p)
-                        : undefined
+            function normalizeOrigin(w, h) {
+                return [
+                    w,
+                    h + Math.ceil(w / space) * offset_y
+                ]   
             }
 
-            // 递归添加点坐标
-            function getPos(width, height, pos) {
-                pushMatrix(width, height, pos)
-                width -= self.offset_x
-                height -= self.space
-                return height > -self.space
-                        ? getPos(width, height, pos)
-                        : pos
+            // 递归添加 x 轴点坐标
+            function pushMatrix(x, y, pos) {
+                return x > 0
+                        ? pushMatrix(x - space, y - offset_y, [ ...pos, [ x, y ] ])
+                        : [ ...pos, [ x, y ] ]
+            }
+
+            // 递归添加 y 轴点坐标
+            function getPos(x, y, pos) {
+                return y > 0
+                        ? getPos(x - offset_x, y - space, pushMatrix(x, y, pos))
+                        : pushMatrix(x, y, pos)
             }
             return getPos(width, height, [])
         }

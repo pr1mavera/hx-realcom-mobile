@@ -190,18 +190,18 @@ export default {
       // toastText: ''
     }
   },
-  mounted() {
-    // 响铃
-    document.getElementById('videoRing').play()
-    // 初始化视频
-    this.readyToVideo()
-    // 进入 RTC 房间
-    this.enterVideoRTCRoomAPI(this.csInfo.csId, this.userInfo.userId, this.userInfo.openId, this.sessionId)
+  // mounted() {
+  //   // 响铃
+  //   document.getElementById('videoRing').play()
+  //   // 初始化视频
+  //   this.readyToVideo()
+  //   // 进入 RTC 房间
+  //   this.enterVideoRTCRoomAPI(this.csInfo.csId, this.userInfo.userId, this.userInfo.openId, this.sessionId)
 
-    this.$nextTick(() => {
-      this.likesCount = +this.csInfo.likesCount
-    })
-  },
+  //   this.$nextTick(() => {
+  //     this.likesCount = +this.csInfo.likesCount
+  //   })
+  // },
   methods: {
     _getVideoTime([ dateBegin, dateEnd ]) {
       const dateDiff = Tools.getVideoDateDiff([ dateBegin, dateEnd ])
