@@ -1,37 +1,31 @@
 <template>
   <div class="video-bar">
-    <!-- 排队 -->
-    <!-- <line-up
-      class="line-up"
-      v-show="isLineUpShow"
-      @ready="readyToVideo"
-    ></line-up> -->
-    <!-- 最大化 -->
     <audio id="videoRing" loop v-show="false" src="/video/static/audio/ring.mp3" type="audio/mpeg"></audio>
-    <div class="video-window" :class="remoteVideo" >
+    <div class="video-window" :class="remoteVideo" :style="remoteVideoBg">
       <video height=100%
+        v-show="isVideoConnectSuccess && !serviceBreakOff"
         id="remoteVideo"
         :muted="videoFilter.muted"
         autoplay
         playsinline
       ></video>
-      <!-- :class="{'video-blur': videoFilter.blur}" -->
       <div class="video-mask">
+        <!-- <div class="screen-shot-section" v-if="videoScreenShotShow" :style="screenShotBg"></div> -->
         <!-- 视频水印 -->
         <water-mark :style="`opacity: ${isVideoFilter ? 1 : 0}`" :blur="false" :img="`/video/static/img/video/hx-watermark.png`"></water-mark>
         <!-- 客服暂离icon -->
         <img width=60% v-show="isVideoFilter" src="/video/static/img/video/video-filter.png" class="video-watermark">
         <!-- 最小化时的缩放按钮 -->
-        <div class="full-screen-btn" v-show="!fullScreen" @click="openVideoBar">
+        <div class="full-screen-btn" v-if="!fullScreen" @click="openVideoBar">
           <svg class="icon" aria-hidden="true">
             <use xlink:href="#icon-quanping"></use>
           </svg>
         </div>
       </div>
-      <img width=100% height=100% v-if="videoScreenShotShow" :src="videoScreenShotSrc" class="video-screen-shot">
+      <!-- <img width=100% height=100% v-if="videoScreenShotShow" :src="videoScreenShotSrc" class="video-screen-shot"> -->
       <!-- <img width=100% height=100% v-if="true" src="https://video-uat.ihxlife.com/user-server/api/v1/video/image/csHeader?id=1007" class="video-screen-shot"> -->
     </div>
-    <div class="video-window bgc" :class="localVideo" v-show="fullScreen && !videoScreenShotShow">
+    <div class="video-window bgc" :class="localVideo" v-show="fullScreen">
       <video height=100%
         :style="{'display': videoScreenShotShow ? 'none' : 'block'}"
         id="localVideo"
@@ -39,13 +33,11 @@
         autoplay
         playsinline
       ></video>
-      <div class="video-mask"></div>
     </div>
     <toast v-model="isUnsmoothTextShow" :time="10000000" type="text" position="default" width="80%">您的网络上行速度较差</toast>
     <div class="full-screen-container" v-show="fullScreen">
       <!-- 重连按钮 -->
-      <div class="reconnect" v-if="serviceBreakOff">
-      <!-- <div class="reconnect" v-if="true"> -->
+      <div class="reconnect" v-show="serviceBreakOff">
         <button class="reconnect-btn" @click="reconnectVideo">重新连接</button>
       </div>
       <!-- 客服头像 -->
@@ -76,14 +68,6 @@
           </div>
           <div class="text">{{likesCount || 0}}</div>
         </div>
-        <!-- <div class="item">
-          <div class="item-icon icon-zhuanfa">
-            <svg class="icon extend-click" aria-hidden="true">
-              <use xlink:href="#icon-zhuanfa"></use>
-            </svg>
-          </div>
-          <div class="text">100</div>
-        </div> -->
       </div>
       <!-- 礼物列表区 -->
       <section class="send-gift-section" v-show="giftSectionShow" @click.stop="giftSectionShow = false">
@@ -104,6 +88,9 @@ import { msgStatus, msgTypes } from '@/common/js/status'
 import IM from '@/server/im.js'
 
 export default {
+  // directives: {
+  //   TransferDom
+  // },
   mixins: [
     RTCRoomMixin,
     IMMixin,
@@ -127,6 +114,11 @@ export default {
       },
       set() {}
     },
+    screenShotBg() {
+      return this.videoScreenShotShow
+              ? `background-image: url('${this.videoScreenShotSrc}');`
+              : `background-image: none;`
+    },
     localVideo() {
       if (!this.fullScreen) {
         return 'invisible'
@@ -137,9 +129,31 @@ export default {
       if (!this.fullScreen) {
         return 'small'
       }
-      const chunk = this.isChangeCamera ? 'small' : 'big'
-      const bgc = this.isVideoConnectSuccess ? 'bgc' : ''
-      return `${chunk} ${bgc}`
+      return this.isChangeCamera ? 'small' : 'big'
+      // const bgc = this.isVideoConnectSuccess ? 'bgc' : ''
+      // return `${chunk} ${bgc}`
+    },
+    remoteVideoBg() {
+      // if (this.isVideoConnectSuccess) {
+      //   if (this.videoScreenShotShow) {
+      //     return `background-image: url('${this.videoScreenShotSrc}');`
+      //   } else {
+      //     return 'background-color: #666;'
+      //   }
+      // } else {
+      //   return 'background-color: unset;'
+      // }
+
+      if (this.videoScreenShotSrc) {
+        return `background-image: url('${this.videoScreenShotSrc}');`
+      } else if (this.isVideoConnectSuccess) {
+        return 'background-color: #666;'
+      } else {
+        return 'background-color: unset;'
+      }
+      // return this.isVideoConnectSuccess
+      //         ? 'background-color: #666;'
+      //         : 'background-color: unset;'
     },
     ...mapGetters([
       'fullScreen',
@@ -170,6 +184,7 @@ export default {
       likes: false,
       likesCount: 0,
       isVideoConnectSuccess: false,
+      RTCconnect: false,
       // 视频网络提示信息
       isUnsmoothTextShow: false
       // toastText: ''
@@ -248,7 +263,7 @@ export default {
       })
       .catch(err => {
         console.log(err)
-        alert('视频通话建立失败！')
+        // alert('视频通话建立失败！')
       })
     },
     async reconnectVideo() {
@@ -273,11 +288,16 @@ export default {
       }
       // 重启视频
       document.getElementById('videoRing').play()
+
       this.readyToVideo()
       // 重置截图
       this.videoScreenShotShow = false
       // 关闭重连按钮
       this.serviceBreakOff = false
+      // 重置视频连接成功状态
+      this.isVideoConnectSuccess = false
+      // 重置截图
+      this.videoScreenShotSrc = ''
     },
     async enterVideoRTCRoomAPI(roomId, userId, openId, sessionId) {
       const enterVideoStatus = window.sessionStorage.getItem('enterVideoStatus')
@@ -338,14 +358,20 @@ export default {
         const canvas = document.getElementById('videoCanvas')
         var canvasCtx = canvas.getContext('2d')
         var video = document.getElementById('remoteVideo')
+        video.crossOrigin = ''
         canvas.width = video.clientWidth
         canvas.height = video.clientHeight
         // 坐原图像的x,y轴坐标，大小，目标图像的x，y轴标，大小。
         canvasCtx.drawImage(video, 0, 0, video.clientWidth, video.clientHeight)
+        // 高斯模糊
+        const oData = canvasCtx.getImageData(0, 0, video.clientWidth, video.clientHeight)
+        canvasCtx.putImageData(Tools.gaussBlur(oData), 0, 0)
         // 把图标base64编码后变成一段url字符串
         this.videoScreenShotSrc = canvas.toDataURL('image/png')
-        this.videoScreenShotShow = true
+        // this.videoScreenShotShow = true
         resolve()
+      }).catch(err => {
+        console.log('ERROR in getVideoScreenShot', err)
       })
     },
 
@@ -396,13 +422,14 @@ export default {
     position: fixed;
     top: 0;
     right: 0;
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    // filter: blur(50px);
     &.big {
       width: 100%;
       height: 100%;
       z-index: 0;
-      &.bgc {
-        background-color: #666;
-      }
     }
     &.small {
       margin: .5rem .5rem 0 0;
@@ -412,9 +439,9 @@ export default {
       // z-index: 200;
       overflow: hidden;
       z-index: 1;
-      &.bgc {
-        background-color: #222;
-      }
+    }
+    &.bgc {
+      background-color: #666;
     }
     &.invisible {
       visibility: hidden;
@@ -446,8 +473,20 @@ export default {
       bottom: 0;
       left: 0;
       right: 0;
-      z-index: 1000;
+      z-index: 10;
       background-color: unset;
+      // .screen-shot-section {
+      //   position: absolute;
+      //   top: 0;
+      //   bottom: 0;
+      //   left: 0;
+      //   right: 0;
+      //   margin: auto;
+      //   background-position: center;
+      //   background-size: cover;
+      //   background-repeat: no-repeat;
+      //   filter: blur(50px);
+      // }
       .water-mark {
         position: absolute;
         top: 0;
@@ -484,10 +523,6 @@ export default {
           opacity: .7;
         }
       }
-    }
-    .video-screen-shot {
-      object-fit: cover;
-      filter: blur(30px);
     }
   }
   .full-screen-container {

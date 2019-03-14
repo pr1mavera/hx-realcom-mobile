@@ -218,7 +218,6 @@ export const RTCRoomMixin = {
   data() {
     return {
       RTC: null,
-      // RTCQuitFlag: false,
       // qualityReqToast: false,
       // bpsOverCount: 0,
       serviceBreakOff: false
@@ -231,7 +230,7 @@ export const RTCRoomMixin = {
   },
   methods: {
     initRTC() {
-      // this.RTCQuitFlag = false
+      // this.RTCconnect = false
       return new Promise((resolve, reject) => {
         const self = this
         // eslint-disable-next-line
@@ -274,14 +273,19 @@ export const RTCRoomMixin = {
               document.getElementById('videoRing').pause()
               // 初始化视频窗口位置
               this.isChangeCamera = false
-              // this.$vux.toast.isVisible() && this.$vux.toast.hide()
-              // 初始化结束状态
-              this.RTCQuitFlag = false
+              // 初始化提示按钮
+              this.$vux.toast.hide()
+              // 初始化连接状态
+              // this.RTCconnect = true
+              // 截图
+              this.getVideoScreenShot()
             }, false)
           }
         })
 
         this.RTC.on('onRemoteStreamRemove', () => {
+          // 初始化连接状态
+          // this.RTCconnect = false
           // 停止推流
           this.quitRTC()
           // 重置视频模糊状态
@@ -391,13 +395,7 @@ export const RTCRoomMixin = {
 
     // 退出RTC
     quitRTC() {
-      return new Promise(async(resolve, reject) => {
-        // if (this.RTCQuitFlag) {
-        //   resolve()
-        //   return undefined
-        // }
-        // this.RTCQuitFlag = true
-        await this.getVideoScreenShot()
+      return new Promise((resolve, reject) => {
         this.RTC && this.RTC.quit(() => {
           console.log('退出音视频房间 成功 辣'); // eslint-disable-line
           // 记录视频结束时间节点

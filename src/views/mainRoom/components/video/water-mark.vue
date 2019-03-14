@@ -13,6 +13,12 @@ export default {
         img: {
             type: String
         },
+        // block: {
+        //     type: Object,
+        //     'default': {
+
+        //     }
+        // },
         angle: {
             type: Number,
             'default': -20
