@@ -21,7 +21,7 @@
 </template>
 
 <script type="text/ecmascript-6">
-import { mapGetters } from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
 import Tools from '@/common/js/tools'
 
 import { ERR_OK, getCsStatus, queryCsInfo, addCs } from '@/server/index.js'
@@ -88,6 +88,15 @@ export default {
 
     // 进入视频客服
     async goToLineUp() {
+      const device = sessionStorage.getItem('device')
+      const version = sessionStorage.getItem('device_version')
+      const videoVersion = await this.systemConfig('ios-ver')
+      if (device === 'iPhone' && +version <= +videoVersion.get()) {
+        // 当前系统版本过低
+        return this.$vux.alert.show({
+          title: `抱歉，您当前系统版本过低，暂不支持视频服务`
+        })
+      }
       // 判断当前是否为工作时间
       const SP_workT = this.userInfo.workTimeInfo.SP
       if (!Tools.DateTools.isWorkTime(SP_workT)) {
@@ -182,7 +191,10 @@ export default {
       } else {
         console.log('error about add the cS' + JSON.stringify(res.result))
       }
-    }
+    },
+    ...mapActions([
+      'systemConfig'
+    ])
   }
 }
 </script>

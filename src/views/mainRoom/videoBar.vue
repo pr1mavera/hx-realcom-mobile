@@ -1,9 +1,9 @@
 <template>
-  <div class="video-bar">
+  <div class="video-bar" :class="`${fullScreen ? 'full-screen' : 'mini-screen'}`">
     <audio id="videoRing" loop v-show="false" src="/video/static/audio/ring.mp3" type="audio/mpeg"></audio>
     <div class="video-window" v-show="!RTCconnecting" :class="remoteVideo" :style="remoteVideoBg">
       <video height=100%
-        v-show="!RTCconnecting && !serviceBreakOff"
+        v-show="!RTCconnecting && !serviceBreakOff && RTC"
         id="remoteVideo"
         :muted="videoFilter.muted"
         autoplay
@@ -21,25 +21,33 @@
           </svg>
         </div>
       </div>
-      <!-- <img width=100% height=100% v-if="videoScreenShotShow" :src="videoScreenShotSrc" class="video-screen-shot"> -->
-      <!-- <img width=100% height=100% v-if="true" src="https://video-uat.ihxlife.com/user-server/api/v1/video/image/csHeader?id=1007" class="video-screen-shot"> -->
     </div>
-    <div class="video-window" :class="localVideo" v-show="fullScreen && !serviceBreakOff">
+    <div class="video-window" :class="localVideo" v-show="fullScreen && !serviceBreakOff && RTC">
       <video height=100%
-        :style="{'display': videoScreenShotShow ? 'none' : 'block'}"
         id="localVideo"
         muted
         autoplay
         playsinline
       ></video>
+      <div class="video-mask"></div>
     </div>
-    <toast v-model="isUnsmoothTextShow" :time="10000000" type="text" position="default" width="80%">您的网络上行速度较差</toast>
+    <div v-transfer-dom>
+      <toast v-model="isUnsmoothTextShow" :time="10000000" type="text" position="default" width="80%">您的网络上行速度较差</toast>
+    </div>
     <div class="full-screen-container" v-show="fullScreen">
       <!-- 重连按钮 -->
-      <div class="reconnect" v-show="serviceBreakOff">
+      <div class="reconnect" v-if="serviceBreakOff">
         <img class="xiaohua" src="/video/static/img/video/xiaohua.png">
-        <p class="text">视频已经结束啦~</p>
-        <x-button class="reconnect-btn" :gradients="['#FF8C6A', '#FF80A0']" @click.native="reconnectVideo">重新连接</x-button>
+        <p class="text">{{this.getCurConnectStateText()}}</p>
+        <!-- '视频已经结束啦~' : '连接超时啦' -->
+        <x-button
+          class="reconnect-btn"
+          :gradients="['#FF8C6A', '#FF80A0']"
+          @click.native="reconnectVideo">
+          重新连接
+        </x-button>
+        <!-- :class="{'disable': connectCount === 0}"
+        :disabled="connectCount === 0" -->
         <!-- <button class="reconnect-btn" @click="reconnectVideo">重新连接</button> -->
       </div>
       <!-- 客服头像 -->
@@ -81,18 +89,18 @@
 </template>
 
 <script type="text/ecmascript-6">
-import { Toast, XButton } from 'vux'
+import { Toast, XButton, TransferDom } from 'vux'
 import Tools from '@/common/js/tools'
-import { mapGetters, mapMutations } from 'vuex'
+import { mapGetters, mapMutations, mapActions } from 'vuex'
 import { ERR_OK, enterVideoRTCRoom, getSessionDetail } from '@/server'
 import { RTCRoomMixin, IMMixin, sendMsgsMixin } from '@/common/js/mixin'
 import { msgStatus, msgTypes } from '@/common/js/status'
 import IM from '@/server/im.js'
 
 export default {
-  // directives: {
-  //   TransferDom
-  // },
+  directives: {
+    TransferDom
+  },
   mixins: [
     RTCRoomMixin,
     IMMixin,
@@ -125,7 +133,7 @@ export default {
     },
     remoteVideo() {
       if (!this.fullScreen) {
-        return 'small'
+        return 'big'
       }
       return this.isChangeCamera ? 'small' : 'big'
     },
@@ -150,29 +158,59 @@ export default {
   },
   data() {
     return {
-      videoScreenShotShow: false,
+      // 视频截图数据，base64，在每次连接成功的时候截取并设置
       videoScreenShotSrc: '',
-      // 通话开始时间表
+      // 通话开始时间缓存
       startTimeTrunk: [],
-      // 通话结束时间表
+      // 通话结束时间缓存
       endTimeTrunk: [],
       // 是否切换客服跟用户的摄像头位置：[false 客户窗口小窗] / [true 客户窗口大窗]
       isChangeCamera: false,
       // 礼物列表弹层开关：[false 开启 / [true 关闭]
       giftSectionShow: false,
+      // 添加喜爱状态，只修改一次
       likes: false,
+      // 被添加的喜爱次数
       likesCount: 0,
+      // 视频是否建立成功状态，只要成功连接一次就设置为 [成功]，之后不再改变
       isVideoConnectSuccess: false,
+      // 连接过程状态记录
+      connectProcess: [],
+      // 视频连接中状态
       RTCconnecting: false,
+      // 服务中断，显示重连按钮
       serviceBreakOff: false,
-      // 视频网络提示信息
-      isUnsmoothTextShow: false
-      // toastText: ''
+      // 本地网络上行不佳提示信息
+      isUnsmoothTextShow: false,
+      // 视频总延迟上限（毫秒）
+      totalDelay: 0,
+      // 视频延迟上限（毫秒）
+      delay: 0,
+      // 重连次数
+      connectCount: 0,
+      // 视频连接超时时长（毫秒）
+      connectTimeout: 0,
+      // 是否监听 bps，第一次连接的时候是默认监听的，重连时设置为 [关闭]，等到坐席推送的RTC初始化消息之后再 [开启]
+      isBpsListen: true,
+      // bps 监听回调
+      bpsCb: null
     }
   },
-  mounted() {
-    // 响铃
-    document.getElementById('videoRing').play()
+  async mounted() {
+    // 初始化重连次数、重连超时时长、视频总延迟上限，视频延迟上限
+    const [ connectCount, connectTimeout, totalDelay, delay ] = await Promise.all([
+      this.systemConfig('connectTimes'),
+      this.systemConfig('connectTimeout'),
+      this.systemConfig('videoTotalDelay'),
+      this.systemConfig('videoDelay')
+    ])
+    this.connectCount = +connectCount.get()
+    this.connectTimeout = +connectTimeout.get()
+    this.totalDelay = +totalDelay.get()
+    this.delay = +delay.get()
+
+    // 初始化bps监听回调，第一次连接，10次，绑定在 data
+    this.bpsCb = this.bps_cb_init(10)
     // 初始化视频
     this.readyToVideo()
     // 进入 RTC 房间
@@ -202,6 +240,9 @@ export default {
     openVideoBar() {
       this.setFullScreen(true)
     },
+    closeVideoBar() {
+      this.setFullScreen(false)
+    },
     selectGift(giftInfo) {
       console.log('发礼物辣：', giftInfo)
       this.$emit('showGiftAnime', giftInfo)
@@ -215,19 +256,80 @@ export default {
       this.sendLikeMsg()
       this.likes = true
     },
-    closeVideoBar() {
-      this.setFullScreen(false)
+    setStateConnecting() {
+      // 开始连接，设置状态
+      const self = this
+      // 响铃
+      document.getElementById('videoRing').play()
+      // 关闭重连按钮
+      self.serviceBreakOff = false
+      // 初始化摄像头
+      self.isChangeCamera = true
+      // 初始化视频连接中状态
+      self.RTCconnecting = true
+      // 记录连接
+      self.connectProcess.push({
+        timeoutId: setTimeout(() => {
+                                // 发送自定义指令
+                                this.sendCustomDirective({
+                                  msg: '客户挂断',
+                                  msgStatus: msgStatus.msg,
+                                  msgType: msgTypes.msg_video_hang_up,
+                                  MsgLifeTime: 0
+                                })
+                                const curConn = self.connectProcess[self.connectProcess.length - 1]
+                                curConn.state = 'fail'
+                                clearTimeout(curConn.timeoutId)
+                                self.setStateUnconnect()
+                              }, self.connectTimeout),
+        state: 'connecting'
+      })
+    },
+    setStateConnected() {
+      // 连接成功，设置状态
+      // 记录连接
+      const curConn = this.connectProcess[this.connectProcess.length - 1]
+      curConn.state = 'succ'
+      clearTimeout(curConn.timeoutId)
+      // 设置时长节点及连接次数
+      if (this.startTimeTrunk.length === this.endTimeTrunk.length) {
+        // 设置剩余重连次数
+        this.connectCount -= 1
+        // 记录视频开始时间节点
+        this.startTimeTrunk.push(new Date().getTime())
+      }
+      // 提示视频加载成功
+      // this.$vux.toast.text('客服视频载入成功', 'default')
+      // 记录视频接通成功状态
+      this.isVideoConnectSuccess = true
+      // 初始化重连按钮
+      this.serviceBreakOff = false
+      // 暂停铃声
+      document.getElementById('videoRing').pause()
+      // 初始化视频窗口位置
+      this.isChangeCamera = false
+      // 初始化提示按钮
+      this.$vux.toast.hide()
+      // 初始化连接状态
+      this.RTCconnecting = false
+      // 截图
+      !this.videoScreenShotSrc && this.getVideoScreenShot()
+    },
+    setStateUnconnect() {
+      // 断开连接，设置状态
+      // 停止推流
+      this.quitRTC()
+      // 暂停铃声
+      document.getElementById('videoRing').pause()
+      // 重置视频模糊状态
+      this.setVideoBlur(false)
+      // 显示重连按钮
+      this.serviceBreakOff = true
     },
     async readyToVideo() {
-      // 初始化摄像头
-      this.isChangeCamera = true
-      // 初始化视频连接中状态
-      this.RTCconnecting = true
-      // new Promise((resolve, reject) => {
-      //   return this.RTC
-      //           ? resolve()
-      //           : resolve(this.initRTC())
-      // })
+      // 初始化开始连接状态
+      this.setStateConnecting()
+      // 初始化 RTC
       this.initRTC()
       .then(() => this.enterRoom(this.roomId))
       .then(() => this.getLocalStream(), err => {
@@ -240,7 +342,7 @@ export default {
       })
       .then(() => {
         // 记录视频开始时间节点
-        this.startTimeTrunk.push(new Date().getTime())
+        // this.startTimeTrunk.push(new Date().getTime())
       })
       .catch(err => {
         console.log(err)
@@ -248,6 +350,18 @@ export default {
       })
     },
     async reconnectVideo() {
+      // 初始化视频卡顿提示信息
+      this.isUnsmoothTextShow = false
+      // 初始化提示按钮
+      this.$vux.toast.hide()
+
+      // 剩余重连次数如果不足，不允许重连
+      if (this.connectCount === 0) {
+        this.$vux.toast.text('您已经不能再重连啦~')
+        await Tools.AsyncTools.sleep(2000)
+        return this.hangUpVideo()
+      }
+
       const res = await getSessionDetail(this.sessionRamId, this.userInfo.userId, this.sessionId)
       if (res.result.code === ERR_OK && !res.data.sectionId) {
         IM.sendNormalMsg(this.userInfo.userId, this.csInfo.csId, {
@@ -263,20 +377,18 @@ export default {
           MsgLifeTime: 0
         })
       } else {
-        this.$vux.toast.text('通话已过期')
+        this.$vux.toast.text('本次会话已结束')
         await Tools.AsyncTools.sleep(2000)
         return this.hangUpVideo()
       }
-      // 重启视频
-      document.getElementById('videoRing').play()
-
-      this.readyToVideo()
-      // 重置截图
-      this.videoScreenShotShow = false
-      // 关闭重连按钮
-      this.serviceBreakOff = false
+      // 重置 bps 监听状态
+      this.isBpsListen = false
       // 重置截图
       this.videoScreenShotSrc = ''
+      // 初始化bps监听回调，重连，5次，绑定在 data
+      this.bpsCb = this.bps_cb_init(5)
+      // 重启视频
+      this.readyToVideo()
     },
     async enterVideoRTCRoomAPI(roomId, userId, openId, sessionId) {
       const enterVideoStatus = window.sessionStorage.getItem('enterVideoStatus')
@@ -289,25 +401,23 @@ export default {
       // }
     },
     async handleHangUpVideo() {
-      // if (!this.isVideoConnectSuccess) {
-      //   // 视频成功接通之前客户点击挂断
-      //   // 关闭铃声
-      //   document.getElementById('videoRing').pause()
-      //   this.$emit('videoFailed')
-      //   // return undefined
-      // }
-      // 发送自定义指令
-      this.sendCustomDirective({
-        msg: '客户点击挂断',
-        msgStatus: msgStatus.msg,
-        msgType: msgTypes.msg_video_hang_up,
-        MsgLifeTime: 0
-      })
+      // 当前为正在连接状态
+      if (this.RTCconnecting) {
+        // 关闭铃声
+        document.getElementById('videoRing').pause()
+        // 记录连接
+        const curConn = this.connectProcess[this.connectProcess.length - 1]
+        curConn.state = 'fail'
+        clearTimeout(curConn.timeoutId)
+      }
       // 停止推流
-      this.quitRTC()
+      await this.quitRTC()
       this.hangUpVideo()
     },
     async hangUpVideo() {
+      // 关闭 RTC
+      this.RTC = null
+
       this.$vux.toast.hide()
       // 初始化重连按钮
       this.serviceBreakOff = false
@@ -315,21 +425,25 @@ export default {
       !this.fullScreen && this.setFullScreen(true)
       // 恢复摄像头默认位置
       this.isChangeCamera && (this.isChangeCamera = false)
-      // 记录通话时间
+      // 计算通话时间
       const time = this._getVideoTime([ this.startTimeTrunk, this.endTimeTrunk ])
       this.setServerTime(time)
       // 清空时间
       this.startTimeTrunk = []
       this.endTimeTrunk = []
       // 判断当前是否评价过
-      this.isVideoConnectSuccess && !this.hasAssess && this.setAssessView({
-        show: true,
-        task: {
-          csInfo: Object.assign({}, this.csInfo),
-          sessionId: this.sessionId,
-          mode: this.roomMode
-        }
-      })
+      if (this.isVideoConnectSuccess && !this.hasAssess) {
+        this.setAssessView({
+          show: true,
+          task: {
+            csInfo: Object.assign({}, this.csInfo),
+            sessionId: this.sessionId,
+            mode: this.roomMode
+          }
+        })
+      } else {
+        this.$emit('videoOver')
+      }
     },
     getVideoScreenShot() {
       return new Promise(resolve => {
@@ -354,17 +468,44 @@ export default {
     },
 
     changeUnsmoothTextShow(state) {
+      if (this.RTCconnecting) {
+        return undefined
+      }
       this.isUnsmoothTextShow = state
     },
 
     showShare(csId, csName) {
       this.$emit('showShare', csId, csName)
     },
+
+    // bps 不达标时候的回调
+    bps_cb_init: function(limit) {
+      let count = 0
+      return function cb(toast, text) {
+        return count > limit
+                ? console.log(text)
+                : ++count
+      }
+    },
+    getCurConnectStateText() {
+      const curConn = this.connectProcess[this.connectProcess.length - 1]
+      switch (curConn.state) {
+        case 'succ':
+          return '视频已经结束啦~'
+        case 'fail':
+          return '连接超时啦'
+        default:
+          return '视频已经结束啦~'
+      }
+    },
     ...mapMutations({
       setFullScreen: 'SET_FULL_SCREEN',
       setAssessView: 'SET_ASSESS_VIEW',
       setServerTime: 'SET_SERVER_TIME'
-    })
+    }),
+    ...mapActions([
+      'systemConfig'
+    ])
   },
   filters: {
     videoTimeFormat(val) {
@@ -381,7 +522,21 @@ export default {
 
 .video-bar {
   position: relative;
-  color: #333;
+  background-color: #333;
+  &.full-screen {
+    width: 100%;
+    height: 100%;
+    // z-index: 0;
+  }
+  &.mini-screen {
+    margin: .5rem .5rem 0 0;
+    width: 9rem;
+    height: 16.5rem;
+    border-radius: .4rem;
+    // z-index: 200;
+    overflow: hidden;
+    // z-index: 1;
+  }
   // &.video-mini-screen {
   //   margin: .5rem .5rem 0 0;
   //   width: 9rem;
@@ -398,7 +553,7 @@ export default {
     z-index: 102;
   }
   .video-window {
-    position: fixed;
+    position: absolute;
     top: 0;
     right: 0;
     background-position: center;
@@ -507,6 +662,8 @@ export default {
     right: 0;
     top: 0;
     bottom: 0;
+    margin: auto;
+    overflow: hidden;
     z-index: 101;
     .reconnect {
       position: absolute;
@@ -514,7 +671,7 @@ export default {
       right: 0;
       top: 0;
       bottom: 0;
-      z-index: 1000;
+      z-index: 20;
       margin: auto;
       background-color: rgba(0, 0, 0, .1);
       // max-width: 80%;
@@ -534,10 +691,13 @@ export default {
         font-size: 1.6rem;
       }
       .reconnect-btn {
-        width: 9rem;
+        width: 13rem;
         height: 3rem;
         line-height: 3rem;
         margin-top: 2rem;
+        &.disable {
+          opacity: .3;
+        }
       }
     }
     .video-header {
@@ -579,7 +739,7 @@ export default {
       bottom: 0;
       left: 0;
       width: 100%;
-      z-index: 10;
+      z-index: 30;
     }
     .video-msg-list {
       position: absolute;

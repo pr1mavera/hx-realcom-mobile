@@ -54,6 +54,36 @@ const config_cb = {
       const themeKey = Object.keys(this.value).filter(key => this.value[key] == 1)[0] // eslint-disable-line
       return themeMap[themeKey]
     }
+  },
+  // iOS 版本限制
+  'ios-ver': {
+    get: function() {
+      return this.value
+    }
+  },
+  // 重连次数（次）
+  'connectTimes': {
+    get: function() {
+      return this.value
+    }
+  },
+  // 重连超时时长（秒 -> 毫秒）
+  'connectTimeout': {
+    get: function() {
+      return this.value * 1000
+    }
+  },
+  // 视频总延迟上限（毫秒 -> 毫秒）
+  'videoTotalDelay': {
+    get: function() {
+      return this.value
+    }
+  },
+  // 视频延迟上限（毫秒 -> 毫秒）
+  'videoDelay': {
+    get: function() {
+      return this.value
+    }
   }
 }
 

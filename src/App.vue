@@ -11,7 +11,7 @@
 <script>
 import { wxConfig } from '@/common/js/share'
 import deviceConfig from './config/device'
-import { beforeEnterVideo } from '@/common/js/beforeEnterVideo'
+import beforeEnterVideo from '@/common/js/beforeEnterVideo'
 import { stringEx } from './config/extend'
 import Tools from '@/common/js/tools'
 // import { mapGetters, mapActions, mapMutations } from 'vuex'

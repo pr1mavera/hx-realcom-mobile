@@ -5,13 +5,12 @@
  *
  * Created by WangXj 。
  */
-export function beforeEnterVideo() {
+export default function beforeEnterVideo() {
   // 判断手机类型, 系统的版本
   const device = sessionStorage.getItem('device')
   const browser = sessionStorage.getItem('browser')
   const ua = navigator.userAgent.toLowerCase()
   let version = 0
-
   if (device === 'Android') {
     // 若为Android设备
     const reg = /android [\d._]+/gi
@@ -24,14 +23,12 @@ export function beforeEnterVideo() {
     const ver = ua.match(/cpu iphone os (.*?) like mac os/)
     version = parseFloat(ver[1].replace(/_/g, '.'))
     // 若用户当前设备的版本过低，则提示用户升级系统
-    if (version < 11) {
-      // this.$emit('low-version', 'true')
-      sessionStorage.setItem('enterVideoStatus', 'low-version')
-    } else if (device === 'iPhone' && browser === 'wx') {
+    sessionStorage.setItem('device_version', version)
+    if (browser === 'wx') {
       // 当前在微信内置浏览器中，弹层提示用户在浏览器中打开,
       // 而且用户此时点击右上角“...”出现的菜单项只有 “在Safari中打开一项”
       sessionStorage.setItem('enterVideoStatus', 'iOS-wx')
-    } else if (device === 'iPhone' && browser === 'safari') {
+    } else if (browser === 'safari') {
       // 进入排队的页面
       sessionStorage.setItem('enterVideoStatus', 'iOS-Safari')
     }

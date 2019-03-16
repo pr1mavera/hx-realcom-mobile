@@ -82,6 +82,10 @@
           </svg>
         </span>
       </div>
+      <div class="guide" :style="`opacity: ${ guideDisplay ? '1' : '0' };`">
+        <h class="title">您可以选择切换、添加专属客服！</h>
+        <p class="text">点击下方操作按钮或者左滑切换、右滑添加</p>
+      </div>
     </div>
     <div class="slide-btn">
       <div class="btn btn-left" @click="hendleChange">换一个</div>
@@ -111,7 +115,6 @@
     <div v-transfer-dom>
       <alert v-model="showTip" :title="'您已经添加了3个专属客服啦！'"></alert>
     </div>
-    <!-- <alert v-model="showTip" :title="'您已经添加了3个专属客服啦！'"></alert> -->
   </div>
 </template>
 
@@ -178,7 +181,8 @@ export default {
       floadTipLeftAnimeCache: null,
       floadTipRightAnimeCache: null,
       showTip: false,
-      addDis: false // 此时‘添加’按钮可点击
+      addDis: false, // 此时‘添加’按钮可点击
+      guideDisplay: true
     }
   },
   computed: {
@@ -195,8 +199,10 @@ export default {
       'userInfo'
     ])
   },
-  mounted() {
+  async mounted() {
     this.getCsList()
+    await Tools.AsyncTools.sleep(3000)
+    this.guideDisplay = false
   },
   methods: {
     updateCsList(item) {
@@ -593,16 +599,17 @@ export default {
     }
   }
   .slide-tip {
+    position: relative;
     width: 100%;
     height: 4rem;
     padding: 0 7rem;
     box-sizing: border-box;
     color: @text-light;
-    opacity: .7;
     display: flex;
     justify-content: space-between;
     margin-bottom: 1.4rem;
     .tip {
+      opacity: .7;
       flex: 50%;
       display: flex;
       align-items: center;
@@ -637,6 +644,35 @@ export default {
         .icon {
           transform: rotateY(180deg);
         }
+      }
+    }
+    .guide {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      left: 0;
+      margin: auto;
+      padding: 2rem 2.5rem;
+      box-sizing: border-box;
+      color: #fff;
+      background-image: linear-gradient(90deg, rgba(255, 135, 131, .8), rgba(255, 135, 131, .3));
+      display: flex;
+      flex-direction: column;
+      opacity: 1;
+      transition: opacity ease-in-out 1s;
+      .title {
+        --title: 1.8rem;
+        font-size: var(--title);
+        line-height: var(--title);
+        height: var(--title);
+        margin-bottom: 1rem;
+        font-weight: bold;
+      }
+      .text {
+        --text: 1.2rem;
+        font-size: var(--text);
+        line-height: var(--text);
+        height: var(--text);
       }
     }
   }

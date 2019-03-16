@@ -218,8 +218,6 @@ export const RTCRoomMixin = {
   data() {
     return {
       RTC: null
-      // qualityReqToast: false,
-      // bpsOverCount: 0
     }
   },
   computed: {
@@ -259,35 +257,15 @@ export const RTCRoomMixin = {
             // 绑定视频流
             videoElement.srcObject = info.stream
             videoElement.play()
-            // 添加监听，远程流视频加载完全时，关闭铃声，切换摄像头
+            // 添加监听，远程流视频加载完全时，关闭铃声，切换摄像头...
             videoElement.addEventListener('playing', () => {
-              // 提示视频加载成功
-              // this.$vux.toast.text('客服视频载入成功', 'default')
-              // 记录视频接通成功状态
-              this.isVideoConnectSuccess = true
-              // 初始化重连按钮
-              this.serviceBreakOff = false
-              // 暂停铃声
-              document.getElementById('videoRing').pause()
-              // 初始化视频窗口位置
-              this.isChangeCamera = false
-              // 初始化提示按钮
-              this.$vux.toast.hide()
-              // 初始化连接状态
-              this.RTCconnecting = false
-              // 截图
-              !this.videoScreenShotSrc && this.getVideoScreenShot()
+              this.setStateConnected()
             }, false)
           }
         })
 
         this.RTC.on('onRemoteStreamRemove', () => {
-          // 停止推流
-          this.quitRTC()
-          // 重置视频模糊状态
-          this.setVideoBlur(false)
-          // 显示重连按钮
-          this.serviceBreakOff = true
+          this.setStateUnconnect()
         })
 
         this.RTC.on('onKickOut', () => {
@@ -415,8 +393,8 @@ export const RTCRoomMixin = {
       }
 
       Tools.trace('视频质量报告：---> ')(data)
-      const daley = data.WebRTCQualityReq.uint32_delay
-      const daley_inside = data.WebRTCQualityReq.VideoReportState.uint32_video_delay
+      const total_delay = data.WebRTCQualityReq.uint32_delay
+      const daley = data.WebRTCQualityReq.VideoReportState.uint32_video_delay
       const send_bps = data.WebRTCQualityReq.uint32_total_send_bps
       const recv_bps = data.WebRTCQualityReq.uint32_total_recv_bps
 
@@ -425,27 +403,18 @@ export const RTCRoomMixin = {
       Tools.trace('rsv_br：=== ')(rsv_br / 1024)
       // Tools.trace('snd_br：=== ')(snd_br)
 
-      Tools.trace('总延迟：')(daley)
-      Tools.trace('视频延迟：')(daley_inside)
-      if (daley >= 1000 || daley_inside >= 600) {
+      Tools.trace('总延迟：')(total_delay)
+      Tools.trace('视频延迟：')(daley)
+      if (total_delay >= (this.totalDelay || 1000) || daley >= (this.delay || 600)) {
         !this.$vux.toast.isVisible() && this.showToast('当前网络状况不佳', 3000)
       }
 
-      Tools.trace('接收数据：')(recv_bps / 1024)
-      if (send_bps === 0 || recv_bps === 0) {
-        this.bps_cb(this.showToast, '当前网络太差，无法建立视频通话')
-        // this.$refs.videoFooter.minimizeBtnHighLight()
-      }
+      // Tools.trace('接收数据：')(recv_bps / 1024)
+      // if (this.isBpsListen && this.RTCconnecting && (send_bps === 0 || recv_bps === 0)) {
+      //   this.bpsCb(this.showToast, '当前网络太差，无法建立视频通话')
+      //   // this.$refs.videoFooter.minimizeBtnHighLight()
+      // }
     },
-
-    bps_cb: (function() {
-      let count = 0
-      return function cb(toast, text) {
-        return count > 10
-                ? toast(text)
-                : ++count
-      }
-    })(),
 
     // 提示插件
     async showToast(text, time) { // 默认不消失
@@ -747,10 +716,10 @@ export const IMMixin = {
         if (msgsObj.msgType === msgTypes.msg_img) { // 图片消息
           this.addPreviewImg({ list: this.previewImgList, msgsObj })
         }
-        if (msgsObj.msgType === msgTypes.msg_normal) { // 消息封装链接
+        else if (msgsObj.msgType === msgTypes.msg_normal) { // 消息封装链接
           msgsObj.content = Tools.strWithLink(msgsObj.content, this.theme['button'])
         }
-        if (msgsObj.msgType === msgTypes.msg_timeout) { // 超时消息
+        else if (msgsObj.msgType === msgTypes.msg_timeout) { // 超时消息
           const dialog = {
             time: Tools.DateTools.formatDate('yyyy-MM-dd hh:mm:ss'),
             msgStatus: msgStatus.dialog,
@@ -761,25 +730,42 @@ export const IMMixin = {
           }
           return this.sendMsgs([dialog])
         }
-        if (msgsObj.msgType === msgTypes.msg_video_blur) { // 客服暂离消息
+        else if (msgsObj.msgType === msgTypes.msg_video_blur) { // 客服暂离消息
           const state = msgsObj.content === 'true'
           return this.setVideoBlur(state)
         }
-        if (msgsObj.msgType === msgTypes.msg_video_muted) { // 客服静音消息
+        else if (msgsObj.msgType === msgTypes.msg_video_muted) { // 客服静音消息
           const state = msgsObj.content === 'true'
           return this.setVideoMuted(state)
         }
-        if (msgsObj.msgType === msgTypes.msg_video_hang_up) { // 视频挂断
+        else if (msgsObj.msgType === msgTypes.msg_video_hang_up) { // 视频挂断
           // this.quitRTC()
           // this.$emit('quitRTCResponse')
           return
         }
-        if (msgsObj.msgType === msgTypes.msg_video_quality) { // 视频卡顿
-          const state = msgsObj.content === 'unsmooth'
+        else if (msgsObj.msgType === msgTypes.msg_video_quality) { // 视频卡顿
+          // const state = msgsObj.content === 'unsmooth'
           // if (state && this.$vux.toast.isVisible()) {
           //   return undefined
           // }
-          return this.$emit('videoQuality', state)
+          msgsObj.content === 'unsmooth'
+            ? this.$vux.toast.show({
+              type: 'text',
+              text: '您的网络上行速度较差',
+              width: '80%',
+              time: 1000000
+            })
+            : this.$vux.toast.hide()
+          // if (this.isUnsmoothTextShow !== undefined) {
+          //   return this.isUnsmoothTextShow = state
+          // } else {
+          //   return this.$emit('videoQuality', state)
+          // }
+        }
+        else if (msgsObj.msgType === msgTypes.msg_video_cs_initRTC) { // 视频坐席已经初始化好了RTC
+          // 开始监听 bps
+          this.isBpsListen = true
+          return undefined
         }
       }
       this.sendMsgs([msgsObj])

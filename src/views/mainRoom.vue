@@ -19,7 +19,9 @@
     <videoBar class="video-bar"
       ref="videoBar"
       v-if="isVideoBarOpen"
+      @videoQuality="videoQuality"
       @showGiftAnime="showGiftAnime"
+      @videoOver="videoOver"
       @videoFailed="iOSVideoFailed"
     ></videoBar>
 
@@ -197,6 +199,9 @@ export default {
       // 设置对应请求坐席，进入排队
       this.$router.replace({path: `/room/line-up?csId=${data.csId}&csName=${data.csName}`})
     },
+    videoOver() {
+      this.isVideoOverReportShow = true
+    },
     // 校验异常
     iOSVideoFailed() {
       // this.setRoomMode(roomStatus.videoChat)
@@ -362,12 +367,15 @@ export default {
     z-index: 10;
   }
   .video-bar {
-    position: absolute;
+    position: fixed;
     top: 0;
-    bottom: 0;
+    // bottom: 0;
+    // right: 0;
     right: 0;
-    left: 0;
-    margin: auto;
+    // width: 100%;
+    // height: 100%;
+    // margin: auto;
+    overflow: hidden;
     z-index: 101;
   }
   .iframe-section {
