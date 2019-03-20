@@ -84,6 +84,18 @@ const config_cb = {
     get: function() {
       return this.value
     }
+  },
+  // fpsOutTimes
+  'fpsOutTimes': {
+    get: function() {
+      return this.value
+    }
+  },
+  // fps
+  'fps': {
+    get: function() {
+      return this.value
+    }
   }
 }
 

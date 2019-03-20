@@ -79,6 +79,7 @@ export default {
 @import '~@/common/style/theme.less';
 
 .video-footer {
+  height: 6.8rem;
   .footer-bar {
     width: 100%;
     height: 6.8rem;

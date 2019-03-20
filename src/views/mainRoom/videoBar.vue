@@ -1,10 +1,12 @@
 <template>
-  <div class="video-bar" :class="`${fullScreen ? 'full-screen' : 'mini-screen'}`">
+  <div class="video-bar" :class="{'mini-screen': !fullScreen}">
     <audio id="videoRing" loop v-show="false" src="/video/static/audio/ring.mp3" type="audio/mpeg"></audio>
     <div class="video-window" v-show="!RTCconnecting" :class="remoteVideo" :style="remoteVideoBg">
+    <!-- <div class="video-window" :class="remoteVideo"> -->
       <video height=100%
         v-show="!RTCconnecting && !serviceBreakOff && RTC"
         id="remoteVideo"
+        :class="{'invisible': RTCconnecting || serviceBreakOff || RTC === null}"
         :muted="videoFilter.muted"
         autoplay
         playsinline
@@ -15,14 +17,15 @@
         <!-- 客服暂离icon -->
         <img width=60% v-show="isVideoFilter" src="/video/static/img/video/video-filter.png" class="video-watermark">
         <!-- 最小化时的缩放按钮 -->
-        <div class="full-screen-btn" v-if="!fullScreen" @click="openVideoBar">
+        <div class="full-screen-btn" :style="`opacity: ${fullScreen ? '0' : '0.7'};`" v-show="!fullScreen" @click="openVideoBar">
           <svg class="icon" aria-hidden="true">
             <use xlink:href="#icon-quanping"></use>
           </svg>
         </div>
       </div>
     </div>
-    <div class="video-window" :class="localVideo" v-show="fullScreen && !serviceBreakOff && RTC">
+    <!-- <div class="video-window" :class="localVideo"> -->
+    <div class="video-window" :class="localVideo" v-show="!serviceBreakOff && RTC !== null">
       <video height=100%
         id="localVideo"
         muted
@@ -36,7 +39,7 @@
     </div>
     <div class="full-screen-container" v-show="fullScreen">
       <!-- 重连按钮 -->
-      <div class="reconnect" v-if="serviceBreakOff">
+      <div class="reconnect" v-if="serviceBreakOff && RTC">
         <img class="xiaohua" src="/video/static/img/video/xiaohua.png">
         <p class="text">{{this.getCurConnectStateText()}}</p>
         <!-- '视频已经结束啦~' : '连接超时啦' -->
@@ -126,21 +129,21 @@ export default {
       set() {}
     },
     localVideo() {
-      if (!this.fullScreen) {
-        return 'invisible'
-      }
-      return this.isChangeCamera ? 'big' : 'small'
+      // if (!this.isLocalVideoView.state) {
+      //   return 'invisible'
+      // }
+      return this.isChangeCamera
+                ? 'big'
+                : this.isLocalVideoView.state ? 'small' : 'small invisible'
     },
     remoteVideo() {
-      if (!this.fullScreen) {
-        return 'big'
-      }
       return this.isChangeCamera ? 'small' : 'big'
     },
     remoteVideoBg() {
       return this.videoScreenShotSrc
               ? `background-image: url('${this.videoScreenShotSrc}');`
               : 'background-color: #666;'
+      // return 'background-color: #666;'
     },
     ...mapGetters([
       'fullScreen',
@@ -158,6 +161,11 @@ export default {
   },
   data() {
     return {
+      RTC: '',
+      isLocalVideoView: {
+        state: true,
+        timeout: null
+      },
       // 视频截图数据，base64，在每次连接成功的时候截取并设置
       videoScreenShotSrc: '',
       // 通话开始时间缓存
@@ -190,27 +198,37 @@ export default {
       connectCount: 0,
       // 视频连接超时时长（毫秒）
       connectTimeout: 0,
+      // fps 为0 次数
+      fpsOutTimes: 0,
+      // fps
+      fps: 0,
       // 是否监听 bps，第一次连接的时候是默认监听的，重连时设置为 [关闭]，等到坐席推送的RTC初始化消息之后再 [开启]
       isBpsListen: true,
       // bps 监听回调
-      bpsCb: null
+      bpsCb: null,
+      // fps 监听回调
+      fpsCb: null
     }
   },
   async mounted() {
     // 初始化重连次数、重连超时时长、视频总延迟上限，视频延迟上限
-    const [ connectCount, connectTimeout, totalDelay, delay ] = await Promise.all([
+    const [ connectCount, connectTimeout, totalDelay, delay, fpsOutTimes, fps ] = await Promise.all([
       this.systemConfig('connectTimes'),
       this.systemConfig('connectTimeout'),
       this.systemConfig('videoTotalDelay'),
-      this.systemConfig('videoDelay')
+      this.systemConfig('videoDelay'),
+      this.systemConfig('fpsOutTimes'),
+      this.systemConfig('fps')
     ])
     this.connectCount = +connectCount.get()
     this.connectTimeout = +connectTimeout.get()
     this.totalDelay = +totalDelay.get()
     this.delay = +delay.get()
+    this.fpsOutTimes = +fpsOutTimes.get()
+    this.fps = +fps.get()
 
     // 初始化bps监听回调，第一次连接，10次，绑定在 data
-    this.bpsCb = this.bps_cb_init(10)
+    // this.bpsCb = this.bps_cb_init(10)
     // 初始化视频
     this.readyToVideo()
     // 进入 RTC 房间
@@ -237,11 +255,23 @@ export default {
       const seconds = Math.round(leave3 / 1000).toString().padStart(2, '0')
       return `${hours}:${minutes}:${seconds}`
     },
+    resetLocalVideoView() {
+      const lv = this.isLocalVideoView
+      clearTimeout(lv.timeout)
+      lv.timeout = null
+    },
     openVideoBar() {
+      this.isLocalVideoView.state = true
+      this.isLocalVideoView.timeout && this.resetLocalVideoView()
       this.setFullScreen(true)
     },
     closeVideoBar() {
+      this.isChangeCamera = false
       this.setFullScreen(false)
+      this.isLocalVideoView.timeout = setTimeout(() => {
+        this.isLocalVideoView.state = false
+        this.resetLocalVideoView()
+      }, 2000)
     },
     selectGift(giftInfo) {
       console.log('发礼物辣：', giftInfo)
@@ -261,6 +291,8 @@ export default {
       const self = this
       // 响铃
       document.getElementById('videoRing').play()
+      // 设置 fps 回调
+      this.fpsCb = this.fps_cb_init(this.fpsOutTimes)
       // 关闭重连按钮
       self.serviceBreakOff = false
       // 初始化摄像头
@@ -277,9 +309,7 @@ export default {
                                   msgType: msgTypes.msg_video_hang_up,
                                   MsgLifeTime: 0
                                 })
-                                const curConn = self.connectProcess[self.connectProcess.length - 1]
-                                curConn.state = 'fail'
-                                clearTimeout(curConn.timeoutId)
+                                self.clearConnectTimeoutWithState('fail')
                                 self.setStateUnconnect()
                               }, self.connectTimeout),
         state: 'connecting'
@@ -288,9 +318,7 @@ export default {
     setStateConnected() {
       // 连接成功，设置状态
       // 记录连接
-      const curConn = this.connectProcess[this.connectProcess.length - 1]
-      curConn.state = 'succ'
-      clearTimeout(curConn.timeoutId)
+      this.clearConnectTimeoutWithState('succ')
       // 设置时长节点及连接次数
       if (this.startTimeTrunk.length === this.endTimeTrunk.length) {
         // 设置剩余重连次数
@@ -316,15 +344,25 @@ export default {
       !this.videoScreenShotSrc && this.getVideoScreenShot()
     },
     setStateUnconnect() {
+      this.openVideoBar()
+      // 初始化提示按钮
+      this.$vux.toast.hide()
       // 断开连接，设置状态
+      this.clearConnectTimeoutWithState('fail')
+      // 显示重连按钮
+      this.serviceBreakOff = true
       // 停止推流
       this.quitRTC()
       // 暂停铃声
       document.getElementById('videoRing').pause()
       // 重置视频模糊状态
       this.setVideoBlur(false)
-      // 显示重连按钮
-      this.serviceBreakOff = true
+    },
+    clearConnectTimeoutWithState(state) {
+      const curConn = this.connectProcess[this.connectProcess.length - 1]
+      curConn.state = state
+      // this.connectProcess.map(({ timeoutId }) => clearTimeout(timeoutId))
+      clearTimeout(curConn.timeoutId)
     },
     async readyToVideo() {
       // 初始化开始连接状态
@@ -386,7 +424,7 @@ export default {
       // 重置截图
       this.videoScreenShotSrc = ''
       // 初始化bps监听回调，重连，5次，绑定在 data
-      this.bpsCb = this.bps_cb_init(5)
+      // this.bpsCb = this.bps_cb_init(5)
       // 重启视频
       this.readyToVideo()
     },
@@ -419,8 +457,6 @@ export default {
       this.RTC = null
 
       this.$vux.toast.hide()
-      // 初始化重连按钮
-      this.serviceBreakOff = false
       // 恢复全屏
       !this.fullScreen && this.setFullScreen(true)
       // 恢复摄像头默认位置
@@ -431,6 +467,8 @@ export default {
       // 清空时间
       this.startTimeTrunk = []
       this.endTimeTrunk = []
+      // 初始化重连按钮
+      this.serviceBreakOff = false
       // 判断当前是否评价过
       if (this.isVideoConnectSuccess && !this.hasAssess) {
         this.setAssessView({
@@ -459,7 +497,10 @@ export default {
         const oData = canvasCtx.getImageData(0, 0, video.clientWidth, video.clientHeight)
         canvasCtx.putImageData(Tools.gaussBlur(oData), 0, 0)
         // 把图标base64编码后变成一段url字符串
-        this.videoScreenShotSrc = canvas.toDataURL('image/png')
+        canvas.toBlob(blob => {
+          const _URL = window.URL || window.webkitURL
+          this.videoScreenShotSrc = _URL.createObjectURL(blob)
+        })
         // this.videoScreenShotShow = true
         resolve()
       }).catch(err => {
@@ -487,15 +528,30 @@ export default {
                 : ++count
       }
     },
+
+    // fps
+    fps_cb_init: function(limit) {
+      let count = 0
+      return function fps_cb(cb) {
+        return count > limit
+                ? cb && cb()
+                : ++count
+      }
+    },
+
     getCurConnectStateText() {
       const curConn = this.connectProcess[this.connectProcess.length - 1]
-      switch (curConn.state) {
-        case 'succ':
-          return '视频已经结束啦~'
-        case 'fail':
-          return '连接超时啦'
-        default:
-          return '视频已经结束啦~'
+      if (curConn) {
+        switch (curConn.state) {
+          case 'succ':
+            return '视频已经结束啦~'
+          case 'fail':
+            return '连接超时啦'
+          default:
+            return '视频已经结束啦~'
+        }
+      } else {
+        return '视频已经结束啦~'
       }
     },
     ...mapMutations({
@@ -523,77 +579,80 @@ export default {
 .video-bar {
   position: relative;
   background-color: #333;
-  &.full-screen {
-    width: 100%;
-    height: 100%;
-    // z-index: 0;
-  }
-  &.mini-screen {
-    margin: .5rem .5rem 0 0;
-    width: 9rem;
-    height: 16.5rem;
-    border-radius: .4rem;
-    // z-index: 200;
-    overflow: hidden;
-    // z-index: 1;
-  }
-  // &.video-mini-screen {
-  //   margin: .5rem .5rem 0 0;
-  //   width: 9rem;
-  //   height: 16.5rem;
-  //   border-radius: .4rem;
-  //   overflow: hidden;
+  width: 100%;
+  height: 100%;
+  transform-origin: calc(~'100% - .5rem') .5rem;
+  transition: transform .5s ease-in-out;
+  // &.full-screen {
+  //   width: 100%;
+  //   height: 100%;
+  //   // z-index: 0;
   // }
-  .line-up {
-    position: fixed;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    z-index: 102;
+  &.mini-screen {
+    // margin: .5rem .5rem 0 0;
+    // width: 9rem;
+    // height: 16.5rem;
+    transform: scale(.25);
+    border-radius: 1.4rem;
+    overflow: hidden;
   }
   .video-window {
     position: absolute;
-    top: 0;
-    right: 0;
     background-position: center;
     background-size: cover;
     background-repeat: no-repeat;
+    overflow: hidden;
+    z-index: 1;
+    transition: opacity .5s ease-in-out;
     // filter: blur(50px);
     &.big {
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
       width: 100%;
       height: 100%;
       z-index: 0;
     }
     &.small {
-      margin: .5rem .5rem 0 0;
+      top: .5rem;
+      right: .5rem;
       width: 9rem;
       height: 16.5rem;
       border-radius: .4rem;
-      // z-index: 200;
       overflow: hidden;
-      z-index: 1;
+      transform: translateZ(100px);
+      z-index: 100;
     }
     &.invisible {
-      visibility: hidden;
+      opacity: 0;
     }
     video {
       position: absolute;
       top: 0;
+      // bottom: 0;
+      // left: 0;
+      // right: 0;
+      // margin: auto;
       left: 50%;
       transform: translateX(-50%);
+      // width: 100%;
       height: 100%;
-      transition: filter ease-in-out .5s;
+      object-fit: cover;
+      // transition: filter ease-in-out .5s;
       // &#remoteVideo {
       //   background-color: #666;
       // }
       // &#localVideo {
-      //   transform: translateX(-50%) rotateY(180deg)
+      //   background-color: #333;
       // }
       // &.video-blur {
       //   filter: blur(50px);
 
       // }
+      &.invisible {
+        visibility: hidden;
+      }
       &::-webkit-media-controls {
         display: none !important;
       }
@@ -644,35 +703,40 @@ export default {
         bottom: 0;
         left: 0;
         right: 0;
+        opacity: 0;
+        transition: opacity .5s ease 1s;
         .icon {
           position: absolute;
-          top: 0.4rem;
-          left: 0.4rem;
-          width: 2rem;
-          height: 2rem;
+          top: 1.4rem;
+          left: 1.4rem;
+          width: 8rem;
+          height: 8rem;
           fill: #fff;
-          opacity: .7;
         }
       }
     }
   }
   .full-screen-container {
-    position: fixed;
+    position: absolute;
     left: 0;
     right: 0;
     top: 0;
     bottom: 0;
+    width: 100%;
+    height: 100%;
     margin: auto;
     overflow: hidden;
-    z-index: 101;
+    z-index: 199;
     .reconnect {
       position: absolute;
       left: 0;
       right: 0;
       top: 0;
       bottom: 0;
-      z-index: 20;
       margin: auto;
+      z-index: 200;
+      width: 100%;
+      height: 100%;
       background-color: rgba(0, 0, 0, .1);
       // max-width: 80%;
       font-size: 1.4rem;
@@ -707,7 +771,7 @@ export default {
       width: 6rem;
       height: 14rem;
       text-align: center;
-      z-index: 10;
+      z-index: 100;
       .avatar {
         width: 6rem;
         height: 6rem;
@@ -735,11 +799,11 @@ export default {
       }
     }
     .video-footer {
-      position: fixed;
+      position: absolute;
       bottom: 0;
       left: 0;
       width: 100%;
-      z-index: 30;
+      z-index: 300;
     }
     .video-msg-list {
       position: absolute;
@@ -758,7 +822,7 @@ export default {
       margin: auto;
       width: 4rem;
       height: 14rem;
-      z-index: 10;
+      z-index: 300;
       .item {
         width: 100%;
         text-align: center;
@@ -803,7 +867,7 @@ export default {
       }
     }
     .send-gift-section {
-      position: fixed;
+      position: absolute;
       left: 0;
       right: 0;
       top: 0;

@@ -263,7 +263,8 @@ export default {
       }
     },
     quitRTCResponse() {
-      this.$refs.videoBar.quitRTC()
+      debugger
+      this.$refs.videoBar.handleHangUpVideo()
     },
     // 评价成功
     assessSuccess(mode) {
@@ -334,7 +335,6 @@ export default {
       this.giftSrc = null
     },
     videoQuality(state) {
-      debugger
       this.$refs.videoBar.changeUnsmoothTextShow(state)
     },
     ...mapMutations({

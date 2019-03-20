@@ -557,6 +557,23 @@ let Tools = Object.assign({}, {
 
     return merger(target, ...Object.keys(target))
   },
+  // 格式化参数
+  formatData(data) {
+    const formData = new FormData()
+    for (const key in data) {
+      formData.append(key, data[key])
+    }
+    return formData
+    // const keys = Object.keys(data)
+    // function formatter(formData, key, ...rest) {
+    //   formData.append(key, data[key])
+    //   return rest.length
+    //           ? formatter(formData, ...rest)
+    //           : formData
+    // }
+    // return formatter(formData, ...keys)
+  },
+  // canvas 高斯模糊
   gaussBlur: function(imgData) {
     let pixes = imgData.data
     let width = imgData.width

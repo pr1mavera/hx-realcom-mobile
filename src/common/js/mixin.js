@@ -217,7 +217,7 @@ export const loginMixin = {
 export const RTCRoomMixin = {
   data() {
     return {
-      RTC: null
+
     }
   },
   computed: {
@@ -227,6 +227,15 @@ export const RTCRoomMixin = {
   },
   methods: {
     initRTC() {
+      // 质量报告计数
+      const getVideoQuaRepCount = (function() {
+        let count = 0
+        return function getConut() {
+          return ++count
+        }
+      })()
+      let count = 0
+
       return new Promise((resolve, reject) => {
         const self = this
         // eslint-disable-next-line
@@ -241,7 +250,10 @@ export const RTCRoomMixin = {
           reject(new Error(`error in initRTC: ${err}`))
         })
 
-        this.RTC.on('onQualityReport', this.handleRTCQualityReport)
+        this.RTC.on('onQualityReport', data => {
+          count = getVideoQuaRepCount()
+          return this.handleRTCQualityReport(data)
+        })
 
         // this.RTC.on('onLocalStreamAdd', (info) => {
         //   const videoElement = document.getElementById('localVideo')
@@ -265,7 +277,7 @@ export const RTCRoomMixin = {
         })
 
         this.RTC.on('onRemoteStreamRemove', () => {
-          this.setStateUnconnect()
+          
         })
 
         this.RTC.on('onKickOut', () => {
@@ -282,6 +294,10 @@ export const RTCRoomMixin = {
           if (info.event === 'onended' || info.event === 'inactive') {
             // this.hangUpVideo()
             // 停止推流
+            // 30秒之后断开，直接显示重连
+            this.RTC && count <= this.connectTimeout / 1000
+              ? undefined
+              : this.setStateUnconnect()
             // this.quitRTC()
           }
           // debugger
@@ -335,27 +351,27 @@ export const RTCRoomMixin = {
       // }
 
       return new Promise((resolve, reject) => {
-        this.RTC.startRTC({ stream, role: 'user' }
-          // () => {
-          //   // 初始化 bytesSent
-          //   const getDiffOfBytesSent = getDiffAndRecordWithInitVal(0)
-          //   // 初始化 packetsSent
-          //   const getDiffOfPacketsSent = getDiffAndRecordWithInitVal(0)
-          //   this.RTC.getStats({
-          //     interval: 1000
-          //   }, res => {
-          //     const video = res.video
-          //     console.log('getStats => !!!!!!!')
-          //     console.log('getStats => bytesReceived:', video.bytesReceived)
-          //     console.log('getStats => bytesSent:', getDiffOfBytesSent(video.bytesSent) / 1024)
-          //     console.log('getStats => packetsLost:', video.packetsLost)
-          //     console.log('getStats => packetsReceived:', video.packetsReceived)
-          //     console.log('getStats => packetsSent:', getDiffOfPacketsSent(video.packetsSent))
-          //   })
-          //   resolve()
-          // }, err => {
-          //   reject(new Error(`error in startRTC: ${JSON.stringify(err)}`))
-          // }
+        this.RTC.startRTC({ stream, role: 'user' },
+          () => {
+            // // 初始化 bytesSent
+            // const getDiffOfBytesSent = getDiffAndRecordWithInitVal(0)
+            // // 初始化 packetsSent
+            // const getDiffOfPacketsSent = getDiffAndRecordWithInitVal(0)
+            this.RTC.getStats({
+              interval: 1000
+            }, res => {
+              // const video = res.video
+              console.log('getStats => !!!!!!!', res)
+              // console.log('getStats => bytesReceived:', video.bytesReceived)
+              // console.log('getStats => bytesSent:', getDiffOfBytesSent(video.bytesSent) / 1024)
+              // console.log('getStats => packetsLost:', video.packetsLost)
+              // console.log('getStats => packetsReceived:', video.packetsReceived)
+              // console.log('getStats => packetsSent:', getDiffOfPacketsSent(video.packetsSent))
+            })
+            resolve()
+          }, err => {
+            reject(new Error(`error in startRTC: ${JSON.stringify(err)}`))
+          }
         )
       })
     },
@@ -395,9 +411,10 @@ export const RTCRoomMixin = {
       Tools.trace('视频质量报告：---> ')(data)
       const total_delay = data.WebRTCQualityReq.uint32_delay
       const daley = data.WebRTCQualityReq.VideoReportState.uint32_video_delay
-      const send_bps = data.WebRTCQualityReq.uint32_total_send_bps
-      const recv_bps = data.WebRTCQualityReq.uint32_total_recv_bps
-
+      // const send_bps = data.WebRTCQualityReq.uint32_total_send_bps
+      // const recv_bps = data.WebRTCQualityReq.uint32_total_recv_bps
+      const videoDecState = data.WebRTCQualityReq.VideoReportState.VideoDecState[0]
+      const fps = videoDecState ? videoDecState.uint32_video_recv_fps : 30
       const rsv_br = data.WebRTCQualityReq.VideoReportState.uint32_video_rcv_br
       // const snd_br = data.WebRTCQualityReq.VideoReportState.uint32_video_snd_br
       Tools.trace('rsv_br：=== ')(rsv_br / 1024)
@@ -405,7 +422,15 @@ export const RTCRoomMixin = {
 
       Tools.trace('总延迟：')(total_delay)
       Tools.trace('视频延迟：')(daley)
-      if (total_delay >= (this.totalDelay || 1000) || daley >= (this.delay || 600)) {
+      Tools.trace('fps：')(fps)
+      if (
+        !this.RTCconnecting &&
+        (
+          total_delay >= (this.totalDelay || 1000) ||
+          daley >= (this.delay || 600) ||
+          fps <= this.fps
+        )
+      ) {
         !this.$vux.toast.isVisible() && this.showToast('当前网络状况不佳', 3000)
       }
 
@@ -414,6 +439,9 @@ export const RTCRoomMixin = {
       //   this.bpsCb(this.showToast, '当前网络太差，无法建立视频通话')
       //   // this.$refs.videoFooter.minimizeBtnHighLight()
       // }
+      if (this.isBpsListen && !this.RTCconnecting && fps === 0) {
+        this.fpsCb(this.setStateUnconnect)
+      }
     },
 
     // 提示插件
@@ -739,16 +767,21 @@ export const IMMixin = {
           return this.setVideoMuted(state)
         }
         else if (msgsObj.msgType === msgTypes.msg_video_hang_up) { // 视频挂断
-          // this.quitRTC()
-          // this.$emit('quitRTCResponse')
-          return
+          // this.handleHangUpVideo()
+          this.$vux.toast.text('本次服务已结束~')
+          if (this.quitRTCResponse) {
+            // iOS下 mixin 作用域里面的 this，是 mainRoom，需要直接调用 quitRTCResponse 方法
+            return this.quitRTCResponse()
+          }
+          // 安卓下 this 是 chat，用 emit
+          return this.$emit('quitRTCResponse')
         }
         else if (msgsObj.msgType === msgTypes.msg_video_quality) { // 视频卡顿
           // const state = msgsObj.content === 'unsmooth'
           // if (state && this.$vux.toast.isVisible()) {
           //   return undefined
           // }
-          msgsObj.content === 'unsmooth'
+          return msgsObj.content === 'unsmooth'
             ? this.$vux.toast.show({
               type: 'text',
               text: '您的网络上行速度较差',
