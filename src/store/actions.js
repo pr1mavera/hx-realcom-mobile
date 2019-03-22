@@ -96,6 +96,18 @@ const config_cb = {
     get: function() {
       return this.value
     }
+  },
+  // byteRate
+  'byteRate': {
+    get: function() {
+      return this.value
+    }
+  },
+  // netPoorTimes
+  'netPoorTimes': {
+    get: function() {
+      return this.value
+    }
   }
 }
 
@@ -563,16 +575,23 @@ export const setVideoMuted = function({ commit, state }, isMuted) {
 }
 
 // 添加相册图片
-export const addPreviewImg = function({ state }, { list, msgsObj }) {
+export const addPreviewImg = function({ commit, state }, { msgsObj }) {
   const data = msgsObj.imgData
-  list.push({
+  commit(types.SET_PREVIEW_IMG_LIST, state.previewImgList.concat({
     src: data.big,
     msrc: data.small,
     w: data.w,
     h: data.h,
     id: msgsObj.timestamp
-  })
-  return list
+  }))
+  // state.previewImgList.push({
+  //   src: data.big,
+  //   msrc: data.small,
+  //   w: data.w,
+  //   h: data.h,
+  //   id: msgsObj.timestamp
+  // })
+  // return list
 }
 
 // 更新本地消息队列

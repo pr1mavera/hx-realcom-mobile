@@ -22,6 +22,8 @@ export const sessionList = state => state.sessionList
 export const chatGuid = state => state.chatGuid
 // 聊天信息队列
 export const msgs = state => state.msgs
+// 相册列表
+export const previewImgList = state => state.previewImgList
 // 视频界面的信息队列
 export const videoMsgs = state => {
   return state.msgs.filter(item => {

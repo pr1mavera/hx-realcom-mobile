@@ -3,14 +3,15 @@
     <audio id="videoRing" loop v-show="false" src="/video/static/audio/ring.mp3" type="audio/mpeg"></audio>
     <div class="video-window" v-show="!RTCconnecting" :class="remoteVideo" :style="remoteVideoBg">
     <!-- <div class="video-window" :class="remoteVideo"> -->
-      <video height=100%
-        v-show="!RTCconnecting && !serviceBreakOff && RTC"
+      <video
+        height=100%
         id="remoteVideo"
         :class="{'invisible': RTCconnecting || serviceBreakOff || RTC === null}"
         :muted="videoFilter.muted"
         autoplay
         playsinline
       ></video>
+      <!-- v-show="!RTCconnecting && !serviceBreakOff && RTC" -->
       <div class="video-mask">
         <!-- 视频水印 -->
         <water-mark :style="`opacity: ${isVideoFilter ? 1 : 0}`" :blur="false" :img="`/video/static/img/video/hx-watermark.png`"></water-mark>
@@ -26,12 +27,14 @@
     </div>
     <!-- <div class="video-window" :class="localVideo"> -->
     <div class="video-window" :class="localVideo" v-show="!serviceBreakOff && RTC !== null">
-      <video height=100%
+      <video
+        height=100%
         id="localVideo"
         muted
         autoplay
         playsinline
       ></video>
+      <!-- :class="{'invisible': serviceBreakOff || RTC === null}" -->
       <div class="video-mask"></div>
     </div>
     <div v-transfer-dom>
@@ -39,7 +42,7 @@
     </div>
     <div class="full-screen-container" v-show="fullScreen">
       <!-- 重连按钮 -->
-      <div class="reconnect" v-if="serviceBreakOff && RTC">
+      <div class="reconnect" v-show="serviceBreakOff && RTC">
         <img class="xiaohua" src="/video/static/img/video/xiaohua.png">
         <p class="text">{{this.getCurConnectStateText()}}</p>
         <!-- '视频已经结束啦~' : '连接超时啦' -->
@@ -161,7 +164,6 @@ export default {
   },
   data() {
     return {
-      RTC: '',
       isLocalVideoView: {
         state: true,
         timeout: null
@@ -194,31 +196,37 @@ export default {
       totalDelay: 0,
       // 视频延迟上限（毫秒）
       delay: 0,
+      // 视频帧率上限
+      byteRate: 0,
       // 重连次数
       connectCount: 0,
       // 视频连接超时时长（毫秒）
       connectTimeout: 0,
       // fps 为0 次数
       fpsOutTimes: 0,
+      // 卡顿计数上限
+      netPoorTimes: 0,
       // fps
       fps: 0,
       // 是否监听 bps，第一次连接的时候是默认监听的，重连时设置为 [关闭]，等到坐席推送的RTC初始化消息之后再 [开启]
-      isBpsListen: true,
-      // bps 监听回调
-      bpsCb: null,
-      // fps 监听回调
-      fpsCb: null
+      // isBpsListen: true,
+      // 卡顿 监听回调
+      unsmoothCount: null,
+      // 断连 监听回调
+      brZeroCount: null
     }
   },
   async mounted() {
     // 初始化重连次数、重连超时时长、视频总延迟上限，视频延迟上限
-    const [ connectCount, connectTimeout, totalDelay, delay, fpsOutTimes, fps ] = await Promise.all([
+    const [ connectCount, connectTimeout, totalDelay, delay, fpsOutTimes, fps, byteRate, netPoorTimes ] = await Promise.all([
       this.systemConfig('connectTimes'),
       this.systemConfig('connectTimeout'),
       this.systemConfig('videoTotalDelay'),
       this.systemConfig('videoDelay'),
       this.systemConfig('fpsOutTimes'),
-      this.systemConfig('fps')
+      this.systemConfig('fps'),
+      this.systemConfig('byteRate'),
+      this.systemConfig('netPoorTimes')
     ])
     this.connectCount = +connectCount.get()
     this.connectTimeout = +connectTimeout.get()
@@ -226,6 +234,8 @@ export default {
     this.delay = +delay.get()
     this.fpsOutTimes = +fpsOutTimes.get()
     this.fps = +fps.get()
+    this.byteRate = +byteRate.get()
+    this.netPoorTimes = +netPoorTimes.get()
 
     // 初始化bps监听回调，第一次连接，10次，绑定在 data
     // this.bpsCb = this.bps_cb_init(10)
@@ -286,13 +296,35 @@ export default {
       this.sendLikeMsg()
       this.likes = true
     },
+    // 计数器
+    recordCount(limit = 5) {
+      let count = 0
+      return {
+        resetCount() {
+          count = 0
+          return count
+        },
+        addCount(cb) {
+          count += 1
+          if (count >= limit) {
+            cb && cb()
+            // self.showToast('当前网络状况不佳', 3000)
+            return this.resetCount()
+          } else {
+            return count
+          }
+        }
+      }
+    },
     setStateConnecting() {
       // 开始连接，设置状态
       const self = this
       // 响铃
       document.getElementById('videoRing').play()
-      // 设置 fps 回调
-      this.fpsCb = this.fps_cb_init(this.fpsOutTimes)
+      // 初始化视频质量监控计数
+      // this.fpsCb = this.fps_cb_init(this.fpsOutTimes)
+      this.unsmoothCount = this.recordCount(this.netPoorTimes)
+      this.brZeroCount = this.recordCount(this.fpsOutTimes)
       // 关闭重连按钮
       self.serviceBreakOff = false
       // 初始化摄像头
@@ -369,7 +401,10 @@ export default {
       this.setStateConnecting()
       // 初始化 RTC
       this.initRTC()
-      .then(() => this.enterRoom(this.roomId))
+      .then(() => this.enterRoom(this.roomId), err => {
+        console.log(err)
+        alert('初始化RTC失败！')
+      })
       .then(() => this.getLocalStream(), err => {
         console.log(err)
         alert('进房失败！')
@@ -378,10 +413,10 @@ export default {
         console.log(err)
         alert('获取本地视频失败！')
       })
-      .then(() => {
-        // 记录视频开始时间节点
-        // this.startTimeTrunk.push(new Date().getTime())
-      })
+      // .then(() => {
+      //   // 记录视频开始时间节点
+      //   // this.startTimeTrunk.push(new Date().getTime())
+      // })
       .catch(err => {
         console.log(err)
         // alert('视频通话建立失败！')
@@ -420,7 +455,7 @@ export default {
         return this.hangUpVideo()
       }
       // 重置 bps 监听状态
-      this.isBpsListen = false
+      // this.isBpsListen = false
       // 重置截图
       this.videoScreenShotSrc = ''
       // 初始化bps监听回调，重连，5次，绑定在 data
@@ -450,12 +485,12 @@ export default {
       }
       // 停止推流
       await this.quitRTC()
-      this.hangUpVideo()
-    },
-    async hangUpVideo() {
       // 关闭 RTC
       this.RTC = null
 
+      this.hangUpVideo()
+    },
+    async hangUpVideo() {
       this.$vux.toast.hide()
       // 恢复全屏
       !this.fullScreen && this.setFullScreen(true)
@@ -519,25 +554,25 @@ export default {
       this.$emit('showShare', csId, csName)
     },
 
-    // bps 不达标时候的回调
-    bps_cb_init: function(limit) {
-      let count = 0
-      return function cb(toast, text) {
-        return count > limit
-                ? console.log(text)
-                : ++count
-      }
-    },
+    // // bps 不达标时候的回调
+    // bps_cb_init: function(limit) {
+    //   let count = 0
+    //   return function cb(toast, text) {
+    //     return count > limit
+    //             ? console.log(text)
+    //             : ++count
+    //   }
+    // },
 
-    // fps
-    fps_cb_init: function(limit) {
-      let count = 0
-      return function fps_cb(cb) {
-        return count > limit
-                ? cb && cb()
-                : ++count
-      }
-    },
+    // // fps
+    // fps_cb_init: function(limit) {
+    //   let count = 0
+    //   return function fps_cb(cb) {
+    //     return count > limit
+    //             ? cb && cb()
+    //             : ++count
+    //   }
+    // },
 
     getCurConnectStateText() {
       const curConn = this.connectProcess[this.connectProcess.length - 1]
@@ -651,7 +686,7 @@ export default {
 
       // }
       &.invisible {
-        visibility: hidden;
+        opacity: 0;
       }
       &::-webkit-media-controls {
         display: none !important;

@@ -2,6 +2,7 @@
   <div class="main-room">
     <keep-alive :include="['chat', 'cus-serv']">
       <router-view class="router-view" id="router-view"
+        ref="routerView"
         @showGiftAnime="showGiftAnime"
         @requestVideoServer="requestVideoServer"
         @cancelVideoLineUp="iOSVideoFailed"

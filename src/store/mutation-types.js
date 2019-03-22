@@ -18,6 +18,8 @@ export const SET_CHAT_GUID = 'SET_CHAT_GUID'
 
 export const SET_MSGS = 'SET_MSGS'
 
+export const SET_PREVIEW_IMG_LIST = 'SET_PREVIEW_IMG_LIST'
+
 export const SET_EXTEND_BAR = 'SET_EXTEND_BAR'
 
 export const SET_INPUT_BAR = 'SET_INPUT_BAR'

@@ -155,6 +155,14 @@ export default {
       }
       return `transform: translate(${pos.left}px, ${pos.top}px); opacity: ${self.isCopyButtonShow ? 1 : 0};`
     },
+    previewImgList: {
+      get() {
+        return this.$store.state.previewImgList
+      },
+      set(value) {
+        this.$store.commit('SET_PREVIEW_IMG_LIST', value)
+      }
+    },
     ...mapGetters([
       'theme',
       'userInfo',
@@ -186,7 +194,7 @@ export default {
       bubbleY: 0,
       /* pull-down-load  over */
       curPreviewImgId: '',
-      previewImgList: [],
+      // previewImgList: [],
       isCopyButtonShow: false,
       copyTextTemp: '',
       // 长按对话dom的位置信息
@@ -303,11 +311,10 @@ export default {
         // IM 初始化
         await this.initIM(userInfo)
         // 初始化本地缓存消息最后一条的时间
-        const lastMsgT = roamMsgs.length && new Date(roamMsgs[roamMsgs.length - 1].time).getTime()
+        const lastMsgT = roamMsgs.length && new Date(roamMsgs[roamMsgs.length - 1].time.replace(/-/g, '/')).getTime()
         this.lastMsgRecord.timestramp = lastMsgT || new Date().getTime()
         // 拉取离线消息
         const offlineMsgs = await this.getOfflineMsgs(+this.lastMsgRecord.timestramp, lastServ.data.csInfo.csId)(Tools.DateTools.formatDate('yyyy-MM-dd hh:mm:ss'))
-        debugger
         if (offlineMsgs.length) {
           this.sendMsgs(offlineMsgs)
           this.saveCurMsgs({ origin: this.userInfo.origin, msg: offlineMsgs })
@@ -395,14 +402,17 @@ export default {
       // 递归查找离线消息
       const self = this
       return async function reqOfflineMsgs(timeTask, ...msgsTask) {
-        const task = await self.getVideoAPI(self.userInfo.userId, csId, timeTask, 15)
+        const task = await self.getVideoAPI(self.userInfo.userId, csId, timeTask, 10)
         const msgs = formatRoamMsgs.IMMsgsparse(task.MsgList)
         // 过滤出离线时间之后的消息
+        console.warn('漫游消息 ！！！过滤前', msgs)
+
         const offlineMsgs = msgs.filter(msg => {
-          return msg.time && (new Date(msg.time).getTime() >= initTimestamp)
+          return msg.time && (new Date(msg.time.replace(/-/g, '/')).getTime() >= +initTimestamp)
         })
+        console.warn('漫游消息 ！！！过滤后', offlineMsgs)
         // 若最后拿到的消息条数小于15，则一定为完整的离线消息
-        return offlineMsgs.length < 15
+        return offlineMsgs.length < 10
               ? offlineMsgs.concat(msgsTask || [])
               : await reqOfflineMsgs(offlineMsgs[0].time, ...offlineMsgs) // eslint-disable-line
       }

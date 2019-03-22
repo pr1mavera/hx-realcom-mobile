@@ -496,7 +496,7 @@ const IM = (() => {
   }
 
   /* ********************************* 腾讯请求漫游消息接口 ********************************* */
-  function getIMRoamMsgs(id, time, pageSize) {
+  function getIMRoamMsgs(id, time, pageSize = 10) {
     const option = {
       'Peer_Account': id,
       'MaxCnt': pageSize,

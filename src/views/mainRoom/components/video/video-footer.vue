@@ -19,11 +19,11 @@
             <use xlink:href="#icon-pingjia"></use>
           </svg>
         </button> -->
-        <button class="footer-btn footer-btn-switch extend-click" @click="videoConnected && $emit('changeCamera')">
+        <!-- <button class="footer-btn footer-btn-switch extend-click" @click="videoConnected && $emit('changeCamera')">
           <svg class="icon" aria-hidden="true">
             <use xlink:href="#icon-qiehuanshexiangtou"></use>
           </svg>
-        </button>
+        </button> -->
         <button class="footer-btn footer-btn-screen extend-click" @click="videoConnected && $emit('minimizeVideoBar')">
            <!-- :class="{'isBtnHighLight': isMinimizeBtnHighLight}" -->
           <svg class="icon" aria-hidden="true">
@@ -90,11 +90,6 @@ export default {
       height: 6.8rem;
       padding: 1.4rem;
       box-sizing: border-box;
-      .footer-btn {
-        .icon {
-
-        }
-      }
     }
     .menu {
       width: calc(~'100% - 6.8rem');
@@ -115,10 +110,10 @@ export default {
       border: 0;
       border-radius: 50%;
       background-color: rgba(0, 0, 0, .3);
-      &.isBtnHighLight {
-        // background-color: rgba(0, 0, 0, .9);
-        // box-shadow: 0 0 .5rem .5rem rgba(255, 255, 255, .8);
-      }
+      // &.isBtnHighLight {
+      //   // background-color: rgba(0, 0, 0, .9);
+      //   // box-shadow: 0 0 .5rem .5rem rgba(255, 255, 255, .8);
+      // }
       &.footer-btn-hang-up {
         background-color: rgba(255, 149, 156, 1);
       }
@@ -128,9 +123,9 @@ export default {
       &.footer-btn-star {
         background-color: unset;
       }
-      &.footer-btn-switch {
+      // &.footer-btn-switch {
 
-      }
+      // }
       &.footer-btn-screen {
         .icon {
           width: 2rem;

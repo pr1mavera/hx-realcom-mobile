@@ -31,6 +31,9 @@ const mutations = {
   [types.SET_MSGS](state, msgs) {
     state.msgs = msgs
   },
+  [types.SET_PREVIEW_IMG_LIST](state, list) {
+    state.previewImgList = list
+  },
   [types.SET_EXTEND_BAR](state, option) {
     state.extendBarOpen = option
   },
