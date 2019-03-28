@@ -47,6 +47,17 @@ FastClick.attach(document.body) // 移动端消除300ms
 
 Vue.config.productionTip = false
 
+- (function() { // eslint-disable-line
+  function changeRootFont() {
+      const designW = 750
+      const rem2px = 20
+      debugger
+      document.documentElement.style.fontSize = `${(window.innerWidth / designW) * rem2px}px`
+  }
+  changeRootFont()
+  window.addEventListener('resize', changeRootFont, false)
+})()
+
 /* eslint-disable no-new */
 new Vue({
   el: '#app',

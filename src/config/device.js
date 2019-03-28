@@ -18,5 +18,8 @@ export default () => {
     }
   } else if (u.indexOf('Windows Phone') > -1) {
     sessionStorage.setItem('device', 'windowsPhone')
+  } else {
+    sessionStorage.setItem('device', 'pc')
+    sessionStorage.setItem('browser', 'pcbrowser')
   }
 }

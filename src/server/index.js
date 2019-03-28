@@ -102,6 +102,11 @@ export const getShareTicket = url => http.post('user', `/ticket/query`, { url })
  */
 
 /**
+ * [phoneCallSendCustomerData 转电话时存ivr系统]
+ */
+export const phoneCallSendCustomerData = (customerId, sessionId) => http.post('user', '/interface/sendCustomerData', { customerId, sessionId })
+
+/**
  * [saveVisitorRecord 保存访客记录]
  */
 export const saveVisitorRecord = (userId, userNick, origin, openId) => http.post('user', `/video/visit/save`, { userId, userNick, origin, openId })

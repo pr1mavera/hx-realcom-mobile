@@ -32,5 +32,7 @@ export default function beforeEnterVideo() {
       // 进入排队的页面
       sessionStorage.setItem('enterVideoStatus', 'iOS-Safari')
     }
+  } else if (device === 'pc') {
+    sessionStorage.setItem('enterVideoStatus', 'pc')
   }
 }

@@ -169,7 +169,7 @@ export default {
 
       const enterVideoStatus = window.sessionStorage.getItem('enterVideoStatus')
 
-      if (enterVideoStatus === 'iOS-wx' || enterVideoStatus === 'Android') { // 微信环境
+      if (enterVideoStatus === 'iOS-wx' || enterVideoStatus === 'Android' || enterVideoStatus === 'pc') { // 微信环境
         // const self = this
         this.$router.replace({path: `/room/chat?openId=${query.openId}&origin=${query.origin}`})
       }

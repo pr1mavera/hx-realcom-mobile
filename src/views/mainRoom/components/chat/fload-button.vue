@@ -53,6 +53,7 @@
 </template>
 
 <script type="text/ecmascript-6">
+import { ERR_OK, phoneCallSendCustomerData } from '@/server'
 import { mapGetters, mapMutations, mapActions } from 'vuex'
 import { systemMsgStatus, sessionStatus, roomStatus, queueStatus, msgStatus, msgTypes } from '@/common/js/status'
 import Tools from '@/common/js/tools'
@@ -148,17 +149,19 @@ export default {
 
       if (this.clickTooFast()) return
       window.location.href = 'tel:95300'
-      // this.sendUserDataToIVR()
+
+      this.sendUserDataToIVR()
     },
-    // sendUserDataToIVR() {
-    //   const data = {
-    //     customerId: this.userInfo.userId,
-    //     sessionId: this.sessionId || this.sessionRamId
-    //   }
-    //   const dataStr = JSON.stringify(data)
-    //   const sign = Tools.getMD5(dataStr)
-    //   debugger
-    // },
+    async sendUserDataToIVR() {
+      const res = await phoneCallSendCustomerData(this.userInfo.userId, this.sessionId || this.sessionRamId)
+      debugger
+      if (res.result.code === ERR_OK) {
+        console.log('存储IVR系统成功')
+        debugger
+      } else {
+        console.log('ERR in phoneCallSendCustomerData')
+      }
+    },
     // 视频客服
     videoLineUp() {
       if (this.clickTooFast()) return
