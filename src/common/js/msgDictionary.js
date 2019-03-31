@@ -29,7 +29,7 @@ const statusMap = {
                             }
                               <div class="bot-avatar bg-image">
                                   <img style={{ width: '100%', height: '100%' }}
-                                    src={ !msg.chatType || msg.chatType === '1' ? this.theme['avatar']['bot'] : getCsAvatar(msg.avatar) }>
+                                    v-lazy={ !msg.chatType || msg.chatType === '1' ? this.theme['avatar']['bot'] : getCsAvatar(msg.avatar) }>
                                   </img>
                               </div>
                           </div>

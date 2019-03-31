@@ -206,6 +206,8 @@ export default {
       fpsOutTimes: 0,
       // 卡顿计数上限
       netPoorTimes: 0,
+      // 音频计数上限
+      audioMuteTimes: 0,
       // fps
       fps: 0,
       // 是否监听 bps，第一次连接的时候是默认监听的，重连时设置为 [关闭]，等到坐席推送的RTC初始化消息之后再 [开启]
@@ -213,12 +215,14 @@ export default {
       // 卡顿 监听回调
       unsmoothCount: null,
       // 断连 监听回调
-      brZeroCount: null
+      brZeroCount: null,
+      // 音频 监听回调
+      audioZeroCount: null
     }
   },
   async mounted() {
     // 初始化重连次数、重连超时时长、视频总延迟上限，视频延迟上限
-    const [ connectCount, connectTimeout, totalDelay, delay, fpsOutTimes, fps, byteRate, netPoorTimes ] = await Promise.all([
+    const [ connectCount, connectTimeout, totalDelay, delay, fpsOutTimes, fps, byteRate, netPoorTimes, audioMuteTimes] = await Promise.all([
       this.systemConfig('connectTimes'),
       this.systemConfig('connectTimeout'),
       this.systemConfig('videoTotalDelay'),
@@ -226,7 +230,8 @@ export default {
       this.systemConfig('fpsOutTimes'),
       this.systemConfig('fps'),
       this.systemConfig('byteRate'),
-      this.systemConfig('netPoorTimes')
+      this.systemConfig('netPoorTimes'),
+      this.systemConfig('audioMuteTimes')
     ])
     this.connectCount = +connectCount.get()
     this.connectTimeout = +connectTimeout.get()
@@ -236,6 +241,7 @@ export default {
     this.fps = +fps.get()
     this.byteRate = +byteRate.get()
     this.netPoorTimes = +netPoorTimes.get()
+    this.audioMuteTimes = +audioMuteTimes.get()
 
     // 初始化bps监听回调，第一次连接，10次，绑定在 data
     // this.bpsCb = this.bps_cb_init(10)
@@ -300,6 +306,9 @@ export default {
     recordCount(limit = 5) {
       let count = 0
       return {
+        count() {
+          return count
+        },
         resetCount() {
           count = 0
           return count
@@ -325,6 +334,7 @@ export default {
       // this.fpsCb = this.fps_cb_init(this.fpsOutTimes)
       this.unsmoothCount = this.recordCount(this.netPoorTimes)
       this.brZeroCount = this.recordCount(this.fpsOutTimes)
+      this.audioZeroCount = this.recordCount(15)
       // 关闭重连按钮
       self.serviceBreakOff = false
       // 初始化摄像头
@@ -553,26 +563,6 @@ export default {
     showShare(csId, csName) {
       this.$emit('showShare', csId, csName)
     },
-
-    // // bps 不达标时候的回调
-    // bps_cb_init: function(limit) {
-    //   let count = 0
-    //   return function cb(toast, text) {
-    //     return count > limit
-    //             ? console.log(text)
-    //             : ++count
-    //   }
-    // },
-
-    // // fps
-    // fps_cb_init: function(limit) {
-    //   let count = 0
-    //   return function fps_cb(cb) {
-    //     return count > limit
-    //             ? cb && cb()
-    //             : ++count
-    //   }
-    // },
 
     getCurConnectStateText() {
       const curConn = this.connectProcess[this.connectProcess.length - 1]

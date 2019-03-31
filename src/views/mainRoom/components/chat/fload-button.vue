@@ -53,7 +53,7 @@
 </template>
 
 <script type="text/ecmascript-6">
-import { ERR_OK, phoneCallSendCustomerData } from '@/server'
+import { phoneCallSendCustomerData } from '@/server'
 import { mapGetters, mapMutations, mapActions } from 'vuex'
 import { systemMsgStatus, sessionStatus, roomStatus, queueStatus, msgStatus, msgTypes } from '@/common/js/status'
 import Tools from '@/common/js/tools'
@@ -155,7 +155,7 @@ export default {
     async sendUserDataToIVR() {
       const res = await phoneCallSendCustomerData(this.userInfo.userId, this.sessionId || this.sessionRamId)
       debugger
-      if (res.result.code === ERR_OK) {
+      if (res.result.code === '00') {
         console.log('存储IVR系统成功')
         debugger
       } else {

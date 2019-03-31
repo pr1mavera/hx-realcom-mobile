@@ -225,6 +225,16 @@ export const RTCRoomMixin = {
       'userInfo'
     ])
   },
+  mounted() {
+    // 手机切换屏幕
+    // window.addEventListener('visibilitychange', () => {
+    //   if (document.hidden) {
+    //     return undefined
+    //   }
+    //   this.RTC.openAudio()
+    //   this.RTC.openVideo()
+    // }, true)
+  },
   methods: {
     initRTC() {
       // 质量报告计数
@@ -414,6 +424,7 @@ export const RTCRoomMixin = {
       const videoDecState = data.WebRTCQualityReq.VideoReportState.VideoDecState[0]
       const fps = videoDecState ? videoDecState.uint32_video_recv_fps : 30
       const rsv_br = data.WebRTCQualityReq.VideoReportState.uint32_video_rcv_br / 1024
+      const audio_br = data.WebRTCQualityReq.AudioReportState.uint32_audio_enc_pkg_br
       // const snd_br = data.WebRTCQualityReq.VideoReportState.uint32_video_snd_br
       Tools.trace('rsv_br：=== ')(rsv_br)
       // Tools.trace('snd_br：=== ')(snd_br)
@@ -424,6 +435,8 @@ export const RTCRoomMixin = {
 
       const self = this
       const enterVideoStatus = window.sessionStorage.getItem('enterVideoStatus')
+
+      // 视频卡顿计数
       if (
         total_delay >= (this.totalDelay || 1000) ||
         daley >= (this.delay || 600) ||
@@ -442,17 +455,8 @@ export const RTCRoomMixin = {
         console.warn('网络好了，重置计数: ', count)
       }
 
-      // Tools.trace('接收数据：')(recv_bps / 1024)
-      // if (this.isBpsListen && this.RTCconnecting && (send_bps === 0 || recv_bps === 0)) {
-      //   this.bpsCb(this.showToast, '当前网络太差，无法建立视频通话')
-      //   // this.$refs.videoFooter.minimizeBtnHighLight()
-      // }
-
-      if (
-        rsv_br === 0
-        // total_delay === 0 &&
-        // fps === 0
-      ) {
+      // 接收视频数据包为零时计数
+      if (+rsv_br === 0) {
         // 网络无响应计数，超过限制提示重连
         this.brZeroCount.addCount(() => {
           self.setStateUnconnect()
@@ -461,6 +465,24 @@ export const RTCRoomMixin = {
         // 重置计数
         this.brZeroCount.resetCount()
       }
+
+      // 音频丢包
+      if (+audio_br === 0) {
+        // 音频丢包计数，超过限制提示重连
+        this.audioZeroCount.addCount(() => {
+          self.setStateUnconnect()
+        })
+      }
+      const pre_audio_br = sessionStorage.getItem('audio_br')
+      if (audio_br !== 0 && +pre_audio_br === 0) {
+        // 恢复时
+        console.log('恢复时，总计数: ', self.audioZeroCount.count())
+
+        self.audioZeroCount.count() >= 3
+          ? self.setStateUnconnect()
+          : self.audioZeroCount.resetCount()
+      }
+      sessionStorage.setItem('audio_br', audio_br)
     },
 
     // 提示插件
@@ -1562,6 +1584,24 @@ export const onLineQueueMixin = {
           }
         }
         // }
+      } else if (res.data.result_code === '451') {
+        this.beforeQueue({
+          mode: roomStatus.menChat,
+          content: `尊敬的${+this.userInfo.userGrade <= 3 ? this.userInfo.userGradeName : ''}客户，正在为您转接人工客服，请稍后。`
+        })
+        // 服务中
+        return {
+          code: '0',
+          data: {
+            isConnect: true,
+            csId: data.csId || '',
+            csName: data.csName || '客服小姐姐',
+            csNick: data.csNick || '客服小姐姐',
+            welcomeText: data.content || '',
+            chatGuid: +data.chatGuid || '',
+            sessionId: data.personSessionId || ''
+          }
+        }
       } else {
         console.log('===== 排队出错 辣 =====')
         const tip = {
@@ -1578,6 +1618,26 @@ export const onLineQueueMixin = {
       }
     },
     async handleQueueRes(data) {
+
+      /**
+       * 重连
+       */
+      if (data.isConnect) {
+        const { welcomeText, chatGuid } = data
+        // 设置坐席信息
+        this.setCsInfo({ welcomeText })
+        // 设置chatGuid
+        this.setChatGuid(chatGuid)
+        // action 排队完成，进入会话
+        return this.afterQueueSuccess({
+          mode: roomStatus.menChat,
+          msgsObj: data
+        })
+      }
+
+      /**
+       * 正常排队
+       */
       if (!data.isTeam) {
         const csInfo_onLine = {
           welcomeText: data.welcomeText
@@ -1738,6 +1798,7 @@ export const onLineQueueMixin = {
       'configSendSystemMsg',
       'reqTransAnotherTimeout',
       'reqTransTimeout',
+      'afterQueueSuccess',
       'afterQueueFailed'
     ])
   }

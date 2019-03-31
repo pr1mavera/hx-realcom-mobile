@@ -108,6 +108,12 @@ const config_cb = {
     get: function() {
       return this.value
     }
+  },
+  // audioMuteTimes
+  'audioMuteTimes': {
+    get: function() {
+      return this.value
+    }
   }
 }
 
