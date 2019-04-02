@@ -577,6 +577,9 @@ export const IMMixin = {
       }
     },
     async receiveSystemMsgs(msgsObj) {
+      // 超时配置
+      const zxConnectTimeout = await this.systemConfig('zxConnectTimeout')
+
       // 处理系统消息（视频、在线）
       // const msgsObj = IM.parseMsgsInSystem(msgs).textMsgs[0]
       switch (+msgsObj.code) {
@@ -613,7 +616,7 @@ export const IMMixin = {
           this.reqTransTimeout({
             msg: VIDEO_CS_REQ_TRANS_FAIL_msg,
             toast: this.$vux.toast,
-            delay: 30000
+            delay: zxConnectTimeout.get()
           }).then(() => {
             // 取消排队接口
             this.videoQueueCancelAPI(3)
@@ -705,7 +708,7 @@ export const IMMixin = {
           const onlineConfig = await this.configSendSystemMsg(onlineQueueSuccMsg)
           await IM.sendSystemMsg(onlineConfig)
 
-          this.reqTransAnotherTimeout(30000).then(state => {
+          this.reqTransAnotherTimeout(zxConnectTimeout.get()).then(state => {
             if (state === '480') {
               // 坐席端已经转接成功，直接接通坐席即可
               return undefined
@@ -718,7 +721,7 @@ export const IMMixin = {
             this.reqTransTimeout({
               msg: ONLINE_CS_REQ_TRANS_FAIL_msg,
               toast: this.$vux.toast,
-              delay: 30000
+              delay: zxConnectTimeout.get()
             }).then(() => {
               this.afterQueueFailed({ sendFailed: true })
             })
@@ -879,6 +882,7 @@ export const IMMixin = {
       setVideoFilter: 'SET_VIDEO_FILTER'
     }),
     ...mapActions([
+      'systemConfig',
       'saveCurMsgs',
       'sendMsgs',
       'configSendSystemMsg',
@@ -1452,7 +1456,7 @@ export const getMsgsMixin = {
             msrc: data.small,
             w: data.w,
             h: data.h,
-            id: item.timestamp
+            id: item.timestamp || `${new Date().getTime()}_${Tools.randomMin2Max(1000, 9999)}`
           })
         }
         return val
@@ -1515,7 +1519,8 @@ export const onLineQueueMixin = {
       'queueNum',
       'sessionId',
       'sessionRamId',
-      'chatGuid'
+      'chatGuid',
+      'sendType'
     ])
   },
   methods: {
@@ -1595,8 +1600,8 @@ export const onLineQueueMixin = {
           data: {
             isConnect: true,
             csId: data.csId || '',
-            csName: data.csName || '客服小姐姐',
-            csNick: data.csNick || '客服小姐姐',
+            csName: data.csName || '',
+            csNick: data.csName || '',
             welcomeText: data.content || '',
             chatGuid: +data.chatGuid || '',
             sessionId: data.personSessionId || ''
@@ -1618,16 +1623,36 @@ export const onLineQueueMixin = {
       }
     },
     async handleQueueRes(data) {
+      // 超时配置
+      const zxConnectTimeout = await this.systemConfig('zxConnectTimeout')
 
       /**
        * 重连
        */
       if (data.isConnect) {
-        const { welcomeText, chatGuid } = data
+        const { welcomeText, chatGuid, csId, csNick, personSessionId } = data
         // 设置坐席信息
         this.setCsInfo({ welcomeText })
         // 设置chatGuid
         this.setChatGuid(chatGuid)
+        // 发送重连消息
+        IM.sendNormalMsg(
+          this.userInfo.userId,
+          csId,
+          {
+            sessionId: personSessionId,
+            chatGuid,
+            toUserName: csNick,
+            msg: '客户重连成功',
+            time: Tools.DateTools.formatDate('yyyy-MM-dd hh:mm:ss'),
+            nickName: this.userInfo.nickName || this.userInfo.userName,
+            avatar: this.userInfo.userId,
+            identifier: this.userInfo.userId,
+            msgStatus: msgStatus.msg,
+            msgType: msgTypes.msg_normal,
+            chatType: roomStatus.menChat,
+            MsgLifeTime: 0
+          })
         // action 排队完成，进入会话
         return this.afterQueueSuccess({
           mode: roomStatus.menChat,
@@ -1656,7 +1681,7 @@ export const onLineQueueMixin = {
         const config = await this.configSendSystemMsg(msg)
         await IM.sendSystemMsg(config)
 
-        this.reqTransAnotherTimeout(30000).then(state => {
+        this.reqTransAnotherTimeout(zxConnectTimeout.get()).then(state => {
           if (state === '480') {
             // 坐席端已经转接成功，直接接通坐席即可
             return undefined
@@ -1669,7 +1694,7 @@ export const onLineQueueMixin = {
           this.reqTransTimeout({
             msg: ONLINE_CS_REQ_TRANS_FAIL_msg,
             toast: this.$vux.toast,
-            delay: 30000
+            delay: zxConnectTimeout.get()
           }).then(() => {
             this.afterQueueFailed({ sendFailed: true })
           })
@@ -1794,6 +1819,7 @@ export const onLineQueueMixin = {
       setChatGuid: 'SET_CHAT_GUID'
     }),
     ...mapActions([
+      'systemConfig',
       'beforeQueue',
       'configSendSystemMsg',
       'reqTransAnotherTimeout',

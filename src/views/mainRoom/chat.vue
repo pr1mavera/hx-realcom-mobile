@@ -86,6 +86,7 @@ import { mapGetters, mapMutations, mapActions } from 'vuex'
 import { formatRoamMsgs } from '@/common/js/MsgsLoader'
 import BScroll from 'better-scroll'
 import Clipboard from 'clipboard'
+import IM from '@/server/im'
 import InputBar from '@/views/mainRoom/components/chat/input-bar'
 import FloadButton from '@/views/mainRoom/components/chat/fload-button'
 // import ExtendBar from '@/views/mainRoom/components/chat/extend-bar'
@@ -316,7 +317,16 @@ export default {
         // 拉取离线消息
         const offlineMsgs = await this.getOfflineMsgs(+this.lastMsgRecord.timestramp, lastServ.data.csInfo.csId)(Tools.DateTools.formatDate('yyyy-MM-dd hh:mm:ss'))
         if (offlineMsgs.length) {
+          offlineMsgs.forEach(item => {
+            item.timestamp = item.timestamp || `${new Date(item.time).getTime()}_${Tools.randomMin2Max(1000, 9999)}`
+          })
+          // 映射出图片消息，存进相册列表
+          const imgList = this.getAllImg(offlineMsgs)
+          debugger
+          this.previewImgList = [...imgList, ...this.previewImgList]
+          // 存消息列表
           this.sendMsgs(offlineMsgs)
+          // 保存当前服务状态
           this.saveCurMsgs({ origin: this.userInfo.origin, msg: offlineMsgs })
         }
 
@@ -384,8 +394,25 @@ export default {
       data.sessionId && this.setSessionId(data.sessionId)
       // 设置chatGuid
       data.chatGuid && this.setChatGuid(data.chatGuid)
-      // 手动更新用户最后活动时间（更新定时器）
-      // this.updateLastAction()
+      // 发送重连消息
+      IM.sendNormalMsg(
+        this.userInfo.userId,
+        data.csInfo.csId,
+        {
+          sessionId: data.sessionId,
+          chatGuid: data.chatGuid,
+          toUserName: data.csInfo.csNick,
+          msg: '客户重连成功',
+          time: Tools.DateTools.formatDate('yyyy-MM-dd hh:mm:ss'),
+          nickName: this.userInfo.nickName || this.userInfo.userName,
+          avatar: this.userInfo.userId,
+          identifier: this.userInfo.userId,
+          msgStatus: msgStatus.msg,
+          msgType: msgTypes.msg_normal,
+          chatType: roomStatus.menChat,
+          MsgLifeTime: 0
+        })
+
       return this.$vux.toast.text('重连成功', 'default')
     },
     async getIMLoginState() {
@@ -432,7 +459,16 @@ export default {
           // 拉取离线消息
           const offlineMsgs = await this.getOfflineMsgs(this.lastMsgRecord.timestramp)(Tools.DateTools.formatDate('yyyy-MM-dd hh:mm:ss'))
           if (offlineMsgs.length) {
+            offlineMsgs.forEach(item => {
+              item.timestamp = item.timestamp || `${new Date(item.time).getTime()}_${Tools.randomMin2Max(1000, 9999)}`
+            })
+            // 映射出图片消息，存进相册列表
+            const imgList = this.getAllImg(offlineMsgs)
+            debugger
+            this.previewImgList = [...imgList, ...this.previewImgList]
+            // 存消息列表
             this.sendMsgs(offlineMsgs)
+            // 保存当前服务状态
             this.saveCurMsgs({ origin: this.userInfo.origin, msg: offlineMsgs })
           }
         }
@@ -483,6 +519,7 @@ export default {
         return
       }
       this.curPreviewImgId = id
+      debugger
       const curIndex = this.previewImgList.findIndex(item => item.id === id)
       this.$refs.previewer.show(curIndex)
     },

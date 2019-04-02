@@ -49,6 +49,10 @@ export default {
   },
   methods: {
     async initQueue() {
+
+      // 超时配置
+      const zxConnectTimeout = await this.systemConfig('zxConnectTimeout')
+
       /* map -> {
         userId,
         userName,
@@ -107,7 +111,7 @@ export default {
           this.reqTransTimeout({
             msg: VIDEO_CS_REQ_TRANS_FAIL_msg,
             toast: this.$vux.toast,
-            delay: 30000
+            delay: zxConnectTimeout.get()
           }).then(() => {
             // 取消排队接口
             this.videoQueueCancelAPI(3)
@@ -189,6 +193,7 @@ export default {
       setQueueNum: 'SET_QUEUE_NUM'
     }),
     ...mapActions([
+      'systemConfig',
       'configSendSystemMsg',
       // 'afterQueueSuccess',
       'reqTransTimeout',
