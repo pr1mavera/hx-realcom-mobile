@@ -19,6 +19,7 @@ export const loginMixin = {
       if (origin === 'WE') {
         // 调用openId拿用户信息
         userInfo = await this.getUserInfoFromOpenId(openId)
+        debugger
       }
       if (!userInfo.baseInfo || userInfo.baseInfo.userGrade === '5') {
         // 配置游客信息
