@@ -9,7 +9,7 @@
         <p class="tips-top" v-if="queueNum">当前还有<label class="num">{{queueNum >= 0 ? queueNum : 0}}</label>人排队.</p>
         <p class="tips-top" v-else>排队成功，正在为您转接视频客服</p>
       </div>
-      <a type="reset" class="btn-cancel" @click="clickToCancelLineUp">取 消</a>
+      <a type="reset" class="btn-cancel" @click="cancelLineUp">取 消</a>
        <!-- @confirmToVideo="confirmToVideo" -->
     </main>
   </section>
@@ -126,6 +126,16 @@ export default {
       } else {
         console.log('error in videoQueue')
       }
+    },
+    // 取消排队的提示
+    cancelLineUp() {
+      const self = this
+      this.$vux.confirm.show({
+        title: '您确定要取消排队吗？',
+        onConfirm() {
+          self.clickToCancelLineUp()
+        }
+      })
     },
     clickToCancelLineUp() {
       // 停止心跳
