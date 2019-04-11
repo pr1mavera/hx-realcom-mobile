@@ -369,7 +369,7 @@ export const afterServerFinish = function({ commit, state }, mode) {
 // 创建会话
 export const initSession = async function({ commit, state }) {
   // 创建机器人会话
-  const res = await createSession(state.userInfo.userId, state.userInfo.userName, state.userInfo.userPhone, sessionStatus.robot, state.sessionRamId)
+  const res = await createSession(state.userInfo.userId, state.userInfo.nickName, state.userInfo.userPhone, sessionStatus.robot, state.sessionRamId)
   if (res.result.code === ERR_OK) {
     console.log('============================= 会话创建成功 辣 =============================')
     commit(types.SET_SESSION_ID, res.data.id)

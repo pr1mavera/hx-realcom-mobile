@@ -61,7 +61,9 @@ export const loginMixin = {
     getVisitorInfo(openId, origin) {
       let data = {}
       // 缓存中有游客信息，直接返回：
-      if (data = Tools.CacheTools.getCacheData({ key: `${origin}_visitor`, check: origin })) return data
+      if (data = Tools.CacheTools.getCacheData({ key: `${origin}_visitor`, check: origin })) {
+        return Object.assign(data, { openId })
+      }
 
       // 缓存中没有对应渠道的游客信息：
       // 1. 创建游客信息
@@ -1006,7 +1008,7 @@ export const sendMsgsMixin = {
         {
           sessionId: this.sessionId,
           chatGuid: this.chatGuid,
-          toUserName: this.csInfo.csName,
+          toUserName: this.csInfo.csNick || this.csInfo.csName,
           msg: text,
           time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
           nickName: this.userInfo.nickName || this.userInfo.userName,
@@ -1039,7 +1041,7 @@ export const sendMsgsMixin = {
         {
           sessionId: this.sessionId,
           chatGuid: this.chatGuid,
-          toUserName: this.csInfo.csName,
+          toUserName: this.csInfo.csNick || this.csInfo.csName,
           msg: `${this.userInfo.nickName || this.userInfo.userName}给你送了一个礼物`,
           time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
           nickName: this.userInfo.nickName || this.userInfo.userName,
@@ -1074,7 +1076,7 @@ export const sendMsgsMixin = {
         {
           sessionId: this.sessionId,
           chatGuid: this.chatGuid,
-          toUserName: this.csInfo.csName,
+          toUserName: this.csInfo.csNick || this.csInfo.csName,
           msg: `我${this.userInfo.nickName || this.userInfo.userName}给你点赞`,
           time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
           nickName: this.userInfo.nickName || this.userInfo.userName,
@@ -1117,7 +1119,7 @@ export const sendMsgsMixin = {
           time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
           nickName: this.userInfo.nickName || this.userInfo.userName,
           avatar: this.userInfo.userId,
-          toUserName: this.csInfo.csName,
+          toUserName: this.csInfo.csNick || this.csInfo.csName,
           sessionId: this.sessionId,
           chatGuid: this.chatGuid,
           identifier: this.userInfo.userId,
@@ -1162,7 +1164,7 @@ export const sendMsgsMixin = {
         {
           sessionId: this.sessionId,
           chatGuid: this.chatGuid,
-          toUserName: this.csInfo.csName,
+          toUserName: this.csInfo.csNick || this.csInfo.csName,
           msg: `小华表情`,
           time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
           nickName: this.userInfo.nickName || this.userInfo.userName,
@@ -1190,7 +1192,7 @@ export const sendMsgsMixin = {
         {
           sessionId: this.sessionId,
           chatGuid: this.chatGuid,
-          toUserName: this.csInfo.csName,
+          toUserName: this.csInfo.csNick || this.csInfo.csName,
           msg,
           time: Tools.DateTools.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
           nickName: this.userInfo.nickName || this.userInfo.userName,
