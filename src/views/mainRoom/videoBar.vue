@@ -222,7 +222,7 @@ export default {
   },
   async mounted() {
     // 初始化重连次数、重连超时时长、视频总延迟上限，视频延迟上限
-    const [ connectCount, connectTimeout, totalDelay, delay, fpsOutTimes, fps, byteRate, netPoorTimes, audioMuteTimes] = await Promise.all([
+    const [connectCount, connectTimeout, totalDelay, delay, fpsOutTimes, fps, byteRate, netPoorTimes, audioMuteTimes] = await Promise.all([
       this.systemConfig('connectTimes'),
       this.systemConfig('connectTimeout'),
       this.systemConfig('videoTotalDelay'),

@@ -120,7 +120,7 @@ const config_cb = {
     get: function() {
       return this.value * 1000
     }
-  },
+  }
 }
 
 async function systemConfigAPI() {

@@ -49,7 +49,6 @@ export default {
   },
   methods: {
     async initQueue() {
-
       // 超时配置
       const zxConnectTimeout = await this.systemConfig('zxConnectTimeout')
 
