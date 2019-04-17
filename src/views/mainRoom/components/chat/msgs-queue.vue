@@ -279,9 +279,9 @@ export default {
           }
           .moving-ellipsis {
             display: inline-block;
-            min-width: 4px;
-            min-height: 4px;
-            margin-right: 12px;
+            min-width: 3px;
+            min-height: 3px;
+            margin: 0 10px 0 2px;
             background-color: #ffffff;
             vertical-align: middle;
             border-radius: 50%;
@@ -294,10 +294,10 @@ export default {
                 box-shadow: none;
               }
               50% {
-                box-shadow: 6px 0 currentColor;
+                box-shadow: 4px 0 currentColor;
               }
               75% {
-                box-shadow: 6px 0 currentColor, 12px 0 currentColor;
+                box-shadow: 4px 0 currentColor, 8px 0 currentColor;
               }
             }
            /* @-moz-keyframes @name { // firefox
