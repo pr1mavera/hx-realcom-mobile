@@ -23,8 +23,8 @@
       </button>
       <p class="text">转电话</p>
     </div>
-    <div class="btn-item" v-if="userInfo.videoVisible || false">
-    <!-- <div class="btn-item"> -->
+    <div class="btn-item" :class="{colourful: (userInfo.isVideoPower === 'N') || false}">
+    <!-- <div class="btn-item"> v-if="userInfo.videoVisible || false" -->
       <button
         class="item extend-click transition-bezier"
         @click="videoLineUp"
@@ -55,6 +55,7 @@
 <script type="text/ecmascript-6">
 import { phoneCallSendCustomerData } from '@/server'
 import { mapGetters, mapMutations, mapActions } from 'vuex'
+
 import { systemMsgStatus, sessionStatus, roomStatus, queueStatus, msgStatus, msgTypes } from '@/common/js/status'
 import Tools from '@/common/js/tools'
 import IM from '@/server/im'
@@ -167,7 +168,7 @@ export default {
       if (this.clickTooFast()) return
 
       if (!this.isVip) { // 非VIP客户
-        this.showTips(2, '此功能只对VIP客户开放')
+        this.showTips(2, `此功能只对VIP客户开放，您当前为${this.userInfo.userGradeName}，快去提升等级吧~`)
         return
       }
 
@@ -344,6 +345,11 @@ export default {
       height: 100%;
     }
   }
+  .colourful {
+    img {
+      filter: grayscale(100%);
+    }
+  }
   .btn-item {
     display: flex;
     flex-direction: column;
@@ -419,17 +425,19 @@ export default {
     opacity: 0;
     transition: opacity 0.2s ease-in-out;
     &.tipsShow {
-      opacity: 1;
+      opacity: .8;
     }
     .text {
       display: inline-block;
-      line-height: 1.4rem;
+      width: 60vw;
+      /*line-height: 1.4rem;*/
+      line-height: 1.25;
       padding: 1rem 1.3rem;
       background-color: #000;
       border-radius: .7rem;
       color: #fff;
       font-size: 1.3rem;
-      white-space:nowrap;
+      /*white-space:nowrap;*/
       &::after {
         content: '';
         display: block;

@@ -9,9 +9,9 @@ import router from './router'
 import store from './store'
 
 // 移动端调试 vConsole
-// let VConsole = require('../node_modules/vconsole/dist/vconsole.min')
-// // eslint-disable-next-line
-// let vConsole = new VConsole()
+let VConsole = require('../node_modules/vconsole/dist/vconsole.min')
+// eslint-disable-next-line
+let vConsole = new VConsole()
 
 Vue.use(WechatPlugin)
 Vue.use(AlertPlugin)
@@ -51,7 +51,7 @@ Vue.config.productionTip = false
   function changeRootFont() {
       const designW = 750
       const rem2px = 20
-      debugger
+      // debugger
       document.documentElement.style.fontSize = `${(window.innerWidth / designW) * rem2px}px`
   }
   changeRootFont()

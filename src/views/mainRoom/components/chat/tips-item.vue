@@ -17,7 +17,7 @@
     </span>
     <span class="item-span" v-if="msg.msgType === tipTypes.tip_line_up">
       当前排队{{msg.queueNum}}人，请耐心等待
-      <span class="button" @click="$emit('onLineCancelQueue')">取消排队</span>
+      <span class="button" @click="cancelLineUp">取消排队...</span>
     </span>
   </div>
 </template>
@@ -40,6 +40,19 @@ export default {
   },
   created() {
     console.log('tips-item ===> 你个组件你被引用了哈哈哈')
+  },
+  methods: {
+    // 取消排队的提示
+    cancelLineUp() {
+      debugger
+      const self = this
+      this.$vux.confirm.show({
+        title: '马上就要转接成功啦，你确定不在等一下了吗？',
+        onConfirm() {
+          self.$emit('onLineCancelQueue')
+        }
+      })
+    }
   },
   filters: {
     timeFilter(val) {

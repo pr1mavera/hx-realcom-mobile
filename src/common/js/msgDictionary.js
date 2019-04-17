@@ -157,7 +157,8 @@ const typeMap = {
             template: function(h, msg) {
                 return (
                     <span class="item-span">
-                        当前排队{ msg.queueNum }人，请耐心等待
+                      当前排队{ msg.queueNum }人，请耐心等待
+                      <span class="moving-ellipsis"></span>
                         <span class="button extend-click" on-click={() => this.$emit('onLineCancelQueue')}>取消排队</span>
                     </span>
                 )

@@ -254,7 +254,7 @@ export default {
       .tips-item {
         position: relative;
         display: inline-block;
-        max-width: 52%;
+        max-width: 55%;
         min-height: 1.2rem;
         padding: 0.3rem 0.6rem;
         margin: 0 auto 1.8rem;
@@ -277,6 +277,70 @@ export default {
           .button {
             color: #2196f3;
           }
+          .moving-ellipsis {
+            display: inline-block;
+            min-width: 4px;
+            min-height: 4px;
+            margin-right: 12px;
+            background-color: #ffffff;
+            vertical-align: middle;
+            border-radius: 50%;
+            .animation (movingEllipsis, 2s, infinite, step-start);
+          }
+          /* 声明一个动画函数 */
+          .keyframes(@name){
+            @keyframes @name {
+              25% {
+                box-shadow: none;
+              }
+              50% {
+                box-shadow: 6px 0 currentColor;
+              }
+              75% {
+                box-shadow: 6px 0 currentColor, 12px 0 currentColor;
+              }
+            }
+           /* @-moz-keyframes @name { // firefox
+              25% {
+                content: '.'
+              }
+              50% {
+                content: '..'
+              }
+              75% {
+                content: '...'
+              }
+            }
+            @-webkit-keyframes @name { // Safari & Chrome
+              25% {
+                content: '.'
+              }
+              50% {
+                content: '..'
+              }
+              75% {
+                content: '...'
+              }
+            }
+            @-o-keyframes @name { // Opera
+              25% {
+                content: '.'
+              }
+              50% {
+                content: '..'
+              }
+              75% {
+                content: '...'
+              }
+            }*/
+          }
+          /* 声明一个过渡函数， */
+          .animation(@animation-name,@animation-duration,@animation-iteration-count,@animation-timing-function) {
+            animation: @arguments;
+          }
+          /* 初始动画 */
+          .keyframes(movingEllipsis);
+          .moving-ellipsis::after {}
         }
       }
       .card-item {

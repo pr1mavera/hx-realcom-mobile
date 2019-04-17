@@ -131,7 +131,7 @@ export default {
     cancelLineUp() {
       const self = this
       this.$vux.confirm.show({
-        title: '您确定要取消排队吗？',
+        title: '马上就要转接成功啦，确定不等了吗~~？',
         onConfirm() {
           self.clickToCancelLineUp()
         }
@@ -230,8 +230,6 @@ export default {
         img {
           width: 100%;
           vertical-align: middle;
-          /*animation: waiting 30s;*/
-          /*animation-timing-function: ease-in;*/
         }
       }
       .tips {
@@ -264,15 +262,6 @@ export default {
         text-align: center;
         background: linear-gradient(to right, #FF8C6A, #FF80A0);
       }
-      /*animation*/
-/*      @keyframes waiting {
-        0% {
-          transform: rotate(0deg);
-        }
-        100% {
-          transform: rotate(7200deg);
-        }
-      }*/
     }
   }
 </style>
