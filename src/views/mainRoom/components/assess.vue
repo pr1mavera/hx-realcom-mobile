@@ -17,13 +17,7 @@
         </div>
         <!-- <div class="eva-more" v-if="stars > 0"> -->
         <div class="eva-more" v-show="stars > 0">
-          <!--<swiper height="9.5rem" style="background: #F1F1F1;margin-top: 1.5rem;" dots-class="custom-bottom" dots-position="center">-->
-            <!--<swiper-item><div class="btn-box"></div></swiper-item>-->
-            <!--<swiper-item><h2 class="fadeInUp animated">test2</h2></swiper-item>-->
-            <!--<swiper-item v-for="(item, index) in btnBoxList" :key="index">-->
-            <!--</swiper-item>-->
-          <!--</swiper>-->
-          <label-btn v-show="showAssessFlag" ref="labelBar" :labelType="labelType" @seledLabels="selLabels"></label-btn>
+          <label-btn v-if="showAssessFlag" ref="labelBar" :labelType="labelType" @seledLabels="selLabels"></label-btn>
           <x-button :gradients="['#FF8C6A', '#ff80a0']" @click.native="handleToSaveAssess"
                     style="width: 11rem;margin: 2rem auto 0;">
             提交评价
@@ -31,8 +25,6 @@
         </div>
       </div>
     </popup>
-    <!-- <toast v-model="showFalseTips" type="text" :time="800" width="15rem" is-show-mask :position="position">{{failText}}</toast>
-    <toast v-model="showSucTips" type="text" :time="800" width="15rem" is-show-mask text="评论成功" :position="position"></toast> -->
   </div>
 </template>
 
