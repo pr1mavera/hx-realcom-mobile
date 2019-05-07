@@ -23,7 +23,7 @@
       </button>
       <p class="text">转电话</p>
     </div>
-    <div class="btn-item" :class="{colourful: (userInfo.isVideoPower === 'N') || false}">
+    <div class="btn-item" v-if="Number(userInfo.userGrade) < 4 || false" :class="{'colourful': !(userInfo.isVideoPower === 'Y')}">
     <!-- <div class="btn-item"> v-if="userInfo.videoVisible || false" -->
       <button
         class="item extend-click transition-bezier"
@@ -166,9 +166,11 @@ export default {
     // 视频客服
     videoLineUp() {
       if (this.clickTooFast()) return
+      // debugger
+      // console.log(this.userInfo) !this.isVip
 
-      if (!this.isVip) { // 非VIP客户
-        this.showTips(2, `此功能只对VIP客户开放，您当前为${this.userInfo.userGradeName}，快去提升等级吧~`)
+      if (this.userInfo.isVideoPower !== 'Y') { // 非VIP客户
+        this.showTips(2, `您的客户等级还需要提升哟，快去投保我们最新的产品升级吧`)
         return
       }
 
