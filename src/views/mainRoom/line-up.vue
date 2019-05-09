@@ -131,7 +131,7 @@ export default {
     cancelLineUp() {
       const self = this
       this.$vux.confirm.show({
-        title: '马上就要转接成功啦，确定不等了吗~~？',
+        title: '马上就要转接成功啦，确定不等了吗~~',
         onConfirm() {
           self.clickToCancelLineUp()
         }

@@ -300,39 +300,6 @@ export default {
                 box-shadow: 4px 0 currentColor, 8px 0 currentColor;
               }
             }
-           /* @-moz-keyframes @name { // firefox
-              25% {
-                content: '.'
-              }
-              50% {
-                content: '..'
-              }
-              75% {
-                content: '...'
-              }
-            }
-            @-webkit-keyframes @name { // Safari & Chrome
-              25% {
-                content: '.'
-              }
-              50% {
-                content: '..'
-              }
-              75% {
-                content: '...'
-              }
-            }
-            @-o-keyframes @name { // Opera
-              25% {
-                content: '.'
-              }
-              50% {
-                content: '..'
-              }
-              75% {
-                content: '...'
-              }
-            }*/
           }
           /* 声明一个过渡函数， */
           .animation(@animation-name,@animation-duration,@animation-iteration-count,@animation-timing-function) {
