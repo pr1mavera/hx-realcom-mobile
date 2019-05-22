@@ -343,17 +343,20 @@ export default {
       self.RTCconnecting = true
       // 记录连接
       self.connectProcess.push({
-        timeoutId: setTimeout(() => {
-                                // 发送自定义指令
-                                this.sendCustomDirective({
-                                  msg: '客户挂断',
-                                  msgStatus: msgStatus.msg,
-                                  msgType: msgTypes.msg_video_hang_up,
-                                  MsgLifeTime: 0
-                                })
-                                self.clearConnectTimeoutWithState('fail')
-                                self.setStateUnconnect()
-                              }, self.connectTimeout),
+        timeoutId: setTimeout(
+                    () => {
+                      // 发送自定义指令
+                      self.sendCustomDirective({
+                        msg: '客户挂断',
+                        msgStatus: msgStatus.msg,
+                        msgType: msgTypes.msg_video_hang_up,
+                        MsgLifeTime: 0
+                      })
+                      self.clearConnectTimeoutWithState('fail')
+                      self.setStateUnconnect()
+                    },
+                    self.connectTimeout
+                  ),
         state: 'connecting'
       })
     },
@@ -385,12 +388,14 @@ export default {
       // 截图
       !this.videoScreenShotSrc && this.getVideoScreenShot()
     },
-    setStateUnconnect() {
+    setStateUnconnect({ netStateBad }) {
       this.openVideoBar()
       // 初始化提示按钮
       this.$vux.toast.hide()
+      // 提示视频由于网络原因断开
+      netStateBad && this.$vux.toast.text('您的网络状况较差，无法建立视频通话')
       // 断开连接，设置状态
-      this.clearConnectTimeoutWithState('fail')
+      this.clearConnectTimeoutWithState(netStateBad ? 'succ' : 'fail')
       // 显示重连按钮
       this.serviceBreakOff = true
       // 停止推流
@@ -402,7 +407,7 @@ export default {
     },
     clearConnectTimeoutWithState(state) {
       const curConn = this.connectProcess[this.connectProcess.length - 1]
-      curConn.state = state
+      curConn && (curConn.state = state)
       // this.connectProcess.map(({ timeoutId }) => clearTimeout(timeoutId))
       clearTimeout(curConn.timeoutId)
     },
@@ -423,10 +428,11 @@ export default {
         console.log(err)
         alert('获取本地视频失败！')
       })
-      // .then(() => {
-      //   // 记录视频开始时间节点
-      //   // this.startTimeTrunk.push(new Date().getTime())
-      // })
+      .then(() => {
+        // 记录视频开始时间节点
+        // this.startTimeTrunk.push(new Date().getTime())
+        this.clearConnectTimeoutWithState('succ')
+      })
       .catch(err => {
         console.log(err)
         // alert('视频通话建立失败！')
@@ -569,14 +575,14 @@ export default {
       if (curConn) {
         switch (curConn.state) {
           case 'succ':
-            return '视频已经结束啦~'
+            return '视频异常中断啦'
           case 'fail':
             return '连接超时啦'
           default:
-            return '视频已经结束啦~'
+            return '连接超时啦'
         }
       } else {
-        return '视频已经结束啦~'
+        return '连接超时啦'
       }
     },
     ...mapMutations({

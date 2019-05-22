@@ -36,12 +36,6 @@ const config_cb = {
       return (cache.getDate() === now.getDate()) && ((now.getTime() - cacheT) < Tools.DateTools.minutes2Timestamp(this.value))
     }
   },
-  // 转接超时时间
-  'connectTimeOut': {
-    get: function() {
-      return this.value
-    }
-  },
   // 图片压缩下限
   'compressLimit': {
     get: function() {

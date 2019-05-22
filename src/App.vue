@@ -234,4 +234,11 @@ body {
     }
   }
 }
+.vux-toast {
+  .weui-toast_text {
+    p {
+      line-height: 1.5;
+    }
+  }
+}
 </style>

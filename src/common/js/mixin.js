@@ -462,7 +462,7 @@ export const RTCRoomMixin = {
       if (+rsv_br === 0) {
         // 网络无响应计数，超过限制提示重连
         this.brZeroCount.addCount(() => {
-          self.setStateUnconnect()
+          self.setStateUnconnect({ netStateBad: true })
         })
       } else {
         // 重置计数
