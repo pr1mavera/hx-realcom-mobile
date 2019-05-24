@@ -5,7 +5,7 @@ import { MsgsLoader } from '@/common/js/MsgsLoader'
 import { ERR_OK, getImgUrl, getUserInfoByOpenID, getLoginInfo, getBotInfo, sendMsgToBot, getSessionList, getCsAvatar, onLineQueue, getBotRoamMsgs, requestHistoryMsgs, videoQueueCancel, onLineQueueCancel, chatQueueHeartBeat, getWorkTime } from '@/server/index.js'
 import Tools from '@/common/js/tools'
 // import { Either } from '@/common/js/container/either'
-import { roomStatus, queueStatus, sessionStatus, systemMsgStatus, msgStatus, cardTypes, msgTypes, tipTypes, dialogTypes } from '@/common/js/status'
+import { roomStatus, queueStatus, sessionStatus, systemMsgStatus, msgStatus, cardTypes, msgTypes, tipTypes, dialogTypes, errorMap } from '@/common/js/status'
 
 export const loginMixin = {
   computed: {
@@ -19,7 +19,6 @@ export const loginMixin = {
       if (origin === 'WE') {
         // 调用openId拿用户信息
         userInfo = await this.getUserInfoFromOpenId(openId)
-        debugger
       }
       if (!userInfo.baseInfo || userInfo.baseInfo.userGrade === '5') {
         // 配置游客信息
@@ -260,7 +259,9 @@ export const RTCRoomMixin = {
         }, () => {
           resolve()
         }, err => {
-          reject(new Error(`error in initRTC: ${err}`))
+          reject(new Error(`error in initRTC: ${JSON.stringify(err)}`))
+          // 视频异常上报
+          this.videoLogReport([ ...errorMap.init_RTC_failed, { checkInfo: err } ])
         })
 
         this.RTC.on('onQualityReport', data => {
@@ -268,30 +269,30 @@ export const RTCRoomMixin = {
           return this.handleRTCQualityReport(data)
         })
 
-        // this.RTC.on('onLocalStreamAdd', (info) => {
-        //   const videoElement = document.getElementById('localVideo')
-        //   if (info && info.stream) {
-        //     debugger
-        //     videoElement.srcObject = info.stream
-        //   }
-        // })
-        this.RTC.on('onRemoteStreamUpdate', (info) => {
-          console.log('onRemoteStreamUpdate ----------------')
-          const videoElement = document.getElementById('remoteVideo')
+        this.RTC.on('onLocalStreamAdd', (info) => {
+          const videoElement = document.getElementById('localVideo')
+          const remoteVideoElement = document.getElementById('remoteVideo')
           if (info && info.stream) {
-            // 绑定视频流
             videoElement.srcObject = info.stream
-            videoElement.play()
-            // 添加监听，远程流视频加载完全时，关闭铃声，切换摄像头...
-            videoElement.addEventListener('playing', () => {
-              this.setStateConnected()
-            }, false)
+            remoteVideoElement.play()
           }
         })
 
-        this.RTC.on('onRemoteStreamRemove', () => {
-
+        this.RTC.on('onRemoteStreamUpdate', (info) => {
+          console.log('onRemoteStreamUpdate ----------------')
+          const videoElement = document.getElementById('remoteVideo')
+          if (info && info.stream && this.RTCconnecting) {
+            // 绑定视频流
+            videoElement.srcObject = info.stream
+            videoElement.play()
+          }
         })
+
+        const remoteVideoElement = document.getElementById('remoteVideo')
+        // 添加监听，远程流视频加载完全时，关闭铃声，切换摄像头...
+        remoteVideoElement.addEventListener('playing', () => {
+          this.setStateConnected()
+        }, false)
 
         this.RTC.on('onKickOut', () => {
           console.warn('其他地方登录，被踢下线')
@@ -330,6 +331,8 @@ export const RTCRoomMixin = {
           resolve()
         }, err => {
           reject(new Error(`error in enterRoom: ${JSON.stringify(err)}`))
+          // 视频异常上报
+          this.videoLogReport([ ...errorMap.enter_room_failed, { checkInfo: err } ])
         })
       })
     },
@@ -345,6 +348,8 @@ export const RTCRoomMixin = {
           }
         }, err => {
           reject(new Error(`error in getLocalStream: ${JSON.stringify(err)}`))
+          // 视频异常上报
+          this.videoLogReport([ ...errorMap.get_local_stream_failed, { checkInfo: err } ])
         })
       })
     },
@@ -380,8 +385,12 @@ export const RTCRoomMixin = {
             //   console.log('ERR in getStats:', err)
             // })
             resolve()
+            const remoteVideoElement = document.getElementById('remoteVideo')
+            remoteVideoElement.play()
           }, err => {
             reject(new Error(`error in startRTC: ${JSON.stringify(err)}`))
+            // 视频异常上报
+            this.videoLogReport([ ...errorMap.start_RTC_failed, { checkInfo: err } ])
           }
         )
       })
@@ -445,11 +454,14 @@ export const RTCRoomMixin = {
         daley >= (this.delay || 600) ||
         (enterVideoStatus === 'Android' ? (fps <= this.fps) : false) ||
         rsv_br <= this.byteRate
+        // true
       ) {
         // 卡顿计数
         // 连续三次卡顿，提示网络状况不佳
         const count = this.unsmoothCount.addCount(() => {
           self.showToast('当前网络状况不佳', 3000)
+          // 视频异常上报
+          this.videoLogReport([ ...errorMap.bad_network_condition, { rsvBr: rsv_br } ])
         })
         console.warn('卡顿计数: ', count)
       } else {
@@ -463,6 +475,8 @@ export const RTCRoomMixin = {
         // 网络无响应计数，超过限制提示重连
         this.brZeroCount.addCount(() => {
           self.setStateUnconnect({ netStateBad: true })
+          // 视频异常上报
+          this.videoLogReport(errorMap.video_unconnect)
         })
       } else {
         // 重置计数
@@ -474,17 +488,30 @@ export const RTCRoomMixin = {
         // 音频丢包计数，超过限制提示重连
         this.audioZeroCount.addCount(() => {
           self.setStateUnconnect()
+          // 视频异常上报
+          this.videoLogReport(errorMap.audio_unconnect)
         })
       }
+
+      // 获取上一次保存的音频流大小
       const pre_audio_br = sessionStorage.getItem('audio_br')
       if (audio_br !== 0 && +pre_audio_br === 0) {
-        // 恢复时
+        // 上一次音频流为0，且本次音频流非0，即音频恢复时
         console.log('恢复时，总计数: ', self.audioZeroCount.count())
 
-        self.audioZeroCount.count() >= 3
-          ? self.setStateUnconnect()
-          : self.audioZeroCount.resetCount()
+        if (self.audioZeroCount.count() >= 3) {
+          self.setStateUnconnect()
+          // 视频异常上报
+          this.videoLogReport(errorMap.audio_unconnect)
+        } else {
+          self.audioZeroCount.resetCount()
+        }
+        // self.audioZeroCount.count() >= 3
+        //   ? self.setStateUnconnect()
+        //   : self.audioZeroCount.resetCount()
       }
+
+      // 保存本次音频流大小
       sessionStorage.setItem('audio_br', audio_br)
     },
 
@@ -499,14 +526,15 @@ export const RTCRoomMixin = {
         time: time || 1000000
       })
       if (!time) {
-        return undefined
+        return void 0
       }
       await Tools.AsyncTools.sleep(3000)
       return Promise.resolve()
     },
 
     ...mapActions([
-      'setVideoBlur'
+      'setVideoBlur',
+      'videoLogReport'
     ])
   }
 }

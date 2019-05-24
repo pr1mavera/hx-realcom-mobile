@@ -100,7 +100,7 @@ import Tools from '@/common/js/tools'
 import { mapGetters, mapMutations, mapActions } from 'vuex'
 import { ERR_OK, enterVideoRTCRoom, getSessionDetail } from '@/server'
 import { RTCRoomMixin, IMMixin, sendMsgsMixin } from '@/common/js/mixin'
-import { msgStatus, msgTypes } from '@/common/js/status'
+import { msgStatus, msgTypes, errorMap } from '@/common/js/status'
 import IM from '@/server/im.js'
 
 export default {
@@ -345,6 +345,8 @@ export default {
       self.connectProcess.push({
         timeoutId: setTimeout(
                     () => {
+                      // 视频异常上报
+                      this.videoLogReport(errorMap.connection_timeout)
                       // 发送自定义指令
                       self.sendCustomDirective({
                         msg: '客户挂断',
@@ -388,7 +390,7 @@ export default {
       // 截图
       !this.videoScreenShotSrc && this.getVideoScreenShot()
     },
-    setStateUnconnect({ netStateBad }) {
+    setStateUnconnect({ netStateBad } = {}) {
       this.openVideoBar()
       // 初始化提示按钮
       this.$vux.toast.hide()
@@ -417,15 +419,15 @@ export default {
       // 初始化 RTC
       this.initRTC()
       .then(() => this.enterRoom(this.roomId), err => {
-        console.log(err)
+        console.warn(err)
         alert('初始化RTC失败！')
       })
       .then(() => this.getLocalStream(), err => {
-        console.log(err)
+        console.warn(err)
         alert('进房失败！')
       })
       .then(info => this.startRTC(info.stream), err => {
-        console.log(err)
+        console.warn(err)
         alert('获取本地视频失败！')
       })
       .then(() => {
@@ -434,7 +436,7 @@ export default {
         this.clearConnectTimeoutWithState('succ')
       })
       .catch(err => {
-        console.log(err)
+        console.warn(err)
         // alert('视频通话建立失败！')
       })
     },
@@ -591,7 +593,8 @@ export default {
       setServerTime: 'SET_SERVER_TIME'
     }),
     ...mapActions([
-      'systemConfig'
+      'systemConfig',
+      'videoLogReport'
     ])
   },
   filters: {

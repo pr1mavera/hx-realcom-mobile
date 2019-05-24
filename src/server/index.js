@@ -98,6 +98,11 @@ export const giftSend = giftInfo => http.post('user', '/video/cs/user/gift', gif
 export const getShareTicket = url => http.post('user', `/ticket/query`, { url })
 
 /**
+ * [saveVideolog 上报视频异常信息]
+ */
+export const saveVideoLog = data => http.post('user', `/chat/video/videolog/save`, data)
+
+/**
  ************************************ chat ************************************
  */
 

@@ -2,7 +2,7 @@ import * as types from './mutation-types'
 import Tools from '@/common/js/tools'
 import IM from '@/server/im'
 import { TIME_3_MIN, TIME_5_MIN, MSG_PAGE_SIZE, sessionStatus, toggleBarStatus, roomStatus, queueStatus, msgStatus, msgTypes, dialogTypes, tipTypes, systemMsgStatus, themeMap } from '@/common/js/status'
-import { ERR_OK, createSession, getCsAvatar, transTimeoutRedistribution, getSessionDetail, getSystemConfig } from '@/server/index.js'
+import { ERR_OK, createSession, getCsAvatar, transTimeoutRedistribution, getSessionDetail, getSystemConfig, saveVideoLog } from '@/server/index.js'
 
 // 系统配置附属函数
 const config_cb = {
@@ -578,6 +578,82 @@ export const setVideoMuted = function({ commit, state }, isMuted) {
     blur: state.videoFilter.blur,
     muted: isMuted
   })
+}
+
+// 设备信息缓存
+const getDeviceInfo = (() => {
+  let cache = null
+  const deviceInfo = () => {
+    const u = navigator.userAgent
+    const ua = u.toLowerCase()
+    let deviceName = ''
+    let deviceVersion = ''
+    let browser = 'wx'
+  
+    if (u.indexOf('Android') > -1 || u.indexOf('Linux') > -1) {
+      // Android
+      const reg = /android [\d._]+/gi
+      deviceName = 'Android'
+      deviceVersion = (ua.match(reg) + '').replace(/[^0-9|_.]/ig, '').replace(/_/ig, '.')
+    } else if (u.indexOf('iPhone') > -1) {
+      // iPhone
+      const ver = ua.match(/cpu iphone os (.*?) like mac os/)
+      deviceName = 'iPhone'
+      deviceVersion = parseFloat(ver[1].replace(/_/g, '.'))
+      // 微信内置浏览器否
+      browser = (ua.match(/MicroMessenger/i) == 'micromessenger') ? 'wx' : 'safari'
+    } else if (u.indexOf('Windows Phone') > -1) {
+      deviceName = 'windowsPhone'
+      deviceVersion = 'unknow'
+    }
+  
+    return {
+      deviceName,
+      deviceVersion,
+      browser
+    }
+  }
+  return () => cache
+                ? cache
+                : cache = deviceInfo()
+})()
+
+/**
+ * 视频质量监控 | 上报事件api
+ */
+export const videoLogReport = async function({ state }, [ checkCode, remark, ext = {} ]) {
+  const { userInfo } = state
+  // 用户信息
+  const { userId, nickName, openId, origin } = userInfo
+  const { checkInfo = '-', rsvBr = '-' } = ext
+  debugger
+  // 设备信息
+  const { deviceName: deviceType, deviceVersion: deviceInfo, browser: clientInfo } = getDeviceInfo()
+
+  const data = {
+    userId,
+    userNick: nickName || '-',
+    openId,
+    origin,
+    clientInfo,
+    deviceInfo,
+    deviceType,
+    checkCode,
+    checkInfo,
+    remark,
+    rsvBr
+  }
+
+  try {
+    const res = await saveVideoLog(data)
+    if (res.result.code === ERR_OK) {
+      console.log('日志上报成功：', remark)
+    } else {
+      console.warn('日志上报失败：', res.result.message)
+    }
+  } catch (error) {
+    console.warn('日志上报失败：', error)
+  }
 }
 
 // 添加相册图片

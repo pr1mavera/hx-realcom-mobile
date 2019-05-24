@@ -31,12 +31,12 @@ const production = {
 }
 
 const development = {
-  userPath: 'https://video-uat.ihxlife.com/user-server/api/v1', // 用户服务,整合video-server,chat-server,online
-  webRTCRoomPath: 'https://video-uat.ihxlife.com/room-server/api/v1', // 房间服务
-  TMPath: 'https://video-uat.ihxlife.com/tm-server/api/v1' // 腾讯消息服务
-  // userPath: 'http://112.74.159.234:8083/api/v1', // 用户服务,整合video-server,chat-server,online
-  // webRTCRoomPath: 'http://112.74.229.22:8085/api/v1', // 房间服务
-  // TMPath: 'http://112.74.159.234:8084/api/v1' // 腾讯消息服务
+  // userPath: 'https://video-uat.ihxlife.com/user-server/api/v1', // 用户服务,整合video-server,chat-server,online
+  // webRTCRoomPath: 'https://video-uat.ihxlife.com/room-server/api/v1', // 房间服务
+  // TMPath: 'https://video-uat.ihxlife.com/tm-server/api/v1' // 腾讯消息服务
+  userPath: 'http://112.74.159.234:8083/api/v1', // 用户服务,整合video-server,chat-server,online
+  webRTCRoomPath: 'http://112.74.229.22:8085/api/v1', // 房间服务
+  TMPath: 'http://112.74.159.234:8084/api/v1' // 腾讯消息服务
 }
 
 const location = env === 'production' ? production : development
