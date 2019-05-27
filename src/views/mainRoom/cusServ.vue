@@ -109,7 +109,6 @@ export default {
         return
       }
 
-      debugger
       const res = await getCsStatus(this.csSelected.id)
       const status = Number(res.data.status || this.csSelected.status)
       // 只有就绪和忙碌可以排队

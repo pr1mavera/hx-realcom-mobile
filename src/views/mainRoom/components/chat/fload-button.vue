@@ -212,7 +212,6 @@ export default {
           /**
            * 白名单用户，忽略工作时间
            */
-          debugger
           if (this.userInfo.isWhiteList) {
             return this.$emit('enterOnLineLineUp')
           }
