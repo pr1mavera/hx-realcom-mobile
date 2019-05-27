@@ -97,16 +97,19 @@ export default {
           title: `抱歉，您当前系统版本过低，暂不支持视频服务`
         })
       }
-      // 判断当前是否为工作时间
+      // 判断当前是否为工作时间（白名单用户，忽略工作时间）
       const SP_workT = this.userInfo.workTimeInfo.SP
-      if (!Tools.DateTools.isWorkTime(SP_workT)) {
+      if (
+        !this.userInfo.isWhiteList && // 非白名单用户
+        !Tools.DateTools.isWorkTime(SP_workT) // 不在工作时间
+      ) {
         this.$vux.alert.show({
           title: `抱歉，当前为非工作时间，视频客服工作时间为周一至周日${SP_workT.startTime}-${SP_workT.endTime}，请在工作时间内来询，感谢您的关注！`
         })
         return
       }
 
-      // debugger
+      debugger
       const res = await getCsStatus(this.csSelected.id)
       const status = Number(res.data.status || this.csSelected.status)
       // 只有就绪和忙碌可以排队

@@ -209,6 +209,14 @@ export default {
 
       switch (this.roomMode) { // 服务中
         case roomStatus.AIChat:
+          /**
+           * 白名单用户，忽略工作时间
+           */
+          debugger
+          if (this.userInfo.isWhiteList) {
+            return this.$emit('enterOnLineLineUp')
+          }
+
           const ZX_workT = this.userInfo.workTimeInfo.ZX
           if (Tools.DateTools.isWorkTime(ZX_workT)) {
             // 当前在工作时间

@@ -22,7 +22,7 @@ export const loginMixin = {
       }
       if (!userInfo.baseInfo || userInfo.baseInfo.userGrade === '5') {
         // 配置游客信息
-        userInfo.baseInfo = this.getVisitorInfo(openId, origin)
+        userInfo.baseInfo = this.getVisitorInfo(openId, origin, userInfo.baseInfo)
       }
       if (!userInfo.workTimeInfo) {
         // 配置工作时间
@@ -58,11 +58,11 @@ export const loginMixin = {
         return {}
       }
     },
-    getVisitorInfo(openId, origin) {
+    getVisitorInfo(openId, origin, baseInfo) {
       let data = {}
       // 缓存中有游客信息，直接返回：
       if (data = Tools.CacheTools.getCacheData({ key: `${origin}_visitor`, check: origin })) {
-        return Object.assign(data, { openId })
+        return Object.assign({}, baseInfo, data, { openId })
       }
 
       // 缓存中没有对应渠道的游客信息：
@@ -86,7 +86,7 @@ export const loginMixin = {
       // 2. 游客信息存缓存
       Tools.CacheTools.setCacheData({ key: `${origin}_visitor`, check: origin, data: visitorInfo })
       // 3. 返回
-      return visitorInfo
+      return Object.assign({}, baseInfo, visitorInfo)
     },
     async getWorkTimeInfo() {
       // 获取工作时间
