@@ -589,7 +589,7 @@ const getDeviceInfo = (() => {
     let deviceName = ''
     let deviceVersion = ''
     let browser = 'wx'
-  
+
     if (u.indexOf('Android') > -1 || u.indexOf('Linux') > -1) {
       // Android
       const reg = /android [\d._]+/gi
@@ -601,21 +601,19 @@ const getDeviceInfo = (() => {
       deviceName = 'iPhone'
       deviceVersion = parseFloat(ver[1].replace(/_/g, '.'))
       // 微信内置浏览器否
-      browser = (ua.match(/MicroMessenger/i) == 'micromessenger') ? 'wx' : 'safari'
+      browser = (ua.match(/MicroMessenger/i) === 'micromessenger') ? 'wx' : 'safari'
     } else if (u.indexOf('Windows Phone') > -1) {
       deviceName = 'windowsPhone'
       deviceVersion = 'unknow'
     }
-  
+
     return {
       deviceName,
       deviceVersion,
       browser
     }
   }
-  return () => cache
-                ? cache
-                : cache = deviceInfo()
+  return () => cache || (cache = deviceInfo())
 })()
 
 /**

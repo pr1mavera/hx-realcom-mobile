@@ -51,7 +51,7 @@ export const loginMixin = {
         }
         const wxUserInfo = data.wxUserInfo
         info.wxUserInfo.avatar = wxUserInfo.headImgUrl || ''
-        info.wxUserInfo.nickName = wxUserInfo.nickName || data.userName
+        info.wxUserInfo.nickName = wxUserInfo.nickName.replace(/(\\n|\/\/|\\b|\\f|\\r|\\t|\\")/g, '') || data.userName
         return info
       } else {
         console.log('error in getUserInfoByOpenId')
