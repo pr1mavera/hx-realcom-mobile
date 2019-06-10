@@ -345,8 +345,6 @@ export default {
       self.connectProcess.push({
         timeoutId: setTimeout(
                     () => {
-                      // 视频异常上报
-                      this.videoLogReport(errorMap.connection_timeout)
                       // 发送自定义指令
                       self.sendCustomDirective({
                         msg: '客户挂断',
@@ -356,6 +354,8 @@ export default {
                       })
                       self.clearConnectTimeoutWithState('fail')
                       self.setStateUnconnect()
+                      // 视频异常上报
+                      self.videoLogReport(errorMap.connection_timeout)
                     },
                     self.connectTimeout
                   ),

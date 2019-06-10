@@ -622,30 +622,30 @@ const getDeviceInfo = (() => {
 export const videoLogReport = async function({ state }, [ checkCode, remark, ext = {} ]) {
   const { userInfo } = state
   // 用户信息
-  const { userId, nickName, openId, origin } = userInfo
+  const {
+    userId = '-',
+    nickName: userNick = '-',
+    openId = '-',
+    origin = '-'
+  } = userInfo
+
   const { checkInfo = '-', rsvBr = '-' } = ext
-  debugger
+
   // 设备信息
-  const { deviceName: deviceType, deviceVersion: deviceInfo, browser: clientInfo } = getDeviceInfo()
+  const {
+    deviceName: deviceType = '-',
+    deviceVersion: deviceInfo = '-',
+    browser: clientInfo = '-'
+  } = getDeviceInfo()
 
   const data = {
-    userId,
-    userNick: nickName || '-',
-    openId,
-    origin,
-    clientInfo,
-    deviceInfo,
-    deviceType,
-    checkCode,
-    checkInfo,
-    remark,
-    rsvBr
+    userId, userNick, openId, origin, clientInfo, deviceInfo, deviceType, checkCode, checkInfo, remark, rsvBr
   }
 
   try {
     const res = await saveVideoLog(data)
     if (res.result.code === ERR_OK) {
-      console.log('日志上报成功：', remark)
+      console.log(`日志上报成功：${remark}, 原因：${JSON.stringify(checkInfo)}`)
     } else {
       console.warn('日志上报失败：', res.result.message)
     }
