@@ -365,7 +365,7 @@ export default {
     position: relative;
     width: 100%;
     height: 100%;
-    z-index: 10;
+    z-index: 1;
   }
   .video-bar {
     position: fixed;
@@ -377,7 +377,7 @@ export default {
     // height: 100%;
     // margin: auto;
     overflow: hidden;
-    z-index: 101;
+    z-index: 11;
   }
   .iframe-section {
     position: fixed;
@@ -403,7 +403,7 @@ export default {
     margin: auto;
     width: 100%;
     height: 100%;
-    z-index: 200;
+    z-index: 20;
     // background-color: rgba(0, 0, 0, 0.2);
     img {
       width: 100%;
