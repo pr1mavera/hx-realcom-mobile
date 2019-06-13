@@ -189,6 +189,7 @@ export default {
         !this.userInfo.isWhiteList && // 非白名单用户
         !Tools.DateTools.isWorkTime(SP_workT) // 不在工作时间
       ) {
+        // 当前是普通用户，且不在工作时间，则不允许视频，显示的提示为非工作时间
         this.$vux.alert.show({
           title: `抱歉，当前为非工作时间，视频客服工作时间为周一至周日${SP_workT.startTime}-${SP_workT.endTime}，请在工作时间内来询，感谢您的关注！`
         })
