@@ -424,6 +424,8 @@ export const RTCRoomMixin = {
     handleRTCQualityReport(data) {
       // 当前远程流已经断开，显示重连按钮
       console.log('this.serviceBreakOff: ', this.serviceBreakOff)
+      console.log('data!!!!!!!!!!!!: ', data)
+
       if (this.serviceBreakOff || this.RTCconnecting) {
         return undefined
       }
@@ -461,7 +463,7 @@ export const RTCRoomMixin = {
         const count = this.unsmoothCount.addCount(() => {
           self.showToast('当前网络状况不佳', 3000)
           // 视频异常上报
-          this.videoLogReport([ ...errorMap.bad_network_condition, { rsvBr: rsv_br } ])
+          self.videoLogReport([ ...errorMap.bad_network_condition, { rsvBr: rsv_br } ])
         })
         console.warn('卡顿计数: ', count)
       } else {
@@ -476,7 +478,7 @@ export const RTCRoomMixin = {
         this.brZeroCount.addCount(() => {
           self.setStateUnconnect({ netStateBad: true })
           // 视频异常上报
-          this.videoLogReport(errorMap.video_unconnect)
+          self.videoLogReport(errorMap.video_unconnect)
         })
       } else {
         // 重置计数
@@ -489,7 +491,7 @@ export const RTCRoomMixin = {
         this.audioZeroCount.addCount(() => {
           self.setStateUnconnect()
           // 视频异常上报
-          this.videoLogReport(errorMap.audio_unconnect)
+          self.videoLogReport(errorMap.audio_unconnect)
         })
       }
 

@@ -881,8 +881,8 @@ export default {
         }
       })
     },
-    async definiteCancelQueue() {
-      await this.cancelQueue()
+    definiteCancelQueue() {
+      this.cancelQueue()
       // action 删除msgs中排队状态的tips
       this.deleteTipMsg()
     },
