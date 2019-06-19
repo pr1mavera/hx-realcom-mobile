@@ -25,6 +25,7 @@
     </div>
     <div class="btn-item" v-if="Number(userInfo.userGrade) < 4 || false" :class="{'colourful': !(userInfo.isVideoPower === 'Y')}">
     <!-- <div class="btn-item"> v-if="userInfo.videoVisible || false" -->
+    <!-- <div class="btn-item" v-if="true"> -->
       <button
         class="item extend-click transition-bezier"
         @click="videoLineUp"
@@ -33,7 +34,7 @@
       </button>
       <p class="text">转视频</p>
     </div>
-    <div class="btn-item">
+    <div class="btn-item" v-show="false">
       <button
         ref="enterMenChat"
         class="item extend-click transition-bezier"

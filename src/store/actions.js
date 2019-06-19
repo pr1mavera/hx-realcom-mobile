@@ -114,6 +114,12 @@ const config_cb = {
     get: function() {
       return this.value * 1000
     }
+  },
+  // iOS12.3版本是否提示引导
+  'isIosGuideShow': {
+    get: function() {
+      return this.value
+    }
   }
 }
 
@@ -363,7 +369,8 @@ export const afterServerFinish = function({ commit, state }, mode) {
 // 创建会话
 export const initSession = async function({ commit, state }) {
   // 创建机器人会话
-  const res = await createSession(state.userInfo.userId, state.userInfo.nickName, state.userInfo.userPhone, sessionStatus.robot, state.sessionRamId)
+  const { userId, userName, nickName, userPhone } = state.userInfo
+  const res = await createSession(userId, nickName || userName, userPhone, sessionStatus.robot, state.sessionRamId)
   if (res.result.code === ERR_OK) {
     console.log('============================= 会话创建成功 辣 =============================')
     commit(types.SET_SESSION_ID, res.data.id)
@@ -639,7 +646,8 @@ export const videoLogReport = async function({ state }, [ checkCode, remark, ext
   } = getDeviceInfo()
 
   const data = {
-    userId, userNick, openId, origin, clientInfo, deviceInfo, deviceType, checkCode, checkInfo, remark, rsvBr
+    userId, userNick, openId, origin, clientInfo, deviceInfo, deviceType, checkCode, remark, rsvBr,
+    checkInfo: JSON.stringify(checkInfo)
   }
 
   try {
