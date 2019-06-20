@@ -646,7 +646,16 @@ export const videoLogReport = async function({ state }, [ checkCode, remark, ext
   } = getDeviceInfo()
 
   const data = {
-    userId, userNick, openId, origin, clientInfo, deviceInfo, deviceType, checkCode, remark, rsvBr,
+    userId,
+    userNick,
+    openId,
+    origin,
+    clientInfo,
+    deviceInfo,
+    deviceType,
+    checkCode,
+    remark,
+    rsvBr: JSON.stringify(rsvBr),
     checkInfo: JSON.stringify(checkInfo)
   }
 

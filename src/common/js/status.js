@@ -153,13 +153,16 @@ export const themeMap = {
 /**
  * 视频异常 | 错误类型及描述
  */
-export const errorMap = {
+export const videoLogMap = {
+  queue_success: ['QUEUE_SUCCESS', '排队成功'],
   init_RTC_failed: ['INIT_RTC_FAILED', '初始化RTC失败'],
   enter_room_failed: ['ENTER_ROOM_FAILED', '进房失败'],
   get_local_stream_failed: ['GET_LOCAL_STREAM_FAILED', '获取本地流失败'],
   start_RTC_failed: ['START_RTC_FAILED', '本地推流失败'],
+  start_RTC_success: ['START_RTC_SUCCESS', '客户已看到坐席的画面'],
   bad_network_condition: ['BAD_NETWORK_CONDITION', '网络状况不佳'],
   connection_timeout: ['connection_timeout', '建立连接时超时，断开连接'],
   video_unconnect: ['VIDEO_UNCONNECT', '视频连接过程中，接收的视频流为空，断开连接'],
-  audio_unconnect: ['VIDEO_UNCONNECT', '视频连接过程中，接收的音频流为空，断开连接']
+  audio_unconnect: ['VIDEO_UNCONNECT', '视频连接过程中，接收的音频流为空，断开连接'],
+  custom_handle_close_video: ['CUSTOM_HANDLE_CLOSE_VIDEO', '客户主动点击挂断视频']
 }
