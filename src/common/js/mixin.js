@@ -5,7 +5,7 @@ import { MsgsLoader } from '@/common/js/MsgsLoader'
 import { ERR_OK, getImgUrl, getUserInfoByOpenID, getLoginInfo, getBotInfo, sendMsgToBot, getSessionList, getCsAvatar, onLineQueue, getBotRoamMsgs, requestHistoryMsgs, videoQueueCancel, onLineQueueCancel, chatQueueHeartBeat, getWorkTime } from '@/server/index.js'
 import Tools from '@/common/js/tools'
 // import { Either } from '@/common/js/container/either'
-import { roomStatus, queueStatus, sessionStatus, systemMsgStatus, msgStatus, cardTypes, msgTypes, tipTypes, dialogTypes, errorMap } from '@/common/js/status'
+import { roomStatus, queueStatus, sessionStatus, systemMsgStatus, msgStatus, cardTypes, msgTypes, tipTypes, dialogTypes, videoLogMap } from '@/common/js/status'
 
 export const loginMixin = {
   computed: {
@@ -261,7 +261,7 @@ export const RTCRoomMixin = {
         }, err => {
           reject(new Error(`error in initRTC: ${JSON.stringify(err)}`))
           // 视频异常上报
-          this.videoLogReport([ ...errorMap.init_RTC_failed, { checkInfo: err } ])
+          this.videoLogReport([ ...videoLogMap.init_RTC_failed, { checkInfo: err } ])
         })
 
         this.RTC.on('onQualityReport', data => {
@@ -311,7 +311,7 @@ export const RTCRoomMixin = {
             // 停止推流
             // return this.setStateUnconnect()
             // 30秒之后断开，直接显示重连
-            this.RTC && this.setStateUnconnect()
+            this.RTC && this.setStateUnconnect({ info: 'onStreamNotify响应，流主动断开' })
           }
           // debugger
           // 本地流断开
@@ -332,7 +332,7 @@ export const RTCRoomMixin = {
         }, err => {
           reject(new Error(`error in enterRoom: ${JSON.stringify(err)}`))
           // 视频异常上报
-          this.videoLogReport([ ...errorMap.enter_room_failed, { checkInfo: err } ])
+          this.videoLogReport([ ...videoLogMap.enter_room_failed, { checkInfo: err } ])
         })
       })
     },
@@ -349,7 +349,7 @@ export const RTCRoomMixin = {
         }, err => {
           reject(new Error(`error in getLocalStream: ${JSON.stringify(err)}`))
           // 视频异常上报
-          this.videoLogReport([ ...errorMap.get_local_stream_failed, { checkInfo: err } ])
+          this.videoLogReport([ ...videoLogMap.get_local_stream_failed, { checkInfo: err } ])
         })
       })
     },
@@ -385,12 +385,13 @@ export const RTCRoomMixin = {
             //   console.log('ERR in getStats:', err)
             // })
             resolve()
+            alert('startRTC')
             const remoteVideoElement = document.getElementById('remoteVideo')
             remoteVideoElement.play()
           }, err => {
             reject(new Error(`error in startRTC: ${JSON.stringify(err)}`))
             // 视频异常上报
-            this.videoLogReport([ ...errorMap.start_RTC_failed, { checkInfo: err } ])
+            this.videoLogReport([ ...videoLogMap.start_RTC_failed, { checkInfo: err } ])
           }
         )
       })
@@ -414,7 +415,7 @@ export const RTCRoomMixin = {
           (this.endTimeTrunk.length === this.startTimeTrunk.length - 1) && this.endTimeTrunk.push(new Date().getTime())
           resolve()
         }, err => {
-          console.error('退出音视频房间 失败 辣', err)
+          console.error('退出音视频房间 失败 辣', JSON.stringify(err))
           reject()
         })
       })
@@ -425,6 +426,7 @@ export const RTCRoomMixin = {
       // 当前远程流已经断开，显示重连按钮
       console.log('this.serviceBreakOff: ', this.serviceBreakOff)
       console.log('data!!!!!!!!!!!!: ', data)
+      console.log('音频流!!!!!!!!!!!!: ', data.WebRTCQualityReq.AudioReportState.uint32_audio_enc_pkg_br)
 
       if (this.serviceBreakOff || this.RTCconnecting) {
         return undefined
@@ -463,7 +465,9 @@ export const RTCRoomMixin = {
         const count = this.unsmoothCount.addCount(() => {
           self.showToast('当前网络状况不佳', 3000)
           // 视频异常上报
-          self.videoLogReport([ ...errorMap.bad_network_condition, { rsvBr: rsv_br } ])
+          self.videoLogReport([ ...videoLogMap.bad_network_condition,
+            { rsvBr: { '视频流：': rsv_br, '音频流：': audio_br } }
+          ])
         })
         console.warn('卡顿计数: ', count)
       } else {
@@ -478,7 +482,9 @@ export const RTCRoomMixin = {
         this.brZeroCount.addCount(() => {
           self.setStateUnconnect({ netStateBad: true })
           // 视频异常上报
-          self.videoLogReport(errorMap.video_unconnect)
+          self.videoLogReport([ ...videoLogMap.video_unconnect,
+            { rsvBr: { '视频流：': rsv_br, '音频流：': audio_br } }
+          ])
         })
       } else {
         // 重置计数
@@ -489,9 +495,12 @@ export const RTCRoomMixin = {
       if (+audio_br === 0) {
         // 音频丢包计数，超过限制提示重连
         this.audioZeroCount.addCount(() => {
-          self.setStateUnconnect()
+          // self.setStateUnconnect({ info: '音频流为空次数超上限' })
           // 视频异常上报
-          self.videoLogReport(errorMap.audio_unconnect)
+          // self.videoLogReport(videoLogMap.audio_unconnect)
+          self.videoLogReport([ ...videoLogMap.audio_unconnect,
+            { rsvBr: { '视频流：': rsv_br, '音频流：': audio_br } }
+          ])
         })
       }
 
@@ -502,9 +511,12 @@ export const RTCRoomMixin = {
         console.log('恢复时，总计数: ', self.audioZeroCount.count())
 
         if (self.audioZeroCount.count() >= 3) {
-          self.setStateUnconnect()
+          // self.setStateUnconnect({ info: '音频流恢复，但次数超上限' })
           // 视频异常上报
-          this.videoLogReport(errorMap.audio_unconnect)
+          // this.videoLogReport(videoLogMap.audio_unconnect)
+          self.videoLogReport([ ...videoLogMap.audio_unconnect,
+            { rsvBr: { '视频流：': rsv_br, '音频流：': audio_br } }
+          ])
         } else {
           self.audioZeroCount.resetCount()
         }

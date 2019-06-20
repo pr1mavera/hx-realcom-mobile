@@ -100,7 +100,7 @@ import Tools from '@/common/js/tools'
 import { mapGetters, mapMutations, mapActions } from 'vuex'
 import { ERR_OK, enterVideoRTCRoom, getSessionDetail } from '@/server'
 import { RTCRoomMixin, IMMixin, sendMsgsMixin } from '@/common/js/mixin'
-import { msgStatus, msgTypes, errorMap } from '@/common/js/status'
+import { msgStatus, msgTypes, videoLogMap } from '@/common/js/status'
 import IM from '@/server/im.js'
 
 export default {
@@ -355,7 +355,7 @@ export default {
                       self.clearConnectTimeoutWithState('fail')
                       self.setStateUnconnect()
                       // 视频异常上报
-                      self.videoLogReport(errorMap.connection_timeout)
+                      self.videoLogReport(videoLogMap.connection_timeout)
                     },
                     self.connectTimeout
                   ),
@@ -390,7 +390,9 @@ export default {
       // 截图
       !this.videoScreenShotSrc && this.getVideoScreenShot()
     },
-    setStateUnconnect({ netStateBad } = {}) {
+    setStateUnconnect({ netStateBad, info } = {}) {
+      info && console.warn(`视频断开信息：${info}`)
+
       this.openVideoBar()
       // 初始化提示按钮
       this.$vux.toast.hide()
