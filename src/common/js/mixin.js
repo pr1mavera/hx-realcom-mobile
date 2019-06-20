@@ -385,7 +385,6 @@ export const RTCRoomMixin = {
             //   console.log('ERR in getStats:', err)
             // })
             resolve()
-            alert('startRTC')
             const remoteVideoElement = document.getElementById('remoteVideo')
             remoteVideoElement.play()
           }, err => {
