@@ -85,7 +85,8 @@ export const msgTypes = {
   msg_video_reconnect: '17', // 视频服务，客户端点击重连
   msg_video_quality: '18', // 视频质量
   msg_video_cs_initRTC: '19', // 视频坐席已经初始化好了RTC
-  msg_hand_up: '24' // 结束会话（在线）
+  msg_hand_up: '24', // 结束会话（在线）
+  msg_custom_forbidden_camera: 'msg_custom_forbidden_camera' // 客户禁用摄像头
 }
 
 export const dialogTypes = {

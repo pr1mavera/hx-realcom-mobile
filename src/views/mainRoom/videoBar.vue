@@ -89,13 +89,31 @@
       <section class="send-gift-section" v-show="giftSectionShow" @click.stop="giftSectionShow = false">
         <send-gift :theme="`dark`" @selectGift="selectGift"></send-gift>
       </section>
+      <!-- 禁用摄像头 -->
+      <div v-transfer-dom>
+        <x-dialog v-model="cameraModalShow" class="camera-modal-guide" mask-z-index='-100'>
+          <div class="wrapper">
+            <img class="camera-img" src="/video/static/img/iOS_12_3/camera.png">
+            <div class="first-guide">
+              <p class="text" v-html="iOSGuideText"></p>
+              <button class="btn-next" @click="cameraModalShow = false">我知道了</button>
+              <img class="img" src="/video/static/img/iOS_12_3/1.png">
+            </div>
+          </div>
+          <div class="iOS-guide-close extend-click" @click="cameraModalShow = false">
+            <svg class="icon" aria-hidden="true">
+              <use xlink:href="#icon-chahao"></use>
+            </svg>
+          </div>
+        </x-dialog>
+      </div>
     </div>
     <canvas id="videoCanvas" v-show="false"></canvas>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
-import { Toast, XButton, TransferDom } from 'vux'
+import { Toast, XButton, XDialog, Swiper, SwiperItem, TransferDomDirective as TransferDom } from 'vux'
 import Tools from '@/common/js/tools'
 import { mapGetters, mapMutations, mapActions } from 'vuex'
 import { ERR_OK, enterVideoRTCRoom, getSessionDetail } from '@/server'
@@ -119,7 +137,10 @@ export default {
     'Assess': () => import('@/views/mainRoom/components/assess'),
     'WaterMark': () => import('@/views/mainRoom/components/video/water-mark'),
     Toast,
-    XButton
+    XButton,
+    Swiper,
+    SwiperItem,
+    XDialog
   },
   computed: {
     likesCountStyle() {
@@ -168,6 +189,10 @@ export default {
         state: true,
         timeout: null
       },
+      // iOS 12.3 引导是否显示
+      cameraModalShow: false,
+      // 引导页首页文案
+      iOSGuideText: '尊贵的VIP客户，<br>&emsp;&emsp;您好~为了不影响您正常使用视频客服服务，请点击“允许”以打开视频相关权限',
       // 视频截图数据，base64，在每次连接成功的时候截取并设置
       videoScreenShotSrc: '',
       // 通话开始时间缓存
@@ -415,7 +440,7 @@ export default {
       // this.connectProcess.map(({ timeoutId }) => clearTimeout(timeoutId))
       clearTimeout(curConn.timeoutId)
     },
-    async readyToVideo() {
+    readyToVideo() {
       // 初始化开始连接状态
       this.setStateConnecting()
       // 初始化 RTC
@@ -428,9 +453,22 @@ export default {
         console.warn(err)
         alert('进房失败！')
       })
-      .then(info => this.startRTC(info.stream), err => {
+      .then(info => this.startRTC(info.stream), async(err) => {
         console.warn(err)
-        alert('获取本地视频失败！')
+        const enterVideoStatus = window.sessionStorage.getItem('enterVideoStatus')
+        // 显示摄像头禁用提示（非安卓用户）
+        enterVideoStatus !== 'Android' && (this.cameraModalShow = true)
+        // 挂断
+        this.handleHangUpVideo()
+        // 延迟两秒
+        await Tools.AsyncTools.sleep(2000)
+        // 通知座席端客户禁用了摄像头
+        this.sendCustomDirective({
+          msg: '客户禁用了摄像头，视频无法建立',
+          msgStatus: msgStatus.msg,
+          msgType: msgTypes.msg_custom_forbidden_camera,
+          MsgLifeTime: 0
+        })
       })
       .then(() => {
         // 记录视频开始时间节点
@@ -916,6 +954,92 @@ export default {
         box-sizing: border-box;
       }
     }
+  }
+}
+
+.camera-modal-guide {
+  position: relative;
+  .weui-dialog {
+    background-color: unset;
+    width: 100vw;
+    max-width: 100vw;
+    height: 42rem;
+    // transform: translateY(-2rem);
+    overflow: unset;
+    .wrapper {
+      // padding:15px;
+      height: 35rem;
+      .camera-img {
+        position: absolute;
+        bottom: 17.4rem;
+        left: 50%;
+        transform: translateX(-17rem);
+        height: 11.6rem;
+        z-index: 10;
+      }
+      .first-guide {
+        position: relative;
+        width: 25rem;
+        height: 96%;
+        border-radius: 0.8rem;
+        margin: 0 auto;
+        background-color: #fff;
+        box-shadow: 0rem 0.4rem 1.5rem 0.1rem rgba(0, 0, 0, 0.2);
+        box-sizing: border-box;
+        padding: 3.8rem 3.1rem 0;
+        overflow: hidden;
+        .text {
+          color: #222;
+          font-size: 1.4rem;
+          line-height: 1.6;
+          text-align: left;
+          letter-spacing: -0.05rem;
+        }
+        .btn-next {
+          position: absolute;
+          left: 2.8rem;
+          bottom: 2.8rem;
+          display: block;
+          color: #000;
+          font-size: 1.4rem;
+          line-height: 1.4rem;
+          width: max-content;
+          z-index: 1;
+          background-color: #fff;
+          border: unset;
+          border-radius: 1.5rem;
+          box-sizing:content-box;
+          padding: 0.8rem 2.4rem;
+          white-space: nowrap;
+          box-shadow: 0rem 0.4rem 1rem 0.1rem rgba(0, 0, 0, 0.1);
+        }
+        .img {
+          position: absolute;
+          right: 0;
+          bottom: 0;
+          width: 100%;
+          height: unset;
+          z-index: 0;
+        }
+      }
+    }
+    .iOS-guide-close {
+      --bound: 1.3rem;
+      position: absolute;
+      top: -2rem;
+      right: 4.4rem;
+      width: var(--bound);
+      height: var(--bound);
+      .icon {
+        fill: #fff;
+        width: 100%;
+        height: 100%;
+      }
+    }
+  }
+  .dialog-title {
+    line-height: 30px;
+    color: #666;
   }
 }
 </style>

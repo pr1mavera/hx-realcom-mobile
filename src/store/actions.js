@@ -704,11 +704,6 @@ export const sendMsgs = async function({ commit, state }, msg) {
     }
     commit(types.SET_MSGS, state.msgs.concat(tip))
   }
-  // const selfMsg = msg.filter((item) => item.isSelfSend)
-  // if ((state.roomMode === roomStatus.menChat) && selfMsg.length) {
-  //   // 更新用户最后活动时间（更新定时器）
-  //   updateLastAction({ commit, state })
-  // }
   commit(types.SET_MSGS, state.msgs.concat(msg))
   return 0
 }

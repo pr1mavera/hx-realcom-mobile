@@ -83,7 +83,7 @@
         </span>
       </div>
       <div class="guide" :style="`opacity: ${ guideDisplay ? '1' : '0' };`">
-        <h class="title">您可以选择切换、添加专属客服！</h>
+        <h3 class="title">您可以选择切换、添加专属客服！</h3>
         <p class="text">点击下方操作按钮或者左滑切换、右滑添加</p>
       </div>
     </div>

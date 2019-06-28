@@ -408,7 +408,7 @@ const msgDictionary = {
         // 根据类型分组获取对应的消息状态分组
         const typeMap = statusItem.getTypeMap()
         // 获取对应消息的子模板
-        const typeTemplate = typeMap[msg.msgType].template.call(this, $h, msg)
+        const typeTemplate = typeMap[msg.msgType] ? typeMap[msg.msgType].template.call(this, $h, msg) : ''
         // 获取对应消息的全部模板，提供给 render 函数动态渲染
         return statusItem.template.call(this, $h, { msg, slot: typeTemplate })
     }
