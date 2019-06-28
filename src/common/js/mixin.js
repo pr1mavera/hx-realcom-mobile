@@ -306,7 +306,7 @@ export const RTCRoomMixin = {
 
         this.RTC.on('onStreamNotify', (info) => {
           console.log(info)
-          if (info.event === 'onended' || info.event === 'inactive') {
+          if (info.isLocal === true && info.event === 'inactive' && info.type === 'stream') {
             // this.hangUpVideo()
             // 停止推流
             // return this.setStateUnconnect()
@@ -315,7 +315,7 @@ export const RTCRoomMixin = {
           }
           // debugger
           // 本地流断开
-          // if (info.stream.active === false && info.isLocal === true && info.type === 'stream') {
+          // if (info.event === 'onended' || info.event === 'inactive') {
           //   this.RTC.getLocalStream({ video: true, audio: true }, (info) => {
           //     this.RTC.startRTC({ stream: info.stream, role: 'user' })
           //   })
@@ -385,7 +385,6 @@ export const RTCRoomMixin = {
             //   console.log('ERR in getStats:', err)
             // })
             resolve()
-            alert('startRTC')
             const remoteVideoElement = document.getElementById('remoteVideo')
             remoteVideoElement.play()
           }, err => {
@@ -510,7 +509,7 @@ export const RTCRoomMixin = {
         // 上一次音频流为0，且本次音频流非0，即音频恢复时
         console.log('恢复时，总计数: ', self.audioZeroCount.count())
 
-        if (self.audioZeroCount.count() >= 3) {
+        if (self.audioZeroCount.count() >= this.audioMuteTimes) {
           // self.setStateUnconnect({ info: '音频流恢复，但次数超上限' })
           // 视频异常上报
           // this.videoLogReport(videoLogMap.audio_unconnect)
