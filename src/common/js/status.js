@@ -78,15 +78,15 @@ export const msgTypes = {
   msg_XH_express: '10', // 小华表情消息
   msg_bot_thanks: '11', // 小华感谢消息
 
-  msg_timeout: '13', // 超时结束会话
-  msg_video_blur: '14', // 坐席暂离，设置模糊及静音
-  msg_video_muted: '15', // 坐席静音
-  msg_video_hang_up: '16', // 视频接通前用户提前挂断
-  msg_video_reconnect: '17', // 视频服务，客户端点击重连
-  msg_video_quality: '18', // 视频质量
-  msg_video_cs_initRTC: '19', // 视频坐席已经初始化好了RTC
+  msg_timeout: '13', // 超时结束会话 rsv
+  msg_video_blur: '14', // 坐席暂离，设置模糊及静音 rsv
+  msg_video_muted: '15', // 坐席静音 rsv
+  msg_video_hang_up: '16', // 视频接通前用户提前挂断 send
+  msg_video_reconnect: '17', // 视频服务，客户端点击重连 send
+  msg_video_quality: '18', // 视频质量 rsv
+  msg_video_cs_initRTC: '19', // 视频坐席已经初始化好了RTC rsv
   msg_hand_up: '24', // 结束会话（在线）
-  msg_custom_forbidden_camera: 'msg_custom_forbidden_camera' // 客户禁用摄像头
+  msg_custom_forbidden_camera: 'msg_custom_forbidden_camera' // 客户禁用摄像头 send
 }
 
 export const dialogTypes = {
@@ -162,7 +162,7 @@ export const videoLogMap = {
   start_RTC_failed: ['START_RTC_FAILED', '本地推流失败'],
   start_RTC_success: ['START_RTC_SUCCESS', '客户已看到坐席的画面'],
   bad_network_condition: ['BAD_NETWORK_CONDITION', '网络状况不佳'],
-  connection_timeout: ['connection_timeout', '建立连接时超时，断开连接'],
+  connection_timeout: ['CONNECTION_TIMEOUT', '建立连接时超时，断开连接'],
   video_unconnect: ['VIDEO_UNCONNECT', '视频连接过程中，接收的视频流为空，断开连接'],
   audio_unconnect: ['VIDEO_UNCONNECT', '视频连接过程中，接收的音频流为空，断开连接'],
   custom_handle_close_video: ['CUSTOM_HANDLE_CLOSE_VIDEO', '客户主动点击挂断视频']
