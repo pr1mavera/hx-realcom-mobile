@@ -34,6 +34,7 @@
         <fload-button
           ref="floadButton"
           :barStatus="inputBarOpen || extendBarOpen"
+          @listenToChildEvent='showCode'
           @enterOnLineLineUp="enterOnLineLineUp"
           @onLineCancelQueue="onLineCancelQueue"
         ></fload-button>
@@ -77,6 +78,7 @@
     <!-- <div class="copyMask" v-show="isCopyButtonShow" @touchstart="resetCopyBtn"></div> -->
     <div v-transfer-dom>
       <previewer :list="previewImgList" ref="previewer" :options="previewImgOptions"></previewer>
+      <qr-code  v-show="codeStatus" @close="codeStatus = false"></qr-code>
     </div>
   </div>
 </template>
@@ -125,7 +127,8 @@ export default {
     // 'FloadButton': () => import('@/views/mainRoom/components/chat/fload-button'),
     'FloatBotAssess': () => import('@/views/mainRoom/components/chat/float-bot-assess'),
     'ExtendBar': () => import('@/views/mainRoom/components/chat/extend-bar'),
-    'PullDown': () => import('@/views/mainRoom/components/chat/pull-down')
+    'PullDown': () => import('@/views/mainRoom/components/chat/pull-down'),
+    'qrCode': () => import('@/views/mainRoom/components/chat/code')
   },
   computed: {
     chatBG() {
@@ -209,7 +212,8 @@ export default {
       lastMsgRecord: {
         timestramp: '',
         length: 0
-      }
+      },
+      codeStatus: false
     }
   },
   mounted() {
@@ -871,6 +875,10 @@ export default {
         }
       }
       this.isBotAssessShow = false
+    },
+    showCode(status) {
+      this.codeStatus = status
+      console.log(111)
     },
     async onLineCancelQueue() {
       const self = this
