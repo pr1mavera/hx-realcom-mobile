@@ -878,7 +878,6 @@ export default {
     },
     showCode(status) {
       this.codeStatus = status
-      console.log(111)
     },
     async onLineCancelQueue() {
       const self = this
