@@ -24,6 +24,8 @@
 }
 .small_program_code .img_s_code {
   position: absolute;
+  height:14rem;
+  width:14rem;
   margin: auto;
   top: 4rem;
   left: 0;
