@@ -3,7 +3,7 @@
     <div class="code_mask" @click='$emit("close")'></div>
     <div class="small_program_code">
       <img class="img_bg" src="/video/static/img/chat/code.png" alt width="100%" height="100%" />
-      <img class="img_s_code" src="/video/static/img/chat/small_code.png" alt />
+      <img class="img_s_code" src="/video/static/img/chat/small_code.jpg" alt />
       <p class="title">视频客服已转移至新的小程序,长按识别上方小程序码，进入小程序或微信搜索“华夏视频客服”进入小程序</p>
     </div>
   </div>
