@@ -137,7 +137,7 @@ export const loginMixin = {
         console.log('error in getLoginInfo')
       }
     },
-    async getBotBaseInfo(openId, userId) {
+    async getBotBaseInfo(userId, origin) {
       // 若本地缓存存在且未过期，直接返回本地缓存
       let data = {}
       let botInfo = {}
@@ -147,7 +147,7 @@ export const loginMixin = {
         // 若本地缓存存在且未过期，直接取本地缓存
         botInfo = data
       } else {
-        const res = await getBotInfo()
+        const res = await getBotInfo(origin)
         if (res.result.code === ERR_OK) {
           console.log('============================= 我现在来请求 BotInfo 辣 =============================')
           botInfo = {

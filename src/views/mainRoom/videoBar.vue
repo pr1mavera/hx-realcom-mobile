@@ -593,9 +593,9 @@ export default {
         canvas.toBlob(blob => {
           const _URL = window.URL || window.webkitURL
           this.videoScreenShotSrc = _URL.createObjectURL(blob)
+          resolve()
         })
         // this.videoScreenShotShow = true
-        resolve()
       }).catch(err => {
         console.log('ERROR in getVideoScreenShot', err)
       })

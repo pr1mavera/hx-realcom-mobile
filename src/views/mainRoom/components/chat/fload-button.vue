@@ -166,40 +166,53 @@ export default {
     },
     // 视频客服
     videoLineUp() {
-      this.$emit('listenToChildEvent', true)
-      // if (this.clickTooFast()) return
-      // // debugger
-      // // console.log(this.userInfo) !this.isVip
+      if (this.clickTooFast()) return
+      // debugger
+      // console.log(this.userInfo) !this.isVip
 
-      // if (this.userInfo.isVideoPower !== 'Y') { // 非VIP客户
-      //   this.showTips(2, `您的客户等级还需要提升哟，快去投保我们最新的产品升级吧`)
-      //   return
-      // }
+      if (this.userInfo.isVideoPower !== 'Y') { // 非VIP客户
+        this.showTips(2, `您的客户等级还需要提升哟，快去投保我们最新的产品升级吧`)
+        return
+      }
 
-      // if (this.queueMode.status === queueStatus.queuing && this.queueMode.mode === roomStatus.menChat) { // 排队中
-      //   this.onlineQueue2Video('您当前正在在线人工排队中，确认需要取消排队并进入视频客服吗？')
-      //   return
-      // }
+      if (this.queueMode.status === queueStatus.queuing && this.queueMode.mode === roomStatus.menChat) { // 排队中
+        this.onlineQueue2Video('您当前正在在线人工排队中，确认需要取消排队并进入视频客服吗？')
+        return
+      }
 
-      // switch (this.roomMode) { // 服务中
-      //   case roomStatus.AIChat:
-      //     // this.$emit('enterVideoLineUp')
-      //     // this.$router.push({path: '/room/cusServ/list'}) change by WangXj
-      //     this.$router.push({ path: '/room/cusServ' })
+      switch (this.roomMode) { // 服务中
+        case roomStatus.AIChat:
+          // this.$emit('enterVideoLineUp')
+          // this.$router.push({path: '/room/cusServ/list'}) change by WangXj
 
-      //     break
-      //   case roomStatus.videoChat:
-      //     this.$vux.alert.show({
-      //       title: '当前已经在视频服务中！！'
-      //     })
-      //     break
-      //   case roomStatus.menChat:
-      //     // this.$vux.alert.show({
-      //     //   title: '您当前正在人工服务中！！请先退出'
-      //     // })
-      //     this.onlineServ2Video('您当前正在在线人工咨询中，确认需要退出并进入视频客服吗？')
-      //     break
-      // }
+          // 根据当前用户配置信息，灰度引流至小程序
+          if (this.userInfo.isMiniProgramVideoPower === 'Y') {
+            this.$emit('listenToChildEvent', true)
+            return void 0
+          }
+
+          this.$router.push({ path: '/room/cusServ' })
+
+          break
+        case roomStatus.videoChat:
+          this.$vux.alert.show({
+            title: '当前已经在视频服务中！！'
+          })
+          break
+        case roomStatus.menChat:
+          // this.$vux.alert.show({
+          //   title: '您当前正在人工服务中！！请先退出'
+          // })
+
+          // 根据当前用户配置信息，灰度引流至小程序
+          if (this.userInfo.isMiniProgramVideoPower === 'Y') {
+            this.$emit('listenToChildEvent', true)
+            return void 0
+          }
+
+          this.onlineServ2Video('您当前正在在线人工咨询中，确认需要退出并进入视频客服吗？')
+          break
+      }
     },
     // 在线客服
     onLineLineUp() {

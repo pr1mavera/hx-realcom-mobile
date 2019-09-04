@@ -139,7 +139,7 @@ export const getSessionList = userId => http.get('user', `/user/session?userId=$
 /**
  * [getBotInfo 获取机器人基本信息]
  */
-export const getBotInfo = () => http.get('user', `/robot/query`)
+export const getBotInfo = origin => http.get('user', `/robot/query?origin=${origin}`)
 
 /**
  * [sendMsgToBot 发送消息给机器人]

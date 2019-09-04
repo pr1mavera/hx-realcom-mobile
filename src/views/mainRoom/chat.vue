@@ -302,7 +302,7 @@ export default {
 
       const setBotWelcome = async(userInfo) => {
         // 获取机器人基本信息，及配置机器人欢迎语
-        const { botInfo, welcomeMsg } = await this.getBotBaseInfo(query.openId, userInfo.userId)
+        const { botInfo, welcomeMsg } = await this.getBotBaseInfo(userInfo.userId, query.origin)
         this.setBotInfo(botInfo)
         // 配置机器人欢迎语
         this.setMsgs(welcomeMsg)

@@ -10,7 +10,7 @@
         <div class="input-wrapper-item input-content needsclick"
           autofocus
           contenteditable="true"
-          placeholder="有问题，找小华"
+          :placeholder="placeholder"
           id="input-content-hook"
           ref="inputContent"
           type="text"
@@ -76,6 +76,9 @@ export default {
     }
   },
   computed: {
+    placeholder() {
+      return this.botInfo.botName ? `有问题，找${this.botInfo.botName}` : ''
+    },
     isRobotChat() {
       return this.roomMode === roomStatus.AIChat
     },
@@ -83,6 +86,7 @@ export default {
       return this.inputBarOpen || this.expressBarShow
     },
     ...mapGetters([
+      'botInfo',
       'roomMode',
       'extendBarOpen',
       'inputBarOpen'
