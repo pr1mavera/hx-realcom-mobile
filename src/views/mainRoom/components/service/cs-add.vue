@@ -378,7 +378,6 @@ export default {
       const userId = this.userInfo.userId
       const listType = '2'
       const res = await queryCsInfo(page, pageSize, userId, listType)
-      debugger
       // labels
       if (res.result.code === ERR_OK) {
         this.cslist = res.data.csList

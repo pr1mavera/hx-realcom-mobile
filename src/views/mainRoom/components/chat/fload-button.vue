@@ -156,10 +156,8 @@ export default {
     },
     async sendUserDataToIVR() {
       const res = await phoneCallSendCustomerData(this.userInfo.userId, this.sessionId || this.sessionRamId)
-      debugger
       if (res.result.code === '00') {
         console.log('存储IVR系统成功')
-        debugger
       } else {
         console.log('ERR in phoneCallSendCustomerData')
       }

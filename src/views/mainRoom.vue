@@ -264,7 +264,6 @@ export default {
       }
     },
     quitRTCResponse() {
-      debugger
       this.$refs.videoBar.handleHangUpVideo()
     },
     // 评价成功

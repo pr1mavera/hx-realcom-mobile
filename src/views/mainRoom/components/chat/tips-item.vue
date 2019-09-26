@@ -44,7 +44,6 @@ export default {
   methods: {
     // 取消排队的提示
     cancelLineUp() {
-      debugger
       const self = this
       this.$vux.confirm.show({
         title: '马上就要转接成功啦，你确定不在等一下了吗？',

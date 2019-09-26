@@ -27,7 +27,6 @@ function redirectAPI(url) {
 (async function redirect(url) {
     const res = await redirectAPI(url)
     if (res.result.code === '0') {
-        debugger
         window.location.href = res.data.serverUrl
     } else {
         // alert(res.result.message)

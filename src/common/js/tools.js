@@ -309,7 +309,50 @@ const MsgsFilterTools = {
   //   return url.match(/https/) ? url : url.replace(/http/, 'https')
   // },
 
-  // 机器人消息解析器
+  // // 机器人消息解析器
+  // botAnswerfilter: function(data) {
+  //   let msg = {
+  //     content: '',
+  //     nickName: data.botName,
+  //     isSelfSend: false,
+  //     time: data.time,
+  //     timestamp: new Date().getTime() + 500,
+  //     msgStatus: msgStatus.msg,
+  //     chatType: sessionStatus.robot
+  //   }
+  //   if (data.info.length === 1) {
+  //     if (data.info[0].question === '如何转人工') {
+  //       // 转人工
+  //       msg.msgType = msgTypes.msg_no_idea
+  //     } else {
+  //       // normal
+  //       // msg.content = this.transA2Button(data.info[0].answer)
+  //       msg.content = data.info[0].answer
+  //       msg.msgType = msgTypes.msg_normal
+  //     }
+  //   } else if (data.info.length === 3) {
+  //     // 猜问题
+  //     msg.msgType = msgTypes.msg_guess
+  //     msg.msgExtend = [{
+  //         question: data.info[0].question,
+  //         answer: data.info[0].answer
+  //         // answer: this.transA2Button(data.info[0].answer)
+  //       },
+  //       {
+  //         question: data.info[1].question,
+  //         answer: data.info[1].answer
+  //         // answer: this.transA2Button(data.info[1].answer)
+  //       },
+  //       {
+  //         question: data.info[2].question,
+  //         answer: data.info[2].answer
+  //         // answer: this.transA2Button(data.info[2].answer)
+  //       }
+  //     ]
+  //   }
+  //   return msg
+  // },
+  // 更换机器人后的机器人消息解析器，上面的方法是老机器人的解析
   botAnswerfilter: function(data) {
     let msg = {
       content: '',
@@ -320,35 +363,38 @@ const MsgsFilterTools = {
       msgStatus: msgStatus.msg,
       chatType: sessionStatus.robot
     }
-    if (data.info.length === 1) {
-      if (data.info[0].question === '如何转人工') {
-        // 转人工
-        msg.msgType = msgTypes.msg_no_idea
-      } else {
-        // normal
-        // msg.content = this.transA2Button(data.info[0].answer)
-        msg.content = data.info[0].answer
-        msg.msgType = msgTypes.msg_normal
-      }
-    } else if (data.info.length === 3) {
+
+    console.warn(data.data[0].content)
+    const msgContent = data.data[0].content
+    if (msgContent === '#') {
+      // 转人工
+      msg.msgType = msgTypes.msg_no_idea
+    } else if (msgContent.split(/[\n][0-9]、/).length === 1) {
+      // 一条消息
+      msg.content = msgContent
+      msg.msgType = msgTypes.msg_normal
+    } else if (msgContent.split(/[\n][0-9]、/).length > 1) {
       // 猜问题
+      const questionList = msgContent.split(/[\n][0-9]、/)
+      questionList.shift()
       msg.msgType = msgTypes.msg_guess
       msg.msgExtend = [{
-          question: data.info[0].question,
-          answer: data.info[0].answer
+          question: questionList[0],
+          answer: ''
           // answer: this.transA2Button(data.info[0].answer)
         },
         {
-          question: data.info[1].question,
-          answer: data.info[1].answer
+          question: questionList[1],
+          answer: ''
           // answer: this.transA2Button(data.info[1].answer)
         },
         {
-          question: data.info[2].question,
-          answer: data.info[2].answer
+          question: questionList[2],
+          answer: ''
           // answer: this.transA2Button(data.info[2].answer)
-        }
-      ]
+        }]
+    } else {
+      console.log('无法识别的机器人返回。')
     }
     return msg
   },
