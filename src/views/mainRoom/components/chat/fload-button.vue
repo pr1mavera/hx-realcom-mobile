@@ -176,6 +176,13 @@ export default {
       }
 
       if (this.queueMode.status === queueStatus.queuing && this.queueMode.mode === roomStatus.menChat) { // 排队中
+
+        // 根据当前用户配置信息，灰度引流至小程序
+        if (this.userInfo.isMiniProgramVideoPower === 'Y') {
+          this.$emit('listenToChildEvent', true)
+          return void 0
+        }
+
         this.onlineQueue2Video('您当前正在在线人工排队中，确认需要取消排队并进入视频客服吗？')
         return
       }
