@@ -184,11 +184,9 @@ export default {
           }
         }
       }, 7000)
-      debugger
     },
     stopVideoHeartBeat() {
       this.videoHeart = false
-      debugger
       clearInterval(this.videoHeartBeatTimer)
       if (this.videoHeartBeatReq) {
         this.videoHeartBeatReq = null

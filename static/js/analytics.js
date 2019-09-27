@@ -3,7 +3,6 @@
  */
 (function(window, factory) {
     var { fp, http } = factory()
-    debugger
 })(window, function() {
     'use strict'
     /**

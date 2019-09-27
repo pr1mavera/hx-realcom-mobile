@@ -326,7 +326,6 @@ export default {
           })
           // 映射出图片消息，存进相册列表
           const imgList = this.getAllImg(offlineMsgs)
-          debugger
           this.previewImgList = [...imgList, ...this.previewImgList]
           // 存消息列表
           this.sendMsgs(offlineMsgs)
@@ -468,7 +467,6 @@ export default {
             })
             // 映射出图片消息，存进相册列表
             const imgList = this.getAllImg(offlineMsgs)
-            debugger
             this.previewImgList = [...imgList, ...this.previewImgList]
             // 存消息列表
             this.sendMsgs(offlineMsgs)
@@ -523,7 +521,6 @@ export default {
         return
       }
       this.curPreviewImgId = id
-      debugger
       const curIndex = this.previewImgList.findIndex(item => item.id === id)
       this.$refs.previewer.show(curIndex)
     },

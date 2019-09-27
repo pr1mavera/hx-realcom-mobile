@@ -431,7 +431,6 @@ export const reqTransAnotherTimeout = function({ commit, state }, delay) {
         }
       }
       else {
-        debugger
         const err = 'error in transTimeoutRedistribution 转接至另外坐席'
         reject(err)
       }
@@ -677,8 +676,8 @@ export const addPreviewImg = function({ commit, state }, { msgsObj }) {
   commit(types.SET_PREVIEW_IMG_LIST, state.previewImgList.concat({
     src: data.big,
     msrc: data.small,
-    w: data.w,
-    h: data.h,
+    w: data.w || 0,
+    h: data.h || 0,
     id: msgsObj.timestamp
   }))
   // state.previewImgList.push({
@@ -692,7 +691,7 @@ export const addPreviewImg = function({ commit, state }, { msgsObj }) {
 }
 
 // 更新本地消息队列
-export const sendMsgs = async function({ commit, state }, msg) {
+export const sendMsgs = function({ commit, state }, msg) {
   const msgT = msg[0].timestamp
   if (Tools.DateTools.isSendTipMsgTime(msgT)) {
     const time = Tools.DateTools.formatDate(new Date(msgT), 'yyyy-MM-dd hh:mm:ss')

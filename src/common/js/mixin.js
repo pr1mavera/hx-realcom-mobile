@@ -991,7 +991,7 @@ export const sendMsgsMixin = {
           answers.forEach(item => {
             (item.msgType === msgTypes.msg_img) && this.addPreviewImg({ msgsObj: item })
           })
-          this.sendMsgs(answers)
+          await this.sendMsgs(answers)
           // 更新缓存
           this.saveCurMsgs({ origin: this.userInfo.origin, msg: answers })
           resolve()
