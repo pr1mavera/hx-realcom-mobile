@@ -43,6 +43,11 @@ export const getCsStatus = csId => http.get('RTCRoom', `/video/room/status?csId=
 export const enterVideoRTCRoom = (roomId, userId, openId, sessionId, clientType) => http.post('RTCRoom', '/comm/room/enter', { roomId, userId, openId, sessionId, clientType })
 
 /**
+ * [getVideoMiniProgramQRcode 获取访问视频小程序二维码]
+ */
+export const getVideoMiniProgramQRcode = ({ headers, ...data }) => http.post('RTCRoom', '/video/sys/login', data, null, { headers })
+
+/**
  ************************************ video ************************************
  */
 

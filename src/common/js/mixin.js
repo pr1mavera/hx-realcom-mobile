@@ -1597,6 +1597,7 @@ export const onLineQueueMixin = {
     },
     async formatOnLineQueueAPI() {
       // 初始化人工客服排队ID，存vuex
+      !this.sessionId && await this.initSession()
       this.setChatGuid(new Date().getTime())
       const option = {
         chatGuid: `${this.chatGuid}`,

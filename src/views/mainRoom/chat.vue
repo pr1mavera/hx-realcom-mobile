@@ -78,7 +78,7 @@
     <!-- <div class="copyMask" v-show="isCopyButtonShow" @touchstart="resetCopyBtn"></div> -->
     <div v-transfer-dom>
       <previewer :list="previewImgList" ref="previewer" :options="previewImgOptions"></previewer>
-      <qr-code  v-show="codeStatus" @close="codeStatus = false"></qr-code>
+      <qr-code v-show="codeStatus" @close="codeStatus = false" :qrcode="transNoQrcode"></qr-code>
     </div>
   </div>
 </template>
@@ -98,7 +98,7 @@ import Tools from '@/common/js/tools'
 import { loginMixin, IMMixin, sendMsgsMixin, getMsgsMixin, onLineQueueMixin } from '@/common/js/mixin'
 // eslint-disable-next-line
 import { TIME_5_MIN, roomStatus, queueStatus, sessionStatus, toggleBarStatus, msgStatus, msgTypes, tipTypes, dialogTypes, cardTypes, themeMap } from '@/common/js/status'
-import { ERR_OK, getSessionStatus, getLoginState, saveVisitorRecord } from '@/server/index.js'
+import { ERR_OK, getSessionStatus, getLoginState, saveVisitorRecord, getVideoMiniProgramQRcode } from '@/server/index.js'
 import { Previewer, TransferDom } from 'vux'
 
 export default {
@@ -175,7 +175,8 @@ export default {
       'roomMode',
       'roomId',
       'extendBarOpen',
-      'inputBarOpen'
+      'inputBarOpen',
+      'sessionRamId'
     ])
   },
   data() {
@@ -213,7 +214,8 @@ export default {
         timestramp: '',
         length: 0
       },
-      codeStatus: false
+      codeStatus: false,
+      transNoQrcode: ''
     }
   },
   mounted() {
@@ -873,7 +875,45 @@ export default {
       }
       this.isBotAssessShow = false
     },
-    showCode(status) {
+    async showCode(status) {
+      // this.codeStatus = status
+
+      // 当前为关闭二维码，直接关闭
+      if (status === false) return (this.codeStatus = status)
+
+      /**
+       * 生成访客二维码
+       * author: pr1mavera
+       * date: 2019-11-26 16:50
+       */
+      if (!this.transNoQrcode) {
+        try {
+          const res = await getVideoMiniProgramQRcode({
+            headers: {
+              // 签名串：appid + timestamp + 请求参数 + 私钥，用md5生成的签名串后转大写
+              // 暂时享受免签待遇，后续考虑在node层实现
+              // signature: xxx,
+              appid: 'SPZX',
+              timestamp: Date.now()
+            },
+            transNo: this.sessionRamId,
+            origin: this.userInfo.origin,
+            validPeriod: 60 * 60, // 单位：分
+            ext: {},
+            openId: this.userInfo.openId
+          })
+
+          debugger
+
+          res.code === ERR_OK
+            ? this.transNoQrcode = 'data:image/png;base64,' + res.qrcode
+            : console.warn('Error in show qrcode: ', res.message)
+        }
+        catch (e) {
+          console.warn('Error in show qrcode: ', e)
+        }
+      }
+
       this.codeStatus = status
     },
     async onLineCancelQueue() {

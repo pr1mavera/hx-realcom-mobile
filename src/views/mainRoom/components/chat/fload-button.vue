@@ -173,7 +173,8 @@ export default {
         return
       }
 
-      if (this.queueMode.status === queueStatus.queuing && this.queueMode.mode === roomStatus.menChat) { // 排队中
+      if (this.queueMode.status === queueStatus.queuing && this.queueMode.mode === roomStatus.menChat) {
+        // 排队中
 
         // 根据当前用户配置信息，灰度引流至小程序
         if (this.userInfo.isMiniProgramVideoPower === 'Y') {
